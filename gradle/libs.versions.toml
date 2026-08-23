@@ -4,6 +4,7 @@ kotlin = "2.4.10"
 ksp = "2.3.11"
 hilt = "2.60.1"
 hiltNavigationCompose = "1.4.0"
+work = "2.11.2"
 composeBom = "2026.06.01"
 core = "1.19.0"
 splashscreen = "1.0.1"
@@ -74,6 +75,8 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt"
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 hilt-core = { module = "com.google.dagger:hilt-core", version.ref = "hilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltNavigationCompose" }
+androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltNavigationCompose" }
 error-prone-annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorProneAnnotations" }
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
@@ -87,6 +90,8 @@ room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "work" }
 
 junit = { module = "junit:junit", version.ref = "junit" }
 androidx-test-ext = { module = "androidx.test.ext:junit", version.ref = "androidxTestExt" }

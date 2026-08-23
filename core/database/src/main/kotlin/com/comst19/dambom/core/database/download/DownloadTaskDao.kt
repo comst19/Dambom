@@ -46,7 +46,7 @@ interface DownloadTaskDao {
         SET downloadedBytes = :downloadedBytes,
             expectedBytes = :expectedBytes,
             updatedAtMillis = :updatedAtMillis
-        WHERE id = :id AND status = 'DOWNLOADING'
+        WHERE id = :id
         """,
     )
     suspend fun updateProgress(
@@ -62,7 +62,7 @@ interface DownloadTaskDao {
         SET status = 'COMPLETED', downloadedBytes = :downloadedBytes,
             expectedBytes = :downloadedBytes, localFileName = :localFileName,
             failureReason = NULL, updatedAtMillis = :updatedAtMillis
-        WHERE id = :id
+        WHERE id = :id AND status = 'DOWNLOADING'
         """,
     )
     suspend fun markCompleted(
@@ -70,7 +70,7 @@ interface DownloadTaskDao {
         downloadedBytes: Long,
         localFileName: String,
         updatedAtMillis: Long,
-    )
+    ): Int
 
     @Query(
         """

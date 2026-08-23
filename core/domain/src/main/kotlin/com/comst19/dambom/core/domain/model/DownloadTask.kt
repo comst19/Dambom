@@ -20,7 +20,7 @@ data class DownloadTask(
     val downloadedBytes: Long,
     val quality: String,
     val status: DownloadStatus,
-    val failureReason: String?,
+    val failureReason: DownloadFailureReason?,
     val localFileName: String?,
     val createdAtMillis: Long,
     val updatedAtMillis: Long,
@@ -39,6 +39,15 @@ enum class DownloadStatus {
     PAUSED,
     COMPLETED,
     FAILED,
+}
+
+enum class DownloadFailureReason {
+    ACCESS_RESTRICTED,
+    UNSUPPORTED_FORMAT,
+    NETWORK,
+    STORAGE,
+    SERVER,
+    UNKNOWN,
 }
 
 data class EnqueueDownloadsResult(

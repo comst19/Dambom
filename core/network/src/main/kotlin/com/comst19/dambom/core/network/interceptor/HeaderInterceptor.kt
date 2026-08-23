@@ -15,7 +15,10 @@ class HeaderInterceptor
                 chain
                     .request()
                     .newBuilder()
-                    .header(ACCEPT_HEADER, JSON_MEDIA_TYPE)
+
+            if (chain.request().header(ACCEPT_HEADER) == null) {
+                requestBuilder.header(ACCEPT_HEADER, JSON_MEDIA_TYPE)
+            }
 
             headerProvider.headers().forEach { (name, value) ->
                 requestBuilder.header(name, value)

@@ -14,9 +14,18 @@ class DefaultSettingsRepository
         private val dataSource: SettingsDataSource,
     ) : SettingsRepository {
         override val settings: Flow<AppSettings> =
-            dataSource.themeMode.map { value ->
-                AppSettings(ThemeMode.entries.find { it.name == value } ?: ThemeMode.SYSTEM)
+            dataSource.settings.map { settings ->
+                AppSettings(
+                    themeMode = ThemeMode.entries.find { it.name == settings.themeMode } ?: ThemeMode.SYSTEM,
+                    clipboardPromptShown = settings.clipboardPromptShown,
+                    clipboardSuggestionEnabled = settings.clipboardSuggestionEnabled,
+                )
             }
 
         override suspend fun setThemeMode(mode: ThemeMode) = dataSource.setThemeMode(mode.name)
+
+        override suspend fun setClipboardSuggestion(
+            promptShown: Boolean,
+            enabled: Boolean,
+        ) = dataSource.setClipboardSuggestion(promptShown, enabled)
     }

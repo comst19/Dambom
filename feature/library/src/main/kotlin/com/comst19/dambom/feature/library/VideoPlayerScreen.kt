@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -31,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -45,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -68,6 +72,9 @@ import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
 import androidx.window.core.layout.WindowSizeClass
 import com.comst19.dambom.core.common.ui.AppScreen
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.core.domain.model.ORIGINAL_QUALITY
+import java.text.DateFormat
+import java.util.Date
 import kotlin.math.roundToLong
 
 @Composable
@@ -174,6 +181,7 @@ private fun VideoPlayerPanel(
 ) {
     val playPauseState = rememberPlayPauseButtonState(player)
     val progressState = rememberProgressStateWithTickInterval(player, PROGRESS_TICK_MILLIS)
+    val metadata by rememberLocalVideoMetadata(task.localFilePath)
     var playbackError by remember(player) { mutableStateOf<PlaybackException?>(player.playerError) }
     val surfaceDescription = stringResource(R.string.player_surface_description, task.title)
 
@@ -224,9 +232,74 @@ private fun VideoPlayerPanel(
             positionMillis = progressState.currentPositionMs,
             durationMillis = progressState.durationMs,
         )
+        VideoDetails(task = task, metadata = metadata)
+    }
+}
+
+@Composable
+private fun VideoDetails(
+    task: DownloadTask,
+    metadata: LocalVideoMetadata?,
+) {
+    val configuration = LocalConfiguration.current
+    val downloadedAt =
+        remember(task.updatedAtMillis, configuration) {
+            DateFormat
+                .getDateInstance(DateFormat.MEDIUM, configuration.locales[0])
+                .format(Date(task.updatedAtMillis))
+        }
+    val unknown = stringResource(R.string.player_info_unknown)
+    val resolution =
+        metadata?.let { details ->
+            if (details.width != null && details.height != null) "${details.width} × ${details.height}" else null
+        } ?: unknown
+    val duration = metadata?.durationMillis?.toTimeText() ?: unknown
+    val quality =
+        if (task.quality == ORIGINAL_QUALITY) {
+            stringResource(R.string.player_quality_original)
+        } else {
+            task.quality
+        }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.player_info_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            VideoMetadataItem(stringResource(R.string.player_info_duration), duration)
+            VideoMetadataItem(stringResource(R.string.player_info_resolution), resolution)
+            VideoMetadataItem(stringResource(R.string.player_info_quality), quality)
+            VideoMetadataItem(stringResource(R.string.player_info_size), task.downloadedBytes.formatBytes())
+            VideoMetadataItem(stringResource(R.string.player_info_downloaded_at), downloadedAt)
+            SelectionContainer {
+                VideoMetadataItem(stringResource(R.string.player_info_source), task.sourcePageUrl)
+            }
+        }
+    }
+}
+
+@Composable
+private fun VideoMetadataItem(
+    label: String,
+    value: String,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
         Text(
-            text = stringResource(R.string.player_file_size, task.downloadedBytes.formatBytes()),
+            text = label,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.labelMedium,
+        )
+        Text(
+            text = value,
             style = MaterialTheme.typography.bodyMedium,
         )
     }
@@ -352,7 +425,7 @@ private fun PlayerControls(
 private val WindowSizeClass.supportsMultiplePanes: Boolean
     get() = isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
 
-private fun Long.toTimeText(): String {
+internal fun Long.toTimeText(): String {
     val totalSeconds = coerceAtLeast(0L) / 1_000L
     val hours = totalSeconds / 3_600L
     val minutes = (totalSeconds % 3_600L) / 60L

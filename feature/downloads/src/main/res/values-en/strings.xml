@@ -1,0 +1,27 @@
+<resources>
+    <string name="downloads_title">Downloads</string>
+    <string name="downloads_back">Back</string>
+    <string name="downloads_empty_title">No downloads in progress</string>
+    <string name="downloads_empty_description">Videos selected from Find videos appear here.</string>
+    <string name="downloads_summary">%1$d downloading · %2$d total</string>
+    <string name="downloads_pause_all">Pause all</string>
+    <string name="downloads_resume_all">Resume all</string>
+    <string name="downloads_group_active">Downloading</string>
+    <string name="downloads_group_queued">Queued</string>
+    <string name="downloads_group_paused">Paused</string>
+    <string name="downloads_group_failed">Failed</string>
+    <string name="downloads_group_completed">Completed</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_unknown_size">Checking size</string>
+    <string name="downloads_pause">Pause</string>
+    <string name="downloads_resume">Resume</string>
+    <string name="downloads_cancel">Cancel</string>
+    <string name="downloads_retry">Retry</string>
+    <string name="downloads_remove">Remove from list</string>
+    <string name="downloads_error_access">This video requires access permission.</string>
+    <string name="downloads_error_format">This video format isn’t supported.</string>
+    <string name="downloads_error_network">The connection didn’t recover. Try again.</string>
+    <string name="downloads_error_storage">Couldn’t save the file. Check storage space.</string>
+    <string name="downloads_error_server">The server couldn’t process the download.</string>
+    <string name="downloads_error_unknown">Something went wrong while downloading.</string>
+</resources>

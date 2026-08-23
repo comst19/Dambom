@@ -1,0 +1,29 @@
+<resources>
+    <string name="web_back">Close web</string>
+    <string name="web_address_placeholder">Enter a web address</string>
+    <string name="web_start_title">Find videos on the web</string>
+    <string name="web_start_description">Keep multiple tabs open and detect videos only on the current tab.</string>
+    <string name="web_open">Open page</string>
+    <string name="web_recent">Recent pages</string>
+    <string name="web_recent_empty">No recently visited pages.</string>
+    <string name="web_go_back">Previous page</string>
+    <string name="web_go_forward">Next page</string>
+    <string name="web_refresh">Refresh</string>
+    <string name="web_detect">Detect video</string>
+    <string name="web_detecting">Detecting</string>
+    <string name="web_detected_count">%1$d videos detected</string>
+    <string name="web_not_detected">No video detected</string>
+    <string name="web_access_restricted">Access restricted</string>
+    <string name="web_network_error">Connection error</string>
+    <string name="web_tabs_title">%1$d open tabs</string>
+    <string name="web_new_tab">New tab</string>
+    <string name="web_close_tab">Close tab</string>
+    <string name="web_empty_tab">Empty tab</string>
+    <string name="web_tab_actions">Current tab actions</string>
+    <string name="web_open_external">Open in default browser</string>
+    <string name="web_copy_link">Copy link</string>
+    <string name="web_share_link">Share link</string>
+    <string name="web_link_copied">Link copied.</string>
+    <string name="web_action_failure">No app can handle this request.</string>
+    <string name="web_share_chooser">Share link</string>
+</resources>

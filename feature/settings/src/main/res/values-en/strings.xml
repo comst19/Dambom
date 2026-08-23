@@ -1,0 +1,45 @@
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="settings_back">Back</string>
+    <string name="settings_section_download">Downloads</string>
+    <string name="settings_download_location">Download location</string>
+    <string name="settings_download_location_value">Saved in the app library. Choose a location when exporting.</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_theme">Appearance</string>
+    <string name="theme_mode_system">System default</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+    <string name="settings_language">Language</string>
+    <string name="language_system">System default</string>
+    <string name="language_korean">한국어</string>
+    <string name="language_english">English</string>
+    <string name="settings_clipboard_suggestion">Suggest copied links</string>
+    <string name="settings_clipboard_suggestion_description">Show a suggestion when a new web address is on the clipboard.</string>
+    <string name="settings_section_support">Support</string>
+    <string name="settings_help">How to download</string>
+    <string name="settings_help_description">Learn how to use URLs, sharing, and the in-app web.</string>
+    <string name="settings_feedback">Send feedback</string>
+    <string name="settings_feedback_description">Write feedback using an app on your device.</string>
+    <string name="settings_feedback_chooser">Send Dambom feedback</string>
+    <string name="settings_feedback_body">Tell us what you think about Dambom %1$s.\n\n</string>
+    <string name="settings_external_action_failure">No app can handle this request.</string>
+    <string name="settings_section_information">App information</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_open_source">Open-source licenses</string>
+    <string name="settings_open_source_description">View the open-source software and licenses included in the app.</string>
+    <string name="settings_legal">Terms and privacy policy</string>
+    <string name="settings_legal_pending">This will be linked when the public Notion pages are ready.</string>
+    <string name="settings_cancel">Cancel</string>
+
+    <string name="help_intro">Only download public, non-DRM videos that you have permission to save.</string>
+    <string name="help_step_url_title">1. Find by web address</string>
+    <string name="help_step_url_description">Paste a video page address on Home, find videos, and choose what to save.</string>
+    <string name="help_step_share_title">2. Share from Chrome or X</string>
+    <string name="help_step_share_description">Choose Dambom in another app’s share menu, confirm the link, and start finding videos.</string>
+    <string name="help_step_web_title">3. Browse inside the app</string>
+    <string name="help_step_web_description">Open multiple web tabs, play the video on the current page, then tap Detect video.</string>
+    <string name="help_step_download_title">4. Manage downloads</string>
+    <string name="help_step_download_description">Check queue progress and pause, resume, cancel, or retry each download.</string>
+    <string name="help_step_library_title">5. Watch in Library</string>
+    <string name="help_step_library_description">Play completed videos, rename them, export, share, or delete them.</string>
+</resources>

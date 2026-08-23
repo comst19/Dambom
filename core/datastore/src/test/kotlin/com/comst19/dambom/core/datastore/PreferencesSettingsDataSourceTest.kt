@@ -28,10 +28,23 @@ class PreferencesSettingsDataSourceTest {
                 }
             val source = PreferencesSettingsDataSource(store)
 
-            source.themeMode.test {
-                assertEquals("SYSTEM", awaitItem())
+            source.settings.test {
+                assertEquals(StoredSettings(), awaitItem())
                 source.setThemeMode("DARK")
-                assertEquals("DARK", awaitItem())
+                assertEquals(StoredSettings(themeMode = "DARK"), awaitItem())
+                cancelAndIgnoreRemainingEvents()
+            }
+            source.settings.test {
+                assertEquals(StoredSettings(themeMode = "DARK"), awaitItem())
+                source.setClipboardSuggestion(promptShown = true, enabled = true)
+                assertEquals(
+                    StoredSettings(
+                        themeMode = "DARK",
+                        clipboardPromptShown = true,
+                        clipboardSuggestionEnabled = true,
+                    ),
+                    awaitItem(),
+                )
                 cancelAndIgnoreRemainingEvents()
             }
             scope.cancel()
@@ -42,8 +55,8 @@ class PreferencesSettingsDataSourceTest {
         runTest {
             val source = PreferencesSettingsDataSource(IoExceptionDataStore)
 
-            source.themeMode.test {
-                assertEquals("SYSTEM", awaitItem())
+            source.settings.test {
+                assertEquals(StoredSettings(), awaitItem())
                 cancelAndIgnoreRemainingEvents()
             }
         }

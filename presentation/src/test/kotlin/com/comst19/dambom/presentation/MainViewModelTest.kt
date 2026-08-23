@@ -66,4 +66,9 @@ private class FakeSettingsRepository : SettingsRepository {
     override val settings: Flow<AppSettings> = flowOf(AppSettings())
 
     override suspend fun setThemeMode(mode: ThemeMode) = Unit
+
+    override suspend fun setClipboardSuggestion(
+        promptShown: Boolean,
+        enabled: Boolean,
+    ) = Unit
 }

@@ -8,4 +8,9 @@ interface SettingsRepository {
     val settings: Flow<AppSettings>
 
     suspend fun setThemeMode(mode: ThemeMode)
+
+    suspend fun setClipboardSuggestion(
+        promptShown: Boolean,
+        enabled: Boolean,
+    )
 }

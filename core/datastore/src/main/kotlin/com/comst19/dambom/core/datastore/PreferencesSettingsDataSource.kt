@@ -3,6 +3,7 @@ package com.comst19.dambom.core.datastore
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -25,24 +26,42 @@ class PreferencesSettingsDataSource
     constructor(
         private val dataStore: DataStore<Preferences>,
     ) : SettingsDataSource {
-        override val themeMode: Flow<String> =
-            dataStore.data
-                .catch { throwable ->
-                    if (throwable is IOException) {
-                        emit(emptyPreferences())
-                    } else {
-                        throw throwable
-                    }
-                }.map { preferences ->
-                    preferences[THEME_MODE] ?: SYSTEM_THEME_MODE
+        private val preferences =
+            dataStore.data.catch { throwable ->
+                if (throwable is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw throwable
                 }
+            }
+
+        override val settings: Flow<StoredSettings> =
+            preferences.map { values ->
+                StoredSettings(
+                    themeMode = values[THEME_MODE] ?: SYSTEM_THEME_MODE,
+                    clipboardPromptShown = values[CLIPBOARD_PROMPT_SHOWN] ?: false,
+                    clipboardSuggestionEnabled = values[CLIPBOARD_SUGGESTION_ENABLED] ?: false,
+                )
+            }
 
         override suspend fun setThemeMode(value: String) {
             dataStore.edit { preferences -> preferences[THEME_MODE] = value }
         }
 
+        override suspend fun setClipboardSuggestion(
+            promptShown: Boolean,
+            enabled: Boolean,
+        ) {
+            dataStore.edit { preferences ->
+                preferences[CLIPBOARD_PROMPT_SHOWN] = promptShown
+                preferences[CLIPBOARD_SUGGESTION_ENABLED] = enabled
+            }
+        }
+
         private companion object {
             val THEME_MODE = stringPreferencesKey("theme_mode")
+            val CLIPBOARD_PROMPT_SHOWN = booleanPreferencesKey("clipboard_prompt_shown")
+            val CLIPBOARD_SUGGESTION_ENABLED = booleanPreferencesKey("clipboard_suggestion_enabled")
             const val SYSTEM_THEME_MODE = "SYSTEM"
         }
     }

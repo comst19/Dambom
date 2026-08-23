@@ -33,6 +33,6 @@ sealed interface LibraryGraph : AppNavKey {
 
     @Serializable
     data class VideoDetailKey(
-        val id: Long,
+        val id: String,
     ) : LibraryGraph
 }

@@ -23,6 +23,12 @@ internal class DownloadFileStore
             mimeType: String?,
         ): File = videoDirectory.resolve(id + fileExtension(url, mimeType))
 
+        fun completedFilePath(localFileName: String?): String? =
+            localFileName
+                ?.let(videoDirectory::resolve)
+                ?.takeIf(File::isFile)
+                ?.absolutePath
+
         fun delete(
             id: String,
             localFileName: String?,

@@ -22,6 +22,7 @@ data class DownloadTask(
     val status: DownloadStatus,
     val failureReason: DownloadFailureReason?,
     val localFileName: String?,
+    val localFilePath: String? = null,
     val createdAtMillis: Long,
     val updatedAtMillis: Long,
 ) {

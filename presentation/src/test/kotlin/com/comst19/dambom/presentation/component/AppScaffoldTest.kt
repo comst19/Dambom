@@ -1,7 +1,7 @@
 package com.comst19.dambom.presentation.component
 
-import com.comst19.dambom.core.navigation.contract.AuthGraph.LoginKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
+import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -26,7 +26,7 @@ class AppScaffoldTest {
     @Test
     fun `replacing a root destination resets the back press timer`() {
         assertNotEquals(
-            RootBackPressResetKey(LoginKey, isAtRoot = true),
+            RootBackPressResetKey(SettingsKey, isAtRoot = true),
             RootBackPressResetKey(HomeKey, isAtRoot = true),
         )
     }

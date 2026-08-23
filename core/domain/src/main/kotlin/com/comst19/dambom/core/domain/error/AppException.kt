@@ -29,8 +29,6 @@ enum class NetworkFailureReason {
 }
 
 enum class AppErrorCode {
-    DUPLICATE_NICKNAME,
-    TOKEN_EXPIRED,
     UNKNOWN,
     ;
 

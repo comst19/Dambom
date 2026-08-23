@@ -11,7 +11,7 @@ class NavigationConfigTest {
             NavigationConfig(
                 startKey = HomeKey,
                 bottomHomeKey = HomeKey,
-                topLevelKeys = setOf(HomeKey, SettingsKey, LoginKey),
+                topLevelKeys = setOf(HomeKey, SettingsKey, StandaloneKey),
                 bottomBarKeys = setOf(HomeKey, SettingsKey),
                 topLevelBackBehavior = TopLevelBackBehavior.ExitThroughHome,
             )
@@ -25,7 +25,7 @@ class NavigationConfigTest {
             NavigationConfig(
                 startKey = SettingsKey,
                 bottomHomeKey = HomeKey,
-                topLevelKeys = setOf(HomeKey, SettingsKey, LoginKey),
+                topLevelKeys = setOf(HomeKey, SettingsKey, StandaloneKey),
                 bottomBarKeys = setOf(HomeKey, SettingsKey),
                 topLevelBackBehavior = TopLevelBackBehavior.ExitThroughHome,
             )
@@ -37,14 +37,14 @@ class NavigationConfigTest {
     fun `non bottom start does not keep home behind it`() {
         val config =
             NavigationConfig(
-                startKey = LoginKey,
+                startKey = StandaloneKey,
                 bottomHomeKey = HomeKey,
-                topLevelKeys = setOf(HomeKey, SettingsKey, LoginKey),
+                topLevelKeys = setOf(HomeKey, SettingsKey, StandaloneKey),
                 bottomBarKeys = setOf(HomeKey, SettingsKey),
                 topLevelBackBehavior = TopLevelBackBehavior.ExitThroughHome,
             )
 
-        assertEquals(listOf(LoginKey), config.initialTopLevelKeys)
+        assertEquals(listOf(StandaloneKey), config.initialTopLevelKeys)
     }
 
     @Test

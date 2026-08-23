@@ -3,6 +3,4 @@
     <string name="startup_initialization_failed">Unable to start the app.</string>
     <string name="destination_home">Home</string>
     <string name="destination_settings">Settings</string>
-    <string name="destination_match">Match</string>
-    <string name="destination_profile">Profile</string>
 </resources>

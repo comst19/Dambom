@@ -6,7 +6,7 @@ import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.TopLevelNavKey
-import com.comst19.dambom.core.navigation.contract.AuthGraph.LoginKey
+import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -34,7 +34,7 @@ class MainViewModelTest {
 
             advanceUntilIdle()
 
-            assertEquals(AppStartupState.Ready(LoginKey), viewModel.startupState.value)
+            assertEquals(AppStartupState.Ready(HomeKey), viewModel.startupState.value)
         }
 
     @Test
@@ -55,7 +55,7 @@ class MainViewModelTest {
 }
 
 private object SuccessfulStartupCoordinator : StartupCoordinator {
-    override suspend fun initialize(): TopLevelNavKey = LoginKey
+    override suspend fun initialize(): TopLevelNavKey = HomeKey
 }
 
 private object FailingStartupCoordinator : StartupCoordinator {

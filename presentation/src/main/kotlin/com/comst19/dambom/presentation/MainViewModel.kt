@@ -79,18 +79,7 @@ class MainViewModel
 
                     is AppRequestException -> {
                         when (error.errorCode) {
-                            AppErrorCode.DUPLICATE_NICKNAME -> {
-                                "Nickname is already in use"
-                            }
-
-                            AppErrorCode.TOKEN_EXPIRED -> {
-                                // 인증 기능을 추가하면 세션을 지우고 로그인 back stack으로 교체합니다.
-                                "Authentication required"
-                            }
-
-                            AppErrorCode.UNKNOWN -> {
-                                "Network request failed"
-                            }
+                            AppErrorCode.UNKNOWN -> "Network request failed"
                         }
                     }
 

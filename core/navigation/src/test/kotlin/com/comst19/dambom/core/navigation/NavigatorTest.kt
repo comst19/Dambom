@@ -75,9 +75,9 @@ class NavigatorTest {
     fun `non bottom top level does not add home to back history`() {
         val state = testState()
 
-        state.selectTopLevel(LoginKey)
+        state.selectTopLevel(StandaloneKey)
 
-        assertEquals(listOf(LoginKey), state.topLevelsInUse)
+        assertEquals(listOf(StandaloneKey), state.topLevelsInUse)
     }
 
     @Test
@@ -176,7 +176,7 @@ private fun testState(topLevelBackBehavior: TopLevelBackBehavior = TopLevelBackB
                 HomeKey to NavBackStack<NavKey>(HomeKey),
                 SettingsKey to NavBackStack<NavKey>(SettingsKey),
                 SomethingTestKey to NavBackStack<NavKey>(SomethingTestKey),
-                LoginKey to NavBackStack<NavKey>(LoginKey),
+                StandaloneKey to NavBackStack<NavKey>(StandaloneKey),
             ),
         topLevelBackBehavior = topLevelBackBehavior,
     )

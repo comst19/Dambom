@@ -3,22 +3,15 @@ package com.comst19.dambom.presentation
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.comst19.dambom.core.navigation.NavigationConfig
 import com.comst19.dambom.core.navigation.TopLevelBackBehavior
 import com.comst19.dambom.core.navigation.TopLevelNavKey
-import com.comst19.dambom.core.navigation.contract.AuthGraph.LoginKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
-import com.comst19.dambom.core.navigation.contract.SampleMatchingGraph.SampleMatchingKey
-import com.comst19.dambom.core.navigation.contract.SampleProfileGraph.SampleProfileKey
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
 
 /** 독립 top-level key와 선택적인 바텀바 표시 정보를 함께 보관하는 앱 설정입니다. */
@@ -41,24 +34,11 @@ internal object AppNavigationConfig {
                 selectedIcon = Icons.Filled.Home,
                 unselectedIcon = Icons.Outlined.Home,
             ),
-            AppTopLevelDestination(LoginKey),
             AppTopLevelDestination(
                 key = SettingsKey,
                 bottomBarLabelRes = R.string.destination_settings,
                 selectedIcon = Icons.Filled.Settings,
                 unselectedIcon = Icons.Outlined.Settings,
-            ),
-            AppTopLevelDestination(
-                key = SampleMatchingKey,
-                bottomBarLabelRes = R.string.destination_match,
-                selectedIcon = Icons.Filled.Search,
-                unselectedIcon = Icons.Outlined.Search,
-            ),
-            AppTopLevelDestination(
-                key = SampleProfileKey,
-                bottomBarLabelRes = R.string.destination_profile,
-                selectedIcon = Icons.Filled.Person,
-                unselectedIcon = Icons.Outlined.Person,
             ),
         )
 

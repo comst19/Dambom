@@ -18,6 +18,7 @@ fun DambomTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
+        typography = DambomTypography,
         content = content,
     )
 }

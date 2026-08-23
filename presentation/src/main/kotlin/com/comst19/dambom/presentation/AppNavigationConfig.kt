@@ -3,16 +3,16 @@ package com.comst19.dambom.presentation
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.comst19.dambom.core.navigation.NavigationConfig
 import com.comst19.dambom.core.navigation.TopLevelBackBehavior
 import com.comst19.dambom.core.navigation.TopLevelNavKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
-import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.LibraryKey
 
 /** 독립 top-level key와 선택적인 바텀바 표시 정보를 함께 보관하는 앱 설정입니다. */
 @Immutable
@@ -35,10 +35,10 @@ internal object AppNavigationConfig {
                 unselectedIcon = Icons.Outlined.Home,
             ),
             AppTopLevelDestination(
-                key = SettingsKey,
-                bottomBarLabelRes = R.string.destination_settings,
-                selectedIcon = Icons.Filled.Settings,
-                unselectedIcon = Icons.Outlined.Settings,
+                key = LibraryKey,
+                bottomBarLabelRes = R.string.destination_library,
+                selectedIcon = Icons.Filled.VideoLibrary,
+                unselectedIcon = Icons.Outlined.VideoLibrary,
             ),
         )
 

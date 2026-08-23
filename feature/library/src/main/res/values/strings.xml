@@ -1,0 +1,4 @@
+<resources>
+    <string name="library_empty_title">아직 담아둔 영상이 없어요</string>
+    <string name="library_empty_description">홈에서 영상을 찾아 보관함에 담아보세요.</string>
+</resources>

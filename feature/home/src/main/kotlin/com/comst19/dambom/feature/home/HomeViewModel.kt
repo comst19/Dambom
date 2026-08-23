@@ -21,7 +21,7 @@ internal class HomeViewModel
     ) : ViewModel() {
         fun openSettings() {
             viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.NavigateTopLevel(SettingsKey))
+                navigation.dispatch(NavigationEvent.Navigate(SettingsKey))
             }
         }
 

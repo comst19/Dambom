@@ -9,6 +9,7 @@ import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -18,6 +19,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -105,6 +107,48 @@ class DefaultDownloadRepositoryTest {
         }
 
     @Test
+    fun `rename updates the saved title`() =
+        runTest {
+            repository = createRepository(testScheduler)
+            repository.enqueue(listOf(testRequest()))
+
+            repository.rename(TEST_ID, "새 이름")
+
+            assertEquals(
+                "새 이름",
+                repository
+                    .downloads
+                    .first()
+                    .single()
+                    .title,
+            )
+        }
+
+    @Test
+    fun `delete removes the saved task and local file`() =
+        runTest {
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val localFile =
+                File(context.filesDir, "videos/video-1.mp4").apply {
+                    parentFile?.mkdirs()
+                    writeText("video")
+                }
+            database.downloadTaskDao().insert(
+                entity(TEST_ID, "media.example").copy(
+                    status = DownloadStatus.COMPLETED.name,
+                    downloadedBytes = localFile.length(),
+                    localFileName = localFile.name,
+                ),
+            )
+            repository = createRepository(testScheduler)
+
+            repository.delete(TEST_ID)
+
+            assertTrue(repository.downloads.first().isEmpty())
+            assertTrue(!localFile.exists())
+        }
+
+    @Test
     fun `selection respects two downloads per host`() {
         val queued =
             listOf(
@@ -122,6 +166,14 @@ class DefaultDownloadRepositoryTest {
         assertEquals("b-1", selected?.id)
         assertTrue(selected?.host != "a.example")
     }
+
+    private fun createRepository(testScheduler: TestCoroutineScheduler) =
+        DefaultDownloadRepository(
+            dao = database.downloadTaskDao(),
+            scheduler = scheduler,
+            fileStore = DownloadFileStore(ApplicationProvider.getApplicationContext()),
+            ioDispatcher = StandardTestDispatcher(testScheduler),
+        )
 }
 
 private class RecordingScheduler : DownloadWorkScheduler {

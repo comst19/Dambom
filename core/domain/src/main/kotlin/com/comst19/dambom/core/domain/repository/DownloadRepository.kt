@@ -16,6 +16,13 @@ interface DownloadRepository {
 
     suspend fun cancel(id: String)
 
+    suspend fun rename(
+        id: String,
+        title: String,
+    )
+
+    suspend fun delete(id: String)
+
     suspend fun retry(id: String)
 
     suspend fun pauseAll()

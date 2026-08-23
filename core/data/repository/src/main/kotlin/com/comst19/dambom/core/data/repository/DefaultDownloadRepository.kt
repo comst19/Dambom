@@ -57,7 +57,18 @@ class DefaultDownloadRepository
             scheduler.schedule()
         }
 
-        override suspend fun cancel(id: String) =
+        override suspend fun cancel(id: String) {
+            delete(id)
+        }
+
+        override suspend fun rename(
+            id: String,
+            title: String,
+        ) = withContext(ioDispatcher) {
+            dao.updateTitle(id, title, System.currentTimeMillis())
+        }
+
+        override suspend fun delete(id: String) =
             withContext(ioDispatcher) {
                 val task = dao.getById(id)
                 dao.delete(id)

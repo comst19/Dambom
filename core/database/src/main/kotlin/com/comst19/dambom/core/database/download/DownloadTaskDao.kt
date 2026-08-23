@@ -112,6 +112,19 @@ interface DownloadTaskDao {
     @Query(
         """
         UPDATE download_tasks
+        SET title = :title, updatedAtMillis = :updatedAtMillis
+        WHERE id = :id
+        """,
+    )
+    suspend fun updateTitle(
+        id: String,
+        title: String,
+        updatedAtMillis: Long,
+    )
+
+    @Query(
+        """
+        UPDATE download_tasks
         SET status = 'PAUSED', updatedAtMillis = :updatedAtMillis
         WHERE status IN ('QUEUED', 'DOWNLOADING')
         """,

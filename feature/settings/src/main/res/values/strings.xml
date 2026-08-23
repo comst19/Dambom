@@ -1,0 +1,9 @@
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="settings_screen_title">TopAppBar screen</string>
+    <string name="settings_screen_description">The TopAppBar background continues behind the transparent status bar.</string>
+    <string name="theme_mode_title">Theme</string>
+    <string name="theme_mode_system">System default</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+</resources>

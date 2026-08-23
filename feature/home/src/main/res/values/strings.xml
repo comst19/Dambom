@@ -1,0 +1,8 @@
+<resources>
+    <string name="home_title">Standard screen</string>
+    <string name="home_description">The screen applies Scaffold padding to its content.</string>
+    <string name="home_open_mvvm">Sample MVVM</string>
+    <string name="home_open_mvi">Sample MVI</string>
+    <string name="home_open_settings">Settings</string>
+    <string name="home_show_snackbar">Show snackbar</string>
+</resources>

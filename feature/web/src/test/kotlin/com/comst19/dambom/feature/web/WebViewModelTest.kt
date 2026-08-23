@@ -1,5 +1,6 @@
 package com.comst19.dambom.feature.web
 
+import androidx.lifecycle.SavedStateHandle
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
@@ -15,7 +16,7 @@ import org.junit.Test
 class WebViewModelTest {
     @Test
     fun `tabs can be created selected and closed without leaving an empty list`() {
-        val viewModel = WebViewModel(FakeMediaDetectionRepository, FakeNavigationDispatcher)
+        val viewModel = createViewModel()
 
         viewModel.applyInitialUrl("example.com")
         val firstTabId = viewModel.uiState.value.currentTabId
@@ -51,7 +52,7 @@ class WebViewModelTest {
 
     @Test
     fun `media detection state belongs to its tab`() {
-        val viewModel = WebViewModel(FakeMediaDetectionRepository, FakeNavigationDispatcher)
+        val viewModel = createViewModel()
         val firstTabId = viewModel.uiState.value.currentTabId
 
         viewModel.onMediaRequest(firstTabId, "https://example.com/video.mp4")
@@ -72,7 +73,26 @@ class WebViewModelTest {
                 ?.detectionState is WebDetectionState.Idle,
         )
     }
+
+    @Test
+    fun `tabs current selection and recent pages restore from saved state`() {
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = createViewModel(savedStateHandle)
+        val firstTabId = viewModel.uiState.value.currentTabId
+        viewModel.navigateCurrentTab("example.com")
+        viewModel.updatePage(firstTabId, "https://example.com/article", "Article")
+        viewModel.createTab("https://media.w3.org")
+
+        val restored = createViewModel(savedStateHandle).uiState.value
+
+        assertEquals(2, restored.tabs.size)
+        assertEquals("https://media.w3.org", restored.currentTab?.url)
+        assertEquals(RecentPage("Article", "https://example.com/article"), restored.recentPages.single())
+    }
 }
+
+private fun createViewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) =
+    WebViewModel(FakeMediaDetectionRepository, FakeNavigationDispatcher, savedStateHandle)
 
 private object FakeMediaDetectionRepository : MediaDetectionRepository {
     override suspend fun detect(url: String): MediaDetectionResult = MediaDetectionResult.Unsupported(UnsupportedReason.NO_MEDIA)

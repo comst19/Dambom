@@ -1,6 +1,7 @@
 package com.comst19.dambom.feature.web
 
 import android.os.Bundle
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
@@ -24,24 +25,26 @@ internal class WebViewModel
     constructor(
         private val mediaDetectionRepository: MediaDetectionRepository,
         private val navigation: NavigationDispatcher,
+        private val savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
-        private val mutableUiState = MutableStateFlow(WebUiState())
+        private val mutableUiState = MutableStateFlow(savedStateHandle.restoreWebUiState())
         val uiState: StateFlow<WebUiState> = mutableUiState.asStateFlow()
         private val savedWebStates = mutableMapOf<Long, Bundle>()
         private val detectedMediaUrls = mutableMapOf<Long, MutableSet<String>>()
-        private var nextTabId = 2L
-        private var initialUrlApplied = false
+        private var nextTabId = savedStateHandle[NEXT_TAB_ID_KEY] ?: (uiState.value.tabs.maxOfOrNull(WebTab::id) ?: 0L) + 1L
+        private var initialUrlApplied = savedStateHandle[INITIAL_URL_APPLIED_KEY] ?: false
 
         fun applyInitialUrl(url: String?) {
             if (initialUrlApplied) return
             initialUrlApplied = true
+            savedStateHandle[INITIAL_URL_APPLIED_KEY] = true
             val normalizedUrl = url?.normalizeAddress() ?: return
             navigateCurrentTab(normalizedUrl)
         }
 
         fun createTab(url: String? = null) {
             val tab = WebTab(id = nextTabId++, url = url?.normalizeAddress())
-            mutableUiState.update { state ->
+            updateState { state ->
                 state.copy(
                     tabs = state.tabs + tab,
                     currentTabId = tab.id,
@@ -51,13 +54,13 @@ internal class WebViewModel
 
         fun selectTab(id: Long) {
             if (uiState.value.tabs.none { it.id == id }) return
-            mutableUiState.update { it.copy(currentTabId = id) }
+            updateState { it.copy(currentTabId = id) }
         }
 
         fun closeTab(id: Long) {
             savedWebStates.remove(id)
             detectedMediaUrls.remove(id)
-            mutableUiState.update { state ->
+            updateState { state ->
                 if (state.tabs.size == 1) {
                     val emptyTab = WebTab(id = nextTabId++)
                     WebUiState(
@@ -96,7 +99,7 @@ internal class WebViewModel
             title: String?,
         ) {
             val safeUrl = url?.takeIf { it.startsWith("http://") || it.startsWith("https://") } ?: return
-            mutableUiState.update { state ->
+            updateState { state ->
                 val tabs =
                     state.tabs.map { tab ->
                         if (tab.id == tabId) {
@@ -182,9 +185,14 @@ internal class WebViewModel
             tabId: Long,
             transform: (WebTab) -> WebTab,
         ) {
-            mutableUiState.update { state ->
+            updateState { state ->
                 state.copy(tabs = state.tabs.map { if (it.id == tabId) transform(it) else it })
             }
+        }
+
+        private fun updateState(transform: (WebUiState) -> WebUiState) {
+            mutableUiState.update(transform)
+            savedStateHandle.persist(uiState.value, nextTabId)
         }
     }
 
@@ -238,3 +246,51 @@ private fun String.hasVideoExtension(): Boolean =
 
 private val VIDEO_EXTENSIONS = setOf(".mp4", ".webm", ".mov", ".m4v")
 private const val MAX_RECENT_PAGES = 8
+private const val TAB_IDS_KEY = "web-tab-ids"
+private const val TAB_TITLES_KEY = "web-tab-titles"
+private const val TAB_URLS_KEY = "web-tab-urls"
+private const val CURRENT_TAB_ID_KEY = "web-current-tab-id"
+private const val RECENT_TITLES_KEY = "web-recent-titles"
+private const val RECENT_URLS_KEY = "web-recent-urls"
+private const val NEXT_TAB_ID_KEY = "web-next-tab-id"
+private const val INITIAL_URL_APPLIED_KEY = "web-initial-url-applied"
+private const val NULL_URL = ""
+
+private fun SavedStateHandle.restoreWebUiState(): WebUiState {
+    val ids = get<LongArray>(TAB_IDS_KEY) ?: longArrayOf()
+    val titles = get<ArrayList<String>>(TAB_TITLES_KEY).orEmpty()
+    val urls = get<ArrayList<String>>(TAB_URLS_KEY).orEmpty()
+    val tabs =
+        ids
+            .mapIndexed { index, id ->
+                WebTab(
+                    id = id,
+                    title = titles.getOrNull(index).orEmpty().ifBlank { "새 탭" },
+                    url = urls.getOrNull(index)?.takeIf(String::isNotBlank),
+                )
+            }.ifEmpty { listOf(WebTab(id = 1L)) }
+    val currentTabId = get<Long>(CURRENT_TAB_ID_KEY)?.takeIf { id -> tabs.any { it.id == id } } ?: tabs.first().id
+    val recentTitles = get<ArrayList<String>>(RECENT_TITLES_KEY).orEmpty()
+    val recentUrls = get<ArrayList<String>>(RECENT_URLS_KEY).orEmpty()
+    val recentPages =
+        recentUrls.mapIndexed { index, url ->
+            RecentPage(
+                title = recentTitles.getOrNull(index).orEmpty().ifBlank { url.hostLabel() },
+                url = url,
+            )
+        }
+    return WebUiState(tabs = tabs, currentTabId = currentTabId, recentPages = recentPages)
+}
+
+private fun SavedStateHandle.persist(
+    state: WebUiState,
+    nextTabId: Long,
+) {
+    this[TAB_IDS_KEY] = state.tabs.map(WebTab::id).toLongArray()
+    this[TAB_TITLES_KEY] = ArrayList(state.tabs.map(WebTab::title))
+    this[TAB_URLS_KEY] = ArrayList(state.tabs.map { it.url ?: NULL_URL })
+    this[CURRENT_TAB_ID_KEY] = state.currentTabId
+    this[RECENT_TITLES_KEY] = ArrayList(state.recentPages.map(RecentPage::title))
+    this[RECENT_URLS_KEY] = ArrayList(state.recentPages.map(RecentPage::url))
+    this[NEXT_TAB_ID_KEY] = nextTabId
+}

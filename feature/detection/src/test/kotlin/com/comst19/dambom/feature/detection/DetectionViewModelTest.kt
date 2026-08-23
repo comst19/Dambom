@@ -73,6 +73,13 @@ private class RecordingDownloadRepository : DownloadRepository {
 
     override suspend fun cancel(id: String) = Unit
 
+    override suspend fun rename(
+        id: String,
+        title: String,
+    ) = Unit
+
+    override suspend fun delete(id: String) = Unit
+
     override suspend fun retry(id: String) = Unit
 
     override suspend fun pauseAll() = Unit

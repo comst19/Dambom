@@ -1,7 +1,7 @@
 package com.comst19.dambom.presentation
 
 import com.comst19.dambom.core.navigation.TopLevelNavKey
-import com.comst19.dambom.core.navigation.contract.AuthGraph.LoginKey
+import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,7 +17,7 @@ interface StartupCoordinator {
 class DefaultStartupCoordinator
     @Inject
     constructor() : StartupCoordinator {
-        override suspend fun initialize(): TopLevelNavKey = LoginKey
+        override suspend fun initialize(): TopLevelNavKey = HomeKey
     }
 
 @Module

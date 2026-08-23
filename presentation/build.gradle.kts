@@ -8,9 +8,7 @@ plugins {
 android { namespace = "com.comst19.dambom.presentation" }
 
 dependencies {
-    implementation(projects.feature.auth)
     implementation(projects.feature.home)
-    implementation(projects.feature.sample)
     implementation(projects.feature.settings)
 
     implementation(projects.core.commonUi)

@@ -8,8 +8,6 @@ android { namespace = "com.comst19.dambom.core.data.repository" }
 
 dependencies {
     implementation(projects.core.domain)
-    implementation(projects.core.data.remote)
-    implementation(projects.core.database)
     implementation(projects.core.datastore)
     implementation(libs.kotlinx.coroutines.core)
 }

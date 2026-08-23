@@ -19,8 +19,6 @@ import com.comst19.dambom.core.designsystem.DambomTheme
 @Composable
 internal fun HomeRoute(viewModel: HomeViewModel = hiltViewModel()) {
     HomeScreen(
-        onOpenMvvm = viewModel::openMvvmSample,
-        onOpenMvi = viewModel::openMviSample,
         onOpenSettings = viewModel::openSettings,
         onShowSnackbar = viewModel::showSnackbar,
     )
@@ -28,8 +26,6 @@ internal fun HomeRoute(viewModel: HomeViewModel = hiltViewModel()) {
 
 @Composable
 internal fun HomeScreen(
-    onOpenMvvm: () -> Unit,
-    onOpenMvi: () -> Unit,
     onOpenSettings: () -> Unit,
     onShowSnackbar: () -> Unit,
 ) {
@@ -45,8 +41,6 @@ internal fun HomeScreen(
     ) {
         Text(stringResource(R.string.home_title))
         Text(stringResource(R.string.home_description))
-        Button(onClick = onOpenMvvm) { Text(stringResource(R.string.home_open_mvvm)) }
-        Button(onClick = onOpenMvi) { Text(stringResource(R.string.home_open_mvi)) }
         Button(onClick = onOpenSettings) { Text(stringResource(R.string.home_open_settings)) }
         Button(onClick = onShowSnackbar) { Text(stringResource(R.string.home_show_snackbar)) }
     }
@@ -57,8 +51,6 @@ internal fun HomeScreen(
 private fun HomeScreenPreview() {
     DambomTheme {
         HomeScreen(
-            onOpenMvvm = {},
-            onOpenMvi = {},
             onOpenSettings = {},
             onShowSnackbar = {},
         )

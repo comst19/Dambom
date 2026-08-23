@@ -12,9 +12,7 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.Navigator
 import com.comst19.dambom.core.navigation.rememberNavigationState
 import com.comst19.dambom.core.navigation.toEntries
-import com.comst19.dambom.feature.auth.navigation.authEntries
 import com.comst19.dambom.feature.home.navigation.homeEntries
-import com.comst19.dambom.feature.sample.navigation.sampleEntries
 import com.comst19.dambom.feature.settings.navigation.settingsEntries
 import com.comst19.dambom.presentation.component.AppScaffold
 import com.comst19.dambom.presentation.event.ObserveSnackbarEvents
@@ -42,9 +40,7 @@ internal fun DambomApp(
     val entries =
         state.toEntries(
             entryProvider<NavKey> {
-                authEntries()
                 homeEntries()
-                sampleEntries()
                 settingsEntries()
             },
         )

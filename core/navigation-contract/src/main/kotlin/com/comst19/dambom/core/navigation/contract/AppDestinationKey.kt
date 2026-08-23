@@ -5,14 +5,34 @@ import com.comst19.dambom.core.navigation.TopLevelNavKey
 import kotlinx.serialization.Serializable
 
 sealed interface HomeGraph : AppNavKey {
-    /** 앱의 시작 top-level이자 Home stack의 root destination입니다. */
     @Serializable
     data object HomeKey : HomeGraph, TopLevelNavKey
 
+    @Serializable
+    data class WebKey(
+        val url: String? = null,
+    ) : HomeGraph
+
+    @Serializable
+    data class DetectionResultKey(
+        val url: String,
+    ) : HomeGraph
+
+    @Serializable
+    data object DownloadsKey : HomeGraph
 }
 
 sealed interface SettingsGraph : AppNavKey {
-    /** Settings 독립 stack의 root destination입니다. */
     @Serializable
-    data object SettingsKey : SettingsGraph, TopLevelNavKey
+    data object SettingsKey : SettingsGraph
+}
+
+sealed interface LibraryGraph : AppNavKey {
+    @Serializable
+    data object LibraryKey : LibraryGraph, TopLevelNavKey
+
+    @Serializable
+    data class VideoDetailKey(
+        val id: Long,
+    ) : LibraryGraph
 }

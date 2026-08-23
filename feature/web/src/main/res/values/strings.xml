@@ -1,0 +1,22 @@
+<resources>
+    <string name="web_back">웹 닫기</string>
+    <string name="web_address_placeholder">웹 주소 입력</string>
+    <string name="web_start_title">웹에서 영상을 찾아보세요</string>
+    <string name="web_start_description">여러 탭을 열어 둘 수 있고, 현재 탭의 영상만 감지해요.</string>
+    <string name="web_open">페이지 열기</string>
+    <string name="web_recent">최근 방문</string>
+    <string name="web_recent_empty">최근에 방문한 페이지가 없어요.</string>
+    <string name="web_go_back">이전 페이지</string>
+    <string name="web_go_forward">다음 페이지</string>
+    <string name="web_refresh">새로고침</string>
+    <string name="web_detect">영상 감지</string>
+    <string name="web_detecting">감지 중</string>
+    <string name="web_detected_count">영상 %1$d개 감지됨</string>
+    <string name="web_not_detected">영상 미감지</string>
+    <string name="web_access_restricted">접근 제한</string>
+    <string name="web_network_error">연결 오류</string>
+    <string name="web_tabs_title">열린 탭 %1$d개</string>
+    <string name="web_new_tab">새 탭</string>
+    <string name="web_close_tab">탭 닫기</string>
+    <string name="web_empty_tab">빈 탭</string>
+</resources>

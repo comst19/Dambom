@@ -2,6 +2,7 @@ package com.comst19.dambom.feature.home
 
 import android.content.ClipboardManager
 import android.content.Context
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,11 +64,12 @@ internal fun HomeRoute(viewModel: HomeViewModel = hiltViewModel()) {
         onUrlChange = viewModel::updateUrl,
         onPaste = { viewModel.useClipboardText(context.clipboardText()) },
         onAnalyze = viewModel::analyzeUrl,
+        onOpenWeb = viewModel::openWeb,
         onOpenSettings = viewModel::openSettings,
         onClipboardConsent = viewModel::setClipboardSuggestionEnabled,
         onUseClipboardSuggestion = { viewModel.useClipboardText(uiState.clipboardUrl) },
         onDismissClipboardSuggestion = viewModel::dismissClipboardSuggestion,
-        onUseSharedUrl = viewModel::useSharedUrl,
+        onOpenSharedUrlInWeb = viewModel::openSharedUrlInWeb,
         onAnalyzeSharedUrl = viewModel::analyzeSharedUrl,
         onDismissSharedUrl = viewModel::dismissSharedUrl,
     )
@@ -79,11 +81,12 @@ internal fun HomeScreen(
     onUrlChange: (String) -> Unit,
     onPaste: () -> Unit,
     onAnalyze: () -> Unit,
+    onOpenWeb: () -> Unit,
     onOpenSettings: () -> Unit,
     onClipboardConsent: (Boolean) -> Unit,
     onUseClipboardSuggestion: () -> Unit,
     onDismissClipboardSuggestion: () -> Unit,
-    onUseSharedUrl: () -> Unit,
+    onOpenSharedUrlInWeb: () -> Unit,
     onAnalyzeSharedUrl: () -> Unit,
     onDismissSharedUrl: () -> Unit,
 ) {
@@ -167,6 +170,7 @@ internal fun HomeScreen(
             MethodRow(
                 title = stringResource(R.string.home_browser_title),
                 description = stringResource(R.string.home_browser_description),
+                onClick = onOpenWeb,
             )
         }
     }
@@ -177,7 +181,7 @@ internal fun HomeScreen(
     uiState.sharedUrl?.let {
         SharedUrlDialog(
             url = it,
-            onUse = onUseSharedUrl,
+            onOpenWeb = onOpenSharedUrlInWeb,
             onAnalyze = onAnalyzeSharedUrl,
             onDismiss = onDismissSharedUrl,
         )
@@ -236,9 +240,13 @@ private fun ClipboardSuggestion(
 private fun MethodRow(
     title: String,
     description: String,
+    onClick: (() -> Unit)? = null,
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .then(if (onClick == null) Modifier else Modifier.clickable(onClick = onClick)),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         shape = RoundedCornerShape(18.dp),
     ) {
@@ -275,7 +283,7 @@ private fun ClipboardConsentDialog(onDecision: (Boolean) -> Unit) {
 @Composable
 private fun SharedUrlDialog(
     url: String,
-    onUse: () -> Unit,
+    onOpenWeb: () -> Unit,
     onAnalyze: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -298,7 +306,7 @@ private fun SharedUrlDialog(
         },
         dismissButton = {
             Row {
-                TextButton(onClick = onUse) { Text(stringResource(R.string.home_put_in_input)) }
+                TextButton(onClick = onOpenWeb) { Text(stringResource(R.string.home_open_in_web)) }
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.home_cancel)) }
             }
         },
@@ -322,11 +330,12 @@ private fun HomeScreenPreview() {
             onUrlChange = {},
             onPaste = {},
             onAnalyze = {},
+            onOpenWeb = {},
             onOpenSettings = {},
             onClipboardConsent = {},
             onUseClipboardSuggestion = {},
             onDismissClipboardSuggestion = {},
-            onUseSharedUrl = {},
+            onOpenSharedUrlInWeb = {},
             onAnalyzeSharedUrl = {},
             onDismissSharedUrl = {},
         )

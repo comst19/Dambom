@@ -9,6 +9,7 @@ composeBom = "2026.06.01"
 core = "1.19.0"
 splashscreen = "1.0.1"
 activity = "1.13.0"
+appcompat = "1.8.0"
 lifecycle = "2.11.0"
 navigation3 = "1.1.5"
 viewmodelNavigation3 = "2.11.0"
@@ -50,6 +51,7 @@ hilt-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", 
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }

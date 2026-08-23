@@ -62,6 +62,12 @@ internal class VideoPlayerViewModel
             if (visibilityState.consumeResumeRequest()) player.play()
         }
 
+        fun stop(id: String) {
+            if (player.currentMediaItem?.mediaId != id) return
+            player.stop()
+            player.clearMediaItems()
+        }
+
         override fun onCleared() {
             player.release()
         }

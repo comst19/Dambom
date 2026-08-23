@@ -92,7 +92,7 @@ private val TertiaryFixedDim = Color(0xFF86E8BE)
 private val OnTertiaryFixed = Color(0xFF005C3C)
 private val OnTertiaryFixedVariant = Color(0xFF029359)
 
-internal val DambomLightColorScheme =
+val DambomLightColorScheme =
     lightColorScheme(
         primary = LightPrimary,
         onPrimary = LightOnPrimary,
@@ -144,7 +144,7 @@ internal val DambomLightColorScheme =
         onTertiaryFixedVariant = OnTertiaryFixedVariant,
     )
 
-internal val DambomDarkColorScheme =
+val DambomDarkColorScheme =
     darkColorScheme(
         primary = DarkPrimary,
         onPrimary = DarkOnPrimary,

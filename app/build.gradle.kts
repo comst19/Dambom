@@ -1,6 +1,7 @@
 plugins {
     id("dambom.android.application")
     id("dambom.android.hilt")
+    id("com.google.android.gms.oss-licenses-plugin")
 }
 
 apply(plugin = "androidx.baselineprofile")

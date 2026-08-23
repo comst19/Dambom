@@ -1,0 +1,31 @@
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">What would you like to save?</string>
+    <string name="home_description">Enter a page address to find videos you can save.</string>
+    <string name="home_url_label">Web address</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Paste</string>
+    <string name="home_analyze">Find videos</string>
+    <string name="home_open_settings">Settings</string>
+    <string name="home_other_methods">Other ways to save</string>
+    <string name="home_share_title">Share from Chrome or X</string>
+    <string name="home_share_description">Choose Dambom in another app’s share menu to bring the link in.</string>
+    <string name="home_browser_title">Browse inside the app</string>
+    <string name="home_browser_description">Open multiple web tabs and find videos on the current page.</string>
+    <string name="home_clipboard_found">A copied link is available</string>
+    <string name="home_use_link">Use link</string>
+    <string name="home_dismiss">Dismiss</string>
+    <string name="home_clipboard_consent_title">Suggest copied links?</string>
+    <string name="home_clipboard_consent_description">When Dambom opens, it can check the clipboard for a web address and suggest filling it in. It never analyzes or downloads automatically.</string>
+    <string name="home_clipboard_consent_allow">Allow suggestions</string>
+    <string name="home_clipboard_consent_deny">Paste manually</string>
+    <string name="home_shared_url_title">Shared link received</string>
+    <string name="home_shared_url_description">Start finding videos now, or put the link in the field and review it first.</string>
+    <string name="home_analyze_now">Find videos</string>
+    <string name="home_open_in_web">Open in web</string>
+    <string name="home_cancel">Cancel</string>
+    <string name="home_download_active">%1$d downloading</string>
+    <string name="home_download_paused">%1$d paused</string>
+    <string name="home_download_failed">%1$d downloads need attention</string>
+    <string name="home_download_open">Tap to manage download status and the queue.</string>
+</resources>

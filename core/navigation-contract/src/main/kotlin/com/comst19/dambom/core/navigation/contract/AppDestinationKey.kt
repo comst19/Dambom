@@ -25,6 +25,9 @@ sealed interface HomeGraph : AppNavKey {
 sealed interface SettingsGraph : AppNavKey {
     @Serializable
     data object SettingsKey : SettingsGraph
+
+    @Serializable
+    data object HelpKey : SettingsGraph
 }
 
 sealed interface LibraryGraph : AppNavKey {

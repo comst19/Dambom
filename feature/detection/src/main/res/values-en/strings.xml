@@ -1,0 +1,18 @@
+<resources>
+    <string name="detection_title">Find videos</string>
+    <string name="detection_back">Back</string>
+    <string name="detection_loading">Finding videos</string>
+    <string name="detection_loading_description">Some pages may take a moment.</string>
+    <string name="detection_found_count">Found %1$d videos you can save.</string>
+    <string name="detection_download_selected">Download %1$d</string>
+    <string name="detection_adding_to_queue">Adding %1$d</string>
+    <string name="detection_enqueue_failed">Couldn’t add these videos to the queue. Try again.</string>
+    <string name="detection_not_found">No videos found</string>
+    <string name="detection_retry_hint">Play the video on the page, then detect again.</string>
+    <string name="detection_retry">Detect again</string>
+    <string name="detection_invalid_url">Check that the web address is valid.</string>
+    <string name="detection_access_restricted">Pages that require sign-in or restricted access aren’t supported.</string>
+    <string name="detection_no_media">No supported public videos were found on this page.</string>
+    <string name="detection_network_error">Couldn’t connect to the page. Check your network.</string>
+    <string name="detection_unsupported_format">Dambom doesn’t support this format yet.</string>
+</resources>

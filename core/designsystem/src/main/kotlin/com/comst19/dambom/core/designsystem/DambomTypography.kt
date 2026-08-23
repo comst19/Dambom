@@ -4,7 +4,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-internal val DambomTypography =
+val DambomTypography =
     Typography().run {
         copy(
             displaySmall = displaySmall.copy(fontSize = 30.sp, lineHeight = 38.sp, fontWeight = FontWeight.Bold),

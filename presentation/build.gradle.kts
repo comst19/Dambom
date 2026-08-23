@@ -9,6 +9,7 @@ android { namespace = "com.comst19.dambom.presentation" }
 
 dependencies {
     implementation(projects.feature.detection)
+    implementation(projects.feature.downloads)
     implementation(projects.feature.home)
     implementation(projects.feature.library)
     implementation(projects.feature.settings)

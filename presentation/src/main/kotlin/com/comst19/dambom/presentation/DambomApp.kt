@@ -13,6 +13,7 @@ import com.comst19.dambom.core.navigation.Navigator
 import com.comst19.dambom.core.navigation.rememberNavigationState
 import com.comst19.dambom.core.navigation.toEntries
 import com.comst19.dambom.feature.detection.navigation.detectionEntries
+import com.comst19.dambom.feature.downloads.navigation.downloadEntries
 import com.comst19.dambom.feature.home.navigation.homeEntries
 import com.comst19.dambom.feature.library.navigation.libraryEntries
 import com.comst19.dambom.feature.settings.navigation.settingsEntries
@@ -44,6 +45,7 @@ internal fun DambomApp(
         state.toEntries(
             entryProvider<NavKey> {
                 detectionEntries()
+                downloadEntries()
                 homeEntries()
                 libraryEntries()
                 settingsEntries()

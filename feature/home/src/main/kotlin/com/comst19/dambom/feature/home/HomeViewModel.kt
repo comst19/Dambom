@@ -4,10 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.comst19.dambom.core.common.SharedUrlBus
+import com.comst19.dambom.core.domain.model.DownloadStatus
+import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
+import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +29,7 @@ internal class HomeViewModel
     constructor(
         private val navigation: NavigationDispatcher,
         private val settingsRepository: SettingsRepository,
+        downloadRepository: DownloadRepository,
         private val sharedUrlBus: SharedUrlBus,
         private val savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
@@ -38,7 +42,13 @@ internal class HomeViewModel
                 settingsRepository.settings,
                 sharedUrlBus.pendingUrl,
                 clipboardUrl,
-            ) { url, settings, sharedUrl, clipboardUrl ->
+                downloadRepository.downloads,
+            ) { url, settings, sharedUrl, clipboardUrl, downloads ->
+                val active = downloads.filter { it.status == DownloadStatus.DOWNLOADING || it.status == DownloadStatus.QUEUED }
+                val pausedCount = downloads.count { it.status == DownloadStatus.PAUSED }
+                val failedCount = downloads.count { it.status == DownloadStatus.FAILED }
+                val totalBytes = active.mapNotNull { it.expectedBytes }.sum()
+                val downloadedBytes = active.sumOf { it.downloadedBytes }
                 HomeUiState(
                     url = url,
                     isUrlValid = url.isValidHttpUrl(),
@@ -46,6 +56,18 @@ internal class HomeViewModel
                     clipboardSuggestionEnabled = settings.clipboardSuggestionEnabled,
                     clipboardUrl = clipboardUrl,
                     sharedUrl = sharedUrl,
+                    downloadSummary =
+                        HomeDownloadSummary(
+                            activeCount = active.size,
+                            pausedCount = pausedCount,
+                            failedCount = failedCount,
+                            progress =
+                                if (totalBytes > 0L) {
+                                    (downloadedBytes.toFloat() / totalBytes).coerceIn(0f, 1f)
+                                } else {
+                                    0f
+                                },
+                        ),
                 )
             }.stateIn(
                 scope = viewModelScope,
@@ -116,6 +138,12 @@ internal class HomeViewModel
             }
         }
 
+        fun openDownloads() {
+            viewModelScope.launch {
+                navigation.dispatch(NavigationEvent.Navigate(DownloadsKey))
+            }
+        }
+
         private fun navigateToDetection(url: String) {
             viewModelScope.launch {
                 navigation.dispatch(NavigationEvent.Navigate(DetectionResultKey(url)))
@@ -130,7 +158,18 @@ internal data class HomeUiState(
     val clipboardSuggestionEnabled: Boolean = false,
     val clipboardUrl: String? = null,
     val sharedUrl: String? = null,
+    val downloadSummary: HomeDownloadSummary = HomeDownloadSummary(),
 )
+
+internal data class HomeDownloadSummary(
+    val activeCount: Int = 0,
+    val pausedCount: Int = 0,
+    val failedCount: Int = 0,
+    val progress: Float = 0f,
+) {
+    val isVisible: Boolean
+        get() = activeCount + pausedCount + failedCount > 0
+}
 
 private fun String.isValidHttpUrl(): Boolean =
     runCatching {

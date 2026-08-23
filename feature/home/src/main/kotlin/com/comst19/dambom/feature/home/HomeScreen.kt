@@ -26,6 +26,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -65,6 +66,7 @@ internal fun HomeRoute(viewModel: HomeViewModel = hiltViewModel()) {
         onPaste = { viewModel.useClipboardText(context.clipboardText()) },
         onAnalyze = viewModel::analyzeUrl,
         onOpenWeb = viewModel::openWeb,
+        onOpenDownloads = viewModel::openDownloads,
         onOpenSettings = viewModel::openSettings,
         onClipboardConsent = viewModel::setClipboardSuggestionEnabled,
         onUseClipboardSuggestion = { viewModel.useClipboardText(uiState.clipboardUrl) },
@@ -82,6 +84,7 @@ internal fun HomeScreen(
     onPaste: () -> Unit,
     onAnalyze: () -> Unit,
     onOpenWeb: () -> Unit,
+    onOpenDownloads: () -> Unit,
     onOpenSettings: () -> Unit,
     onClipboardConsent: (Boolean) -> Unit,
     onUseClipboardSuggestion: () -> Unit,
@@ -156,6 +159,13 @@ internal fun HomeScreen(
                     onDismiss = onDismissClipboardSuggestion,
                 )
             }
+            if (uiState.downloadSummary.isVisible) {
+                Spacer(Modifier.height(20.dp))
+                HomeDownloadStatus(
+                    summary = uiState.downloadSummary,
+                    onClick = onOpenDownloads,
+                )
+            }
             Spacer(Modifier.height(36.dp))
             Text(
                 text = stringResource(R.string.home_other_methods),
@@ -185,6 +195,41 @@ internal fun HomeScreen(
             onAnalyze = onAnalyzeSharedUrl,
             onDismiss = onDismissSharedUrl,
         )
+    }
+}
+
+@Composable
+private fun HomeDownloadStatus(
+    summary: HomeDownloadSummary,
+    onClick: () -> Unit,
+) {
+    val title =
+        when {
+            summary.activeCount > 0 -> stringResource(R.string.home_download_active, summary.activeCount)
+            summary.pausedCount > 0 -> stringResource(R.string.home_download_paused, summary.pausedCount)
+            else -> stringResource(R.string.home_download_failed, summary.failedCount)
+        }
+    Card(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        shape = RoundedCornerShape(18.dp),
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                stringResource(R.string.home_download_open),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (summary.activeCount > 0) {
+                LinearProgressIndicator(
+                    progress = { summary.progress },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
     }
 }
 
@@ -331,6 +376,7 @@ private fun HomeScreenPreview() {
             onPaste = {},
             onAnalyze = {},
             onOpenWeb = {},
+            onOpenDownloads = {},
             onOpenSettings = {},
             onClipboardConsent = {},
             onUseClipboardSuggestion = {},

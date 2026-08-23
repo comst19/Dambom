@@ -19,4 +19,11 @@
     <string name="web_new_tab">새 탭</string>
     <string name="web_close_tab">탭 닫기</string>
     <string name="web_empty_tab">빈 탭</string>
+    <string name="web_tab_actions">현재 탭 더보기</string>
+    <string name="web_open_external">기본 브라우저에서 열기</string>
+    <string name="web_copy_link">링크 복사</string>
+    <string name="web_share_link">링크 공유</string>
+    <string name="web_link_copied">링크를 복사했어요.</string>
+    <string name="web_action_failure">요청을 처리할 앱을 찾지 못했어요.</string>
+    <string name="web_share_chooser">링크 공유</string>
 </resources>

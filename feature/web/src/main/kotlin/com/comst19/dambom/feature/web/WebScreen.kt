@@ -1,7 +1,13 @@
 package com.comst19.dambom.feature.web
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.webkit.WebChromeClient
@@ -10,6 +16,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,11 +41,17 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -61,6 +74,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -80,6 +94,9 @@ internal fun WebRoute(
     viewModel: WebViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val copiedMessage = stringResource(R.string.web_link_copied)
+    val actionFailureMessage = stringResource(R.string.web_action_failure)
     LaunchedEffect(initialUrl) { viewModel.applyInitialUrl(initialUrl) }
     WebScreen(
         uiState = uiState,
@@ -93,6 +110,9 @@ internal fun WebRoute(
         onCloseTab = viewModel::closeTab,
         savedWebState = viewModel::savedWebState,
         onSaveWebState = viewModel::saveWebState,
+        onOpenExternal = { url -> context.openExternal(url, actionFailureMessage) },
+        onCopyLink = { url -> context.copyLink(url, copiedMessage) },
+        onShareLink = { url -> context.shareLink(url, actionFailureMessage) },
     )
 }
 
@@ -110,6 +130,9 @@ internal fun WebScreen(
     onCloseTab: (Long) -> Unit,
     savedWebState: (Long) -> Bundle?,
     onSaveWebState: (Long, Bundle) -> Unit,
+    onOpenExternal: (String) -> Unit,
+    onCopyLink: (String) -> Unit,
+    onShareLink: (String) -> Unit,
 ) {
     val currentTab = uiState.currentTab ?: return
     var showTabs by rememberSaveable { mutableStateOf(false) }
@@ -144,6 +167,10 @@ internal fun WebScreen(
             },
             onBack = onBack,
             onOpenTabs = { showTabs = true },
+            currentUrl = currentTab.url,
+            onOpenExternal = onOpenExternal,
+            onCopyLink = onCopyLink,
+            onShareLink = onShareLink,
         )
         if (currentTab.url == null) {
             WebStartPage(
@@ -191,7 +218,12 @@ private fun WebAddressBar(
     onSubmit: () -> Unit,
     onBack: () -> Unit,
     onOpenTabs: () -> Unit,
+    currentUrl: String?,
+    onOpenExternal: (String) -> Unit,
+    onCopyLink: (String) -> Unit,
+    onShareLink: (String) -> Unit,
 ) {
+    var menuExpanded by remember { mutableStateOf(false) }
     Row(
         modifier =
             Modifier
@@ -232,7 +264,60 @@ private fun WebAddressBar(
                 Text(tabCount.toString(), style = MaterialTheme.typography.labelLarge)
             }
         }
+        Box {
+            IconButton(
+                onClick = { menuExpanded = true },
+                enabled = currentUrl != null,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.MoreVert,
+                    contentDescription = stringResource(R.string.web_tab_actions),
+                )
+            }
+            DropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false },
+            ) {
+                WebActionMenuItem(
+                    label = stringResource(R.string.web_open_external),
+                    icon = { Icon(Icons.Outlined.Language, contentDescription = null) },
+                    onClick = {
+                        menuExpanded = false
+                        currentUrl?.let(onOpenExternal)
+                    },
+                )
+                WebActionMenuItem(
+                    label = stringResource(R.string.web_copy_link),
+                    icon = { Icon(Icons.Outlined.ContentCopy, contentDescription = null) },
+                    onClick = {
+                        menuExpanded = false
+                        currentUrl?.let(onCopyLink)
+                    },
+                )
+                WebActionMenuItem(
+                    label = stringResource(R.string.web_share_link),
+                    icon = { Icon(Icons.Outlined.Share, contentDescription = null) },
+                    onClick = {
+                        menuExpanded = false
+                        currentUrl?.let(onShareLink)
+                    },
+                )
+            }
+        }
     }
+}
+
+@Composable
+private fun WebActionMenuItem(
+    label: String,
+    icon: @Composable () -> Unit,
+    onClick: () -> Unit,
+) {
+    DropdownMenuItem(
+        text = { Text(label) },
+        onClick = onClick,
+        leadingIcon = icon,
+    )
 }
 
 @Composable
@@ -566,3 +651,41 @@ private fun createWebView(
             tab.url?.let(::loadUrl)
         }
     }
+
+private fun Context.openExternal(
+    url: String,
+    failureMessage: String,
+) {
+    try {
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    } catch (_: ActivityNotFoundException) {
+        Toast.makeText(this, failureMessage, Toast.LENGTH_SHORT).show()
+    }
+}
+
+private fun Context.copyLink(
+    url: String,
+    copiedMessage: String,
+) {
+    getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("URL", url))
+    Toast.makeText(this, copiedMessage, Toast.LENGTH_SHORT).show()
+}
+
+private fun Context.shareLink(
+    url: String,
+    failureMessage: String,
+) {
+    val intent =
+        Intent
+            .createChooser(
+                Intent(Intent.ACTION_SEND)
+                    .setType("text/plain")
+                    .putExtra(Intent.EXTRA_TEXT, url),
+                getString(R.string.web_share_chooser),
+            )
+    try {
+        startActivity(intent)
+    } catch (_: ActivityNotFoundException) {
+        Toast.makeText(this, failureMessage, Toast.LENGTH_SHORT).show()
+    }
+}

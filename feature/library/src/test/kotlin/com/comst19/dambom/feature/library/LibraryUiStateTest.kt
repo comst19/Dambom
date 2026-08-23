@@ -35,6 +35,34 @@ class LibraryUiStateTest {
 
         assertNull(state.selectedVideo)
     }
+
+    @Test
+    fun `search filters titles without hiding the selected detail`() {
+        val selected = task("selected", DownloadStatus.COMPLETED, "/video/selected.mp4")
+        val matching =
+            task("matching", DownloadStatus.COMPLETED, "/video/matching.mp4").copy(title = "Travel Film")
+
+        val state =
+            toLibraryUiState(
+                tasks = listOf(selected, matching),
+                selectedId = selected.id,
+                query = "travel",
+            )
+
+        assertEquals(listOf(matching), state.videos)
+        assertEquals(selected, state.selectedVideo)
+        assertEquals("travel", state.query)
+        assertEquals(true, state.hasVideos)
+    }
+
+    @Test
+    fun `suggested file name removes invalid characters and keeps extension`() {
+        val task =
+            task("video", DownloadStatus.COMPLETED, "/video/source.mp4")
+                .copy(title = "여행:서울/2026.mp4")
+
+        assertEquals("여행_서울_2026.mp4", task.suggestedFileName())
+    }
 }
 
 private fun task(

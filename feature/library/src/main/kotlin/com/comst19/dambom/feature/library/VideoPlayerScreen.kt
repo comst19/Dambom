@@ -72,15 +72,23 @@ import kotlin.math.roundToLong
 
 @Composable
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-internal fun VideoPlayerRoute(
-    id: String,
-    libraryViewModel: LibraryViewModel = hiltViewModel(),
-) {
-    val uiState by libraryViewModel.uiState.collectAsStateWithLifecycle()
+internal fun VideoPlayerRoute(id: String) {
     val activity = checkNotNull(LocalActivity.current) as ComponentActivity
+    val libraryViewModel: LibraryViewModel = hiltViewModel(activity)
     val playerViewModel: VideoPlayerViewModel = hiltViewModel(activity)
-    val task = uiState.videos.firstOrNull { it.id == id }
+    val uiState by libraryViewModel.uiState.collectAsStateWithLifecycle()
+    val task =
+        uiState.selectedVideo?.takeIf { it.id == id }
+            ?: uiState.videos.firstOrNull { it.id == id }
     val multiplePanes = currentWindowAdaptiveInfoV2().windowSizeClass.supportsMultiplePanes
+    val fileActions =
+        rememberLibraryFileActions(
+            viewModel = libraryViewModel,
+            onDelete = { video ->
+                playerViewModel.stop(video.id)
+                libraryViewModel.delete(video, closeDetail = true)
+            },
+        )
 
     LifecycleResumeEffect(playerViewModel) {
         playerViewModel.onUiResumed()
@@ -93,6 +101,7 @@ internal fun VideoPlayerRoute(
     VideoPlayerScreen(
         task = task,
         player = playerViewModel.player,
+        fileActions = fileActions,
         onBack = libraryViewModel::goBack,
         showBack = !multiplePanes,
     )
@@ -103,6 +112,7 @@ internal fun VideoPlayerRoute(
 internal fun VideoPlayerScreen(
     task: DownloadTask?,
     player: Player,
+    fileActions: LibraryFileActions,
     onBack: () -> Unit,
     showBack: Boolean,
 ) {
@@ -123,6 +133,9 @@ internal fun VideoPlayerScreen(
                     } else {
                         {}
                     },
+                actions = {
+                    task?.let { VideoActionsButton(task = it, actions = fileActions) }
+                },
             )
         },
     ) { innerPadding ->

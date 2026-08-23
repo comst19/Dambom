@@ -37,5 +37,13 @@
     <string name="player_play">Play</string>
     <string name="player_pause">Pause</string>
     <string name="player_forward">Forward 10 seconds</string>
-    <string name="player_file_size">File size %1$s</string>
+    <string name="player_info_title">Video information</string>
+    <string name="player_info_duration">Duration</string>
+    <string name="player_info_resolution">Resolution</string>
+    <string name="player_info_quality">Quality</string>
+    <string name="player_info_size">File size</string>
+    <string name="player_info_downloaded_at">Downloaded</string>
+    <string name="player_info_source">Source page</string>
+    <string name="player_info_unknown">Unknown</string>
+    <string name="player_quality_original">Original</string>
 </resources>

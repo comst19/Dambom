@@ -37,5 +37,13 @@
     <string name="player_play">재생</string>
     <string name="player_pause">일시정지</string>
     <string name="player_forward">10초 앞으로</string>
-    <string name="player_file_size">파일 크기 %1$s</string>
+    <string name="player_info_title">영상 정보</string>
+    <string name="player_info_duration">재생 시간</string>
+    <string name="player_info_resolution">해상도</string>
+    <string name="player_info_quality">품질</string>
+    <string name="player_info_size">파일 크기</string>
+    <string name="player_info_downloaded_at">다운로드 날짜</string>
+    <string name="player_info_source">원본 페이지</string>
+    <string name="player_info_unknown">알 수 없음</string>
+    <string name="player_quality_original">원본</string>
 </resources>

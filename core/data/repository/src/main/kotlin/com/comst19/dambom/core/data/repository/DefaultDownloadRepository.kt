@@ -11,6 +11,7 @@ import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.net.URI
@@ -26,7 +27,14 @@ class DefaultDownloadRepository
         private val fileStore: DownloadFileStore,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : DownloadRepository {
-        override val downloads: Flow<List<DownloadTask>> = dao.observeAll().map { entities -> entities.map(DownloadTaskEntity::toDomain) }
+        override val downloads: Flow<List<DownloadTask>> =
+            dao
+                .observeAll()
+                .map { entities ->
+                    entities.map { entity ->
+                        entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
+                    }
+                }.flowOn(ioDispatcher)
 
         override suspend fun enqueue(requests: List<DownloadRequest>): EnqueueDownloadsResult =
             withContext(ioDispatcher) {
@@ -89,7 +97,7 @@ private fun DownloadRequest.toEntity(now: Long): DownloadTaskEntity =
         updatedAtMillis = now,
     )
 
-private fun DownloadTaskEntity.toDomain(): DownloadTask =
+private fun DownloadTaskEntity.toDomain(localFilePath: String?): DownloadTask =
     DownloadTask(
         id = id,
         url = url,
@@ -102,6 +110,7 @@ private fun DownloadTaskEntity.toDomain(): DownloadTask =
         status = enumValueOrDefault(status, DownloadStatus.FAILED),
         failureReason = failureReason?.let { enumValueOrDefault(it, DownloadFailureReason.UNKNOWN) },
         localFileName = localFileName,
+        localFilePath = localFilePath,
         createdAtMillis = createdAtMillis,
         updatedAtMillis = updatedAtMillis,
     )

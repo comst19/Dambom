@@ -12,6 +12,7 @@ dependencies {
     implementation(projects.feature.home)
     implementation(projects.feature.library)
     implementation(projects.feature.settings)
+    implementation(projects.feature.web)
 
     implementation(projects.core.commonUi)
     implementation(projects.core.common)

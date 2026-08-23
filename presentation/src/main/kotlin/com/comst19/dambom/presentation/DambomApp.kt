@@ -16,6 +16,7 @@ import com.comst19.dambom.feature.detection.navigation.detectionEntries
 import com.comst19.dambom.feature.home.navigation.homeEntries
 import com.comst19.dambom.feature.library.navigation.libraryEntries
 import com.comst19.dambom.feature.settings.navigation.settingsEntries
+import com.comst19.dambom.feature.web.navigation.webEntries
 import com.comst19.dambom.presentation.component.AppScaffold
 import com.comst19.dambom.presentation.event.ObserveSnackbarEvents
 
@@ -46,6 +47,7 @@ internal fun DambomApp(
                 homeEntries()
                 libraryEntries()
                 settingsEntries()
+                webEntries()
             },
         )
 

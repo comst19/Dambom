@@ -8,6 +8,7 @@ import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
+import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,16 +79,20 @@ internal class HomeViewModel
             }
         }
 
-        fun useSharedUrl() {
+        fun openSharedUrlInWeb() {
             val sharedUrl = uiState.value.sharedUrl ?: return
-            savedStateHandle[URL_KEY] = sharedUrl
-            sharedUrlBus.clear()
+            viewModelScope.launch {
+                navigation.dispatch(NavigationEvent.Navigate(WebKey(sharedUrl)))
+                sharedUrlBus.clear()
+            }
         }
 
         fun analyzeSharedUrl() {
             val sharedUrl = uiState.value.sharedUrl ?: return
-            sharedUrlBus.clear()
-            navigateToDetection(sharedUrl)
+            viewModelScope.launch {
+                navigation.dispatch(NavigationEvent.Navigate(DetectionResultKey(sharedUrl)))
+                sharedUrlBus.clear()
+            }
         }
 
         fun dismissSharedUrl() {
@@ -102,6 +107,12 @@ internal class HomeViewModel
         fun openSettings() {
             viewModelScope.launch {
                 navigation.dispatch(NavigationEvent.Navigate(SettingsKey))
+            }
+        }
+
+        fun openWeb(url: String? = null) {
+            viewModelScope.launch {
+                navigation.dispatch(NavigationEvent.Navigate(WebKey(url)))
             }
         }
 

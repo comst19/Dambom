@@ -82,9 +82,10 @@ class MainActivity : ComponentActivity() {
 
     private fun handleSharedText(intent: Intent) {
         if (intent.action != Intent.ACTION_SEND || intent.type != "text/plain") return
-        sharedUrlBus.offer(intent.getStringExtra(Intent.EXTRA_TEXT))
+        val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
         lifecycleScope.launch {
             navigationDispatcher.dispatch(NavigationEvent.NavigateTopLevel(HomeKey))
+            sharedUrlBus.offer(sharedText)
         }
     }
 }

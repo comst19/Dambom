@@ -1,0 +1,27 @@
+<resources>
+    <string name="downloads_title">다운로드</string>
+    <string name="downloads_back">뒤로</string>
+    <string name="downloads_empty_title">진행 중인 다운로드가 없어요</string>
+    <string name="downloads_empty_description">영상 찾기에서 선택한 항목이 여기에 표시돼요.</string>
+    <string name="downloads_summary">%1$d개 다운로드 중 · 전체 %2$d개</string>
+    <string name="downloads_pause_all">전체 일시정지</string>
+    <string name="downloads_resume_all">전체 재개</string>
+    <string name="downloads_group_active">다운로드 중</string>
+    <string name="downloads_group_queued">대기 중</string>
+    <string name="downloads_group_paused">일시정지</string>
+    <string name="downloads_group_failed">실패</string>
+    <string name="downloads_group_completed">완료</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_unknown_size">크기 확인 중</string>
+    <string name="downloads_pause">일시정지</string>
+    <string name="downloads_resume">재개</string>
+    <string name="downloads_cancel">취소</string>
+    <string name="downloads_retry">다시 시도</string>
+    <string name="downloads_remove">목록에서 제거</string>
+    <string name="downloads_error_access">접근 권한이 필요한 영상이에요.</string>
+    <string name="downloads_error_format">지원하지 않는 영상 형식이에요.</string>
+    <string name="downloads_error_network">연결이 복구되지 않아 멈췄어요. 다시 시도해 주세요.</string>
+    <string name="downloads_error_storage">파일을 저장하지 못했어요. 저장 공간을 확인해 주세요.</string>
+    <string name="downloads_error_server">서버가 다운로드 요청을 처리하지 못했어요.</string>
+    <string name="downloads_error_unknown">다운로드 중 문제가 발생했어요.</string>
+</resources>

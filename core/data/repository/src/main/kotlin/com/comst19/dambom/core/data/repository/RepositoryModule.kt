@@ -1,5 +1,6 @@
 package com.comst19.dambom.core.data.repository
 
+import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import dagger.Binds
@@ -13,9 +14,17 @@ import javax.inject.Singleton
 abstract class RepositoryModule {
     @Binds
     @Singleton
+    abstract fun bindDownloadRepository(implementation: DefaultDownloadRepository): DownloadRepository
+
+    @Binds
+    @Singleton
     abstract fun bindMediaDetectionRepository(implementation: DefaultMediaDetectionRepository): MediaDetectionRepository
 
     @Binds
     @Singleton
     abstract fun bindSettingsRepository(implementation: DefaultSettingsRepository): SettingsRepository
+
+    @Binds
+    @Singleton
+    internal abstract fun bindDownloadWorkScheduler(implementation: WorkManagerDownloadScheduler): DownloadWorkScheduler
 }

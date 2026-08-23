@@ -24,4 +24,8 @@
     <string name="home_analyze_now">영상 찾기</string>
     <string name="home_open_in_web">웹에서 열기</string>
     <string name="home_cancel">취소</string>
+    <string name="home_download_active">%1$d개 다운로드 중</string>
+    <string name="home_download_paused">%1$d개 일시정지됨</string>
+    <string name="home_download_failed">%1$d개 다운로드 확인 필요</string>
+    <string name="home_download_open">눌러서 다운로드 상태와 대기열을 관리하세요.</string>
 </resources>

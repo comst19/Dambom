@@ -1,0 +1,5 @@
+<resources>
+    <string name="download_notification_channel">다운로드</string>
+    <string name="download_notification_title">담봄에서 영상을 받고 있어요</string>
+    <string name="download_notification_description">연결이 끊기면 보관한 지점부터 다시 이어가요.</string>
+</resources>

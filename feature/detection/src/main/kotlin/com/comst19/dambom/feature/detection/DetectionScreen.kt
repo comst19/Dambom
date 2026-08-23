@@ -58,6 +58,7 @@ internal fun DetectionRoute(
         onBack = viewModel::goBack,
         onRetry = viewModel::retry,
         onToggleCandidate = viewModel::toggleCandidate,
+        onDownload = viewModel::downloadSelected,
     )
 }
 
@@ -68,6 +69,7 @@ internal fun DetectionScreen(
     onBack: () -> Unit,
     onRetry: () -> Unit,
     onToggleCandidate: (String) -> Unit,
+    onDownload: () -> Unit,
 ) {
     AppScreen(
         topBar = {
@@ -94,7 +96,7 @@ internal fun DetectionScreen(
         ) {
             when (uiState) {
                 DetectionUiState.Loading -> LoadingContent()
-                is DetectionUiState.Content -> DetectionContent(uiState, onToggleCandidate)
+                is DetectionUiState.Content -> DetectionContent(uiState, onToggleCandidate, onDownload)
                 is DetectionUiState.Unsupported -> UnsupportedContent(uiState.reason, onRetry)
             }
         }
@@ -123,6 +125,7 @@ private fun LoadingContent() {
 private fun DetectionContent(
     state: DetectionUiState.Content,
     onToggleCandidate: (String) -> Unit,
+    onDownload: () -> Unit,
 ) {
     LazyColumn(
         modifier =
@@ -152,27 +155,30 @@ private fun DetectionContent(
         item {
             Spacer(Modifier.height(12.dp))
             Button(
-                onClick = {},
+                onClick = onDownload,
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .height(54.dp),
-                enabled = false,
+                enabled = state.selectedIds.isNotEmpty() && !state.isSubmitting,
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Text(
                     stringResource(
-                        R.string.detection_selected_count,
+                        if (state.isSubmitting) R.string.detection_adding_to_queue else R.string.detection_download_selected,
                         state.selectedIds.size,
                     ),
                 )
             }
-            Text(
-                text = stringResource(R.string.detection_download_next),
-                modifier = Modifier.padding(top = 8.dp, bottom = 24.dp),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (state.enqueueFailed) {
+                Text(
+                    text = stringResource(R.string.detection_enqueue_failed),
+                    modifier = Modifier.padding(top = 8.dp),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
@@ -302,6 +308,7 @@ private fun DetectionScreenPreview() {
             onBack = {},
             onRetry = {},
             onToggleCandidate = {},
+            onDownload = {},
         )
     }
 }

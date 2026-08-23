@@ -37,9 +37,12 @@ dependencies {
     implementation(projects.core.navigation)
     implementation(projects.core.common)
     implementation(projects.core.data.repository)
+    implementation(projects.core.database)
     implementation(projects.core.datastore)
     implementation(projects.core.network)
     implementation(projects.core.coroutine)
     implementation(projects.core.analytics)
+    implementation(libs.androidx.hilt.work)
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.profileinstaller)
 }

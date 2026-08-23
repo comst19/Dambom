@@ -4,8 +4,9 @@
     <string name="detection_loading">영상을 찾고 있어요</string>
     <string name="detection_loading_description">페이지에 따라 잠시 걸릴 수 있어요.</string>
     <string name="detection_found_count">저장할 수 있는 영상 %1$d개를 찾았어요.</string>
-    <string name="detection_selected_count">%1$d개 선택됨</string>
-    <string name="detection_download_next">다운로드 대기열 연결은 다음 구현 단계에서 활성화됩니다.</string>
+    <string name="detection_download_selected">%1$d개 다운로드</string>
+    <string name="detection_adding_to_queue">%1$d개 추가 중</string>
+    <string name="detection_enqueue_failed">대기열에 추가하지 못했어요. 다시 시도해 주세요.</string>
     <string name="detection_not_found">영상을 찾지 못했어요</string>
     <string name="detection_retry_hint">페이지에서 영상을 재생한 뒤 다시 감지해 보세요.</string>
     <string name="detection_retry">다시 감지</string>

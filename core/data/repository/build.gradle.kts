@@ -2,6 +2,7 @@ plugins {
     id("dambom.android.library")
     id("dambom.android.hilt")
     id("dambom.android.test")
+    id("dambom.kotlin.serialization")
 }
 
 android { namespace = "com.comst19.dambom.core.data.repository" }
@@ -17,6 +18,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.okhttp.core)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
     ksp(libs.androidx.hilt.compiler)
     testImplementation(libs.mockwebserver)
     testImplementation(libs.androidx.work.testing)

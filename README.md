@@ -1,6 +1,6 @@
 # Dambom Android
 
-웹에서 찾은 저장 권한이 있는 공개 비-DRM 영상을 감지하고 내려받아 보관하는 Android 앱입니다.
+웹에서 찾은 저장 권한이 있는 공개 비-DRM 영상과 공개 X 게시물의 MP4 영상을 감지하고 내려받아 보관하는 Android 앱입니다.
 
 ## 환경
 
@@ -30,3 +30,4 @@ ANDROID_HOME=/path/to/android-sdk ./gradlew testDebugUnitTest lintDebug
 ## 지원 범위
 
 사용자가 저장 권한을 가진 공개 비-DRM 영상만 지원합니다. DRM, 유료 콘텐츠, 로그인 또는 접근 제한을 우회하지 않습니다.
+X 게시물은 공개 status ID만 FxTwitter API에 전달하며, 응답 중 `video.twimg.com`의 HTTPS MP4만 다운로드 후보로 사용합니다.

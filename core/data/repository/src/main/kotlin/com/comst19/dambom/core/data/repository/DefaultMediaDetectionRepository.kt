@@ -13,15 +13,19 @@ import java.net.URI
 import java.security.MessageDigest
 import javax.inject.Inject
 
-class DefaultMediaDetectionRepository
+internal class DefaultMediaDetectionRepository
     @Inject
     constructor(
         private val client: OkHttpClient,
+        private val fxTwitterDetector: FxTwitterMediaDetector,
     ) : MediaDetectionRepository {
         override suspend fun detect(url: String): MediaDetectionResult =
             withContext(Dispatchers.IO) {
                 val normalizedUrl = normalizeUrl(url) ?: return@withContext unsupported(UnsupportedReason.INVALID_URL)
                 try {
+                    fxTwitterDetector.detect(normalizedUrl)?.let { result ->
+                        return@withContext result
+                    }
                     client.newCall(buildRequest(normalizedUrl)).execute().use { response ->
                         when (response.code) {
                             HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> unsupported(UnsupportedReason.ACCESS_RESTRICTED)
@@ -68,8 +72,10 @@ class DefaultMediaDetectionRepository
                     .orEmpty()
                     .ifBlank { "웹 영상" }
             val candidates =
-                (MEDIA_TAG_REGEX.findAll(html).map { it.groupValues[1] } + DIRECT_VIDEO_REGEX.findAll(html).map { it.value })
-                    .mapNotNull { source -> resolveUrl(requestUrl, source) }
+                (
+                    MEDIA_TAG_REGEX.findAll(html).map { it.groupValues[1] } +
+                        DIRECT_VIDEO_REGEX.findAll(html).map { it.value }
+                ).mapNotNull { source -> resolveUrl(requestUrl, source) }
                     .filter(String::hasVideoExtension)
                     .distinct()
                     .map { mediaUrl -> mediaUrl.toCandidate(mediaUrl.fileTitle(), null, null) }
@@ -131,7 +137,10 @@ private fun unsupported(reason: UnsupportedReason) = MediaDetectionResult.Unsupp
 
 private val TITLE_REGEX = Regex("<title[^>]*>(.*?)</title>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
 private val MEDIA_TAG_REGEX =
-    Regex("<(?:video|source)[^>]+src\\s*=\\s*[\"']([^\"']+)[\"']", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+    Regex(
+        "<(?:video|source)[^>]+src\\s*=\\s*[\"']([^\"']+)[\"']",
+        setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
+    )
 private val DIRECT_VIDEO_REGEX =
     Regex("https?://[^\\s\"'<>]+\\.(?:mp4|webm|mov|m4v)(?:\\?[^\\s\"'<>]*)?", RegexOption.IGNORE_CASE)
 private val HTML_TAG_REGEX = Regex("<[^>]+>")

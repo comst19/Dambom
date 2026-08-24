@@ -19,7 +19,7 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindMediaDetectionRepository(implementation: DefaultMediaDetectionRepository): MediaDetectionRepository
+    internal abstract fun bindMediaDetection(implementation: DefaultMediaDetectionRepository): MediaDetectionRepository
 
     @Binds
     @Singleton

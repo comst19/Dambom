@@ -289,6 +289,11 @@ private fun CandidateItem(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
+                Text(
+                    candidate.quality,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
                 candidate.contentLength?.let {
                     Text(
                         it.formatBytes(),

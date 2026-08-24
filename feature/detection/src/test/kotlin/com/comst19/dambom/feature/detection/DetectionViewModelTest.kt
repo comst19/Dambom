@@ -37,6 +37,7 @@ class DetectionViewModelTest {
             advanceUntilIdle()
 
             assertEquals(listOf(MEDIA_URL), downloads.enqueued.single().map(DownloadRequest::url))
+            assertEquals(listOf(MEDIA_QUALITY), downloads.enqueued.single().map(DownloadRequest::quality))
             assertEquals(NavigationEvent.Replace(DownloadsKey), navigation.dispatched.last())
         }
 }
@@ -53,6 +54,7 @@ private object SuccessfulDetectionRepository : MediaDetectionRepository {
                         title = "video",
                         mimeType = "video/mp4",
                         contentLength = 1024L,
+                        quality = MEDIA_QUALITY,
                     ),
                 ),
         )
@@ -91,3 +93,4 @@ private class RecordingDownloadRepository : DownloadRepository {
 
 private const val SOURCE_URL = "https://example.com/page"
 private const val MEDIA_URL = "https://example.com/video.mp4"
+private const val MEDIA_QUALITY = "720×1280 · 2176 kbps"

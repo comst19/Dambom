@@ -96,6 +96,7 @@ internal class DetectionViewModel
                                 title = candidate.title,
                                 mimeType = candidate.mimeType,
                                 expectedBytes = candidate.contentLength,
+                                quality = candidate.quality,
                             )
                         }
                 suspendRunCatching { downloadRepository.enqueue(requests) }

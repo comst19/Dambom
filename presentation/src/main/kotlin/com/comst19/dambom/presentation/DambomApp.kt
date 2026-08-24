@@ -4,6 +4,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import com.comst19.dambom.core.common.ui.SnackbarEventBus
@@ -36,6 +37,7 @@ internal fun DambomApp(
         rememberNavigationState(navigationConfig)
     val navigator = remember(state) { Navigator(state) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val currentNetworkAccess = rememberUpdatedState(networkAccess)
 
     // 모든 feature가 발행한 명령은 이 단일 collector에서 순서대로 NavigationState에 반영합니다.
     LaunchedEffect(dispatcher, navigator) {
@@ -46,9 +48,9 @@ internal fun DambomApp(
     val entries =
         state.toEntries(
             entryProvider<NavKey> {
-                detectionEntries(networkAccess)
-                downloadEntries(networkAccess)
-                homeEntries(networkAccess)
+                detectionEntries { currentNetworkAccess.value }
+                downloadEntries { currentNetworkAccess.value }
+                homeEntries { currentNetworkAccess.value }
                 libraryEntries()
                 settingsEntries()
                 webEntries()

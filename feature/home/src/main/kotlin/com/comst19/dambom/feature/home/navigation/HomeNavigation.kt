@@ -7,6 +7,6 @@ import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
 import com.comst19.dambom.feature.home.HomeRoute
 
 /** Home feature가 소유한 NavKey와 Route의 entry를 앱 entry provider에 등록합니다. */
-fun EntryProviderScope<NavKey>.homeEntries(networkAccess: NetworkAccessState) {
-    entry<HomeKey> { HomeRoute(networkAccess) }
+fun EntryProviderScope<NavKey>.homeEntries(networkAccess: () -> NetworkAccessState) {
+    entry<HomeKey> { HomeRoute(networkAccess()) }
 }

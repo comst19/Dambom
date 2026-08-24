@@ -35,6 +35,10 @@ internal class ConnectivityNetworkMonitor
             callbackFlow {
                 val callback =
                     object : ConnectivityManager.NetworkCallback() {
+                        override fun onAvailable(network: Network) {
+                            trySend(getNetworkCapabilities(activeNetwork).toConnection())
+                        }
+
                         override fun onCapabilitiesChanged(
                             network: Network,
                             networkCapabilities: NetworkCapabilities,
@@ -43,7 +47,7 @@ internal class ConnectivityNetworkMonitor
                         }
 
                         override fun onLost(network: Network) {
-                            trySend(NetworkConnection.OFFLINE)
+                            trySend(getNetworkCapabilities(activeNetwork).toConnection())
                         }
                     }
                 registerDefaultNetworkCallback(callback)

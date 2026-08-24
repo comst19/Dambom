@@ -6,9 +6,9 @@
     <string name="download_notification_progress_title">%1$s 다운로드 중</string>
     <string name="download_notification_progress">%1$d%% 완료</string>
     <string name="download_notification_completed">다운로드가 완료됐어요</string>
-    <string name="download_notification_completed_description">%1$s 영상이 보관함에 저장됐어요.</string>
+    <string name="download_notification_completed_description">보관함에 저장했어요: %1$s</string>
     <string name="download_notification_failed">다운로드하지 못했어요</string>
-    <string name="download_notification_failed_description">%1$s 영상을 다시 시도해 주세요.</string>
-    <string name="download_notification_failed_network">%1$s 영상의 네트워크 연결을 확인해 주세요.</string>
-    <string name="download_notification_failed_storage">%1$s 영상을 저장할 공간을 확인해 주세요.</string>
+    <string name="download_notification_failed_description">다시 시도해 주세요: %1$s</string>
+    <string name="download_notification_failed_network">네트워크 연결을 확인해 주세요: %1$s</string>
+    <string name="download_notification_failed_storage">저장 공간을 확인해 주세요: %1$s</string>
 </resources>

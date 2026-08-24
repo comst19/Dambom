@@ -1,5 +1,10 @@
 package com.comst19.dambom.feature.detection
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,10 +39,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.AppScreen
@@ -56,6 +63,11 @@ internal fun DetectionRoute(
     viewModel: DetectionViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val notificationPermissionLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+            viewModel.downloadSelected()
+        }
     LaunchedEffect(url, networkAccess.canUseInternet) {
         if (networkAccess.canUseInternet) viewModel.detect(url) else viewModel.setNetworkUnavailable()
     }
@@ -65,7 +77,16 @@ internal fun DetectionRoute(
         onBack = viewModel::goBack,
         onRetry = viewModel::retry,
         onToggleCandidate = viewModel::toggleCandidate,
-        onDownload = viewModel::downloadSelected,
+        onDownload = {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                viewModel.downloadSelected()
+            } else {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        },
     )
 }
 

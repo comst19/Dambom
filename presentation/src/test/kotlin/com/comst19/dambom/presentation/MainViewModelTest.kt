@@ -71,4 +71,6 @@ private class FakeSettingsRepository : SettingsRepository {
         promptShown: Boolean,
         enabled: Boolean,
     ) = Unit
+
+    override suspend fun setWifiOnlyDownloads(enabled: Boolean) = Unit
 }

@@ -19,6 +19,7 @@ class DefaultSettingsRepository
                     themeMode = ThemeMode.entries.find { it.name == settings.themeMode } ?: ThemeMode.SYSTEM,
                     clipboardPromptShown = settings.clipboardPromptShown,
                     clipboardSuggestionEnabled = settings.clipboardSuggestionEnabled,
+                    wifiOnlyDownloads = settings.wifiOnlyDownloads,
                 )
             }
 
@@ -28,4 +29,6 @@ class DefaultSettingsRepository
             promptShown: Boolean,
             enabled: Boolean,
         ) = dataSource.setClipboardSuggestion(promptShown, enabled)
+
+        override suspend fun setWifiOnlyDownloads(enabled: Boolean) = dataSource.setWifiOnlyDownloads(enabled)
     }

@@ -28,4 +28,6 @@ interface DownloadRepository {
     suspend fun pauseAll()
 
     suspend fun resumeAll()
+
+    suspend fun refreshNetworkPolicy()
 }

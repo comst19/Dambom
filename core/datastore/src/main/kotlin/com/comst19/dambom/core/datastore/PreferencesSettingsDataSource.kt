@@ -41,6 +41,7 @@ class PreferencesSettingsDataSource
                     themeMode = values[THEME_MODE] ?: SYSTEM_THEME_MODE,
                     clipboardPromptShown = values[CLIPBOARD_PROMPT_SHOWN] ?: false,
                     clipboardSuggestionEnabled = values[CLIPBOARD_SUGGESTION_ENABLED] ?: false,
+                    wifiOnlyDownloads = values[WIFI_ONLY_DOWNLOADS] ?: false,
                 )
             }
 
@@ -58,10 +59,15 @@ class PreferencesSettingsDataSource
             }
         }
 
+        override suspend fun setWifiOnlyDownloads(enabled: Boolean) {
+            dataStore.edit { preferences -> preferences[WIFI_ONLY_DOWNLOADS] = enabled }
+        }
+
         private companion object {
             val THEME_MODE = stringPreferencesKey("theme_mode")
             val CLIPBOARD_PROMPT_SHOWN = booleanPreferencesKey("clipboard_prompt_shown")
             val CLIPBOARD_SUGGESTION_ENABLED = booleanPreferencesKey("clipboard_suggestion_enabled")
+            val WIFI_ONLY_DOWNLOADS = booleanPreferencesKey("wifi_only_downloads")
             const val SYSTEM_THEME_MODE = "SYSTEM"
         }
     }

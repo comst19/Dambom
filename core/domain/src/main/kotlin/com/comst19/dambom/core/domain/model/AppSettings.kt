@@ -4,6 +4,7 @@ data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val clipboardPromptShown: Boolean = false,
     val clipboardSuggestionEnabled: Boolean = false,
+    val wifiOnlyDownloads: Boolean = false,
 )
 
 enum class ThemeMode {

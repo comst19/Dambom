@@ -47,6 +47,20 @@ class PreferencesSettingsDataSourceTest {
                 )
                 cancelAndIgnoreRemainingEvents()
             }
+            source.settings.test {
+                awaitItem()
+                source.setWifiOnlyDownloads(true)
+                assertEquals(
+                    StoredSettings(
+                        themeMode = "DARK",
+                        clipboardPromptShown = true,
+                        clipboardSuggestionEnabled = true,
+                        wifiOnlyDownloads = true,
+                    ),
+                    awaitItem(),
+                )
+                cancelAndIgnoreRemainingEvents()
+            }
             scope.cancel()
         }
 

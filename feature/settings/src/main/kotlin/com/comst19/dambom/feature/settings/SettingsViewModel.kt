@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.ThemeMode
+import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
@@ -25,6 +26,7 @@ internal class SettingsViewModel
     @Inject
     constructor(
         private val repository: SettingsRepository,
+        private val downloadRepository: DownloadRepository,
         private val navigation: NavigationDispatcher,
         @ApplicationContext context: Context,
     ) : ViewModel() {
@@ -54,6 +56,13 @@ internal class SettingsViewModel
         fun setClipboardSuggestion(enabled: Boolean) {
             viewModelScope.launch {
                 repository.setClipboardSuggestion(promptShown = true, enabled = enabled)
+            }
+        }
+
+        fun setWifiOnlyDownloads(enabled: Boolean) {
+            viewModelScope.launch {
+                repository.setWifiOnlyDownloads(enabled)
+                downloadRepository.refreshNetworkPolicy()
             }
         }
 

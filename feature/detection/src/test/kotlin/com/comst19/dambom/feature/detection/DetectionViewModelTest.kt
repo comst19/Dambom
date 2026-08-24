@@ -85,6 +85,8 @@ private class RecordingDownloadRepository : DownloadRepository {
     override suspend fun pauseAll() = Unit
 
     override suspend fun resumeAll() = Unit
+
+    override suspend fun refreshNetworkPolicy() = Unit
 }
 
 private const val SOURCE_URL = "https://example.com/page"

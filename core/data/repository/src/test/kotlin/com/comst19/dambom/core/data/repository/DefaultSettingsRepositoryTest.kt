@@ -29,6 +29,10 @@ class DefaultSettingsRepositoryTest {
                 val clipboardSettings = awaitItem()
                 assertEquals(true, clipboardSettings.clipboardPromptShown)
                 assertEquals(true, clipboardSettings.clipboardSuggestionEnabled)
+
+                repository.setWifiOnlyDownloads(true)
+
+                assertEquals(true, awaitItem().wifiOnlyDownloads)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -52,5 +56,9 @@ private class FakeSettingsDataSource : SettingsDataSource {
                 clipboardPromptShown = promptShown,
                 clipboardSuggestionEnabled = enabled,
             )
+    }
+
+    override suspend fun setWifiOnlyDownloads(enabled: Boolean) {
+        settingsState.value = settingsState.value.copy(wifiOnlyDownloads = enabled)
     }
 }

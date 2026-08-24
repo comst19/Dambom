@@ -107,6 +107,20 @@ class DefaultDownloadRepositoryTest {
         }
 
     @Test
+    fun `network policy refresh replaces work only while downloads are schedulable`() =
+        runTest {
+            repository = createRepository(testScheduler)
+            repository.enqueue(listOf(testRequest()))
+
+            repository.refreshNetworkPolicy()
+            assertEquals(1, scheduler.rescheduleCount)
+
+            repository.pause(TEST_ID)
+            repository.refreshNetworkPolicy()
+            assertEquals(1, scheduler.rescheduleCount)
+        }
+
+    @Test
     fun `rename updates the saved title`() =
         runTest {
             repository = createRepository(testScheduler)
@@ -178,9 +192,14 @@ class DefaultDownloadRepositoryTest {
 
 private class RecordingScheduler : DownloadWorkScheduler {
     var scheduleCount = 0
+    var rescheduleCount = 0
 
-    override fun schedule() {
+    override suspend fun schedule() {
         scheduleCount++
+    }
+
+    override suspend fun reschedule() {
+        rescheduleCount++
     }
 }
 

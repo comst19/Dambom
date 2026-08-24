@@ -88,6 +88,10 @@ class DefaultDownloadRepository
             dao.resumeAll(System.currentTimeMillis())
             scheduler.schedule()
         }
+
+        override suspend fun refreshNetworkPolicy() {
+            if (dao.countSchedulable() > 0) scheduler.reschedule()
+        }
     }
 
 private fun DownloadRequest.toEntity(now: Long): DownloadTaskEntity =

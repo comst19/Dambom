@@ -1,5 +1,6 @@
 package com.comst19.dambom.feature.settings
 
+import com.comst19.dambom.feature.settings.contract.AppLanguage
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

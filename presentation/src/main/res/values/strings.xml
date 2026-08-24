@@ -3,4 +3,10 @@
     <string name="startup_initialization_failed">앱을 시작하지 못했어요.</string>
     <string name="destination_home">홈</string>
     <string name="destination_library">보관함</string>
+    <string name="network_offline_banner">인터넷 연결이 없어요. 네트워크 기능을 쓸 수 없어요.</string>
+    <string name="network_unmetered_banner">Wi-Fi 연결을 기다리고 있어요. 다운로드는 자동으로 이어져요.</string>
+    <string name="download_feedback_queued">다운로드 대기열에 추가했어요: %1$s</string>
+    <string name="download_feedback_started">다운로드를 시작했어요: %1$s</string>
+    <string name="download_feedback_completed">다운로드가 완료됐어요: %1$s</string>
+    <string name="download_feedback_failed">다운로드하지 못했어요: %1$s</string>
 </resources>

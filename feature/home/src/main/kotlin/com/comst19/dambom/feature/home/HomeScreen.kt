@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentPaste
@@ -35,8 +34,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,11 +48,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.appScaffoldPadding
+import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
+import com.comst19.dambom.core.domain.model.NetworkAccessState
+import com.comst19.dambom.feature.home.contract.HomeDownloadSummary
+import com.comst19.dambom.feature.home.contract.HomeUiState
 
 @Composable
-internal fun HomeRoute(viewModel: HomeViewModel = hiltViewModel()) {
+internal fun HomeRoute(
+    networkAccess: NetworkAccessState,
+    viewModel: HomeViewModel = hiltViewModel(),
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -62,6 +71,7 @@ internal fun HomeRoute(viewModel: HomeViewModel = hiltViewModel()) {
 
     HomeScreen(
         uiState = uiState,
+        canUseInternet = networkAccess.canUseInternet,
         onUrlChange = viewModel::updateUrl,
         onPaste = { viewModel.useClipboardText(context.clipboardText()) },
         onAnalyze = viewModel::analyzeUrl,
@@ -80,6 +90,7 @@ internal fun HomeRoute(viewModel: HomeViewModel = hiltViewModel()) {
 @Composable
 internal fun HomeScreen(
     uiState: HomeUiState,
+    canUseInternet: Boolean,
     onUrlChange: (String) -> Unit,
     onPaste: () -> Unit,
     onAnalyze: () -> Unit,
@@ -137,7 +148,7 @@ internal fun HomeScreen(
                         )
                     }
                 },
-                shape = RoundedCornerShape(16.dp),
+                shape = DambomShapes.Control,
             )
             Spacer(Modifier.height(12.dp))
             Button(
@@ -146,8 +157,8 @@ internal fun HomeScreen(
                     Modifier
                         .fillMaxWidth()
                         .height(54.dp),
-                enabled = uiState.isUrlValid,
-                shape = RoundedCornerShape(16.dp),
+                enabled = uiState.isUrlValid && canUseInternet,
+                shape = DambomShapes.Control,
             ) {
                 Text(stringResource(R.string.home_analyze), style = MaterialTheme.typography.labelLarge)
             }
@@ -181,6 +192,7 @@ internal fun HomeScreen(
                 title = stringResource(R.string.home_browser_title),
                 description = stringResource(R.string.home_browser_description),
                 onClick = onOpenWeb,
+                enabled = canUseInternet,
             )
         }
     }
@@ -194,6 +206,7 @@ internal fun HomeScreen(
             onOpenWeb = onOpenSharedUrlInWeb,
             onAnalyze = onAnalyzeSharedUrl,
             onDismiss = onDismissSharedUrl,
+            canUseInternet = canUseInternet,
         )
     }
 }
@@ -215,7 +228,7 @@ private fun HomeDownloadStatus(
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        shape = RoundedCornerShape(18.dp),
+        shape = DambomShapes.Card,
     ) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
@@ -263,7 +276,7 @@ private fun ClipboardSuggestion(
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        shape = RoundedCornerShape(18.dp),
+        shape = DambomShapes.Card,
     ) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.home_clipboard_found), style = MaterialTheme.typography.titleMedium)
@@ -286,14 +299,22 @@ private fun MethodRow(
     title: String,
     description: String,
     onClick: (() -> Unit)? = null,
+    enabled: Boolean = true,
 ) {
     Card(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .then(if (onClick == null) Modifier else Modifier.clickable(onClick = onClick)),
+                .alpha(if (enabled) 1f else 0.48f)
+                .then(
+                    if (onClick == null) {
+                        Modifier
+                    } else {
+                        Modifier.clickable(enabled = enabled, onClick = onClick)
+                    },
+                ).then(if (enabled) Modifier else Modifier.semantics { disabled() }),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        shape = RoundedCornerShape(18.dp),
+        shape = DambomShapes.Card,
     ) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
@@ -331,6 +352,7 @@ private fun SharedUrlDialog(
     onOpenWeb: () -> Unit,
     onAnalyze: () -> Unit,
     onDismiss: () -> Unit,
+    canUseInternet: Boolean,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -347,11 +369,11 @@ private fun SharedUrlDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onAnalyze) { Text(stringResource(R.string.home_analyze_now)) }
+            TextButton(onClick = onAnalyze, enabled = canUseInternet) { Text(stringResource(R.string.home_analyze_now)) }
         },
         dismissButton = {
             Row {
-                TextButton(onClick = onOpenWeb) { Text(stringResource(R.string.home_open_in_web)) }
+                TextButton(onClick = onOpenWeb, enabled = canUseInternet) { Text(stringResource(R.string.home_open_in_web)) }
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.home_cancel)) }
             }
         },
@@ -372,6 +394,7 @@ private fun HomeScreenPreview() {
     DambomTheme {
         HomeScreen(
             uiState = HomeUiState(url = "https://example.com/video", isUrlValid = true),
+            canUseInternet = true,
             onUrlChange = {},
             onPaste = {},
             onAnalyze = {},

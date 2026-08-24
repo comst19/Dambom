@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -57,6 +58,7 @@ import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.DambomTypography
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.domain.model.ThemeMode
+import com.comst19.dambom.feature.settings.contract.AppLanguage
 import com.google.android.gms.oss.licenses.v2.OssLicensesMenuActivity
 
 @Composable
@@ -73,11 +75,13 @@ internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
         themeMode = settings.themeMode,
         language = language,
         clipboardSuggestionEnabled = settings.clipboardSuggestionEnabled,
+        wifiOnlyDownloads = settings.wifiOnlyDownloads,
         versionName = viewModel.versionName,
         onBack = viewModel::goBack,
         onThemeModeChange = viewModel::setThemeMode,
         onLanguageChange = viewModel::setLanguage,
         onClipboardSuggestionChange = viewModel::setClipboardSuggestion,
+        onWifiOnlyDownloadsChange = viewModel::setWifiOnlyDownloads,
         onHelp = viewModel::openHelp,
         onFeedback = { context.sendFeedback(feedbackTitle, feedbackBody, feedbackFailure) },
         onLicenses = { context.openSourceLicenses(licensesTitle) },
@@ -90,11 +94,13 @@ internal fun SettingsScreen(
     themeMode: ThemeMode,
     language: AppLanguage,
     clipboardSuggestionEnabled: Boolean,
+    wifiOnlyDownloads: Boolean,
     versionName: String,
     onBack: () -> Unit,
     onThemeModeChange: (ThemeMode) -> Unit,
     onLanguageChange: (AppLanguage) -> Unit,
     onClipboardSuggestionChange: (Boolean) -> Unit,
+    onWifiOnlyDownloadsChange: (Boolean) -> Unit,
     onHelp: () -> Unit,
     onFeedback: () -> Unit,
     onLicenses: () -> Unit,
@@ -127,6 +133,20 @@ internal fun SettingsScreen(
                     icon = Icons.Outlined.Folder,
                     title = stringResource(R.string.settings_download_location),
                     subtitle = stringResource(R.string.settings_download_location_value),
+                )
+            }
+            item {
+                SettingsRow(
+                    icon = Icons.Outlined.Wifi,
+                    title = stringResource(R.string.settings_wifi_only),
+                    subtitle = stringResource(R.string.settings_wifi_only_description),
+                    onClick = { onWifiOnlyDownloadsChange(!wifiOnlyDownloads) },
+                    trailing = {
+                        Switch(
+                            checked = wifiOnlyDownloads,
+                            onCheckedChange = null,
+                        )
+                    },
                 )
             }
             item { SettingsDivider() }
@@ -390,11 +410,13 @@ private fun SettingsScreenPreview() {
             themeMode = ThemeMode.SYSTEM,
             language = AppLanguage.SYSTEM,
             clipboardSuggestionEnabled = true,
+            wifiOnlyDownloads = false,
             versionName = "1.0",
             onBack = {},
             onThemeModeChange = {},
             onLanguageChange = {},
             onClipboardSuggestionChange = {},
+            onWifiOnlyDownloadsChange = {},
             onHelp = {},
             onFeedback = {},
             onLicenses = {},

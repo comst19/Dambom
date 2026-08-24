@@ -1,15 +1,8 @@
 package com.comst19.dambom.core.data.repository
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.pm.ServiceInfo
-import android.os.Build
-import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.database.download.DownloadTaskDao
@@ -44,11 +37,12 @@ internal class DownloadQueueWorker
         private val dao: DownloadTaskDao,
         private val client: OkHttpClient,
         private val fileStore: DownloadFileStore,
+        private val notifier: DownloadNotifier,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : CoroutineWorker(appContext, params) {
         override suspend fun doWork(): Result =
             withContext(ioDispatcher) {
-                setForeground(createForegroundInfo())
+                setForeground(notifier.foreground())
                 dao.resetInterrupted(System.currentTimeMillis())
                 try {
                     drainQueue()
@@ -107,14 +101,14 @@ internal class DownloadQueueWorker
                 throw cancellation
             } catch (_: IOException) {
                 if (runAttemptCount >= MAX_NETWORK_RETRIES) {
-                    dao.markFailed(task.id, DownloadFailureReason.NETWORK.name, System.currentTimeMillis())
+                    markFailed(task, DownloadFailureReason.NETWORK)
                 } else {
                     throw RetryQueueException()
                 }
             } catch (failure: DownloadFailureException) {
-                dao.markFailed(task.id, failure.reason.name, System.currentTimeMillis())
+                markFailed(task, failure.reason)
             } catch (_: Exception) {
-                dao.markFailed(task.id, DownloadFailureReason.UNKNOWN.name, System.currentTimeMillis())
+                markFailed(task, DownloadFailureReason.UNKNOWN)
             }
         }
 
@@ -186,7 +180,9 @@ internal class DownloadQueueWorker
             totalBytes: Long?,
         ) {
             dao.updateProgress(id, downloadedBytes, totalBytes, System.currentTimeMillis())
-            when (dao.getById(id)?.status) {
+            val current = dao.getById(id)
+            setForeground(notifier.foreground(current?.title, downloadedBytes, totalBytes))
+            when (current?.status) {
                 DownloadStatus.PAUSED.name -> throw PausedDownloadException()
                 null -> throw CancelledDownloadException()
             }
@@ -213,50 +209,15 @@ internal class DownloadQueueWorker
                 completedFile.delete()
                 throw CancelledDownloadException()
             }
+            notifier.completed(task.id, task.title)
         }
 
-        private fun createForegroundInfo(): ForegroundInfo {
-            createNotificationChannel()
-            val launchIntent = applicationContext.packageManager.getLaunchIntentForPackage(applicationContext.packageName)
-            val contentIntent =
-                launchIntent?.let {
-                    PendingIntent.getActivity(
-                        applicationContext,
-                        0,
-                        it,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                    )
-                }
-            val notification =
-                NotificationCompat
-                    .Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
-                    .setSmallIcon(android.R.drawable.stat_sys_download)
-                    .setContentTitle(applicationContext.getString(R.string.download_notification_title))
-                    .setContentText(applicationContext.getString(R.string.download_notification_description))
-                    .setContentIntent(contentIntent)
-                    .setOngoing(true)
-                    .setOnlyAlertOnce(true)
-                    .setProgress(0, 0, true)
-                    .build()
-            val serviceType =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-                } else {
-                    0
-                }
-            return ForegroundInfo(NOTIFICATION_ID, notification, serviceType)
-        }
-
-        private fun createNotificationChannel() {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-            val manager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val channel =
-                NotificationChannel(
-                    NOTIFICATION_CHANNEL_ID,
-                    applicationContext.getString(R.string.download_notification_channel),
-                    NotificationManager.IMPORTANCE_LOW,
-                )
-            manager.createNotificationChannel(channel)
+        private suspend fun markFailed(
+            task: DownloadTaskEntity,
+            reason: DownloadFailureReason,
+        ) {
+            dao.markFailed(task.id, reason.name, System.currentTimeMillis())
+            notifier.failed(task.id, task.title, reason)
         }
     }
 
@@ -307,5 +268,3 @@ private const val HTTP_PARTIAL_CONTENT = 206
 private const val HTTP_UNAUTHORIZED = 401
 private const val HTTP_FORBIDDEN = 403
 private const val HTTP_RANGE_NOT_SATISFIABLE = 416
-private const val NOTIFICATION_CHANNEL_ID = "downloads"
-private const val NOTIFICATION_ID = 1001

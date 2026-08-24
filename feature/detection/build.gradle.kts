@@ -2,4 +2,8 @@ plugins { id("dambom.android.feature") }
 
 android { namespace = "com.comst19.dambom.feature.detection" }
 
-dependencies { implementation(libs.androidx.compose.material.icons.extended) }
+dependencies {
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.compose.material.icons.extended)
+}

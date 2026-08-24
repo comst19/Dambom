@@ -2,6 +2,7 @@ package com.comst19.dambom.core.data.repository
 
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
+import com.comst19.dambom.core.domain.repository.NetworkMonitor
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import dagger.Binds
 import dagger.Module
@@ -23,6 +24,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSettingsRepository(implementation: DefaultSettingsRepository): SettingsRepository
+
+    @Binds
+    @Singleton
+    internal abstract fun bindNetworkMonitor(implementation: ConnectivityNetworkMonitor): NetworkMonitor
 
     @Binds
     @Singleton

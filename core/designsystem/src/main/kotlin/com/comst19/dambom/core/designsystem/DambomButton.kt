@@ -17,6 +17,7 @@ fun DambomButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
+        shape = DambomShapes.Control,
     ) {
         Text(text)
     }

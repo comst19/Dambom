@@ -4,6 +4,8 @@
     <string name="settings_section_download">Downloads</string>
     <string name="settings_download_location">Download location</string>
     <string name="settings_download_location_value">Saved in the app library. Choose a location when exporting.</string>
+    <string name="settings_wifi_only">Download on Wi-Fi only</string>
+    <string name="settings_wifi_only_description">New and resumed downloads wait while using mobile data.</string>
     <string name="settings_section_general">General</string>
     <string name="settings_theme">Appearance</string>
     <string name="theme_mode_system">System default</string>

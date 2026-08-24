@@ -13,4 +13,6 @@ interface SettingsRepository {
         promptShown: Boolean,
         enabled: Boolean,
     )
+
+    suspend fun setWifiOnlyDownloads(enabled: Boolean)
 }

@@ -15,6 +15,7 @@ import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
+import com.comst19.dambom.feature.library.contract.LibraryUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -115,13 +116,6 @@ internal class LibraryViewModel
             snackbarEventBus.send(SnackbarEvent(UiText.Resource(message)))
         }
     }
-
-internal data class LibraryUiState(
-    val videos: List<DownloadTask> = emptyList(),
-    val selectedVideo: DownloadTask? = null,
-    val query: String = "",
-    val hasVideos: Boolean = false,
-)
 
 internal fun toLibraryUiState(
     tasks: List<DownloadTask>,

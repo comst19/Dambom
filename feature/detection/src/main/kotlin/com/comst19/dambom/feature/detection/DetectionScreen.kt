@@ -1,5 +1,10 @@
 package com.comst19.dambom.feature.detection
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Button
@@ -34,31 +38,56 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.AppScreen
+import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.domain.model.MediaCandidate
+import com.comst19.dambom.core.domain.model.NetworkAccessState
+import com.comst19.dambom.core.domain.model.NetworkConnection
+import com.comst19.dambom.core.domain.model.NetworkRestriction
 import com.comst19.dambom.core.domain.model.UnsupportedReason
+import com.comst19.dambom.feature.detection.contract.DetectionUiState
 
 @Composable
 internal fun DetectionRoute(
     url: String,
+    networkAccess: NetworkAccessState,
     viewModel: DetectionViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(url) { viewModel.detect(url) }
+    val context = LocalContext.current
+    val notificationPermissionLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+            viewModel.downloadSelected()
+        }
+    LaunchedEffect(url, networkAccess.canUseInternet) {
+        if (networkAccess.canUseInternet) viewModel.detect(url) else viewModel.setNetworkUnavailable()
+    }
     DetectionScreen(
         uiState = uiState,
+        networkAccess = networkAccess,
         onBack = viewModel::goBack,
         onRetry = viewModel::retry,
         onToggleCandidate = viewModel::toggleCandidate,
-        onDownload = viewModel::downloadSelected,
+        onDownload = {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                viewModel.downloadSelected()
+            } else {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        },
     )
 }
 
@@ -66,6 +95,7 @@ internal fun DetectionRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 internal fun DetectionScreen(
     uiState: DetectionUiState,
+    networkAccess: NetworkAccessState,
     onBack: () -> Unit,
     onRetry: () -> Unit,
     onToggleCandidate: (String) -> Unit,
@@ -96,10 +126,27 @@ internal fun DetectionScreen(
         ) {
             when (uiState) {
                 DetectionUiState.Loading -> LoadingContent()
-                is DetectionUiState.Content -> DetectionContent(uiState, onToggleCandidate, onDownload)
+                DetectionUiState.NetworkUnavailable -> NetworkUnavailableContent()
+                is DetectionUiState.Content -> DetectionContent(uiState, networkAccess, onToggleCandidate, onDownload)
                 is DetectionUiState.Unsupported -> UnsupportedContent(uiState.reason, onRetry)
             }
         }
+    }
+}
+
+@Composable
+private fun NetworkUnavailableContent() {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(stringResource(R.string.detection_network_unavailable), style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            stringResource(R.string.detection_network_unavailable_description),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -124,6 +171,7 @@ private fun LoadingContent() {
 @Composable
 private fun DetectionContent(
     state: DetectionUiState.Content,
+    networkAccess: NetworkAccessState,
     onToggleCandidate: (String) -> Unit,
     onDownload: () -> Unit,
 ) {
@@ -160,8 +208,8 @@ private fun DetectionContent(
                     Modifier
                         .fillMaxWidth()
                         .height(54.dp),
-                enabled = state.selectedIds.isNotEmpty() && !state.isSubmitting,
-                shape = RoundedCornerShape(16.dp),
+                enabled = state.selectedIds.isNotEmpty() && !state.isSubmitting && networkAccess.canDownload,
+                shape = DambomShapes.Control,
             ) {
                 Text(
                     stringResource(
@@ -175,6 +223,21 @@ private fun DetectionContent(
                     text = stringResource(R.string.detection_enqueue_failed),
                     modifier = Modifier.padding(top = 8.dp),
                     color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            networkAccess.restriction?.let { restriction ->
+                Text(
+                    text =
+                        stringResource(
+                            if (restriction == NetworkRestriction.OFFLINE) {
+                                R.string.detection_download_offline
+                            } else {
+                                R.string.detection_download_wifi_required
+                            },
+                        ),
+                    modifier = Modifier.padding(top = 8.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -203,7 +266,7 @@ private fun CandidateItem(
                         MaterialTheme.colorScheme.surfaceContainer
                     },
             ),
-        shape = RoundedCornerShape(18.dp),
+        shape = DambomShapes.Card,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 14.dp),
@@ -305,6 +368,7 @@ private fun DetectionScreenPreview() {
                         ),
                     selectedIds = setOf("1"),
                 ),
+            networkAccess = NetworkAccessState(NetworkConnection.UNMETERED),
             onBack = {},
             onRetry = {},
             onToggleCandidate = {},

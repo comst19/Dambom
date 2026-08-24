@@ -17,6 +17,7 @@ fun DambomCard(
 ) {
     Card(
         modifier = modifier,
+        shape = DambomShapes.Card,
         colors =
             CardDefaults.cardColors(
                 containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainer,

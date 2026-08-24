@@ -3,15 +3,26 @@ package com.comst19.dambom.presentation.component
 import android.os.SystemClock
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.SignalWifiOff
+import androidx.compose.material.icons.outlined.WifiFind
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -20,11 +31,18 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import com.comst19.dambom.core.common.ui.LocalAppScaffoldPadding
+import com.comst19.dambom.core.domain.model.NetworkAccessState
+import com.comst19.dambom.core.domain.model.NetworkRestriction
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.NavigationState
@@ -46,6 +64,7 @@ internal fun AppScaffold(
     dispatcher: NavigationDispatcher,
     entries: List<NavEntry<NavKey>>,
     snackbarHostState: SnackbarHostState,
+    networkAccess: NetworkAccessState,
 ) {
     val chrome = appChrome(state.currentKey)
     val coroutineScope = rememberCoroutineScope()
@@ -74,6 +93,9 @@ internal fun AppScaffold(
     SystemBarAppearance(chrome)
     Scaffold(
         contentWindowInsets = WindowInsets.safeDrawing,
+        topBar = {
+            networkAccess.restriction?.let { NetworkRestrictionBanner(it) }
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (chrome.showBottomBar) {
@@ -106,6 +128,37 @@ internal fun AppScaffold(
         CompositionLocalProvider(LocalAppScaffoldPadding provides innerPadding) {
             // 각 화면이 일반, 목록, 전체 화면 특성에 맞게 이 PaddingValues를 적용합니다.
             AppNavDisplay(entries, navigator, Modifier.fillMaxSize())
+        }
+    }
+}
+
+@Composable
+private fun NetworkRestrictionBanner(restriction: NetworkRestriction) {
+    val offline = restriction == NetworkRestriction.OFFLINE
+    Surface(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .semantics { liveRegion = LiveRegionMode.Polite },
+        color = if (offline) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer,
+    ) {
+        Row(
+            modifier = Modifier.statusBarsPadding().padding(horizontal = 20.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = if (offline) Icons.Outlined.SignalWifiOff else Icons.Outlined.WifiFind,
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+            )
+            Text(
+                text =
+                    stringResource(
+                        if (offline) R.string.network_offline_banner else R.string.network_unmetered_banner,
+                    ),
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
     }
 }

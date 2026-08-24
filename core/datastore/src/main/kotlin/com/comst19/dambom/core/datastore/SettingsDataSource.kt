@@ -11,10 +11,13 @@ interface SettingsDataSource {
         promptShown: Boolean,
         enabled: Boolean,
     )
+
+    suspend fun setWifiOnlyDownloads(enabled: Boolean)
 }
 
 data class StoredSettings(
     val themeMode: String = "SYSTEM",
     val clipboardPromptShown: Boolean = false,
     val clipboardSuggestionEnabled: Boolean = false,
+    val wifiOnlyDownloads: Boolean = false,
 )

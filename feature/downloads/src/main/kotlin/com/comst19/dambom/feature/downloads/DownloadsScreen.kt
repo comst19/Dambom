@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Button
@@ -41,17 +40,25 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.AppScreen
+import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.domain.model.DownloadFailureReason
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.core.domain.model.NetworkAccessState
+import com.comst19.dambom.core.domain.model.NetworkConnection
+import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
 
 @Composable
-internal fun DownloadsRoute(viewModel: DownloadsViewModel = hiltViewModel()) {
+internal fun DownloadsRoute(
+    networkAccess: NetworkAccessState,
+    viewModel: DownloadsViewModel = hiltViewModel(),
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     DownloadsScreen(
         uiState = uiState,
+        canDownload = networkAccess.canDownload,
         onBack = viewModel::goBack,
         onPause = viewModel::pause,
         onResume = viewModel::resume,
@@ -66,6 +73,7 @@ internal fun DownloadsRoute(viewModel: DownloadsViewModel = hiltViewModel()) {
 @OptIn(ExperimentalMaterial3Api::class)
 internal fun DownloadsScreen(
     uiState: DownloadsUiState,
+    canDownload: Boolean,
     onBack: () -> Unit,
     onPause: (String) -> Unit,
     onResume: (String) -> Unit,
@@ -102,6 +110,7 @@ internal fun DownloadsScreen(
             } else {
                 DownloadList(
                     uiState = uiState,
+                    canDownload = canDownload,
                     onPause = onPause,
                     onResume = onResume,
                     onCancel = onCancel,
@@ -136,6 +145,7 @@ private fun EmptyDownloads() {
 @Composable
 private fun DownloadList(
     uiState: DownloadsUiState,
+    canDownload: Boolean,
     onPause: (String) -> Unit,
     onResume: (String) -> Unit,
     onCancel: (String) -> Unit,
@@ -164,6 +174,7 @@ private fun DownloadList(
         item {
             DownloadSummary(
                 state = uiState,
+                canDownload = canDownload,
                 onPauseAll = onPauseAll,
                 onResumeAll = onResumeAll,
             )
@@ -176,6 +187,7 @@ private fun DownloadList(
                 items(tasks, key = DownloadTask::id) { task ->
                     DownloadRow(
                         task = task,
+                        canDownload = canDownload,
                         onPause = { onPause(task.id) },
                         onResume = { onResume(task.id) },
                         onCancel = { onCancel(task.id) },
@@ -190,12 +202,13 @@ private fun DownloadList(
 @Composable
 private fun DownloadSummary(
     state: DownloadsUiState,
+    canDownload: Boolean,
     onPauseAll: () -> Unit,
     onResumeAll: () -> Unit,
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        shape = RoundedCornerShape(20.dp),
+        shape = DambomShapes.Summary,
     ) {
         Column(
             modifier = Modifier.padding(20.dp),
@@ -217,7 +230,9 @@ private fun DownloadSummary(
                     OutlinedButton(onClick = onPauseAll) { Text(stringResource(R.string.downloads_pause_all)) }
                 }
                 if (state.canResumeAll) {
-                    Button(onClick = onResumeAll) { Text(stringResource(R.string.downloads_resume_all)) }
+                    Button(onClick = onResumeAll, enabled = canDownload) {
+                        Text(stringResource(R.string.downloads_resume_all))
+                    }
                 }
             }
         }
@@ -227,6 +242,7 @@ private fun DownloadSummary(
 @Composable
 private fun DownloadRow(
     task: DownloadTask,
+    canDownload: Boolean,
     onPause: () -> Unit,
     onResume: () -> Unit,
     onCancel: () -> Unit,
@@ -235,7 +251,7 @@ private fun DownloadRow(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        shape = RoundedCornerShape(18.dp),
+        shape = DambomShapes.Card,
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
@@ -286,12 +302,16 @@ private fun DownloadRow(
                     }
 
                     DownloadStatus.PAUSED -> {
-                        TextButton(onClick = onResume) { Text(stringResource(R.string.downloads_resume)) }
+                        TextButton(onClick = onResume, enabled = canDownload) {
+                            Text(stringResource(R.string.downloads_resume))
+                        }
                         TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_cancel)) }
                     }
 
                     DownloadStatus.FAILED -> {
-                        TextButton(onClick = onRetry) { Text(stringResource(R.string.downloads_retry)) }
+                        TextButton(onClick = onRetry, enabled = canDownload) {
+                            Text(stringResource(R.string.downloads_retry))
+                        }
                         TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_remove)) }
                     }
 
@@ -357,6 +377,7 @@ private fun DownloadsScreenPreview() {
                             previewTask("3", DownloadStatus.PAUSED, 0.2f),
                         ),
                 ),
+            canDownload = NetworkAccessState(NetworkConnection.UNMETERED).canDownload,
             onBack = {},
             onPause = {},
             onResume = {},

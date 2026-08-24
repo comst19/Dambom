@@ -23,6 +23,9 @@ interface DownloadTaskDao {
         quality: String,
     ): Int
 
+    @Query("SELECT COUNT(*) FROM download_tasks WHERE status IN ('QUEUED', 'DOWNLOADING')")
+    suspend fun countSchedulable(): Int
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(entity: DownloadTaskEntity): Long
 

@@ -2,4 +2,13 @@
     <string name="download_notification_channel">Downloads</string>
     <string name="download_notification_title">Dambom is downloading videos</string>
     <string name="download_notification_description">Downloads resume from the saved point after reconnecting.</string>
+    <string name="download_result_notification_channel">Download results</string>
+    <string name="download_notification_progress_title">Downloading %1$s</string>
+    <string name="download_notification_progress">%1$d%% complete</string>
+    <string name="download_notification_completed">Download complete</string>
+    <string name="download_notification_completed_description">%1$s was saved to your Library.</string>
+    <string name="download_notification_failed">Download failed</string>
+    <string name="download_notification_failed_description">Try downloading %1$s again.</string>
+    <string name="download_notification_failed_network">Check the network connection for %1$s.</string>
+    <string name="download_notification_failed_storage">Check available storage for %1$s.</string>
 </resources>

@@ -87,6 +87,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.appScaffoldPadding
 import com.comst19.dambom.core.domain.model.UnsupportedReason
+import com.comst19.dambom.feature.web.contract.RecentPage
+import com.comst19.dambom.feature.web.contract.WebDetectionState
+import com.comst19.dambom.feature.web.contract.WebTab
+import com.comst19.dambom.feature.web.contract.WebUiState
 
 @Composable
 internal fun WebRoute(

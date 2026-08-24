@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentPaste
@@ -49,9 +48,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.appScaffoldPadding
+import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.domain.model.NetworkAccessState
+import com.comst19.dambom.feature.home.contract.HomeDownloadSummary
+import com.comst19.dambom.feature.home.contract.HomeUiState
 
 @Composable
 internal fun HomeRoute(
@@ -146,7 +148,7 @@ internal fun HomeScreen(
                         )
                     }
                 },
-                shape = RoundedCornerShape(16.dp),
+                shape = DambomShapes.Control,
             )
             Spacer(Modifier.height(12.dp))
             Button(
@@ -156,7 +158,7 @@ internal fun HomeScreen(
                         .fillMaxWidth()
                         .height(54.dp),
                 enabled = uiState.isUrlValid && canUseInternet,
-                shape = RoundedCornerShape(16.dp),
+                shape = DambomShapes.Control,
             ) {
                 Text(stringResource(R.string.home_analyze), style = MaterialTheme.typography.labelLarge)
             }
@@ -226,7 +228,7 @@ private fun HomeDownloadStatus(
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        shape = RoundedCornerShape(18.dp),
+        shape = DambomShapes.Card,
     ) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
@@ -274,7 +276,7 @@ private fun ClipboardSuggestion(
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        shape = RoundedCornerShape(18.dp),
+        shape = DambomShapes.Card,
     ) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.home_clipboard_found), style = MaterialTheme.typography.titleMedium)
@@ -312,7 +314,7 @@ private fun MethodRow(
                     },
                 ).then(if (enabled) Modifier else Modifier.semantics { disabled() }),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        shape = RoundedCornerShape(18.dp),
+        shape = DambomShapes.Card,
     ) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)

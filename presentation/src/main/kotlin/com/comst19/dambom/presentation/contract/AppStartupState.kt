@@ -1,4 +1,4 @@
-package com.comst19.dambom.presentation
+package com.comst19.dambom.presentation.contract
 
 import com.comst19.dambom.core.navigation.TopLevelNavKey
 

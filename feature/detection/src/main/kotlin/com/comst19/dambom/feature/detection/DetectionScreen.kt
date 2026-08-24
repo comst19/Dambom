@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Button
@@ -48,6 +47,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.AppScreen
+import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.domain.model.MediaCandidate
@@ -55,6 +55,7 @@ import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.model.NetworkConnection
 import com.comst19.dambom.core.domain.model.NetworkRestriction
 import com.comst19.dambom.core.domain.model.UnsupportedReason
+import com.comst19.dambom.feature.detection.contract.DetectionUiState
 
 @Composable
 internal fun DetectionRoute(
@@ -208,7 +209,7 @@ private fun DetectionContent(
                         .fillMaxWidth()
                         .height(54.dp),
                 enabled = state.selectedIds.isNotEmpty() && !state.isSubmitting && networkAccess.canDownload,
-                shape = RoundedCornerShape(16.dp),
+                shape = DambomShapes.Control,
             ) {
                 Text(
                     stringResource(
@@ -265,7 +266,7 @@ private fun CandidateItem(
                         MaterialTheme.colorScheme.surfaceContainer
                     },
             ),
-        shape = RoundedCornerShape(18.dp),
+        shape = DambomShapes.Card,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 14.dp),

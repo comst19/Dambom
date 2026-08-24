@@ -20,6 +20,7 @@ import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
+import com.comst19.dambom.presentation.contract.AppStartupState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject

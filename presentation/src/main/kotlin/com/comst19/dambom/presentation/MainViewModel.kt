@@ -20,6 +20,8 @@ import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.NetworkMonitor
 import com.comst19.dambom.core.domain.repository.SettingsRepository
+import com.comst19.dambom.presentation.contract.AppStartupState
+import com.comst19.dambom.presentation.contract.StartupFailure
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Button
@@ -41,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.AppScreen
+import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.domain.model.DownloadFailureReason
@@ -48,6 +48,7 @@ import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.model.NetworkConnection
+import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
 
 @Composable
 internal fun DownloadsRoute(
@@ -207,7 +208,7 @@ private fun DownloadSummary(
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        shape = RoundedCornerShape(20.dp),
+        shape = DambomShapes.Summary,
     ) {
         Column(
             modifier = Modifier.padding(20.dp),
@@ -250,7 +251,7 @@ private fun DownloadRow(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        shape = RoundedCornerShape(18.dp),
+        shape = DambomShapes.Card,
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),

@@ -13,6 +13,8 @@ import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
+import com.comst19.dambom.feature.home.contract.HomeDownloadSummary
+import com.comst19.dambom.feature.home.contract.HomeUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -150,26 +152,6 @@ internal class HomeViewModel
             }
         }
     }
-
-internal data class HomeUiState(
-    val url: String = "",
-    val isUrlValid: Boolean = false,
-    val showClipboardConsent: Boolean = false,
-    val clipboardSuggestionEnabled: Boolean = false,
-    val clipboardUrl: String? = null,
-    val sharedUrl: String? = null,
-    val downloadSummary: HomeDownloadSummary = HomeDownloadSummary(),
-)
-
-internal data class HomeDownloadSummary(
-    val activeCount: Int = 0,
-    val pausedCount: Int = 0,
-    val failedCount: Int = 0,
-    val progress: Float = 0f,
-) {
-    val isVisible: Boolean
-        get() = activeCount + pausedCount + failedCount > 0
-}
 
 private fun String.isValidHttpUrl(): Boolean =
     runCatching {

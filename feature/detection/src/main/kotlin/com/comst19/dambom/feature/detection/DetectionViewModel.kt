@@ -4,14 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.comst19.dambom.core.common.suspendRunCatching
 import com.comst19.dambom.core.domain.model.DownloadRequest
-import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
-import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
+import com.comst19.dambom.feature.detection.contract.DetectionUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -112,21 +111,3 @@ internal class DetectionViewModel
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Back) }
         }
     }
-
-internal sealed interface DetectionUiState {
-    data object Loading : DetectionUiState
-
-    data object NetworkUnavailable : DetectionUiState
-
-    data class Content(
-        val pageTitle: String,
-        val candidates: List<MediaCandidate>,
-        val selectedIds: Set<String>,
-        val isSubmitting: Boolean = false,
-        val enqueueFailed: Boolean = false,
-    ) : DetectionUiState
-
-    data class Unsupported(
-        val reason: UnsupportedReason,
-    ) : DetectionUiState
-}

@@ -12,6 +12,7 @@ import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.HelpKey
+import com.comst19.dambom.feature.settings.contract.AppLanguage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -74,19 +75,5 @@ internal class SettingsViewModel
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Back) }
         }
     }
-
-internal enum class AppLanguage(
-    val languageTag: String,
-) {
-    SYSTEM(""),
-    KOREAN("ko"),
-    ENGLISH("en"),
-    ;
-
-    companion object {
-        fun from(languageTags: String): AppLanguage =
-            entries.firstOrNull { it.languageTag.isNotEmpty() && languageTags.startsWith(it.languageTag) } ?: SYSTEM
-    }
-}
 
 private const val SETTINGS_STOP_TIMEOUT_MILLIS = 5_000L

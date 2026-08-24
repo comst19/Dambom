@@ -6,6 +6,8 @@ import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
+import com.comst19.dambom.feature.web.contract.RecentPage
+import com.comst19.dambom.feature.web.contract.WebDetectionState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import org.junit.Assert.assertEquals

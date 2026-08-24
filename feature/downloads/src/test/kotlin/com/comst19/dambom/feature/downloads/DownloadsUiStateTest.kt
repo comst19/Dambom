@@ -2,6 +2,7 @@ package com.comst19.dambom.feature.downloads
 
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

@@ -44,17 +44,24 @@ import com.comst19.dambom.core.common.ui.AppScreen
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.domain.model.MediaCandidate
+import com.comst19.dambom.core.domain.model.NetworkAccessState
+import com.comst19.dambom.core.domain.model.NetworkConnection
+import com.comst19.dambom.core.domain.model.NetworkRestriction
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 
 @Composable
 internal fun DetectionRoute(
     url: String,
+    networkAccess: NetworkAccessState,
     viewModel: DetectionViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(url) { viewModel.detect(url) }
+    LaunchedEffect(url, networkAccess.canUseInternet) {
+        if (networkAccess.canUseInternet) viewModel.detect(url) else viewModel.setNetworkUnavailable()
+    }
     DetectionScreen(
         uiState = uiState,
+        networkAccess = networkAccess,
         onBack = viewModel::goBack,
         onRetry = viewModel::retry,
         onToggleCandidate = viewModel::toggleCandidate,
@@ -66,6 +73,7 @@ internal fun DetectionRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 internal fun DetectionScreen(
     uiState: DetectionUiState,
+    networkAccess: NetworkAccessState,
     onBack: () -> Unit,
     onRetry: () -> Unit,
     onToggleCandidate: (String) -> Unit,
@@ -96,10 +104,27 @@ internal fun DetectionScreen(
         ) {
             when (uiState) {
                 DetectionUiState.Loading -> LoadingContent()
-                is DetectionUiState.Content -> DetectionContent(uiState, onToggleCandidate, onDownload)
+                DetectionUiState.NetworkUnavailable -> NetworkUnavailableContent()
+                is DetectionUiState.Content -> DetectionContent(uiState, networkAccess, onToggleCandidate, onDownload)
                 is DetectionUiState.Unsupported -> UnsupportedContent(uiState.reason, onRetry)
             }
         }
+    }
+}
+
+@Composable
+private fun NetworkUnavailableContent() {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(stringResource(R.string.detection_network_unavailable), style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            stringResource(R.string.detection_network_unavailable_description),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -124,6 +149,7 @@ private fun LoadingContent() {
 @Composable
 private fun DetectionContent(
     state: DetectionUiState.Content,
+    networkAccess: NetworkAccessState,
     onToggleCandidate: (String) -> Unit,
     onDownload: () -> Unit,
 ) {
@@ -160,7 +186,7 @@ private fun DetectionContent(
                     Modifier
                         .fillMaxWidth()
                         .height(54.dp),
-                enabled = state.selectedIds.isNotEmpty() && !state.isSubmitting,
+                enabled = state.selectedIds.isNotEmpty() && !state.isSubmitting && networkAccess.canDownload,
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Text(
@@ -175,6 +201,21 @@ private fun DetectionContent(
                     text = stringResource(R.string.detection_enqueue_failed),
                     modifier = Modifier.padding(top = 8.dp),
                     color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            networkAccess.restriction?.let { restriction ->
+                Text(
+                    text =
+                        stringResource(
+                            if (restriction == NetworkRestriction.OFFLINE) {
+                                R.string.detection_download_offline
+                            } else {
+                                R.string.detection_download_wifi_required
+                            },
+                        ),
+                    modifier = Modifier.padding(top = 8.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -305,6 +346,7 @@ private fun DetectionScreenPreview() {
                         ),
                     selectedIds = setOf("1"),
                 ),
+            networkAccess = NetworkAccessState(NetworkConnection.UNMETERED),
             onBack = {},
             onRetry = {},
             onToggleCandidate = {},

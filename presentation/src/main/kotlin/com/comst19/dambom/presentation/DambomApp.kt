@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import com.comst19.dambom.core.common.ui.SnackbarEventBus
+import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.navigation.NavigationConfig
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.Navigator
@@ -29,6 +30,7 @@ internal fun DambomApp(
     navigationConfig: NavigationConfig,
     dispatcher: NavigationDispatcher,
     snackbarEventBus: SnackbarEventBus,
+    networkAccess: NetworkAccessState,
 ) {
     val state =
         rememberNavigationState(navigationConfig)
@@ -44,9 +46,9 @@ internal fun DambomApp(
     val entries =
         state.toEntries(
             entryProvider<NavKey> {
-                detectionEntries()
-                downloadEntries()
-                homeEntries()
+                detectionEntries(networkAccess)
+                downloadEntries(networkAccess)
+                homeEntries(networkAccess)
                 libraryEntries()
                 settingsEntries()
                 webEntries()
@@ -59,5 +61,6 @@ internal fun DambomApp(
         dispatcher = dispatcher,
         entries = entries,
         snackbarHostState = snackbarHostState,
+        networkAccess = networkAccess,
     )
 }

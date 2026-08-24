@@ -13,12 +13,15 @@ import com.comst19.dambom.core.domain.error.AppRequestException
 import com.comst19.dambom.core.domain.error.ErrorHandler
 import com.comst19.dambom.core.domain.error.NetworkFailureReason
 import com.comst19.dambom.core.domain.model.AppSettings
+import com.comst19.dambom.core.domain.model.NetworkAccessState
+import com.comst19.dambom.core.domain.repository.NetworkMonitor
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,6 +31,7 @@ class MainViewModel
     @Inject
     constructor(
         repository: SettingsRepository,
+        networkMonitor: NetworkMonitor,
         private val startupCoordinator: StartupCoordinator,
         private val errorHandler: ErrorHandler,
         private val snackbarEventBus: SnackbarEventBus,
@@ -40,6 +44,15 @@ class MainViewModel
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(SETTINGS_STOP_TIMEOUT_MILLIS),
                 initialValue = AppSettings(),
+            )
+
+        val networkAccess: StateFlow<NetworkAccessState> =
+            combine(networkMonitor.connection, settings) { connection, settings ->
+                NetworkAccessState(connection, settings.wifiOnlyDownloads)
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(SETTINGS_STOP_TIMEOUT_MILLIS),
+                initialValue = NetworkAccessState(),
             )
 
         init {

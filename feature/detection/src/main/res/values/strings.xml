@@ -7,6 +7,10 @@
     <string name="detection_download_selected">%1$d개 다운로드</string>
     <string name="detection_adding_to_queue">%1$d개 추가 중</string>
     <string name="detection_enqueue_failed">대기열에 추가하지 못했어요. 다시 시도해 주세요.</string>
+    <string name="detection_network_unavailable">인터넷 연결이 필요해요</string>
+    <string name="detection_network_unavailable_description">연결되면 영상 찾기를 자동으로 다시 시작해요.</string>
+    <string name="detection_download_offline">인터넷에 연결되면 다운로드할 수 있어요.</string>
+    <string name="detection_download_wifi_required">Wi-Fi 전용 설정이 켜져 있어 Wi-Fi 연결을 기다리고 있어요.</string>
     <string name="detection_not_found">영상을 찾지 못했어요</string>
     <string name="detection_retry_hint">페이지에서 영상을 재생한 뒤 다시 감지해 보세요.</string>
     <string name="detection_retry">다시 감지</string>

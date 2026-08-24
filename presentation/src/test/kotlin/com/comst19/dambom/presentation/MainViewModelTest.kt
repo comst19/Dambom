@@ -3,7 +3,9 @@ package com.comst19.dambom.presentation
 import com.comst19.dambom.core.common.ui.SnackbarEventBus
 import com.comst19.dambom.core.domain.error.ErrorHandler
 import com.comst19.dambom.core.domain.model.AppSettings
+import com.comst19.dambom.core.domain.model.NetworkConnection
 import com.comst19.dambom.core.domain.model.ThemeMode
+import com.comst19.dambom.core.domain.repository.NetworkMonitor
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.TopLevelNavKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
@@ -27,6 +29,7 @@ class MainViewModelTest {
             val viewModel =
                 MainViewModel(
                     FakeSettingsRepository(),
+                    FakeNetworkMonitor,
                     SuccessfulStartupCoordinator,
                     ErrorHandler(),
                     SnackbarEventBus(),
@@ -43,6 +46,7 @@ class MainViewModelTest {
             val viewModel =
                 MainViewModel(
                     FakeSettingsRepository(),
+                    FakeNetworkMonitor,
                     FailingStartupCoordinator,
                     ErrorHandler(),
                     SnackbarEventBus(),
@@ -73,4 +77,8 @@ private class FakeSettingsRepository : SettingsRepository {
     ) = Unit
 
     override suspend fun setWifiOnlyDownloads(enabled: Boolean) = Unit
+}
+
+private object FakeNetworkMonitor : NetworkMonitor {
+    override val connection: Flow<NetworkConnection> = flowOf(NetworkConnection.UNMETERED)
 }

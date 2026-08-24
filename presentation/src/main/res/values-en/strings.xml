@@ -3,4 +3,6 @@
     <string name="startup_initialization_failed">Couldn’t start the app.</string>
     <string name="destination_home">Home</string>
     <string name="destination_library">Library</string>
+    <string name="network_offline_banner">No internet connection. Network features are temporarily unavailable.</string>
+    <string name="network_unmetered_banner">Waiting for Wi-Fi. Downloads resume automatically.</string>
 </resources>

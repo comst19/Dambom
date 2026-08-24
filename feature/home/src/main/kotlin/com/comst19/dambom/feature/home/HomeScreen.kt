@@ -48,9 +48,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.appScaffoldPadding
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
+import com.comst19.dambom.core.domain.model.NetworkAccessState
 
 @Composable
-internal fun HomeRoute(viewModel: HomeViewModel = hiltViewModel()) {
+internal fun HomeRoute(
+    networkAccess: NetworkAccessState,
+    viewModel: HomeViewModel = hiltViewModel(),
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
@@ -62,6 +66,7 @@ internal fun HomeRoute(viewModel: HomeViewModel = hiltViewModel()) {
 
     HomeScreen(
         uiState = uiState,
+        canUseInternet = networkAccess.canUseInternet,
         onUrlChange = viewModel::updateUrl,
         onPaste = { viewModel.useClipboardText(context.clipboardText()) },
         onAnalyze = viewModel::analyzeUrl,
@@ -80,6 +85,7 @@ internal fun HomeRoute(viewModel: HomeViewModel = hiltViewModel()) {
 @Composable
 internal fun HomeScreen(
     uiState: HomeUiState,
+    canUseInternet: Boolean,
     onUrlChange: (String) -> Unit,
     onPaste: () -> Unit,
     onAnalyze: () -> Unit,
@@ -146,7 +152,7 @@ internal fun HomeScreen(
                     Modifier
                         .fillMaxWidth()
                         .height(54.dp),
-                enabled = uiState.isUrlValid,
+                enabled = uiState.isUrlValid && canUseInternet,
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Text(stringResource(R.string.home_analyze), style = MaterialTheme.typography.labelLarge)
@@ -181,6 +187,7 @@ internal fun HomeScreen(
                 title = stringResource(R.string.home_browser_title),
                 description = stringResource(R.string.home_browser_description),
                 onClick = onOpenWeb,
+                enabled = canUseInternet,
             )
         }
     }
@@ -194,6 +201,7 @@ internal fun HomeScreen(
             onOpenWeb = onOpenSharedUrlInWeb,
             onAnalyze = onAnalyzeSharedUrl,
             onDismiss = onDismissSharedUrl,
+            canUseInternet = canUseInternet,
         )
     }
 }
@@ -286,12 +294,19 @@ private fun MethodRow(
     title: String,
     description: String,
     onClick: (() -> Unit)? = null,
+    enabled: Boolean = true,
 ) {
     Card(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .then(if (onClick == null) Modifier else Modifier.clickable(onClick = onClick)),
+                .then(
+                    if (onClick == null) {
+                        Modifier
+                    } else {
+                        Modifier.clickable(enabled = enabled, onClick = onClick)
+                    },
+                ),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         shape = RoundedCornerShape(18.dp),
     ) {
@@ -331,6 +346,7 @@ private fun SharedUrlDialog(
     onOpenWeb: () -> Unit,
     onAnalyze: () -> Unit,
     onDismiss: () -> Unit,
+    canUseInternet: Boolean,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -347,11 +363,11 @@ private fun SharedUrlDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onAnalyze) { Text(stringResource(R.string.home_analyze_now)) }
+            TextButton(onClick = onAnalyze, enabled = canUseInternet) { Text(stringResource(R.string.home_analyze_now)) }
         },
         dismissButton = {
             Row {
-                TextButton(onClick = onOpenWeb) { Text(stringResource(R.string.home_open_in_web)) }
+                TextButton(onClick = onOpenWeb, enabled = canUseInternet) { Text(stringResource(R.string.home_open_in_web)) }
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.home_cancel)) }
             }
         },
@@ -372,6 +388,7 @@ private fun HomeScreenPreview() {
     DambomTheme {
         HomeScreen(
             uiState = HomeUiState(url = "https://example.com/video", isUrlValid = true),
+            canUseInternet = true,
             onUrlChange = {},
             onPaste = {},
             onAnalyze = {},

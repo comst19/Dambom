@@ -60,6 +60,12 @@ internal class DetectionViewModel
             detect(url)
         }
 
+        fun setNetworkUnavailable() {
+            if (mutableUiState.value !is DetectionUiState.Content) {
+                mutableUiState.value = DetectionUiState.NetworkUnavailable
+            }
+        }
+
         fun toggleCandidate(id: String) {
             mutableUiState.update { state ->
                 if (state !is DetectionUiState.Content) return@update state
@@ -109,6 +115,8 @@ internal class DetectionViewModel
 
 internal sealed interface DetectionUiState {
     data object Loading : DetectionUiState
+
+    data object NetworkUnavailable : DetectionUiState
 
     data class Content(
         val pageTitle: String,

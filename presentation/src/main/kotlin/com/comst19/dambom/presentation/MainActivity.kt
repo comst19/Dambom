@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         handleSharedText(intent)
         setContent {
             val settings by mainViewModel.settings.collectAsStateWithLifecycle()
+            val networkAccess by mainViewModel.networkAccess.collectAsStateWithLifecycle()
             val startupState by mainViewModel.startupState.collectAsStateWithLifecycle()
             val useDarkTheme =
                 when (settings.themeMode) {
@@ -63,6 +64,7 @@ class MainActivity : AppCompatActivity() {
                             navigationConfig = AppNavigationConfig.navigation(state.startKey),
                             dispatcher = navigationDispatcher,
                             snackbarEventBus = snackbarEventBus,
+                            networkAccess = networkAccess,
                         )
                     }
 

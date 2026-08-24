@@ -9,11 +9,12 @@ sealed interface UiText {
 
     data class Resource(
         val id: Int,
+        val arguments: List<Any> = emptyList(),
     ) : UiText
 }
 
 fun UiText.resolve(context: Context): String =
     when (this) {
         is UiText.Dynamic -> value
-        is UiText.Resource -> context.getString(id)
+        is UiText.Resource -> context.getString(id, *arguments.toTypedArray())
     }

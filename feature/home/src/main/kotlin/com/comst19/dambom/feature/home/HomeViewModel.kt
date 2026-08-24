@@ -37,6 +37,7 @@ internal class HomeViewModel
     ) : ViewModel() {
         private val url = savedStateHandle.getStateFlow(URL_KEY, "")
         private val clipboardUrl = MutableStateFlow<String?>(null)
+        private var lastSuggestedClipboardUrl: String? = null
 
         val uiState: StateFlow<HomeUiState> =
             combine(
@@ -90,7 +91,9 @@ internal class HomeViewModel
         fun suggestClipboardText(text: String?) {
             if (!uiState.value.clipboardSuggestionEnabled) return
             val detectedUrl = text?.extractHttpUrl() ?: return
-            if (detectedUrl != uiState.value.url) clipboardUrl.value = detectedUrl
+            if (detectedUrl == lastSuggestedClipboardUrl || detectedUrl == uiState.value.url) return
+            lastSuggestedClipboardUrl = detectedUrl
+            clipboardUrl.value = detectedUrl
         }
 
         fun dismissClipboardSuggestion() {
@@ -159,7 +162,11 @@ private fun String.isValidHttpUrl(): Boolean =
         (uri.scheme.equals("http", true) || uri.scheme.equals("https", true)) && !uri.host.isNullOrBlank()
     }.getOrDefault(false)
 
-private fun String.extractHttpUrl(): String? = HTTP_URL_REGEX.find(this)?.value?.trimEnd('.', ',', ')', ']', '}')
+private fun String.extractHttpUrl(): String? =
+    HTTP_URL_REGEX
+        .findAll(this)
+        .map { it.value.trimEnd('.', ',', ')', ']', '}') }
+        .firstOrNull(String::isValidHttpUrl)
 
 private val HTTP_URL_REGEX = Regex("https?://[^\\s<]+", RegexOption.IGNORE_CASE)
 private const val URL_KEY = "url"

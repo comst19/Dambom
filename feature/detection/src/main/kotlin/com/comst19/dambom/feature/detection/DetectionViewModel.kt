@@ -12,6 +12,9 @@ import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
 import com.comst19.dambom.feature.detection.contract.DetectionUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.mutate
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,8 +44,8 @@ internal class DetectionViewModel
                         is MediaDetectionResult.Success -> {
                             DetectionUiState.Content(
                                 pageTitle = result.pageTitle,
-                                candidates = result.candidates,
-                                selectedIds = result.candidates.mapTo(mutableSetOf()) { it.id },
+                                candidates = result.candidates.toPersistentList(),
+                                selectedIds = result.candidates.map { it.id }.toPersistentSet(),
                             )
                         }
 
@@ -68,8 +71,10 @@ internal class DetectionViewModel
         fun toggleCandidate(id: String) {
             mutableUiState.update { state ->
                 if (state !is DetectionUiState.Content) return@update state
-                val selectedIds = state.selectedIds.toMutableSet()
-                if (!selectedIds.add(id)) selectedIds.remove(id)
+                val selectedIds =
+                    state.selectedIds.mutate { ids ->
+                        if (!ids.add(id)) ids.remove(id)
+                    }
                 state.copy(selectedIds = selectedIds, enqueueFailed = false)
             }
         }

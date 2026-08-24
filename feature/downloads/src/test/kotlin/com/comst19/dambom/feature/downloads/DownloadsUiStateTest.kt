@@ -3,6 +3,7 @@ package com.comst19.dambom.feature.downloads
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -13,7 +14,7 @@ class DownloadsUiStateTest {
         val state =
             DownloadsUiState(
                 tasks =
-                    listOf(
+                    persistentListOf(
                         task("active", DownloadStatus.DOWNLOADING, 50L, 100L),
                         task("queued", DownloadStatus.QUEUED, 0L, 100L),
                         task("done", DownloadStatus.COMPLETED, 100L, 100L),

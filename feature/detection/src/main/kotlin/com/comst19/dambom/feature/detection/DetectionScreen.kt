@@ -56,6 +56,8 @@ import com.comst19.dambom.core.domain.model.NetworkConnection
 import com.comst19.dambom.core.domain.model.NetworkRestriction
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.feature.detection.contract.DetectionUiState
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentSetOf
 
 @Composable
 internal fun DetectionRoute(
@@ -357,7 +359,7 @@ private fun DetectionScreenPreview() {
                 DetectionUiState.Content(
                     pageTitle = "여행 기록",
                     candidates =
-                        listOf(
+                        persistentListOf(
                             MediaCandidate(
                                 id = "1",
                                 url = "https://example.com/trip.mp4",
@@ -366,7 +368,7 @@ private fun DetectionScreenPreview() {
                                 contentLength = 24_000_000,
                             ),
                         ),
-                    selectedIds = setOf("1"),
+                    selectedIds = persistentSetOf("1"),
                 ),
             networkAccess = NetworkAccessState(NetworkConnection.UNMETERED),
             onBack = {},

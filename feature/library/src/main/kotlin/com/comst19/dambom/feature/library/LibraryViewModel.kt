@@ -17,6 +17,7 @@ import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
 import com.comst19.dambom.feature.library.contract.LibraryUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -134,7 +135,7 @@ internal fun toLibraryUiState(
             savedVideos.filter { it.title.contains(trimmedQuery, ignoreCase = true) }
         }
     return LibraryUiState(
-        videos = videos,
+        videos = videos.toPersistentList(),
         selectedVideo = savedVideos.firstOrNull { it.id == selectedId },
         query = query,
         hasVideos = savedVideos.isNotEmpty(),

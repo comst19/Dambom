@@ -50,6 +50,7 @@ import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.contract.LibraryUiState
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 internal fun LibraryRoute() {
@@ -332,7 +333,7 @@ private fun LibraryScreenPreview() {
         LibraryScreen(
             uiState =
                 LibraryUiState(
-                    videos = listOf(previewTask("여행 영상"), previewTask("인터뷰")),
+                    videos = persistentListOf(previewTask("여행 영상"), previewTask("인터뷰")),
                     hasVideos = true,
                 ),
             fileActions =

@@ -60,6 +60,8 @@ import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.feature.settings.contract.AppLanguage
 import com.google.android.gms.oss.licenses.v2.OssLicensesMenuActivity
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.toPersistentList
 
 @Composable
 internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
@@ -229,7 +231,7 @@ internal fun SettingsScreen(
     if (showThemeDialog) {
         SettingsChoiceDialog(
             title = stringResource(R.string.settings_theme),
-            entries = ThemeMode.entries,
+            entries = THEME_MODE_ENTRIES,
             selected = themeMode,
             label = { stringResource(it.labelRes) },
             onDismiss = { showThemeDialog = false },
@@ -242,7 +244,7 @@ internal fun SettingsScreen(
     if (showLanguageDialog) {
         SettingsChoiceDialog(
             title = stringResource(R.string.settings_language),
-            entries = AppLanguage.entries,
+            entries = APP_LANGUAGE_ENTRIES,
             selected = language,
             label = { stringResource(it.labelRes) },
             onDismiss = { showLanguageDialog = false },
@@ -322,7 +324,7 @@ private fun SettingsDivider() {
 @Composable
 private fun <T> SettingsChoiceDialog(
     title: String,
-    entries: List<T>,
+    entries: PersistentList<T>,
     selected: T,
     label: @Composable (T) -> String,
     onDismiss: () -> Unit,
@@ -359,6 +361,9 @@ private fun <T> SettingsChoiceDialog(
         },
     )
 }
+
+private val THEME_MODE_ENTRIES = ThemeMode.entries.toPersistentList()
+private val APP_LANGUAGE_ENTRIES = AppLanguage.entries.toPersistentList()
 
 private fun Context.sendFeedback(
     chooserTitle: String,

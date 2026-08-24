@@ -1,10 +1,14 @@
 package com.comst19.dambom.feature.downloads.contract
 
+import androidx.compose.runtime.Immutable
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.persistentListOf
 
+@Immutable
 internal data class DownloadsUiState(
-    val tasks: List<DownloadTask> = emptyList(),
+    val tasks: PersistentList<DownloadTask> = persistentListOf(),
 ) {
     val activeCount: Int
         get() = tasks.count { it.status == DownloadStatus.DOWNLOADING }

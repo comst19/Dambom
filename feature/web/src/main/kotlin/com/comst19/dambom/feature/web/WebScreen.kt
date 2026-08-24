@@ -91,6 +91,7 @@ import com.comst19.dambom.feature.web.contract.RecentPage
 import com.comst19.dambom.feature.web.contract.WebDetectionState
 import com.comst19.dambom.feature.web.contract.WebTab
 import com.comst19.dambom.feature.web.contract.WebUiState
+import kotlinx.collections.immutable.PersistentList
 
 @Composable
 internal fun WebRoute(
@@ -327,7 +328,7 @@ private fun WebActionMenuItem(
 @Composable
 private fun WebStartPage(
     address: String,
-    recentPages: List<RecentPage>,
+    recentPages: PersistentList<RecentPage>,
     onNavigate: (String) -> Unit,
 ) {
     Column(

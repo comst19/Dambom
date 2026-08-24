@@ -15,6 +15,9 @@ import com.comst19.dambom.feature.web.contract.WebDetectionState
 import com.comst19.dambom.feature.web.contract.WebTab
 import com.comst19.dambom.feature.web.contract.WebUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.mutate
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -50,7 +53,7 @@ internal class WebViewModel
             val tab = WebTab(id = nextTabId++, url = url?.normalizeAddress())
             updateState { state ->
                 state.copy(
-                    tabs = state.tabs + tab,
+                    tabs = state.tabs.mutate { it.add(tab) },
                     currentTabId = tab.id,
                 )
             }
@@ -68,13 +71,13 @@ internal class WebViewModel
                 if (state.tabs.size == 1) {
                     val emptyTab = WebTab(id = nextTabId++)
                     WebUiState(
-                        tabs = listOf(emptyTab),
+                        tabs = persistentListOf(emptyTab),
                         currentTabId = emptyTab.id,
                         recentPages = state.recentPages,
                     )
                 } else {
                     val closedIndex = state.tabs.indexOfFirst { it.id == id }
-                    val remainingTabs = state.tabs.filterNot { it.id == id }
+                    val remainingTabs = state.tabs.filterNot { it.id == id }.toPersistentList()
                     val currentTabId =
                         if (state.currentTabId == id) {
                             remainingTabs[closedIndex.coerceAtMost(remainingTabs.lastIndex)].id
@@ -105,23 +108,26 @@ internal class WebViewModel
             val safeUrl = url?.takeIf { it.startsWith("http://") || it.startsWith("https://") } ?: return
             updateState { state ->
                 val tabs =
-                    state.tabs.map { tab ->
-                        if (tab.id == tabId) {
-                            tab.copy(
-                                url = safeUrl,
-                                title = title?.takeIf(String::isNotBlank) ?: safeUrl.hostLabel(),
-                            )
-                        } else {
-                            tab
-                        }
-                    }
+                    state.tabs
+                        .map { tab ->
+                            if (tab.id == tabId) {
+                                tab.copy(
+                                    url = safeUrl,
+                                    title = title?.takeIf(String::isNotBlank) ?: safeUrl.hostLabel(),
+                                )
+                            } else {
+                                tab
+                            }
+                        }.toPersistentList()
                 val currentTab = tabs.firstOrNull { it.id == tabId }
                 val recentPages =
                     if (currentTab == null) {
                         state.recentPages
                     } else {
-                        listOf(RecentPage(currentTab.title, safeUrl)) +
-                            state.recentPages.filterNot { it.url == safeUrl }.take(MAX_RECENT_PAGES - 1)
+                        (
+                            listOf(RecentPage(currentTab.title, safeUrl)) +
+                                state.recentPages.filterNot { it.url == safeUrl }.take(MAX_RECENT_PAGES - 1)
+                        ).toPersistentList()
                     }
                 state.copy(tabs = tabs, recentPages = recentPages)
             }
@@ -190,7 +196,7 @@ internal class WebViewModel
             transform: (WebTab) -> WebTab,
         ) {
             updateState { state ->
-                state.copy(tabs = state.tabs.map { if (it.id == tabId) transform(it) else it })
+                state.copy(tabs = state.tabs.map { if (it.id == tabId) transform(it) else it }.toPersistentList())
             }
         }
 
@@ -238,16 +244,18 @@ private fun SavedStateHandle.restoreWebUiState(): WebUiState {
                     url = urls.getOrNull(index)?.takeIf(String::isNotBlank),
                 )
             }.ifEmpty { listOf(WebTab(id = 1L)) }
+            .toPersistentList()
     val currentTabId = get<Long>(CURRENT_TAB_ID_KEY)?.takeIf { id -> tabs.any { it.id == id } } ?: tabs.first().id
     val recentTitles = get<ArrayList<String>>(RECENT_TITLES_KEY).orEmpty()
     val recentUrls = get<ArrayList<String>>(RECENT_URLS_KEY).orEmpty()
     val recentPages =
-        recentUrls.mapIndexed { index, url ->
-            RecentPage(
-                title = recentTitles.getOrNull(index).orEmpty().ifBlank { url.hostLabel() },
-                url = url,
-            )
-        }
+        recentUrls
+            .mapIndexed { index, url ->
+                RecentPage(
+                    title = recentTitles.getOrNull(index).orEmpty().ifBlank { url.hostLabel() },
+                    url = url,
+                )
+            }.toPersistentList()
     return WebUiState(tabs = tabs, currentTabId = currentTabId, recentPages = recentPages)
 }
 

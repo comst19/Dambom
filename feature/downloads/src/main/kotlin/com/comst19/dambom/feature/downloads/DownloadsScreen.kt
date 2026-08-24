@@ -49,6 +49,7 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.model.NetworkConnection
 import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 internal fun DownloadsRoute(
@@ -371,7 +372,7 @@ private fun DownloadsScreenPreview() {
             uiState =
                 DownloadsUiState(
                     tasks =
-                        listOf(
+                        persistentListOf(
                             previewTask("1", DownloadStatus.DOWNLOADING, 0.62f),
                             previewTask("2", DownloadStatus.QUEUED, 0f),
                             previewTask("3", DownloadStatus.PAUSED, 0.2f),

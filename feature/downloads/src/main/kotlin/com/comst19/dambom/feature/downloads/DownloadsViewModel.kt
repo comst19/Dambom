@@ -7,6 +7,7 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -23,7 +24,7 @@ internal class DownloadsViewModel
     ) : ViewModel() {
         val uiState: StateFlow<DownloadsUiState> =
             repository.downloads
-                .map(::DownloadsUiState)
+                .map { tasks -> DownloadsUiState(tasks.toPersistentList()) }
                 .stateIn(
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),

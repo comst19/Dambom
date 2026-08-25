@@ -9,13 +9,11 @@
     <string name="web_go_back">Previous page</string>
     <string name="web_go_forward">Next page</string>
     <string name="web_refresh">Refresh</string>
-    <string name="web_detect">Detect video</string>
     <string name="web_detecting">Detecting</string>
-    <string name="web_detected_count">%1$d videos detected</string>
-    <string name="web_not_detected">No video detected</string>
+    <string name="web_open_detected_count">Open %1$d videos</string>
+    <string name="web_no_detected_video">No detected videos</string>
+    <string name="web_rescan">Scan again</string>
     <string name="web_playback_hint">If no video is detected, play it on the page and try again.</string>
-    <string name="web_access_restricted">Access restricted</string>
-    <string name="web_network_error">Connection error</string>
     <string name="web_connection_error_title">Couldn\'t connect to the site</string>
     <string name="web_connection_error_description">The site closed the connection or is unavailable on the current network.</string>
     <string name="web_retry">Try again</string>

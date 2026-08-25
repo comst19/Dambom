@@ -133,13 +133,9 @@ internal class WebViewModel
             }
         }
 
-        fun detectCurrentTab() {
+        fun scanCurrentTab() {
             val tab = uiState.value.currentTab ?: return
             val url = tab.url ?: return
-            if (tab.detectionState is WebDetectionState.Found) {
-                openDetection(url)
-                return
-            }
             updateCurrentTab { it.copy(detectionState = WebDetectionState.Scanning) }
             viewModelScope.launch {
                 when (val result = mediaDetectionRepository.detect(url)) {
@@ -156,6 +152,12 @@ internal class WebViewModel
                     }
                 }
             }
+        }
+
+        fun openDetectedMedia() {
+            val tab = uiState.value.currentTab ?: return
+            if (tab.detectionState !is WebDetectionState.Found) return
+            tab.url?.let(::openDetection)
         }
 
         fun onMediaRequest(

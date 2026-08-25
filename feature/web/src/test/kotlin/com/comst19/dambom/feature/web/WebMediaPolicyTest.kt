@@ -23,6 +23,10 @@ class WebMediaPolicyTest {
         )
         assertTrue(WEB_MEDIA_GUARD_SCRIPT.contains("IntersectionObserver"))
         assertTrue(WEB_MEDIA_GUARD_SCRIPT.contains("HTMLMediaElement.prototype.play"))
+        assertTrue(WEB_MEDIA_GUARD_SCRIPT.contains("const originalPlay"))
+        assertTrue(WEB_MEDIA_GUARD_SCRIPT.contains("originalPlay.call(this)"))
+        assertTrue(WEB_MEDIA_GUARD_SCRIPT.contains("this.preload = 'none'"))
+        assertFalse(WEB_MEDIA_GUARD_SCRIPT.contains("video.currentTime"))
     }
 
     @Test
@@ -38,10 +42,10 @@ class WebMediaPolicyTest {
     }
 
     @Test
-    fun `playback hint is shown only after media detection fails`() {
+    fun `playback hint is shown before detection and after media detection fails`() {
         assertTrue(WebDetectionState.NotFound(UnsupportedReason.NO_MEDIA).shouldShowPlaybackHint())
         assertTrue(WebDetectionState.NotFound(UnsupportedReason.UNSUPPORTED_FORMAT).shouldShowPlaybackHint())
-        assertFalse(WebDetectionState.Idle.shouldShowPlaybackHint())
+        assertTrue(WebDetectionState.Idle.shouldShowPlaybackHint())
         assertFalse(WebDetectionState.Scanning.shouldShowPlaybackHint())
         assertFalse(WebDetectionState.Found(1).shouldShowPlaybackHint())
         assertFalse(WebDetectionState.NotFound(UnsupportedReason.NETWORK_ERROR).shouldShowPlaybackHint())

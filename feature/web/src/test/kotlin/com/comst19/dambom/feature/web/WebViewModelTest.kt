@@ -6,7 +6,9 @@ import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
+import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
 import com.comst19.dambom.core.testing.MainDispatcherRule
+import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.web.contract.RecentPage
 import com.comst19.dambom.feature.web.contract.WebDetectionState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -132,7 +134,7 @@ class WebViewModelTest {
             val viewModel = createViewModel(savedStateHandle)
             viewModel.applyInitialUrl("https://example.com")
 
-            viewModel.detectCurrentTab()
+            viewModel.scanCurrentTab()
             advanceUntilIdle()
 
             val restored = createViewModel(savedStateHandle).uiState.value
@@ -140,6 +142,30 @@ class WebViewModelTest {
             assertEquals(
                 WebDetectionState.NotFound(UnsupportedReason.NO_MEDIA),
                 restored.currentTab?.detectionState,
+            )
+        }
+
+    @Test
+    fun `detection result opens only after media is found`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val viewModel = WebViewModel(FakeMediaDetectionRepository, navigation, SavedStateHandle())
+            viewModel.applyInitialUrl("https://example.com")
+
+            viewModel.openDetectedMedia()
+            advanceUntilIdle()
+            assertTrue(navigation.dispatched.isEmpty())
+
+            viewModel.onMediaRequest(
+                viewModel.uiState.value.currentTabId,
+                "https://example.com/video.mp4",
+            )
+            viewModel.openDetectedMedia()
+            advanceUntilIdle()
+
+            assertEquals(
+                NavigationEvent.Navigate(DetectionResultKey("https://example.com")),
+                navigation.dispatched.single(),
             )
         }
 }

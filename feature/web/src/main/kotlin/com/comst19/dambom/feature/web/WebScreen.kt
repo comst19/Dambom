@@ -47,6 +47,7 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.ScreenSearchDesktop
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
@@ -55,15 +56,21 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -115,7 +122,8 @@ internal fun WebRoute(
         onNavigate = viewModel::navigateCurrentTab,
         onPageChanged = viewModel::updatePage,
         onMediaRequest = viewModel::onMediaRequest,
-        onDetect = viewModel::detectCurrentTab,
+        onScan = viewModel::scanCurrentTab,
+        onOpenDetectedMedia = viewModel::openDetectedMedia,
         onCreateTab = viewModel::createTab,
         onSelectTab = viewModel::selectTab,
         onCloseTab = viewModel::closeTab,
@@ -135,7 +143,8 @@ internal fun WebScreen(
     onNavigate: (String) -> Unit,
     onPageChanged: (Long, String?, String?) -> Unit,
     onMediaRequest: (Long, String) -> Unit,
-    onDetect: () -> Unit,
+    onScan: () -> Unit,
+    onOpenDetectedMedia: () -> Unit,
     onCreateTab: (String?) -> Unit,
     onSelectTab: (Long) -> Unit,
     onCloseTab: (Long) -> Unit,
@@ -198,7 +207,8 @@ internal fun WebScreen(
                     onPageChanged = onPageChanged,
                     onMediaRequest = onMediaRequest,
                     onSaveWebState = onSaveWebState,
-                    onDetect = onDetect,
+                    onScan = onScan,
+                    onOpenDetectedMedia = onOpenDetectedMedia,
                     onOpenExternal = onOpenExternal,
                 )
             }
@@ -422,7 +432,8 @@ private fun ColumnScope.WebContent(
     onPageChanged: (Long, String?, String?) -> Unit,
     onMediaRequest: (Long, String) -> Unit,
     onSaveWebState: (Long, Bundle) -> Unit,
-    onDetect: () -> Unit,
+    onScan: () -> Unit,
+    onOpenDetectedMedia: () -> Unit,
     onOpenExternal: (String) -> Unit,
 ) {
     var webView by remember(tab.id) { mutableStateOf<WebView?>(null) }
@@ -480,6 +491,14 @@ private fun ColumnScope.WebContent(
                     onOpenExternal = { tab.url?.let(onOpenExternal) },
                 )
             }
+            if (navigationFailure == null && tab.detectionState !is WebDetectionState.Scanning) {
+                Box(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
+                    WebRescanButton(
+                        detectionState = tab.detectionState,
+                        onScan = onScan,
+                    )
+                }
+            }
         }
 
         DisposableEffect(tab.id, webViewGeneration) {
@@ -500,8 +519,36 @@ private fun ColumnScope.WebContent(
     WebToolbar(
         webView = webView,
         detectionState = tab.detectionState,
-        onDetect = onDetect,
+        onOpenDetectedMedia = onOpenDetectedMedia,
     )
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun WebRescanButton(
+    detectionState: WebDetectionState,
+    onScan: () -> Unit,
+) {
+    val tooltipState = rememberTooltipState()
+    LaunchedEffect(detectionState) {
+        if (detectionState.shouldShowPlaybackHint()) tooltipState.show()
+    }
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+        tooltip = {
+            PlainTooltip {
+                Text(stringResource(R.string.web_playback_hint))
+            }
+        },
+        state = tooltipState,
+    ) {
+        FloatingActionButton(onClick = onScan) {
+            Icon(
+                imageVector = Icons.Outlined.ScreenSearchDesktop,
+                contentDescription = stringResource(R.string.web_rescan),
+            )
+        }
+    }
 }
 
 @Composable
@@ -561,64 +608,48 @@ private fun WebNavigationErrorContent(
 private fun WebToolbar(
     webView: WebView?,
     detectionState: WebDetectionState,
-    onDetect: () -> Unit,
+    onOpenDetectedMedia: () -> Unit,
 ) {
-    Column {
-        if (detectionState.shouldShowPlaybackHint()) {
-            Text(
-                text = stringResource(R.string.web_playback_hint),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            )
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        IconButton(onClick = { webView?.goBack() }, enabled = webView?.canGoBack() == true) {
+            Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.web_go_back))
         }
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        IconButton(onClick = { webView?.goForward() }, enabled = webView?.canGoForward() == true) {
+            Icon(Icons.AutoMirrored.Outlined.ArrowForward, stringResource(R.string.web_go_forward))
+        }
+        IconButton(onClick = { webView?.reload() }) {
+            Icon(Icons.Outlined.Refresh, stringResource(R.string.web_refresh))
+        }
+        Spacer(Modifier.weight(1f))
+        TextButton(
+            onClick = onOpenDetectedMedia,
+            enabled = detectionState is WebDetectionState.Found,
         ) {
-            IconButton(onClick = { webView?.goBack() }, enabled = webView?.canGoBack() == true) {
-                Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.web_go_back))
-            }
-            IconButton(onClick = { webView?.goForward() }, enabled = webView?.canGoForward() == true) {
-                Icon(Icons.AutoMirrored.Outlined.ArrowForward, stringResource(R.string.web_go_forward))
-            }
-            IconButton(onClick = { webView?.reload() }) {
-                Icon(Icons.Outlined.Refresh, stringResource(R.string.web_refresh))
-            }
-            Spacer(Modifier.weight(1f))
-            TextButton(
-                onClick = onDetect,
-                enabled = detectionState !is WebDetectionState.Scanning,
-            ) {
-                Text(detectionState.label())
-            }
+            Text(detectionState.resultLabel())
         }
     }
 }
 
 internal fun WebDetectionState.shouldShowPlaybackHint(): Boolean =
-    this is WebDetectionState.NotFound &&
-        (reason == UnsupportedReason.NO_MEDIA || reason == UnsupportedReason.UNSUPPORTED_FORMAT)
+    this == WebDetectionState.Idle ||
+        (
+            this is WebDetectionState.NotFound &&
+                (reason == UnsupportedReason.NO_MEDIA || reason == UnsupportedReason.UNSUPPORTED_FORMAT)
+        )
 
 @Composable
-private fun WebDetectionState.label(): String =
+private fun WebDetectionState.resultLabel(): String =
     when (this) {
-        WebDetectionState.Idle -> stringResource(R.string.web_detect)
+        WebDetectionState.Idle -> stringResource(R.string.web_no_detected_video)
         WebDetectionState.Scanning -> stringResource(R.string.web_detecting)
-        is WebDetectionState.Found -> stringResource(R.string.web_detected_count, count)
-        is WebDetectionState.NotFound -> reason.label()
-    }
-
-@Composable
-private fun UnsupportedReason.label(): String =
-    when (this) {
-        UnsupportedReason.ACCESS_RESTRICTED -> stringResource(R.string.web_access_restricted)
-        UnsupportedReason.NETWORK_ERROR -> stringResource(R.string.web_network_error)
-        else -> stringResource(R.string.web_not_detected)
+        is WebDetectionState.Found -> stringResource(R.string.web_open_detected_count, count)
+        is WebDetectionState.NotFound -> stringResource(R.string.web_no_detected_video)
     }
 
 @Composable
@@ -820,35 +851,36 @@ internal const val WEB_MEDIA_GUARD_SCRIPT =
       if (window.__dambomMediaGuard) return;
       window.__dambomMediaGuard = true;
 
-      const seekToFirstFrame = (video) => {
-        const seek = Number.isFinite(video.duration) ? Math.min(0.1, video.duration / 100) : 0.05;
-        try { video.currentTime = seek; } catch (_) {}
-      };
+      const originalPlay = HTMLMediaElement.prototype.play;
+      const userStartedVideos = new WeakSet();
+
+      document.addEventListener('pointerdown', (event) => {
+        const video = event.composedPath().find((node) => node instanceof HTMLVideoElement);
+        if (video) userStartedVideos.add(video);
+      }, true);
 
       HTMLMediaElement.prototype.play = function() {
         this.autoplay = false;
         this.removeAttribute('autoplay');
-        this.preload = 'metadata';
-        if (this.readyState >= 1) {
-          seekToFirstFrame(this);
-        } else {
-          this.addEventListener('loadedmetadata', () => seekToFirstFrame(this), { once: true });
+        if (!userStartedVideos.delete(this)) {
+          this.pause();
+          this.preload = 'none';
+          return Promise.resolve();
         }
-        return Promise.resolve();
+        document.querySelectorAll('video').forEach((other) => {
+          if (other !== this) {
+            other.pause();
+            other.preload = 'none';
+          }
+        });
+        this.preload = 'metadata';
+        return originalPlay.call(this);
       };
 
       const visibility = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           const video = entry.target;
-          if (entry.isIntersecting) {
-            video.preload = 'metadata';
-            if (video.readyState >= 1) {
-              seekToFirstFrame(video);
-            } else {
-              video.addEventListener('loadedmetadata', () => seekToFirstFrame(video), { once: true });
-              video.load();
-            }
-          } else {
+          if (!entry.isIntersecting) {
             video.pause();
             video.preload = 'none';
           }

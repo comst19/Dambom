@@ -240,7 +240,7 @@ private fun DetectionContent(
                     state.candidates
                         .drop(lastVisibleItemIndex.coerceIn(0, state.candidates.size))
                         .take(PRELOAD_CANDIDATE_COUNT)
-                        .map { it.thumbnailUrl ?: it.url }
+                        .mapNotNull(MediaCandidate::thumbnailUrl)
                 }
             }
         }
@@ -341,11 +341,13 @@ private fun CandidateItem(
                     modifier = Modifier.size(44.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                VideoThumbnail(
-                    data = candidate.thumbnailUrl ?: candidate.url,
-                    contentDescription = stringResource(R.string.detection_thumbnail, index),
-                    modifier = Modifier.fillMaxSize(),
-                )
+                candidate.thumbnailUrl?.let { thumbnailUrl ->
+                    VideoThumbnail(
+                        data = thumbnailUrl,
+                        contentDescription = stringResource(R.string.detection_thumbnail, index),
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
             Row(
                 modifier = Modifier.padding(start = 8.dp, end = 12.dp, top = 10.dp, bottom = 8.dp),

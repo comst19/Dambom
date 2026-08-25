@@ -10,6 +10,7 @@ import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
+import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
 import com.comst19.dambom.feature.detection.contract.DetectionUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.mutate
@@ -65,6 +66,13 @@ internal class DetectionViewModel
             val url = loadedUrl ?: return
             loadedUrl = null
             detect(url)
+        }
+
+        fun openInWeb() {
+            val url = loadedUrl ?: return
+            viewModelScope.launch {
+                navigation.dispatch(NavigationEvent.Replace(WebKey(url)))
+            }
         }
 
         fun setNetworkUnavailable() {

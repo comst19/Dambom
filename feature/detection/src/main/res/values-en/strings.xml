@@ -17,11 +17,12 @@
     <string name="detection_download_offline">Connect to the internet to download.</string>
     <string name="detection_download_wifi_required">Wi-Fi only is on. Waiting for a Wi-Fi connection.</string>
     <string name="detection_not_found">No videos found</string>
-    <string name="detection_retry_hint">Play the video on the page, then detect again.</string>
     <string name="detection_retry">Detect again</string>
+    <string name="detection_open_web_hint">Open this page directly to keep looking for videos.</string>
+    <string name="detection_open_web">Find on this page</string>
     <string name="detection_invalid_url">Check that the web address is valid.</string>
     <string name="detection_access_restricted">Pages that require sign-in or restricted access aren’t supported.</string>
-    <string name="detection_no_media">No supported public videos were found on this page.</string>
+    <string name="detection_no_media">No videos that Dambom can save were found on this page.</string>
     <string name="detection_network_error">Couldn’t connect to the page. Check your network.</string>
     <string name="detection_unsupported_format">Dambom doesn’t support this format yet.</string>
 </resources>

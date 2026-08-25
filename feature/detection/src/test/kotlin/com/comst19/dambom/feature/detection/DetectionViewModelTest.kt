@@ -9,6 +9,7 @@ import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
+import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.detection.contract.DetectionUiState
@@ -59,6 +60,25 @@ class DetectionViewModelTest {
             val content = viewModel.uiState.value as DetectionUiState.Content
             assertTrue(content.selectedIds.isEmpty())
         }
+
+    @Test
+    fun `unsupported page can continue in web with the same URL`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val viewModel =
+                DetectionViewModel(
+                    UnsupportedDetectionRepository,
+                    RecordingDownloadRepository(),
+                    navigation,
+                )
+
+            viewModel.detect(SOURCE_URL)
+            advanceUntilIdle()
+            viewModel.openInWeb()
+            advanceUntilIdle()
+
+            assertEquals(NavigationEvent.Replace(WebKey(SOURCE_URL)), navigation.dispatched.last())
+        }
 }
 
 private object SuccessfulDetectionRepository : MediaDetectionRepository {
@@ -89,6 +109,11 @@ private object MultipleVideoDetectionRepository : MediaDetectionRepository {
                     MediaCandidate("video-2", "$MEDIA_URL?item=2", "video 2", "video/mp4", null),
                 ),
         )
+}
+
+private object UnsupportedDetectionRepository : MediaDetectionRepository {
+    override suspend fun detect(url: String): MediaDetectionResult =
+        MediaDetectionResult.Unsupported(com.comst19.dambom.core.domain.model.UnsupportedReason.NO_MEDIA)
 }
 
 private class RecordingDownloadRepository : DownloadRepository {

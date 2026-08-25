@@ -63,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -107,6 +108,7 @@ internal fun DetectionRoute(
         networkAccess = networkAccess,
         onBack = viewModel::goBack,
         onRetry = viewModel::retry,
+        onOpenWeb = viewModel::openInWeb,
         onToggleCandidate = viewModel::toggleCandidate,
         onDownload = {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
@@ -128,6 +130,7 @@ internal fun DetectionScreen(
     networkAccess: NetworkAccessState,
     onBack: () -> Unit,
     onRetry: () -> Unit,
+    onOpenWeb: () -> Unit,
     onToggleCandidate: (String) -> Unit,
     onDownload: () -> Unit,
 ) {
@@ -158,7 +161,7 @@ internal fun DetectionScreen(
                 DetectionUiState.Loading -> LoadingContent()
                 DetectionUiState.NetworkUnavailable -> NetworkUnavailableContent()
                 is DetectionUiState.Content -> DetectionContent(uiState, networkAccess, onToggleCandidate, onDownload)
-                is DetectionUiState.Unsupported -> UnsupportedContent(uiState.reason, onRetry)
+                is DetectionUiState.Unsupported -> UnsupportedContent(uiState.reason, onRetry, onOpenWeb)
             }
         }
     }
@@ -503,6 +506,7 @@ private fun MediaCandidate.sourceLabel(): String = Uri.parse(url).host?.removePr
 private fun UnsupportedContent(
     reason: UnsupportedReason,
     onRetry: () -> Unit,
+    onOpenWeb: () -> Unit,
 ) {
     Column(
         modifier =
@@ -518,13 +522,29 @@ private fun UnsupportedContent(
         Spacer(Modifier.height(10.dp))
         Text(
             reason.description(),
+            modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(12.dp))
-        Text(
-            stringResource(R.string.detection_retry_hint),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        if (reason.canContinueInWeb()) {
+            Spacer(Modifier.height(16.dp))
+            Text(
+                stringResource(R.string.detection_open_web_hint),
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(12.dp))
+            Button(
+                onClick = onOpenWeb,
+                modifier = Modifier.fillMaxWidth(),
+                shape = DambomShapes.Control,
+            ) {
+                Text(stringResource(R.string.detection_open_web))
+            }
+        }
         TextButton(onClick = onRetry) { Text(stringResource(R.string.detection_retry)) }
         Spacer(Modifier.weight(1f))
     }
@@ -541,6 +561,9 @@ private fun UnsupportedReason.description(): String =
             UnsupportedReason.UNSUPPORTED_FORMAT -> R.string.detection_unsupported_format
         },
     )
+
+private fun UnsupportedReason.canContinueInWeb(): Boolean =
+    this == UnsupportedReason.NO_MEDIA || this == UnsupportedReason.UNSUPPORTED_FORMAT
 
 private fun Long.formatBytes(): String {
     val megabytes = this / (1024.0 * 1024.0)
@@ -578,6 +601,7 @@ private fun DetectionScreenPreview() {
             networkAccess = NetworkAccessState(NetworkConnection.UNMETERED),
             onBack = {},
             onRetry = {},
+            onOpenWeb = {},
             onToggleCandidate = {},
             onDownload = {},
         )

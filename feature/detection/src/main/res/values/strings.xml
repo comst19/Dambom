@@ -17,11 +17,12 @@
     <string name="detection_download_offline">인터넷에 연결되면 다운로드할 수 있어요.</string>
     <string name="detection_download_wifi_required">Wi-Fi 전용 설정이 켜져 있어 Wi-Fi 연결을 기다리고 있어요.</string>
     <string name="detection_not_found">영상을 찾지 못했어요</string>
-    <string name="detection_retry_hint">페이지에서 영상을 재생한 뒤 다시 감지해 보세요.</string>
     <string name="detection_retry">다시 감지</string>
+    <string name="detection_open_web_hint">이 페이지는 직접 열어야 영상을 찾을 수 있어요.</string>
+    <string name="detection_open_web">페이지에서 직접 찾기</string>
     <string name="detection_invalid_url">올바른 웹 주소인지 확인해 주세요.</string>
     <string name="detection_access_restricted">로그인 또는 접근 권한이 필요한 페이지는 지원하지 않아요.</string>
-    <string name="detection_no_media">이 페이지에서 지원하는 공개 영상을 발견하지 못했어요.</string>
+    <string name="detection_no_media">이 페이지에서 저장할 수 있는 영상을 찾지 못했어요.</string>
     <string name="detection_network_error">페이지에 연결하지 못했어요. 네트워크 상태를 확인해 주세요.</string>
     <string name="detection_unsupported_format">담봄이 아직 지원하지 않는 형식이에요.</string>
 </resources>

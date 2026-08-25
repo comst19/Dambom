@@ -65,6 +65,7 @@ internal fun AppScaffold(
     entries: List<NavEntry<NavKey>>,
     snackbarHostState: SnackbarHostState,
     networkAccess: NetworkAccessState,
+    isLibraryDetailPaneVisible: Boolean,
 ) {
     val chrome = appChrome(state.currentKey)
     val coroutineScope = rememberCoroutineScope()
@@ -127,7 +128,12 @@ internal fun AppScaffold(
     ) { innerPadding ->
         CompositionLocalProvider(LocalAppScaffoldPadding provides innerPadding) {
             // 각 화면이 일반, 목록, 전체 화면 특성에 맞게 이 PaddingValues를 적용합니다.
-            AppNavDisplay(entries, navigator, Modifier.fillMaxSize())
+            AppNavDisplay(
+                entries = entries,
+                navigator = navigator,
+                isLibraryDetailPaneVisible = isLibraryDetailPaneVisible,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
     }
 }

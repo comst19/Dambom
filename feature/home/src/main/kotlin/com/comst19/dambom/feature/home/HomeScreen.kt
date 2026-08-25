@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -48,6 +47,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.appScaffoldPadding
+import com.comst19.dambom.core.designsystem.AdaptiveTwoColumnLayout
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
@@ -111,90 +111,28 @@ internal fun HomeScreen(
                 .appScaffoldPadding(),
         contentAlignment = Alignment.TopCenter,
     ) {
-        Column(
-            modifier =
-                Modifier
-                    .widthIn(max = 640.dp)
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp, vertical = 20.dp),
-        ) {
-            HomeHeader(onOpenSettings)
-            Spacer(Modifier.height(36.dp))
-            Text(
-                text = stringResource(R.string.home_title),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = stringResource(R.string.home_description),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(24.dp))
-            OutlinedTextField(
-                value = uiState.url,
-                onValueChange = onUrlChange,
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(R.string.home_url_label)) },
-                placeholder = { Text(stringResource(R.string.home_url_placeholder)) },
-                singleLine = true,
-                trailingIcon = {
-                    IconButton(onClick = onPaste) {
-                        Icon(
-                            imageVector = Icons.Outlined.ContentPaste,
-                            contentDescription = stringResource(R.string.home_paste),
-                        )
-                    }
-                },
-                shape = DambomShapes.Control,
-            )
-            Spacer(Modifier.height(12.dp))
-            Button(
-                onClick = onAnalyze,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(54.dp),
-                enabled = uiState.isUrlValid && canUseInternet,
-                shape = DambomShapes.Control,
-            ) {
-                Text(stringResource(R.string.home_analyze), style = MaterialTheme.typography.labelLarge)
-            }
-            uiState.clipboardUrl?.let {
-                Spacer(Modifier.height(20.dp))
-                ClipboardSuggestion(
-                    url = it,
-                    onUse = onUseClipboardSuggestion,
-                    onDismiss = onDismissClipboardSuggestion,
+        AdaptiveTwoColumnLayout(
+            modifier = Modifier.verticalScroll(rememberScrollState()),
+            header = { HomeHeader(onOpenSettings) },
+            primary = {
+                HomePrimarySection(
+                    uiState = uiState,
+                    canUseInternet = canUseInternet,
+                    onUrlChange = onUrlChange,
+                    onPaste = onPaste,
+                    onAnalyze = onAnalyze,
+                    onOpenDownloads = onOpenDownloads,
+                    onUseClipboardSuggestion = onUseClipboardSuggestion,
+                    onDismissClipboardSuggestion = onDismissClipboardSuggestion,
                 )
-            }
-            if (uiState.downloadSummary.isVisible) {
-                Spacer(Modifier.height(20.dp))
-                HomeDownloadStatus(
-                    summary = uiState.downloadSummary,
-                    onClick = onOpenDownloads,
+            },
+            supporting = {
+                HomeOtherMethods(
+                    canUseInternet = canUseInternet,
+                    onOpenWeb = onOpenWeb,
                 )
-            }
-            Spacer(Modifier.height(36.dp))
-            Text(
-                text = stringResource(R.string.home_other_methods),
-                style = MaterialTheme.typography.titleLarge,
-            )
-            Spacer(Modifier.height(12.dp))
-            MethodRow(
-                title = stringResource(R.string.home_share_title),
-                description = stringResource(R.string.home_share_description),
-            )
-            Spacer(Modifier.height(8.dp))
-            MethodRow(
-                title = stringResource(R.string.home_browser_title),
-                description = stringResource(R.string.home_browser_description),
-                onClick = onOpenWeb,
-                enabled = canUseInternet,
-            )
-        }
+            },
+        )
     }
 
     if (uiState.showClipboardConsent) {
@@ -207,6 +145,101 @@ internal fun HomeScreen(
             onAnalyze = onAnalyzeSharedUrl,
             onDismiss = onDismissSharedUrl,
             canUseInternet = canUseInternet,
+        )
+    }
+}
+
+@Composable
+private fun HomePrimarySection(
+    uiState: HomeUiState,
+    canUseInternet: Boolean,
+    onUrlChange: (String) -> Unit,
+    onPaste: () -> Unit,
+    onAnalyze: () -> Unit,
+    onOpenDownloads: () -> Unit,
+    onUseClipboardSuggestion: () -> Unit,
+    onDismissClipboardSuggestion: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier) {
+        Text(
+            text = stringResource(R.string.home_title),
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.home_description),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(24.dp))
+        OutlinedTextField(
+            value = uiState.url,
+            onValueChange = onUrlChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text(stringResource(R.string.home_url_label)) },
+            placeholder = { Text(stringResource(R.string.home_url_placeholder)) },
+            singleLine = true,
+            trailingIcon = {
+                IconButton(onClick = onPaste) {
+                    Icon(
+                        imageVector = Icons.Outlined.ContentPaste,
+                        contentDescription = stringResource(R.string.home_paste),
+                    )
+                }
+            },
+            shape = DambomShapes.Control,
+        )
+        Spacer(Modifier.height(12.dp))
+        Button(
+            onClick = onAnalyze,
+            modifier = Modifier.fillMaxWidth().height(54.dp),
+            enabled = uiState.isUrlValid && canUseInternet,
+            shape = DambomShapes.Control,
+        ) {
+            Text(stringResource(R.string.home_analyze), style = MaterialTheme.typography.labelLarge)
+        }
+        uiState.clipboardUrl?.let {
+            Spacer(Modifier.height(20.dp))
+            ClipboardSuggestion(
+                url = it,
+                onUse = onUseClipboardSuggestion,
+                onDismiss = onDismissClipboardSuggestion,
+            )
+        }
+        if (uiState.downloadSummary.isVisible) {
+            Spacer(Modifier.height(20.dp))
+            HomeDownloadStatus(
+                summary = uiState.downloadSummary,
+                onClick = onOpenDownloads,
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeOtherMethods(
+    canUseInternet: Boolean,
+    onOpenWeb: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier) {
+        Text(
+            text = stringResource(R.string.home_other_methods),
+            style = MaterialTheme.typography.titleLarge,
+        )
+        Spacer(Modifier.height(12.dp))
+        MethodRow(
+            title = stringResource(R.string.home_share_title),
+            description = stringResource(R.string.home_share_description),
+        )
+        Spacer(Modifier.height(8.dp))
+        MethodRow(
+            title = stringResource(R.string.home_browser_title),
+            description = stringResource(R.string.home_browser_description),
+            onClick = onOpenWeb,
+            enabled = canUseInternet,
         )
     }
 }

@@ -3,8 +3,12 @@ package com.comst19.dambom.presentation
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import com.comst19.dambom.core.common.ui.SnackbarEventBus
@@ -38,6 +42,7 @@ internal fun DambomApp(
     val navigator = remember(state) { Navigator(state) }
     val snackbarHostState = remember { SnackbarHostState() }
     val currentNetworkAccess = rememberUpdatedState(networkAccess)
+    var isLibraryDetailPaneVisible by rememberSaveable { mutableStateOf(true) }
 
     // 모든 feature가 발행한 명령은 이 단일 collector에서 순서대로 NavigationState에 반영합니다.
     LaunchedEffect(dispatcher, navigator) {
@@ -51,7 +56,10 @@ internal fun DambomApp(
                 detectionEntries { currentNetworkAccess.value }
                 downloadEntries { currentNetworkAccess.value }
                 homeEntries { currentNetworkAccess.value }
-                libraryEntries()
+                libraryEntries(
+                    isDetailPaneVisible = { isLibraryDetailPaneVisible },
+                    onDetailPaneVisibilityChange = { isLibraryDetailPaneVisible = it },
+                )
                 settingsEntries()
                 webEntries()
             },
@@ -64,5 +72,6 @@ internal fun DambomApp(
         entries = entries,
         snackbarHostState = snackbarHostState,
         networkAccess = networkAccess,
+        isLibraryDetailPaneVisible = isLibraryDetailPaneVisible,
     )
 }

@@ -11,4 +11,10 @@ internal data class LibraryUiState(
     val selectedVideo: DownloadTask? = null,
     val query: String = "",
     val hasVideos: Boolean = false,
+    val viewMode: LibraryViewMode = LibraryViewMode.GRID,
 )
+
+internal enum class LibraryViewMode {
+    GRID,
+    LIST,
+}

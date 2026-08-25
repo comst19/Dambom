@@ -5,8 +5,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -22,9 +24,20 @@ import com.comst19.dambom.core.navigation.Navigator
 internal fun AppNavDisplay(
     entries: List<NavEntry<NavKey>>,
     navigator: Navigator,
+    isLibraryDetailPaneVisible: Boolean,
     modifier: Modifier,
 ) {
-    val listDetailSceneStrategy = rememberListDetailSceneStrategy<NavKey>()
+    val paneExpansionState = rememberPaneExpansionState()
+    val listDetailSceneStrategy =
+        rememberListDetailSceneStrategy<NavKey>(paneExpansionState = paneExpansionState)
+
+    LaunchedEffect(isLibraryDetailPaneVisible) {
+        if (isLibraryDetailPaneVisible) {
+            paneExpansionState.clear()
+        } else {
+            paneExpansionState.setFirstPaneProportion(1f)
+        }
+    }
     NavDisplay(
         entries = entries,
         onBack = navigator::goBack,

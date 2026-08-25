@@ -5,3 +5,5 @@ plugins {
 }
 
 android { namespace = "com.comst19.dambom.core.designsystem" }
+
+dependencies { implementation(libs.androidx.compose.material3.adaptive) }

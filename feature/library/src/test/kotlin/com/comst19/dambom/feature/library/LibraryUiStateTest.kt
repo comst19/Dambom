@@ -2,6 +2,7 @@ package com.comst19.dambom.feature.library
 
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.feature.library.contract.LibraryViewMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -53,6 +54,18 @@ class LibraryUiStateTest {
         assertEquals(selected, state.selectedVideo)
         assertEquals("travel", state.query)
         assertEquals(true, state.hasVideos)
+    }
+
+    @Test
+    fun `selected view mode is kept in ui state`() {
+        val state =
+            toLibraryUiState(
+                tasks = listOf(task("completed", DownloadStatus.COMPLETED, "/video/completed.mp4")),
+                selectedId = null,
+                viewMode = LibraryViewMode.LIST,
+            )
+
+        assertEquals(LibraryViewMode.LIST, state.viewMode)
     }
 
     @Test

@@ -16,6 +16,7 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
 import com.comst19.dambom.feature.library.contract.LibraryUiState
+import com.comst19.dambom.feature.library.contract.LibraryViewMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.SharingStarted
@@ -37,14 +38,21 @@ internal class LibraryViewModel
     ) : ViewModel() {
         private val selectedId = savedStateHandle.getStateFlow<String?>(SELECTED_ID_KEY, null)
         private val query = savedStateHandle.getStateFlow(QUERY_KEY, "")
+        private val viewMode = savedStateHandle.getStateFlow(VIEW_MODE_KEY, LibraryViewMode.GRID.name)
 
         val uiState: StateFlow<LibraryUiState> =
-            combine(repository.downloads, selectedId, query, ::toLibraryUiState)
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-                    initialValue = LibraryUiState(),
+            combine(repository.downloads, selectedId, query, viewMode) { tasks, selectedId, query, viewMode ->
+                toLibraryUiState(
+                    tasks = tasks,
+                    selectedId = selectedId,
+                    query = query,
+                    viewMode = LibraryViewMode.entries.firstOrNull { it.name == viewMode } ?: LibraryViewMode.GRID,
                 )
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+                initialValue = LibraryUiState(),
+            )
 
         fun openVideo(id: String) {
             savedStateHandle[SELECTED_ID_KEY] = id
@@ -57,6 +65,10 @@ internal class LibraryViewModel
 
         fun updateQuery(query: String) {
             savedStateHandle[QUERY_KEY] = query
+        }
+
+        fun setViewMode(viewMode: LibraryViewMode) {
+            savedStateHandle[VIEW_MODE_KEY] = viewMode.name
         }
 
         fun rename(
@@ -103,6 +115,14 @@ internal class LibraryViewModel
             viewModelScope.launch { showMessage(R.string.library_share_failure) }
         }
 
+        fun notifyLinkCopied() {
+            viewModelScope.launch { showMessage(R.string.library_copy_link_success) }
+        }
+
+        fun notifyOpenOriginalFailure() {
+            viewModelScope.launch { showMessage(R.string.library_open_original_failure) }
+        }
+
         private suspend fun Result<Unit>.notifyResult(
             successMessage: Int,
             failureMessage: Int,
@@ -122,6 +142,7 @@ internal fun toLibraryUiState(
     tasks: List<DownloadTask>,
     selectedId: String?,
     query: String = "",
+    viewMode: LibraryViewMode = LibraryViewMode.GRID,
 ): LibraryUiState {
     val savedVideos =
         tasks.filter { task ->
@@ -139,9 +160,11 @@ internal fun toLibraryUiState(
         selectedVideo = savedVideos.firstOrNull { it.id == selectedId },
         query = query,
         hasVideos = savedVideos.isNotEmpty(),
+        viewMode = viewMode,
     )
 }
 
 private const val SELECTED_ID_KEY = "library-selected-video-id"
 private const val QUERY_KEY = "library-search-query"
+private const val VIEW_MODE_KEY = "library-view-mode"
 private const val STOP_TIMEOUT_MILLIS = 5_000L

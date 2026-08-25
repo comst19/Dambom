@@ -1,13 +1,19 @@
 package com.comst19.dambom.feature.library
 
 import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AlertDialog
@@ -19,9 +25,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,10 +37,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.domain.model.DownloadTask
 
+@Immutable
 internal data class LibraryFileActions(
     val onRename: (DownloadTask, String) -> Unit,
     val onExport: (DownloadTask) -> Unit,
     val onShare: (DownloadTask) -> Unit,
+    val onCopyLink: (DownloadTask) -> Unit,
+    val onOpenOriginal: (DownloadTask) -> Unit,
     val onDelete: (DownloadTask) -> Unit,
 )
 
@@ -49,23 +60,41 @@ internal fun rememberLibraryFileActions(
             pendingExport = null
             if (destination != null && task != null) viewModel.export(task, destination)
         }
-    return LibraryFileActions(
-        onRename = viewModel::rename,
-        onExport = { task ->
-            pendingExport = task
-            exportLauncher.launch(task.suggestedFileName())
-        },
-        onShare = { task ->
-            try {
-                context.startActivity(viewModel.createShareIntent(task))
-            } catch (_: ActivityNotFoundException) {
-                viewModel.notifyShareFailure()
-            } catch (_: IllegalArgumentException) {
-                viewModel.notifyShareFailure()
-            }
-        },
-        onDelete = onDelete ?: { task -> viewModel.delete(task) },
-    )
+    val currentOnDelete = rememberUpdatedState(onDelete)
+    return remember(viewModel, context, exportLauncher) {
+        LibraryFileActions(
+            onRename = viewModel::rename,
+            onExport = { task ->
+                pendingExport = task
+                exportLauncher.launch(task.suggestedFileName())
+            },
+            onShare = { task ->
+                try {
+                    context.startActivity(viewModel.createShareIntent(task))
+                } catch (_: ActivityNotFoundException) {
+                    viewModel.notifyShareFailure()
+                } catch (_: IllegalArgumentException) {
+                    viewModel.notifyShareFailure()
+                }
+            },
+            onCopyLink = { task ->
+                context
+                    .getSystemService(ClipboardManager::class.java)
+                    .setPrimaryClip(ClipData.newPlainText("URL", task.sourcePageUrl))
+                viewModel.notifyLinkCopied()
+            },
+            onOpenOriginal = { task ->
+                try {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(task.sourcePageUrl)))
+                } catch (_: ActivityNotFoundException) {
+                    viewModel.notifyOpenOriginalFailure()
+                } catch (_: IllegalArgumentException) {
+                    viewModel.notifyOpenOriginalFailure()
+                }
+            },
+            onDelete = { task -> currentOnDelete.value?.invoke(task) ?: viewModel.delete(task) },
+        )
+    }
 }
 
 @Composable
@@ -98,19 +127,35 @@ internal fun VideoActionsButton(
                 },
             )
             ActionMenuItem(
-                label = stringResource(R.string.library_export),
-                icon = { Icon(Icons.Outlined.Download, contentDescription = null) },
-                onClick = {
-                    menuExpanded = false
-                    actions.onExport(task)
-                },
-            )
-            ActionMenuItem(
                 label = stringResource(R.string.library_share),
                 icon = { Icon(Icons.Outlined.Share, contentDescription = null) },
                 onClick = {
                     menuExpanded = false
                     actions.onShare(task)
+                },
+            )
+            ActionMenuItem(
+                label = stringResource(R.string.library_copy_link),
+                icon = { Icon(Icons.Outlined.Link, contentDescription = null) },
+                onClick = {
+                    menuExpanded = false
+                    actions.onCopyLink(task)
+                },
+            )
+            ActionMenuItem(
+                label = stringResource(R.string.library_open_original),
+                icon = { Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null) },
+                onClick = {
+                    menuExpanded = false
+                    actions.onOpenOriginal(task)
+                },
+            )
+            ActionMenuItem(
+                label = stringResource(R.string.library_export),
+                icon = { Icon(Icons.Outlined.Download, contentDescription = null) },
+                onClick = {
+                    menuExpanded = false
+                    actions.onExport(task)
                 },
             )
             ActionMenuItem(

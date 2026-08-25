@@ -6,19 +6,25 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.LibraryKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
-import com.comst19.dambom.feature.library.LibraryDetailPlaceholder
+import com.comst19.dambom.feature.library.LibraryDetailPlaceholderRoute
 import com.comst19.dambom.feature.library.LibraryRoute
 import com.comst19.dambom.feature.library.VideoPlayerRoute
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-fun EntryProviderScope<NavKey>.libraryEntries() {
+fun EntryProviderScope<NavKey>.libraryEntries(
+    isDetailPaneVisible: () -> Boolean,
+    onDetailPaneVisibilityChange: (Boolean) -> Unit,
+) {
     entry<LibraryKey>(
         metadata =
             ListDetailSceneStrategy.listPane(
-                detailPlaceholder = { LibraryDetailPlaceholder() },
+                detailPlaceholder = { LibraryDetailPlaceholderRoute() },
             ),
     ) {
-        LibraryRoute()
+        LibraryRoute(
+            isDetailPaneVisible = isDetailPaneVisible(),
+            onDetailPaneVisibilityChange = onDetailPaneVisibilityChange,
+        )
     }
     entry<VideoDetailKey>(metadata = ListDetailSceneStrategy.detailPane()) { key ->
         VideoPlayerRoute(key.id)

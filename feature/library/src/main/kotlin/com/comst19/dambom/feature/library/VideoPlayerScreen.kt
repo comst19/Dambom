@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -24,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Forward10
+import androidx.compose.material.icons.outlined.Fullscreen
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Replay10
@@ -49,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -61,6 +64,12 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -123,6 +132,8 @@ internal fun VideoPlayerScreen(
     onBack: () -> Unit,
     showBack: Boolean,
 ) {
+    var fullscreen by remember { mutableStateOf(false) }
+
     AppScreen(
         topBar = {
             TopAppBar(
@@ -141,7 +152,15 @@ internal fun VideoPlayerScreen(
                         {}
                     },
                 actions = {
-                    task?.let { VideoActionsButton(task = it, actions = fileActions) }
+                    task?.let {
+                        IconButton(onClick = { fullscreen = true }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Fullscreen,
+                                contentDescription = stringResource(R.string.player_fullscreen),
+                            )
+                        }
+                        VideoActionsButton(task = it, actions = fileActions)
+                    }
                 },
             )
         },
@@ -159,6 +178,104 @@ internal fun VideoPlayerScreen(
                         .consumeWindowInsets(innerPadding),
             )
         }
+    }
+
+    if (fullscreen && task != null) {
+        FullscreenVideoPlayer(
+            task = task,
+            player = player,
+            fileActions = fileActions,
+            onDismiss = { fullscreen = false },
+        )
+    }
+}
+
+@Composable
+private fun FullscreenVideoPlayer(
+    task: DownloadTask,
+    player: Player,
+    fileActions: LibraryFileActions,
+    onDismiss: () -> Unit,
+) {
+    val playPauseState = rememberPlayPauseButtonState(player)
+    val progressState = rememberProgressStateWithTickInterval(player, PROGRESS_TICK_MILLIS)
+    val surfaceDescription = stringResource(R.string.player_surface_description, task.title)
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties =
+            DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false,
+            ),
+    ) {
+        FullscreenSystemBars()
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = Color.Black,
+            contentColor = Color.White,
+        ) {
+            Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = stringResource(R.string.player_exit_fullscreen),
+                        )
+                    }
+                    Text(
+                        text = task.title,
+                        modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                        maxLines = 1,
+                    )
+                    VideoActionsButton(task = task, actions = fileActions)
+                }
+                ContentFrame(
+                    player = player,
+                    shutter = {},
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .background(Color.Black)
+                            .semantics { contentDescription = surfaceDescription },
+                )
+                Surface(
+                    color = Color.Black,
+                    contentColor = Color.White,
+                ) {
+                    Column(Modifier.padding(horizontal = 24.dp, vertical = 12.dp)) {
+                        PlayerControls(
+                            player = player,
+                            showPlay = playPauseState.showPlay,
+                            playEnabled = playPauseState.isEnabled,
+                            onPlayPause = playPauseState::onClick,
+                            positionMillis = progressState.currentPositionMs,
+                            durationMillis = progressState.durationMs,
+                            contentColor = Color.White,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FullscreenSystemBars() {
+    val view = LocalView.current
+    val window = (view.parent as? DialogWindowProvider)?.window
+
+    DisposableEffect(view, window) {
+        val controller = window?.let { WindowCompat.getInsetsController(it, view) }
+        controller?.apply {
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            hide(WindowInsetsCompat.Type.systemBars())
+        }
+        onDispose { controller?.show(WindowInsetsCompat.Type.systemBars()) }
     }
 }
 
@@ -205,6 +322,7 @@ private fun VideoPlayerPanel(
     ) {
         ContentFrame(
             player = player,
+            shutter = {},
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -314,6 +432,7 @@ private fun PlayerControls(
     onPlayPause: () -> Unit,
     positionMillis: Long,
     durationMillis: Long,
+    contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
 ) {
     val safeDuration = durationMillis.coerceAtLeast(0L)
     val progress =
@@ -417,7 +536,7 @@ private fun PlayerControls(
     Text(
         text = "$positionText / $durationText",
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = contentColor,
         style = MaterialTheme.typography.bodySmall,
     )
 }

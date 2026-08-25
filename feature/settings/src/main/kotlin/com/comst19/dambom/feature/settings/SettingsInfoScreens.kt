@@ -49,8 +49,10 @@ private fun HelpScreen(onBack: () -> Unit) {
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            items(HELP_STEPS.indices.toList()) { index ->
-                val step = HELP_STEPS[index]
+            items(
+                items = HELP_STEPS,
+                key = HelpStep::titleRes,
+            ) { step ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),

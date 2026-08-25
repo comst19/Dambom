@@ -2,6 +2,7 @@ package com.comst19.dambom.core.data.repository
 
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
+import com.comst19.dambom.core.domain.model.MediaVariant
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
@@ -96,23 +97,32 @@ private fun FxTweet.toCandidates(): List<MediaCandidate> {
     return media
         ?.videos
         .orEmpty()
-        .flatMap { video ->
-            video.formats
-                .filter { format -> format.container.equals("mp4", ignoreCase = true) }
-                .ifEmpty {
-                    listOf(
-                        FxVideoFormat(
-                            url = video.url,
-                            width = video.width,
-                            height = video.height,
-                        ),
+        .mapNotNull { video ->
+            val variants =
+                video.formats
+                    .filter { format -> format.container.equals("mp4", ignoreCase = true) }
+                    .ifEmpty {
+                        listOf(
+                            FxVideoFormat(
+                                url = video.url,
+                                width = video.width,
+                                height = video.height,
+                            ),
+                        )
+                    }.mapNotNull(FxVideoFormat::toVariant)
+                    .distinctBy(XVideoVariant::url)
+                    .sortedWith(
+                        compareByDescending<XVideoVariant> { variant -> variant.pixelCount }
+                            .thenByDescending { variant -> variant.bitrate ?: 0L },
                     )
-                }.mapNotNull(FxVideoFormat::toVariant)
-        }.distinctBy(XVideoVariant::url)
-        .sortedWith(
-            compareByDescending<XVideoVariant> { variant -> variant.pixelCount }
-                .thenByDescending { variant -> variant.bitrate ?: 0L },
-        ).map { variant -> variant.toCandidate(candidateTitle) }
+            val primary = variants.firstOrNull() ?: return@mapNotNull null
+            primary.toCandidate(
+                idSource = video.url,
+                title = candidateTitle,
+                thumbnailUrl = video.thumbnailUrl,
+                variants = variants.map(XVideoVariant::toMediaVariant),
+            )
+        }
 }
 
 private fun FxVideoFormat.toVariant(): XVideoVariant? {
@@ -137,11 +147,26 @@ private fun FxVideoFormat.toVariant(): XVideoVariant? {
     }
 }
 
-private fun XVideoVariant.toCandidate(title: String): MediaCandidate =
+private fun XVideoVariant.toCandidate(
+    idSource: String,
+    title: String,
+    thumbnailUrl: String?,
+    variants: List<MediaVariant>,
+): MediaCandidate =
     MediaCandidate(
-        id = MessageDigest.getInstance("SHA-256").digest(url.toByteArray()).joinToString("") { "%02x".format(it) },
+        id = MessageDigest.getInstance("SHA-256").digest(idSource.toByteArray()).joinToString("") { "%02x".format(it) },
         url = url,
         title = title,
+        mimeType = "video/mp4",
+        contentLength = size,
+        quality = quality,
+        thumbnailUrl = thumbnailUrl,
+        variants = variants,
+    )
+
+private fun XVideoVariant.toMediaVariant(): MediaVariant =
+    MediaVariant(
+        url = url,
         mimeType = "video/mp4",
         contentLength = size,
         quality = quality,

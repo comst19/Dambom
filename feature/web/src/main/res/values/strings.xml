@@ -13,8 +13,13 @@
     <string name="web_detecting">감지 중</string>
     <string name="web_detected_count">영상 %1$d개 감지됨</string>
     <string name="web_not_detected">영상 미감지</string>
+    <string name="web_playback_hint">영상이 안 잡히면 페이지에서 영상을 재생한 뒤 다시 감지해 보세요.</string>
     <string name="web_access_restricted">접근 제한</string>
     <string name="web_network_error">연결 오류</string>
+    <string name="web_connection_error_title">사이트에 연결하지 못했어요</string>
+    <string name="web_connection_error_description">사이트가 연결을 끊었거나 현재 네트워크에서 접근할 수 없어요.</string>
+    <string name="web_retry">다시 시도</string>
+    <string name="web_external_download_notice">외부 브라우저에서는 담봄이 영상을 감지하거나 다운로드할 수 없어요.</string>
     <string name="web_tabs_title">열린 탭 %1$d개</string>
     <string name="web_new_tab">새 탭</string>
     <string name="web_close_tab">탭 닫기</string>

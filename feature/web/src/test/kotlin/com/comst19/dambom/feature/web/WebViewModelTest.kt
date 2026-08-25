@@ -6,16 +6,24 @@ import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
+import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.feature.web.contract.RecentPage
 import com.comst19.dambom.feature.web.contract.WebDetectionState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class WebViewModelTest {
+    @get:Rule val mainDispatcherRule = MainDispatcherRule()
+
     @Test
     fun `tabs can be created selected and closed without leaving an empty list`() {
         val viewModel = createViewModel()
@@ -77,6 +85,31 @@ class WebViewModelTest {
     }
 
     @Test
+    fun `x quality requests count as one detected video`() {
+        val viewModel = createViewModel()
+        val tabId = viewModel.uiState.value.currentTabId
+
+        viewModel.onMediaRequest(
+            tabId,
+            "https://video.twimg.com/ext_tw_video/123/pu/vid/180x320/low.mp4",
+        )
+        viewModel.onMediaRequest(
+            tabId,
+            "https://video.twimg.com/ext_tw_video/123/pu/vid/360x640/medium.mp4",
+        )
+        viewModel.onMediaRequest(
+            tabId,
+            "https://video.twimg.com/ext_tw_video/123/pu/vid/720x1280/high.mp4",
+        )
+
+        assertEquals(
+            WebDetectionState.Found(1),
+            viewModel.uiState.value.currentTab
+                ?.detectionState,
+        )
+    }
+
+    @Test
     fun `tabs current selection and recent pages restore from saved state`() {
         val savedStateHandle = SavedStateHandle()
         val viewModel = createViewModel(savedStateHandle)
@@ -91,6 +124,24 @@ class WebViewModelTest {
         assertEquals("https://media.w3.org", restored.currentTab?.url)
         assertEquals(RecentPage("Article", "https://example.com/article"), restored.recentPages.single())
     }
+
+    @Test
+    fun `media detection failure restores after activity recreation`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val savedStateHandle = SavedStateHandle()
+            val viewModel = createViewModel(savedStateHandle)
+            viewModel.applyInitialUrl("https://example.com")
+
+            viewModel.detectCurrentTab()
+            advanceUntilIdle()
+
+            val restored = createViewModel(savedStateHandle).uiState.value
+
+            assertEquals(
+                WebDetectionState.NotFound(UnsupportedReason.NO_MEDIA),
+                restored.currentTab?.detectionState,
+            )
+        }
 }
 
 private fun createViewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) =

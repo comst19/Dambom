@@ -40,6 +40,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -80,6 +82,7 @@ import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.domain.model.MediaCandidate
+import com.comst19.dambom.core.domain.model.MediaVariant
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.model.NetworkConnection
 import com.comst19.dambom.core.domain.model.NetworkRestriction
@@ -110,6 +113,7 @@ internal fun DetectionRoute(
         onRetry = viewModel::retry,
         onOpenWeb = viewModel::openInWeb,
         onToggleCandidate = viewModel::toggleCandidate,
+        onSelectVariant = viewModel::selectVariant,
         onDownload = {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
                 ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
@@ -132,6 +136,7 @@ internal fun DetectionScreen(
     onRetry: () -> Unit,
     onOpenWeb: () -> Unit,
     onToggleCandidate: (String) -> Unit,
+    onSelectVariant: (String, String) -> Unit,
     onDownload: () -> Unit,
 ) {
     AppScreen(
@@ -158,10 +163,21 @@ internal fun DetectionScreen(
             contentAlignment = Alignment.TopCenter,
         ) {
             when (uiState) {
-                DetectionUiState.Loading -> LoadingContent()
-                DetectionUiState.NetworkUnavailable -> NetworkUnavailableContent()
-                is DetectionUiState.Content -> DetectionContent(uiState, networkAccess, onToggleCandidate, onDownload)
-                is DetectionUiState.Unsupported -> UnsupportedContent(uiState.reason, onRetry, onOpenWeb)
+                DetectionUiState.Loading -> {
+                    LoadingContent()
+                }
+
+                DetectionUiState.NetworkUnavailable -> {
+                    NetworkUnavailableContent()
+                }
+
+                is DetectionUiState.Content -> {
+                    DetectionContent(uiState, networkAccess, onToggleCandidate, onSelectVariant, onDownload)
+                }
+
+                is DetectionUiState.Unsupported -> {
+                    UnsupportedContent(uiState.reason, onRetry, onOpenWeb)
+                }
             }
         }
     }
@@ -206,6 +222,7 @@ private fun DetectionContent(
     state: DetectionUiState.Content,
     networkAccess: NetworkAccessState,
     onToggleCandidate: (String) -> Unit,
+    onSelectVariant: (String, String) -> Unit,
     onDownload: () -> Unit,
 ) {
     var previewCandidate by remember { mutableStateOf<MediaCandidate?>(null) }
@@ -260,12 +277,18 @@ private fun DetectionContent(
                 key = { _, candidate -> candidate.id },
                 contentType = { _, _ -> CANDIDATE_CONTENT_TYPE },
             ) { index, candidate ->
+                val selectedVariant =
+                    candidate.downloadVariants.firstOrNull {
+                        it.url == state.selectedVariantUrls[candidate.id]
+                    } ?: candidate.downloadVariants.first()
                 CandidateItem(
                     candidate = candidate,
+                    selectedVariant = selectedVariant,
                     index = index + 1,
                     selected = candidate.id in state.selectedIds,
                     onClick = { onToggleCandidate(candidate.id) },
-                    onPreview = { previewCandidate = candidate },
+                    onSelectVariant = { onSelectVariant(candidate.id, it) },
+                    onPreview = { previewCandidate = candidate.copy(url = selectedVariant.url) },
                 )
             }
         }
@@ -279,11 +302,14 @@ private fun DetectionContent(
 @Composable
 private fun CandidateItem(
     candidate: MediaCandidate,
+    selectedVariant: MediaVariant,
     index: Int,
     selected: Boolean,
     onClick: () -> Unit,
+    onSelectVariant: (String) -> Unit,
     onPreview: () -> Unit,
 ) {
+    var qualityMenuExpanded by remember(candidate.id) { mutableStateOf(false) }
     Card(
         modifier =
             Modifier
@@ -340,12 +366,26 @@ private fun CandidateItem(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Text(
-                        candidate.quality,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    candidate.contentLength?.let {
+                    Box {
+                        TextButton(onClick = { qualityMenuExpanded = true }) {
+                            Text(selectedVariant.quality)
+                        }
+                        DropdownMenu(
+                            expanded = qualityMenuExpanded,
+                            onDismissRequest = { qualityMenuExpanded = false },
+                        ) {
+                            candidate.downloadVariants.forEach { variant ->
+                                DropdownMenuItem(
+                                    text = { Text(variant.quality) },
+                                    onClick = {
+                                        qualityMenuExpanded = false
+                                        onSelectVariant(variant.url)
+                                    },
+                                )
+                            }
+                        }
+                    }
+                    selectedVariant.contentLength?.let {
                         Text(
                             it.formatBytes(),
                             style = MaterialTheme.typography.bodySmall,
@@ -424,7 +464,7 @@ private fun CandidatePreviewDialog(
     var videoAspectRatio by remember(candidate.id) { mutableFloatStateOf(VIDEO_ASPECT_RATIO) }
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
         BoxWithConstraints(
             modifier = Modifier.fillMaxSize().padding(32.dp),
@@ -603,6 +643,7 @@ private fun DetectionScreenPreview() {
             onRetry = {},
             onOpenWeb = {},
             onToggleCandidate = {},
+            onSelectVariant = { _, _ -> },
             onDownload = {},
         )
     }

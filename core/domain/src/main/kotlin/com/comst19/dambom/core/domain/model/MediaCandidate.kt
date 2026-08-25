@@ -8,6 +8,27 @@ data class MediaCandidate(
     val contentLength: Long?,
     val quality: String = ORIGINAL_QUALITY,
     val thumbnailUrl: String? = null,
+    val variants: List<MediaVariant> = emptyList(),
+) {
+    val downloadVariants: List<MediaVariant>
+        get() =
+            variants.ifEmpty {
+                listOf(
+                    MediaVariant(
+                        url = url,
+                        mimeType = mimeType,
+                        contentLength = contentLength,
+                        quality = quality,
+                    ),
+                )
+            }
+}
+
+data class MediaVariant(
+    val url: String,
+    val mimeType: String?,
+    val contentLength: Long?,
+    val quality: String,
 )
 
 sealed interface MediaDetectionResult {

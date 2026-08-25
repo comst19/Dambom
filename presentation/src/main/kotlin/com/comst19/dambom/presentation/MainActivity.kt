@@ -1,6 +1,8 @@
 package com.comst19.dambom.presentation
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -38,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        applyOrientationPolicy(resources.configuration.smallestScreenWidthDp)
         splashScreen.setKeepOnScreenCondition {
             mainViewModel.startupState.value is AppStartupState.Initializing
         }
@@ -45,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
         }
-        handleSharedText(intent)
+        if (savedInstanceState == null) handleSharedText(intent)
         setContent {
             val settings by mainViewModel.settings.collectAsStateWithLifecycle()
             val networkAccess by mainViewModel.networkAccess.collectAsStateWithLifecycle()
@@ -83,6 +86,12 @@ class MainActivity : AppCompatActivity() {
         handleSharedText(intent)
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
+    private fun applyOrientationPolicy(smallestScreenWidthDp: Int) {
+        val orientation = requestedOrientationFor(smallestScreenWidthDp)
+        if (requestedOrientation != orientation) requestedOrientation = orientation
+    }
+
     private fun handleSharedText(intent: Intent) {
         if (intent.action != Intent.ACTION_SEND || intent.type != "text/plain") return
         val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
@@ -92,3 +101,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
+internal fun requestedOrientationFor(smallestScreenWidthDp: Int): Int =
+    if (smallestScreenWidthDp < ROTATION_MIN_SMALLEST_WIDTH_DP) {
+        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    } else {
+        ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
+
+private const val ROTATION_MIN_SMALLEST_WIDTH_DP = 600

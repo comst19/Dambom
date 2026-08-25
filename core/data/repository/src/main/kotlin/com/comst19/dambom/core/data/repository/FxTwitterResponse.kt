@@ -33,6 +33,7 @@ internal data class FxVideo(
     val url: String,
     val width: Int? = null,
     val height: Int? = null,
+    @SerialName("thumbnail_url") val thumbnailUrl: String? = null,
     val formats: List<FxVideoFormat> = emptyList(),
 )
 

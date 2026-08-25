@@ -5,6 +5,7 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
+import com.comst19.dambom.core.domain.model.MediaVariant
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.navigation.NavigationEvent
@@ -45,6 +46,27 @@ class DetectionViewModelTest {
         }
 
     @Test
+    fun `selected video downloads the chosen quality variant`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val downloads = RecordingDownloadRepository()
+            val viewModel =
+                DetectionViewModel(
+                    SuccessfulDetectionRepository,
+                    downloads,
+                    SpyNavigationDispatcher(),
+                )
+
+            viewModel.detect(SOURCE_URL)
+            advanceUntilIdle()
+            viewModel.selectVariant("video-1", LOW_MEDIA_URL)
+            viewModel.downloadSelected()
+            advanceUntilIdle()
+
+            assertEquals(listOf(LOW_MEDIA_URL), downloads.enqueued.single().map(DownloadRequest::url))
+            assertEquals(listOf(LOW_MEDIA_QUALITY), downloads.enqueued.single().map(DownloadRequest::quality))
+        }
+
+    @Test
     fun `multiple detected videos require an explicit selection`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel =
@@ -62,7 +84,7 @@ class DetectionViewModelTest {
         }
 
     @Test
-    fun `unsupported page can continue in web with the same URL`() =
+    fun `unsupported page automatically continues in web with the same URL`() =
         runTest(mainDispatcherRule.dispatcher) {
             val navigation = SpyNavigationDispatcher()
             val viewModel =
@@ -73,8 +95,6 @@ class DetectionViewModelTest {
                 )
 
             viewModel.detect(SOURCE_URL)
-            advanceUntilIdle()
-            viewModel.openInWeb()
             advanceUntilIdle()
 
             assertEquals(NavigationEvent.Replace(WebKey(SOURCE_URL)), navigation.dispatched.last())
@@ -94,6 +114,11 @@ private object SuccessfulDetectionRepository : MediaDetectionRepository {
                         mimeType = "video/mp4",
                         contentLength = 1024L,
                         quality = MEDIA_QUALITY,
+                        variants =
+                            listOf(
+                                MediaVariant(MEDIA_URL, "video/mp4", 1024L, MEDIA_QUALITY),
+                                MediaVariant(LOW_MEDIA_URL, "video/mp4", 512L, LOW_MEDIA_QUALITY),
+                            ),
                     ),
                 ),
         )
@@ -149,4 +174,6 @@ private class RecordingDownloadRepository : DownloadRepository {
 
 private const val SOURCE_URL = "https://example.com/page"
 private const val MEDIA_URL = "https://example.com/video.mp4"
+private const val LOW_MEDIA_URL = "https://example.com/video-low.mp4"
 private const val MEDIA_QUALITY = "720×1280 · 2176 kbps"
+private const val LOW_MEDIA_QUALITY = "360×640 · 832 kbps"

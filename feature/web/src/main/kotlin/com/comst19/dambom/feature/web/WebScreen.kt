@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
@@ -198,6 +199,7 @@ internal fun WebScreen(
                     onMediaRequest = onMediaRequest,
                     onSaveWebState = onSaveWebState,
                     onDetect = onDetect,
+                    onOpenExternal = onOpenExternal,
                 )
             }
         }
@@ -421,9 +423,11 @@ private fun ColumnScope.WebContent(
     onMediaRequest: (Long, String) -> Unit,
     onSaveWebState: (Long, Bundle) -> Unit,
     onDetect: () -> Unit,
+    onOpenExternal: (String) -> Unit,
 ) {
     var webView by remember(tab.id) { mutableStateOf<WebView?>(null) }
     var loadingProgress by remember(tab.id) { mutableStateOf(0) }
+    var navigationFailure by remember(tab.id) { mutableStateOf<WebNavigationFailure?>(null) }
     var webViewGeneration by remember(tab.id) { androidx.compose.runtime.mutableIntStateOf(0) }
 
     if (loadingProgress in 1..99) {
@@ -434,35 +438,49 @@ private fun ColumnScope.WebContent(
     }
     key(webViewGeneration) {
         val rendererGone = remember { AtomicBoolean(false) }
-        AndroidView(
-            factory = { context ->
-                createWebView(
-                    context = context,
-                    tab = tab,
-                    savedState = savedState,
-                    onPageChanged = onPageChanged,
-                    onMediaRequest = onMediaRequest,
-                    onProgress = { loadingProgress = it },
-                    onRendererGone = {
-                        rendererGone.set(true)
-                        onWebViewReady(null)
-                        webViewGeneration += 1
-                    },
-                ).also {
-                    webView = it
-                    onWebViewReady(it)
-                }
-            },
+        Box(
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .weight(1f)
                     .clipToBounds(),
-            update = { view ->
-                val targetUrl = tab.url
-                if (targetUrl != null && view.url != targetUrl) view.loadUrl(targetUrl)
-            },
-        )
+        ) {
+            AndroidView(
+                factory = { context ->
+                    createWebView(
+                        context = context,
+                        tab = tab,
+                        savedState = savedState,
+                        onPageChanged = onPageChanged,
+                        onMediaRequest = onMediaRequest,
+                        onProgress = { loadingProgress = it },
+                        onNavigationFailure = { navigationFailure = it },
+                        onRendererGone = {
+                            rendererGone.set(true)
+                            onWebViewReady(null)
+                            webViewGeneration += 1
+                        },
+                    ).also {
+                        webView = it
+                        onWebViewReady(it)
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+                update = { view ->
+                    val targetUrl = tab.url
+                    if (targetUrl != null && view.url != targetUrl) view.loadUrl(targetUrl)
+                },
+            )
+            navigationFailure?.let {
+                WebNavigationErrorContent(
+                    onRetry = {
+                        navigationFailure = null
+                        webView?.reload()
+                    },
+                    onOpenExternal = { tab.url?.let(onOpenExternal) },
+                )
+            }
+        }
 
         DisposableEffect(tab.id, webViewGeneration) {
             onDispose {
@@ -487,36 +505,104 @@ private fun ColumnScope.WebContent(
 }
 
 @Composable
+private fun WebNavigationErrorContent(
+    onRetry: () -> Unit,
+    onOpenExternal: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Language,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = stringResource(R.string.web_connection_error_title),
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.web_connection_error_description),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+            Spacer(Modifier.height(20.dp))
+            Button(onClick = onRetry) {
+                Icon(Icons.Outlined.Refresh, contentDescription = null)
+                Text(
+                    text = stringResource(R.string.web_retry),
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
+            TextButton(onClick = onOpenExternal) {
+                Text(stringResource(R.string.web_open_external))
+            }
+            Text(
+                text = stringResource(R.string.web_external_download_notice),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+        }
+    }
+}
+
+@Composable
 private fun WebToolbar(
     webView: WebView?,
     detectionState: WebDetectionState,
     onDetect: () -> Unit,
 ) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(onClick = { webView?.goBack() }, enabled = webView?.canGoBack() == true) {
-            Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.web_go_back))
+    Column {
+        if (detectionState.shouldShowPlaybackHint()) {
+            Text(
+                text = stringResource(R.string.web_playback_hint),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
         }
-        IconButton(onClick = { webView?.goForward() }, enabled = webView?.canGoForward() == true) {
-            Icon(Icons.AutoMirrored.Outlined.ArrowForward, stringResource(R.string.web_go_forward))
-        }
-        IconButton(onClick = { webView?.reload() }) {
-            Icon(Icons.Outlined.Refresh, stringResource(R.string.web_refresh))
-        }
-        Spacer(Modifier.weight(1f))
-        TextButton(
-            onClick = onDetect,
-            enabled = detectionState !is WebDetectionState.Scanning,
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(detectionState.label())
+            IconButton(onClick = { webView?.goBack() }, enabled = webView?.canGoBack() == true) {
+                Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.web_go_back))
+            }
+            IconButton(onClick = { webView?.goForward() }, enabled = webView?.canGoForward() == true) {
+                Icon(Icons.AutoMirrored.Outlined.ArrowForward, stringResource(R.string.web_go_forward))
+            }
+            IconButton(onClick = { webView?.reload() }) {
+                Icon(Icons.Outlined.Refresh, stringResource(R.string.web_refresh))
+            }
+            Spacer(Modifier.weight(1f))
+            TextButton(
+                onClick = onDetect,
+                enabled = detectionState !is WebDetectionState.Scanning,
+            ) {
+                Text(detectionState.label())
+            }
         }
     }
 }
+
+internal fun WebDetectionState.shouldShowPlaybackHint(): Boolean =
+    this is WebDetectionState.NotFound &&
+        (reason == UnsupportedReason.NO_MEDIA || reason == UnsupportedReason.UNSUPPORTED_FORMAT)
 
 @Composable
 private fun WebDetectionState.label(): String =
@@ -618,6 +704,7 @@ private fun createWebView(
     onPageChanged: (Long, String?, String?) -> Unit,
     onMediaRequest: (Long, String) -> Unit,
     onProgress: (Int) -> Unit,
+    onNavigationFailure: (WebNavigationFailure?) -> Unit,
     onRendererGone: () -> Unit,
 ): WebView =
     WebView(context).apply {
@@ -639,6 +726,7 @@ private fun createWebView(
                     url: String?,
                     favicon: Bitmap?,
                 ) {
+                    onNavigationFailure(null)
                     onPageChanged(tab.id, url, view?.title)
                 }
 
@@ -656,6 +744,17 @@ private fun createWebView(
                     val url = request?.url?.toString() ?: return null
                     onMediaRequest(tab.id, url)
                     return if (shouldBlockWebVideo(url, mediaGuardInstalled)) blockedVideoResponse() else null
+                }
+
+                override fun onReceivedError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    error: WebResourceError?,
+                ) {
+                    classifyWebNavigationFailure(
+                        isForMainFrame = request?.isForMainFrame == true,
+                        errorCode = error?.errorCode,
+                    )?.let(onNavigationFailure)
                 }
 
                 override fun onRenderProcessGone(
@@ -703,6 +802,15 @@ private fun blockedVideoResponse() =
         emptyMap(),
         ByteArrayInputStream(ByteArray(0)),
     )
+
+internal enum class WebNavigationFailure {
+    CONNECTION,
+}
+
+internal fun classifyWebNavigationFailure(
+    isForMainFrame: Boolean,
+    errorCode: Int?,
+): WebNavigationFailure? = if (isForMainFrame && errorCode != null) WebNavigationFailure.CONNECTION else null
 
 private val WEB_VIDEO_EXTENSIONS = setOf(".mp4", ".webm", ".mov", ".m4v")
 

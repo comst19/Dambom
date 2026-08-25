@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.comst19.dambom.core.common.suspendRunCatching
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
+import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
@@ -15,6 +16,7 @@ import com.comst19.dambom.feature.detection.contract.DetectionUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.mutate
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.collections.immutable.toPersistentSet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,9 +42,9 @@ internal class DetectionViewModel
             loadedUrl = url
             mutableUiState.value = DetectionUiState.Loading
             viewModelScope.launch {
-                mutableUiState.value =
-                    when (val result = repository.detect(url)) {
-                        is MediaDetectionResult.Success -> {
+                when (val result = repository.detect(url)) {
+                    is MediaDetectionResult.Success -> {
+                        mutableUiState.value =
                             DetectionUiState.Content(
                                 pageTitle = result.pageTitle,
                                 candidates = result.candidates.toPersistentList(),
@@ -52,13 +54,21 @@ internal class DetectionViewModel
                                         .orEmpty()
                                         .map { it.id }
                                         .toPersistentSet(),
+                                selectedVariantUrls =
+                                    result.candidates
+                                        .associate { candidate -> candidate.id to candidate.url }
+                                        .toPersistentMap(),
                             )
-                        }
+                    }
 
-                        is MediaDetectionResult.Unsupported -> {
-                            DetectionUiState.Unsupported(result.reason)
+                    is MediaDetectionResult.Unsupported -> {
+                        if (result.reason == UnsupportedReason.INVALID_URL) {
+                            mutableUiState.value = DetectionUiState.Unsupported(result.reason)
+                        } else {
+                            navigation.dispatch(NavigationEvent.Replace(WebKey(url)))
                         }
                     }
+                }
             }
         }
 
@@ -92,6 +102,18 @@ internal class DetectionViewModel
             }
         }
 
+        fun selectVariant(
+            candidateId: String,
+            url: String,
+        ) {
+            mutableUiState.update { state ->
+                if (state !is DetectionUiState.Content) return@update state
+                val candidate = state.candidates.firstOrNull { it.id == candidateId } ?: return@update state
+                if (candidate.downloadVariants.none { it.url == url }) return@update state
+                state.copy(selectedVariantUrls = state.selectedVariantUrls.putting(candidateId, url))
+            }
+        }
+
         fun downloadSelected() {
             val state = mutableUiState.value as? DetectionUiState.Content ?: return
             val sourcePageUrl = loadedUrl ?: return
@@ -102,14 +124,18 @@ internal class DetectionViewModel
                     state.candidates
                         .filter { it.id in state.selectedIds }
                         .map { candidate ->
+                            val selectedUrl = state.selectedVariantUrls[candidate.id]
+                            val variant =
+                                candidate.downloadVariants.firstOrNull { it.url == selectedUrl }
+                                    ?: candidate.downloadVariants.first()
                             DownloadRequest(
                                 id = candidate.id,
-                                url = candidate.url,
+                                url = variant.url,
                                 sourcePageUrl = sourcePageUrl,
                                 title = candidate.title,
-                                mimeType = candidate.mimeType,
-                                expectedBytes = candidate.contentLength,
-                                quality = candidate.quality,
+                                mimeType = variant.mimeType,
+                                expectedBytes = variant.contentLength,
+                                quality = variant.quality,
                             )
                         }
                 suspendRunCatching { downloadRepository.enqueue(requests) }

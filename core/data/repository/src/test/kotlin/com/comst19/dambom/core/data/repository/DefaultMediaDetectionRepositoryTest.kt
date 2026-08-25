@@ -104,7 +104,7 @@ class DefaultMediaDetectionRepositoryTest {
         }
 
     @Test
-    fun `x post exposes mp4 variants sorted by quality`() =
+    fun `x post groups quality variants as one video with its thumbnail`() =
         runTest {
             server.enqueue(
                 MockResponse()
@@ -120,13 +120,22 @@ class DefaultMediaDetectionRepositoryTest {
             assertTrue(result is MediaDetectionResult.Success)
             result as MediaDetectionResult.Success
             assertEquals("API demos (@FloodSocial)", result.pageTitle)
+            assertEquals(1, result.candidates.size)
+            assertEquals("720×1280 · 2176 kbps", result.candidates.single().quality)
             assertEquals(
                 listOf(
                     "720×1280 · 2176 kbps",
                     "360×640 · 832 kbps",
                     "180×320 · 256 kbps",
                 ),
-                result.candidates.map { it.quality },
+                result.candidates
+                    .single()
+                    .downloadVariants
+                    .map { it.quality },
+            )
+            assertEquals(
+                "https://pbs.twimg.com/ext_tw_video_thumb/869317980307415040/pu/img/demo.jpg",
+                result.candidates.single().thumbnailUrl,
             )
             assertTrue(result.candidates.all { it.mimeType == "video/mp4" })
             assertEquals("/i/status/869318041078820864", server.takeRequest().path)
@@ -163,6 +172,7 @@ private val X_VIDEO_RESPONSE =
             "width": 720,
             "height": 1280,
             "duration": 10.704,
+            "thumbnail_url": "https://pbs.twimg.com/ext_tw_video_thumb/869317980307415040/pu/img/demo.jpg",
             "formats": [
               { "container": "m3u8", "url": "https://video.twimg.com/video.m3u8" },
               { "container": "mp4", "codec": "h264", "bitrate": 256000, "url": "https://video.twimg.com/pu/vid/180x320/low.mp4" },

@@ -13,8 +13,13 @@
     <string name="web_detecting">Detecting</string>
     <string name="web_detected_count">%1$d videos detected</string>
     <string name="web_not_detected">No video detected</string>
+    <string name="web_playback_hint">If no video is detected, play it on the page and try again.</string>
     <string name="web_access_restricted">Access restricted</string>
     <string name="web_network_error">Connection error</string>
+    <string name="web_connection_error_title">Couldn\'t connect to the site</string>
+    <string name="web_connection_error_description">The site closed the connection or is unavailable on the current network.</string>
+    <string name="web_retry">Try again</string>
+    <string name="web_external_download_notice">Dambom cannot detect or download videos from an external browser.</string>
     <string name="web_tabs_title">%1$d open tabs</string>
     <string name="web_new_tab">New tab</string>
     <string name="web_close_tab">Close tab</string>

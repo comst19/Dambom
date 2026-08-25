@@ -106,14 +106,6 @@ internal class HomeViewModel
             }
         }
 
-        fun openSharedUrlInWeb() {
-            val sharedUrl = uiState.value.sharedUrl ?: return
-            viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Navigate(WebKey(sharedUrl)))
-                sharedUrlBus.clear()
-            }
-        }
-
         fun analyzeSharedUrl() {
             val sharedUrl = uiState.value.sharedUrl ?: return
             viewModelScope.launch {

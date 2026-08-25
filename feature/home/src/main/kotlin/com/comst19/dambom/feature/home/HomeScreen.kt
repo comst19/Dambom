@@ -13,14 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -30,7 +29,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -48,7 +46,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.appScaffoldPadding
-import com.comst19.dambom.core.designsystem.AdaptiveTwoColumnLayout
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
@@ -82,7 +79,6 @@ internal fun HomeRoute(
         onClipboardConsent = viewModel::setClipboardSuggestionEnabled,
         onUseClipboardSuggestion = { viewModel.useClipboardText(uiState.clipboardUrl) },
         onDismissClipboardSuggestion = viewModel::dismissClipboardSuggestion,
-        onOpenSharedUrlInWeb = viewModel::openSharedUrlInWeb,
         onAnalyzeSharedUrl = viewModel::analyzeSharedUrl,
         onDismissSharedUrl = viewModel::dismissSharedUrl,
     )
@@ -101,7 +97,6 @@ internal fun HomeScreen(
     onClipboardConsent: (Boolean) -> Unit,
     onUseClipboardSuggestion: () -> Unit,
     onDismissClipboardSuggestion: () -> Unit,
-    onOpenSharedUrlInWeb: () -> Unit,
     onAnalyzeSharedUrl: () -> Unit,
     onDismissSharedUrl: () -> Unit,
 ) {
@@ -112,28 +107,33 @@ internal fun HomeScreen(
                 .appScaffoldPadding(),
         contentAlignment = Alignment.TopCenter,
     ) {
-        AdaptiveTwoColumnLayout(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-            header = { HomeHeader(onOpenSettings) },
-            primary = {
-                HomePrimarySection(
-                    uiState = uiState,
-                    canUseInternet = canUseInternet,
-                    onUrlChange = onUrlChange,
-                    onPaste = onPaste,
-                    onAnalyze = onAnalyze,
-                    onOpenDownloads = onOpenDownloads,
-                    onUseClipboardSuggestion = onUseClipboardSuggestion,
-                    onDismissClipboardSuggestion = onDismissClipboardSuggestion,
-                )
-            },
-            supporting = {
-                HomeOtherMethods(
-                    canUseInternet = canUseInternet,
-                    onOpenWeb = onOpenWeb,
-                )
-            },
-        )
+        Column(
+            modifier =
+                Modifier
+                    .widthIn(max = HOME_CONTENT_MAX_WIDTH)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+        ) {
+            HomeHeader(onOpenSettings)
+            Spacer(Modifier.height(28.dp))
+            HomePrimarySection(
+                uiState = uiState,
+                canUseInternet = canUseInternet,
+                onUrlChange = onUrlChange,
+                onPaste = onPaste,
+                onAnalyze = onAnalyze,
+                onUseClipboardSuggestion = onUseClipboardSuggestion,
+                onDismissClipboardSuggestion = onDismissClipboardSuggestion,
+            )
+            Spacer(Modifier.height(28.dp))
+            HomeSupportingSection(
+                downloadSummary = uiState.downloadSummary,
+                canUseInternet = canUseInternet,
+                onOpenWeb = onOpenWeb,
+                onOpenDownloads = onOpenDownloads,
+            )
+        }
     }
 
     if (uiState.showClipboardConsent) {
@@ -142,7 +142,6 @@ internal fun HomeScreen(
     uiState.sharedUrl?.let {
         SharedUrlDialog(
             url = it,
-            onOpenWeb = onOpenSharedUrlInWeb,
             onAnalyze = onAnalyzeSharedUrl,
             onDismiss = onDismissSharedUrl,
             canUseInternet = canUseInternet,
@@ -157,7 +156,6 @@ private fun HomePrimarySection(
     onUrlChange: (String) -> Unit,
     onPaste: () -> Unit,
     onAnalyze: () -> Unit,
-    onOpenDownloads: () -> Unit,
     onUseClipboardSuggestion: () -> Unit,
     onDismissClipboardSuggestion: () -> Unit,
     modifier: Modifier = Modifier,
@@ -209,39 +207,47 @@ private fun HomePrimarySection(
                 onDismiss = onDismissClipboardSuggestion,
             )
         }
-        if (uiState.downloadSummary.isVisible) {
-            Spacer(Modifier.height(20.dp))
-            HomeDownloadStatus(
-                summary = uiState.downloadSummary,
-                onClick = onOpenDownloads,
-            )
-        }
     }
 }
 
 @Composable
-private fun HomeOtherMethods(
+private fun HomeSupportingSection(
+    downloadSummary: HomeDownloadSummary,
     canUseInternet: Boolean,
     onOpenWeb: () -> Unit,
+    onOpenDownloads: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
         Text(
-            text = stringResource(R.string.home_other_methods),
-            style = MaterialTheme.typography.titleLarge,
+            text = stringResource(R.string.home_web_prompt_title),
+            style = MaterialTheme.typography.titleMedium,
         )
-        Spacer(Modifier.height(12.dp))
-        ShareInstruction(
-            title = stringResource(R.string.home_share_title),
-            description = stringResource(R.string.home_share_description),
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.home_web_prompt_description),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(8.dp))
-        BrowserActionCard(
-            title = stringResource(R.string.home_browser_title),
-            description = stringResource(R.string.home_browser_description),
+        TextButton(
             onClick = onOpenWeb,
             enabled = canUseInternet,
-        )
+        ) {
+            Icon(imageVector = Icons.Outlined.Language, contentDescription = null)
+            Text(
+                text = stringResource(R.string.home_browse_web),
+                modifier = Modifier.padding(start = 8.dp),
+            )
+        }
+        if (downloadSummary.isVisible) {
+            Spacer(Modifier.height(24.dp))
+            Text(
+                text = stringResource(R.string.home_current_activity),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(Modifier.height(12.dp))
+            HomeDownloadStatus(summary = downloadSummary, onClick = onOpenDownloads)
+        }
     }
 }
 
@@ -329,84 +335,6 @@ private fun ClipboardSuggestion(
 }
 
 @Composable
-private fun ShareInstruction(
-    title: String,
-    description: String,
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shape = DambomShapes.Card,
-    ) {
-        Row(
-            modifier = Modifier.padding(18.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Share,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    stringResource(R.string.home_external_instruction),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Text(title, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun BrowserActionCard(
-    title: String,
-    description: String,
-    onClick: () -> Unit,
-    enabled: Boolean,
-) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        enabled = enabled,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-        shape = DambomShapes.Card,
-    ) {
-        Row(
-            modifier = Modifier.padding(18.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Language,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-            )
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(title, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                contentDescription = stringResource(R.string.home_open_browser),
-                tint = MaterialTheme.colorScheme.primary,
-            )
-        }
-    }
-}
-
-@Composable
 private fun ClipboardConsentDialog(onDecision: (Boolean) -> Unit) {
     AlertDialog(
         onDismissRequest = { onDecision(false) },
@@ -428,7 +356,6 @@ private fun ClipboardConsentDialog(onDecision: (Boolean) -> Unit) {
 @Composable
 private fun SharedUrlDialog(
     url: String,
-    onOpenWeb: () -> Unit,
     onAnalyze: () -> Unit,
     onDismiss: () -> Unit,
     canUseInternet: Boolean,
@@ -451,10 +378,7 @@ private fun SharedUrlDialog(
             TextButton(onClick = onAnalyze, enabled = canUseInternet) { Text(stringResource(R.string.home_analyze_now)) }
         },
         dismissButton = {
-            Row {
-                TextButton(onClick = onOpenWeb, enabled = canUseInternet) { Text(stringResource(R.string.home_open_in_web)) }
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.home_cancel)) }
-            }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.home_cancel)) }
         },
     )
 }
@@ -465,6 +389,8 @@ private fun Context.clipboardText(): String? =
         ?.getItemAt(0)
         ?.coerceToText(this)
         ?.toString()
+
+private val HOME_CONTENT_MAX_WIDTH = 720.dp
 
 @Preview
 @FormFactorPreviews
@@ -483,7 +409,6 @@ private fun HomeScreenPreview() {
             onClipboardConsent = {},
             onUseClipboardSuggestion = {},
             onDismissClipboardSuggestion = {},
-            onOpenSharedUrlInWeb = {},
             onAnalyzeSharedUrl = {},
             onDismissSharedUrl = {},
         )

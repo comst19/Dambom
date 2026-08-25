@@ -22,3 +22,4 @@ obfuscated-stacktrace.txt
 .codex/
 .AGENT.md
 /.codex/
+.omo/

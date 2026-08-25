@@ -12,6 +12,7 @@
     <string name="downloads_group_failed">실패</string>
     <string name="downloads_group_completed">완료</string>
     <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s 썸네일</string>
     <string name="downloads_unknown_size">크기 확인 중</string>
     <string name="downloads_pause">일시정지</string>
     <string name="downloads_resume">재개</string>

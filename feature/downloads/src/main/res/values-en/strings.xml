@@ -12,6 +12,7 @@
     <string name="downloads_group_failed">Failed</string>
     <string name="downloads_group_completed">Completed</string>
     <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s thumbnail</string>
     <string name="downloads_unknown_size">Checking size</string>
     <string name="downloads_pause">Pause</string>
     <string name="downloads_resume">Resume</string>

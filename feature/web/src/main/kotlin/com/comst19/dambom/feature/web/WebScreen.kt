@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -85,6 +86,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.webkit.WebViewCompat
+import androidx.webkit.WebViewFeature
 import com.comst19.dambom.core.common.ui.appScaffoldPadding
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.feature.web.contract.RecentPage
@@ -92,6 +95,8 @@ import com.comst19.dambom.feature.web.contract.WebDetectionState
 import com.comst19.dambom.feature.web.contract.WebTab
 import com.comst19.dambom.feature.web.contract.WebUiState
 import kotlinx.collections.immutable.PersistentList
+import java.io.ByteArrayInputStream
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Composable
 internal fun WebRoute(
@@ -419,6 +424,7 @@ private fun ColumnScope.WebContent(
 ) {
     var webView by remember(tab.id) { mutableStateOf<WebView?>(null) }
     var loadingProgress by remember(tab.id) { mutableStateOf(0) }
+    var webViewGeneration by remember(tab.id) { androidx.compose.runtime.mutableIntStateOf(0) }
 
     if (loadingProgress in 1..99) {
         LinearProgressIndicator(
@@ -426,48 +432,58 @@ private fun ColumnScope.WebContent(
             modifier = Modifier.fillMaxWidth(),
         )
     }
-    AndroidView(
-        factory = { context ->
-            createWebView(
-                context = context,
-                tab = tab,
-                savedState = savedState,
-                onPageChanged = onPageChanged,
-                onMediaRequest = onMediaRequest,
-                onProgress = { loadingProgress = it },
-            ).also {
-                webView = it
-                onWebViewReady(it)
+    key(webViewGeneration) {
+        val rendererGone = remember { AtomicBoolean(false) }
+        AndroidView(
+            factory = { context ->
+                createWebView(
+                    context = context,
+                    tab = tab,
+                    savedState = savedState,
+                    onPageChanged = onPageChanged,
+                    onMediaRequest = onMediaRequest,
+                    onProgress = { loadingProgress = it },
+                    onRendererGone = {
+                        rendererGone.set(true)
+                        onWebViewReady(null)
+                        webViewGeneration += 1
+                    },
+                ).also {
+                    webView = it
+                    onWebViewReady(it)
+                }
+            },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .clipToBounds(),
+            update = { view ->
+                val targetUrl = tab.url
+                if (targetUrl != null && view.url != targetUrl) view.loadUrl(targetUrl)
+            },
+        )
+
+        DisposableEffect(tab.id, webViewGeneration) {
+            onDispose {
+                webView?.let { view ->
+                    if (!rendererGone.get()) {
+                        val state = Bundle()
+                        view.saveState(state)
+                        onSaveWebState(tab.id, state)
+                    }
+                    view.stopLoading()
+                    view.destroy()
+                }
+                onWebViewReady(null)
             }
-        },
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .clipToBounds(),
-        update = { view ->
-            val targetUrl = tab.url
-            if (targetUrl != null && view.url != targetUrl) view.loadUrl(targetUrl)
-        },
-    )
+        }
+    }
     WebToolbar(
         webView = webView,
         detectionState = tab.detectionState,
         onDetect = onDetect,
     )
-
-    DisposableEffect(tab.id) {
-        onDispose {
-            webView?.let { view ->
-                val state = Bundle()
-                view.saveState(state)
-                onSaveWebState(tab.id, state)
-                view.stopLoading()
-                view.destroy()
-            }
-            onWebViewReady(null)
-        }
-    }
 }
 
 @Composable
@@ -602,6 +618,7 @@ private fun createWebView(
     onPageChanged: (Long, String?, String?) -> Unit,
     onMediaRequest: (Long, String) -> Unit,
     onProgress: (Int) -> Unit,
+    onRendererGone: () -> Unit,
 ): WebView =
     WebView(context).apply {
         settings.javaScriptEnabled = true
@@ -611,6 +628,10 @@ private fun createWebView(
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
         settings.mediaPlaybackRequiresUserGesture = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) settings.safeBrowsingEnabled = true
+        val mediaGuardInstalled = WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
+        if (mediaGuardInstalled) {
+            WebViewCompat.addDocumentStartJavaScript(this, WEB_MEDIA_GUARD_SCRIPT, setOf("*"))
+        }
         webViewClient =
             object : WebViewClient() {
                 override fun onPageStarted(
@@ -632,8 +653,17 @@ private fun createWebView(
                     view: WebView?,
                     request: WebResourceRequest?,
                 ): WebResourceResponse? {
-                    request?.url?.toString()?.let { onMediaRequest(tab.id, it) }
-                    return null
+                    val url = request?.url?.toString() ?: return null
+                    onMediaRequest(tab.id, url)
+                    return if (shouldBlockWebVideo(url, mediaGuardInstalled)) blockedVideoResponse() else null
+                }
+
+                override fun onRenderProcessGone(
+                    view: WebView?,
+                    detail: RenderProcessGoneDetail?,
+                ): Boolean {
+                    view?.post(onRendererGone)
+                    return true
                 }
             }
         webChromeClient =
@@ -656,6 +686,87 @@ private fun createWebView(
             tab.url?.let(::loadUrl)
         }
     }
+
+internal fun shouldBlockWebVideo(
+    url: String,
+    mediaGuardInstalled: Boolean,
+): Boolean =
+    !mediaGuardInstalled &&
+        WEB_VIDEO_EXTENSIONS.any { extension -> url.substringBefore('?').endsWith(extension, ignoreCase = true) }
+
+private fun blockedVideoResponse() =
+    WebResourceResponse(
+        "video/mp4",
+        null,
+        204,
+        "No Content",
+        emptyMap(),
+        ByteArrayInputStream(ByteArray(0)),
+    )
+
+private val WEB_VIDEO_EXTENSIONS = setOf(".mp4", ".webm", ".mov", ".m4v")
+
+internal const val WEB_MEDIA_GUARD_SCRIPT =
+    """
+    (() => {
+      if (window.__dambomMediaGuard) return;
+      window.__dambomMediaGuard = true;
+
+      const seekToFirstFrame = (video) => {
+        const seek = Number.isFinite(video.duration) ? Math.min(0.1, video.duration / 100) : 0.05;
+        try { video.currentTime = seek; } catch (_) {}
+      };
+
+      HTMLMediaElement.prototype.play = function() {
+        this.autoplay = false;
+        this.removeAttribute('autoplay');
+        this.preload = 'metadata';
+        if (this.readyState >= 1) {
+          seekToFirstFrame(this);
+        } else {
+          this.addEventListener('loadedmetadata', () => seekToFirstFrame(this), { once: true });
+        }
+        return Promise.resolve();
+      };
+
+      const visibility = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target;
+          if (entry.isIntersecting) {
+            video.preload = 'metadata';
+            if (video.readyState >= 1) {
+              seekToFirstFrame(video);
+            } else {
+              video.addEventListener('loadedmetadata', () => seekToFirstFrame(video), { once: true });
+              video.load();
+            }
+          } else {
+            video.pause();
+            video.preload = 'none';
+          }
+        });
+      }, { rootMargin: '320px 0px' });
+
+      const prepare = (video) => {
+        if (video.dataset.dambomGuarded) return;
+        video.dataset.dambomGuarded = 'true';
+        video.autoplay = false;
+        video.removeAttribute('autoplay');
+        video.preload = 'none';
+        visibility.observe(video);
+      };
+
+      const scan = (root) => {
+        if (root instanceof HTMLVideoElement) prepare(root);
+        if (root.querySelectorAll) root.querySelectorAll('video').forEach(prepare);
+      };
+
+      document.addEventListener('DOMContentLoaded', () => scan(document), { once: true });
+      new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => mutation.addedNodes.forEach(scan));
+      }).observe(document, { childList: true, subtree: true });
+    })();
+    """
 
 private fun Context.openExternal(
     url: String,

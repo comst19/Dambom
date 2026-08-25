@@ -4,6 +4,11 @@
     <string name="detection_loading">영상을 찾고 있어요</string>
     <string name="detection_loading_description">페이지에 따라 잠시 걸릴 수 있어요.</string>
     <string name="detection_found_count">저장할 수 있는 영상 %1$d개를 찾았어요.</string>
+    <string name="detection_choose_videos">썸네일이나 미리보기를 확인하고 저장할 영상을 선택해 주세요.</string>
+    <string name="detection_video_number">영상 %1$d</string>
+    <string name="detection_thumbnail">영상 %1$d 썸네일</string>
+    <string name="detection_preview">미리보기</string>
+    <string name="detection_close_preview">닫기</string>
     <string name="detection_download_selected">%1$d개 다운로드</string>
     <string name="detection_adding_to_queue">%1$d개 추가 중</string>
     <string name="detection_enqueue_failed">대기열에 추가하지 못했어요. 다시 시도해 주세요.</string>

@@ -11,12 +11,14 @@ import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
+import com.comst19.dambom.feature.detection.contract.DetectionUiState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -40,6 +42,23 @@ class DetectionViewModelTest {
             assertEquals(listOf(MEDIA_QUALITY), downloads.enqueued.single().map(DownloadRequest::quality))
             assertEquals(NavigationEvent.Replace(DownloadsKey), navigation.dispatched.last())
         }
+
+    @Test
+    fun `multiple detected videos require an explicit selection`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel =
+                DetectionViewModel(
+                    MultipleVideoDetectionRepository,
+                    RecordingDownloadRepository(),
+                    SpyNavigationDispatcher(),
+                )
+
+            viewModel.detect(SOURCE_URL)
+            advanceUntilIdle()
+
+            val content = viewModel.uiState.value as DetectionUiState.Content
+            assertTrue(content.selectedIds.isEmpty())
+        }
 }
 
 private object SuccessfulDetectionRepository : MediaDetectionRepository {
@@ -56,6 +75,18 @@ private object SuccessfulDetectionRepository : MediaDetectionRepository {
                         contentLength = 1024L,
                         quality = MEDIA_QUALITY,
                     ),
+                ),
+        )
+}
+
+private object MultipleVideoDetectionRepository : MediaDetectionRepository {
+    override suspend fun detect(url: String): MediaDetectionResult =
+        MediaDetectionResult.Success(
+            pageTitle = "여러 영상",
+            candidates =
+                listOf(
+                    MediaCandidate("video-1", "$MEDIA_URL?item=1", "video 1", "video/mp4", null),
+                    MediaCandidate("video-2", "$MEDIA_URL?item=2", "video 2", "video/mp4", null),
                 ),
         )
 }

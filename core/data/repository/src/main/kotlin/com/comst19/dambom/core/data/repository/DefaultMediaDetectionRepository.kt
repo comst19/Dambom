@@ -71,19 +71,46 @@ internal class DefaultMediaDetectionRepository
                     ?.stripHtml()
                     .orEmpty()
                     .ifBlank { "웹 영상" }
-            val candidates =
-                (
-                    MEDIA_TAG_REGEX.findAll(html).map { it.groupValues[1] } +
-                        DIRECT_VIDEO_REGEX.findAll(html).map { it.value }
-                ).mapNotNull { source -> resolveUrl(requestUrl, source) }
+            val candidates = linkedMapOf<String, MediaCandidate>()
+            VIDEO_ELEMENT_REGEX.findAll(html).forEach { match ->
+                val attributes = match.groupValues[1]
+                val body = match.groupValues[2]
+                val thumbnailUrl = attributes.attribute("poster")?.let { resolveUrl(requestUrl, it) }
+                val sources =
+                    sequenceOf(attributes.attribute("src")) +
+                        SOURCE_TAG_REGEX.findAll(body).map { it.groupValues[1] }
+                sources
+                    .filterNotNull()
+                    .mapNotNull { resolveUrl(requestUrl, it) }
                     .filter(String::hasVideoExtension)
-                    .distinct()
-                    .map { mediaUrl -> mediaUrl.toCandidate(mediaUrl.fileTitle(), null, null) }
-                    .toList()
+                    .forEach { mediaUrl ->
+                        candidates.putIfAbsent(
+                            mediaUrl,
+                            mediaUrl.toCandidate(mediaUrl.fileTitle(), null, null, thumbnailUrl),
+                        )
+                    }
+            }
+            (
+                MEDIA_TAG_REGEX.findAll(html).map { it.groupValues[1] } +
+                    DIRECT_VIDEO_REGEX.findAll(html).map { it.value }
+            ).mapNotNull { source -> resolveUrl(requestUrl, source) }
+                .filter(String::hasVideoExtension)
+                .forEach { mediaUrl ->
+                    candidates.putIfAbsent(mediaUrl, mediaUrl.toCandidate(mediaUrl.fileTitle(), null, null))
+                }
             return if (candidates.isEmpty()) {
                 unsupported(UnsupportedReason.NO_MEDIA)
             } else {
-                MediaDetectionResult.Success(pageTitle, candidates)
+                MediaDetectionResult.Success(
+                    pageTitle,
+                    candidates.values.mapIndexed { index, candidate ->
+                        if (OPAQUE_MEDIA_TITLE_REGEX.matches(candidate.title)) {
+                            candidate.copy(title = "${pageTitle.candidateCollectionTitle()} · ${index + 1}")
+                        } else {
+                            candidate
+                        }
+                    },
+                )
             }
         }
     }
@@ -122,6 +149,7 @@ private fun String.toCandidate(
     title: String,
     mimeType: String?,
     contentLength: Long?,
+    thumbnailUrl: String? = null,
 ): MediaCandidate =
     MediaCandidate(
         id = MessageDigest.getInstance("SHA-256").digest(toByteArray()).joinToString("") { "%02x".format(it) },
@@ -129,7 +157,21 @@ private fun String.toCandidate(
         title = title,
         mimeType = mimeType,
         contentLength = contentLength,
+        thumbnailUrl = thumbnailUrl,
     )
+
+private fun String.attribute(name: String): String? =
+    Regex("""\b${Regex.escape(name)}\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+        .find(this)
+        ?.groupValues
+        ?.get(1)
+
+private fun String.candidateCollectionTitle(): String =
+    substringBefore('·')
+        .trim()
+        .replace(LEADING_RESULT_COUNT_REGEX, "")
+        .take(MAX_CANDIDATE_PAGE_TITLE_LENGTH)
+        .trim()
 
 private fun String.stripHtml(): String = replace(HTML_TAG_REGEX, "").trim()
 
@@ -141,9 +183,22 @@ private val MEDIA_TAG_REGEX =
         "<(?:video|source)[^>]+src\\s*=\\s*[\"']([^\"']+)[\"']",
         setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
     )
+private val VIDEO_ELEMENT_REGEX =
+    Regex(
+        "<video\\b([^>]*)>(.*?)</video>",
+        setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
+    )
+private val SOURCE_TAG_REGEX =
+    Regex(
+        "<source[^>]+src\\s*=\\s*[\"']([^\"']+)[\"']",
+        setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
+    )
 private val DIRECT_VIDEO_REGEX =
     Regex("https?://[^\\s\"'<>]+\\.(?:mp4|webm|mov|m4v)(?:\\?[^\\s\"'<>]*)?", RegexOption.IGNORE_CASE)
 private val HTML_TAG_REGEX = Regex("<[^>]+>")
 private val VIDEO_EXTENSIONS = setOf(".mp4", ".webm", ".mov", ".m4v")
+private val OPAQUE_MEDIA_TITLE_REGEX = Regex("[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}")
+private val LEADING_RESULT_COUNT_REGEX = Regex("^[\\d,+]+개의\\s+(?:최고의\\s+)?")
 private const val HTTP_UNAUTHORIZED = 401
 private const val HTTP_FORBIDDEN = 403
+private const val MAX_CANDIDATE_PAGE_TITLE_LENGTH = 48

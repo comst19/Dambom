@@ -1,20 +1,26 @@
 package com.comst19.dambom.feature.downloads
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -40,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.AppScreen
+import com.comst19.dambom.core.common.ui.VideoThumbnail
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
@@ -162,17 +169,14 @@ private fun DownloadList(
             DownloadStatus.FAILED,
             DownloadStatus.COMPLETED,
         )
-    LazyColumn(
-        modifier =
-            Modifier
-                .widthIn(max = 760.dp)
-                .fillMaxSize(),
-        contentPadding =
-            androidx.compose.foundation.layout
-                .PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(MIN_DOWNLOAD_CARD_WIDTH),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        item {
+        item(span = { GridItemSpan(maxLineSpan) }) {
             DownloadSummary(
                 state = uiState,
                 canDownload = canDownload,
@@ -184,8 +188,14 @@ private fun DownloadList(
         groups.forEach { status ->
             val tasks = uiState.tasks.filter { it.status == status }
             if (tasks.isNotEmpty()) {
-                item { Text(status.groupTitle(), style = MaterialTheme.typography.titleMedium) }
-                items(tasks, key = DownloadTask::id) { task ->
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Text(status.groupTitle(), style = MaterialTheme.typography.titleMedium)
+                }
+                items(
+                    items = tasks,
+                    key = DownloadTask::id,
+                    contentType = { DOWNLOAD_ITEM_CONTENT_TYPE },
+                ) { task ->
                     DownloadRow(
                         task = task,
                         canDownload = canDownload,
@@ -208,6 +218,7 @@ private fun DownloadSummary(
     onResumeAll: () -> Unit,
 ) {
     Card(
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
         shape = DambomShapes.Summary,
     ) {
@@ -254,69 +265,91 @@ private fun DownloadRow(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         shape = DambomShapes.Card,
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Text(
-                task.title,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                task.status.statusText(),
-                color = task.status.statusColor(),
-                style = MaterialTheme.typography.labelLarge,
-            )
-            Text(
-                stringResource(
-                    R.string.downloads_bytes,
-                    task.downloadedBytes.formatBytes(),
-                    task.expectedBytes?.formatBytes() ?: stringResource(R.string.downloads_unknown_size),
-                    task.quality,
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall,
-            )
-            if (task.status == DownloadStatus.DOWNLOADING) {
-                LinearProgressIndicator(
-                    progress = { task.progress },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .semantics { progressBarRangeInfo = ProgressBarRangeInfo(task.progress, 0f..1f) },
+        Column {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(VIDEO_ASPECT_RATIO)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.VideoLibrary,
+                    contentDescription = null,
+                    modifier = Modifier.size(44.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                VideoThumbnail(
+                    data = task.localFilePath ?: task.url,
+                    contentDescription = stringResource(R.string.downloads_thumbnail, task.title),
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
-            task.failureReason?.let {
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
                 Text(
-                    it.failureText(),
-                    color = MaterialTheme.colorScheme.error,
+                    task.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    task.status.statusText(),
+                    color = task.status.statusColor(),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Text(
+                    stringResource(
+                        R.string.downloads_bytes,
+                        task.downloadedBytes.formatBytes(),
+                        task.expectedBytes?.formatBytes() ?: stringResource(R.string.downloads_unknown_size),
+                        task.quality,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall,
                 )
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                when (task.status) {
-                    DownloadStatus.DOWNLOADING, DownloadStatus.QUEUED -> {
-                        TextButton(onClick = onPause) { Text(stringResource(R.string.downloads_pause)) }
-                        TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_cancel)) }
-                    }
-
-                    DownloadStatus.PAUSED -> {
-                        TextButton(onClick = onResume, enabled = canDownload) {
-                            Text(stringResource(R.string.downloads_resume))
+                if (task.status == DownloadStatus.DOWNLOADING) {
+                    LinearProgressIndicator(
+                        progress = { task.progress },
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .semantics { progressBarRangeInfo = ProgressBarRangeInfo(task.progress, 0f..1f) },
+                    )
+                }
+                task.failureReason?.let {
+                    Text(
+                        it.failureText(),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    when (task.status) {
+                        DownloadStatus.DOWNLOADING, DownloadStatus.QUEUED -> {
+                            TextButton(onClick = onPause) { Text(stringResource(R.string.downloads_pause)) }
+                            TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_cancel)) }
                         }
-                        TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_cancel)) }
-                    }
 
-                    DownloadStatus.FAILED -> {
-                        TextButton(onClick = onRetry, enabled = canDownload) {
-                            Text(stringResource(R.string.downloads_retry))
+                        DownloadStatus.PAUSED -> {
+                            TextButton(onClick = onResume, enabled = canDownload) {
+                                Text(stringResource(R.string.downloads_resume))
+                            }
+                            TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_cancel)) }
                         }
-                        TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_remove)) }
-                    }
 
-                    DownloadStatus.COMPLETED -> {}
+                        DownloadStatus.FAILED -> {
+                            TextButton(onClick = onRetry, enabled = canDownload) {
+                                Text(stringResource(R.string.downloads_retry))
+                            }
+                            TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_remove)) }
+                        }
+
+                        DownloadStatus.COMPLETED -> {}
+                    }
                 }
             }
         }
@@ -363,6 +396,10 @@ private fun Long.formatBytes(): String {
     val megabytes = this / (1024.0 * 1024.0)
     return if (megabytes >= 1.0) "%.1f MB".format(megabytes) else "%.0f KB".format(this / 1024.0)
 }
+
+private val MIN_DOWNLOAD_CARD_WIDTH = 340.dp
+private const val DOWNLOAD_ITEM_CONTENT_TYPE = "download"
+private const val VIDEO_ASPECT_RATIO = 16f / 9f
 
 @FormFactorPreviews
 @Composable

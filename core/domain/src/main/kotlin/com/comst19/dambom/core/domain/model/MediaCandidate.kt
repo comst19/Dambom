@@ -7,6 +7,7 @@ data class MediaCandidate(
     val mimeType: String?,
     val contentLength: Long?,
     val quality: String = ORIGINAL_QUALITY,
+    val thumbnailUrl: String? = null,
 )
 
 sealed interface MediaDetectionResult {

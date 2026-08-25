@@ -64,6 +64,36 @@ class DefaultMediaDetectionRepositoryTest {
         }
 
     @Test
+    fun `html video poster is attached to its candidate`() =
+        runTest {
+            server.enqueue(
+                MockResponse()
+                    .setBody(
+                        "<html><video poster='/images/trip.jpg'><source src='/media/trip.mp4'></video></html>",
+                    ).setHeader("Content-Type", "text/html"),
+            )
+
+            val result = repository.detect(server.url("/page").toString()) as MediaDetectionResult.Success
+
+            assertEquals(server.url("/images/trip.jpg").toString(), result.candidates.single().thumbnailUrl)
+        }
+
+    @Test
+    fun `opaque media file name is replaced with page title and position`() =
+        runTest {
+            server.enqueue(
+                MockResponse()
+                    .setBody(
+                        "<html><title>3,000+개의 최고의 샘플 동영상 · Pexels</title><video src='/media/8b3917b0-21e5-41cb-b724-0bd24bc3b5d1.mp4'></video></html>",
+                    ).setHeader("Content-Type", "text/html"),
+            )
+
+            val result = repository.detect(server.url("/page").toString()) as MediaDetectionResult.Success
+
+            assertEquals("샘플 동영상 · 1", result.candidates.single().title)
+        }
+
+    @Test
     fun `restricted response is not bypassed`() =
         runTest {
             server.enqueue(MockResponse().setResponseCode(403))

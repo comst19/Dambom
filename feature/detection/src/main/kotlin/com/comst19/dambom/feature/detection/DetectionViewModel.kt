@@ -45,7 +45,12 @@ internal class DetectionViewModel
                             DetectionUiState.Content(
                                 pageTitle = result.pageTitle,
                                 candidates = result.candidates.toPersistentList(),
-                                selectedIds = result.candidates.map { it.id }.toPersistentSet(),
+                                selectedIds =
+                                    result.candidates
+                                        .takeIf { it.size == 1 }
+                                        .orEmpty()
+                                        .map { it.id }
+                                        .toPersistentSet(),
                             )
                         }
 

@@ -4,25 +4,29 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import com.comst19.dambom.core.common.ui.AppEvent
+import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.SnackbarDuration
-import com.comst19.dambom.core.common.ui.SnackbarEvent
-import com.comst19.dambom.core.common.ui.SnackbarEventBus
 import com.comst19.dambom.core.common.ui.resolve
 import androidx.compose.material3.SnackbarDuration as MaterialSnackbarDuration
 
 @Composable
-internal fun ObserveSnackbarEvents(
-    eventBus: SnackbarEventBus,
+internal fun ObserveAppEvents(
+    eventBus: AppEventBus,
     snackbarHostState: SnackbarHostState,
 ) {
     val context = LocalContext.current
     LaunchedEffect(eventBus, snackbarHostState) {
         eventBus.events.collect { event ->
-            snackbarHostState.showSnackbar(
-                message = event.message.resolve(context),
-                duration = event.duration.toMaterialDuration(),
-                withDismissAction = event.duration == SnackbarDuration.Indefinite,
-            )
+            when (event) {
+                is AppEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message.resolve(context),
+                        duration = event.duration.toMaterialDuration(),
+                        withDismissAction = event.duration == SnackbarDuration.Indefinite,
+                    )
+                }
+            }
         }
     }
 }

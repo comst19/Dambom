@@ -6,10 +6,12 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class SnackbarEvent(
-    val message: UiText,
-    val duration: SnackbarDuration = SnackbarDuration.Short,
-)
+sealed interface AppEvent {
+    data class ShowSnackbar(
+        val message: UiText,
+        val duration: SnackbarDuration = SnackbarDuration.Short,
+    ) : AppEvent
+}
 
 enum class SnackbarDuration {
     Short,
@@ -18,14 +20,14 @@ enum class SnackbarDuration {
 }
 
 @Singleton
-class SnackbarEventBus
+class AppEventBus
     @Inject
     constructor() {
-        private val channel = Channel<SnackbarEvent>(capacity = Channel.BUFFERED)
+        private val channel = Channel<AppEvent>(capacity = Channel.BUFFERED)
 
-        val events: Flow<SnackbarEvent> = channel.receiveAsFlow()
+        val events: Flow<AppEvent> = channel.receiveAsFlow()
 
-        suspend fun send(event: SnackbarEvent) {
+        suspend fun send(event: AppEvent) {
             channel.send(event)
         }
     }

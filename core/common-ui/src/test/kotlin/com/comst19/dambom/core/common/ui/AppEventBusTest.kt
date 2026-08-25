@@ -5,13 +5,13 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class SnackbarEventBusTest {
+class AppEventBusTest {
     @Test
     fun `events are delivered in order`() =
         runTest {
-            val eventBus = SnackbarEventBus()
-            val first = SnackbarEvent(UiText.Dynamic("Saved"))
-            val second = SnackbarEvent(UiText.Dynamic("Deleted"))
+            val eventBus = AppEventBus()
+            val first = AppEvent.ShowSnackbar(UiText.Dynamic("Saved"))
+            val second = AppEvent.ShowSnackbar(UiText.Dynamic("Deleted"))
 
             eventBus.send(first)
             eventBus.send(second)

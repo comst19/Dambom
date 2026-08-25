@@ -3,9 +3,9 @@ package com.comst19.dambom.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.comst19.dambom.core.common.suspendRunCatching
+import com.comst19.dambom.core.common.ui.AppEvent
+import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.SnackbarDuration
-import com.comst19.dambom.core.common.ui.SnackbarEvent
-import com.comst19.dambom.core.common.ui.SnackbarEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.domain.error.AppDecodingException
 import com.comst19.dambom.core.domain.error.AppErrorCode
@@ -41,7 +41,7 @@ class MainViewModel
         downloadRepository: DownloadRepository,
         private val startupCoordinator: StartupCoordinator,
         private val errorHandler: ErrorHandler,
-        private val snackbarEventBus: SnackbarEventBus,
+        private val appEventBus: AppEventBus,
     ) : ViewModel() {
         private val _startupState = MutableStateFlow<AppStartupState>(AppStartupState.Initializing)
         val startupState: StateFlow<AppStartupState> = _startupState.asStateFlow()
@@ -93,8 +93,8 @@ class MainViewModel
                 repository.downloads.collect { tasks ->
                     previousStatuses?.let { previous ->
                         downloadFeedback(previous, tasks).forEach { feedback ->
-                            snackbarEventBus.send(
-                                SnackbarEvent(
+                            appEventBus.send(
+                                AppEvent.ShowSnackbar(
                                     message = UiText.Resource(feedback.type.messageRes, listOf(feedback.title)),
                                     duration =
                                         if (feedback.type == DownloadFeedbackType.FAILED) {
@@ -136,7 +136,7 @@ class MainViewModel
                         "Something went wrong"
                     }
                 }
-            snackbarEventBus.send(SnackbarEvent(UiText.Dynamic(message)))
+            appEventBus.send(AppEvent.ShowSnackbar(UiText.Dynamic(message)))
         }
     }
 

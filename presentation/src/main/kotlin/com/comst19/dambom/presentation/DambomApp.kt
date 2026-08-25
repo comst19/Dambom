@@ -11,7 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import com.comst19.dambom.core.common.ui.SnackbarEventBus
+import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.navigation.NavigationConfig
 import com.comst19.dambom.core.navigation.NavigationDispatcher
@@ -25,7 +25,7 @@ import com.comst19.dambom.feature.library.navigation.libraryEntries
 import com.comst19.dambom.feature.settings.navigation.settingsEntries
 import com.comst19.dambom.feature.web.navigation.webEntries
 import com.comst19.dambom.presentation.component.AppScaffold
-import com.comst19.dambom.presentation.event.ObserveSnackbarEvents
+import com.comst19.dambom.presentation.event.ObserveAppEvents
 
 /**
  * 앱의 NavigationState, Navigator, entry provider와 공통 Scaffold를 한 번만 조립하는 최상위 Composable입니다.
@@ -34,7 +34,7 @@ import com.comst19.dambom.presentation.event.ObserveSnackbarEvents
 internal fun DambomApp(
     navigationConfig: NavigationConfig,
     dispatcher: NavigationDispatcher,
-    snackbarEventBus: SnackbarEventBus,
+    appEventBus: AppEventBus,
     networkAccess: NetworkAccessState,
 ) {
     val state =
@@ -48,7 +48,7 @@ internal fun DambomApp(
     LaunchedEffect(dispatcher, navigator) {
         dispatcher.events.collect(navigator::handle)
     }
-    ObserveSnackbarEvents(snackbarEventBus, snackbarHostState)
+    ObserveAppEvents(appEventBus, snackbarHostState)
 
     val entries =
         state.toEntries(

@@ -13,7 +13,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.comst19.dambom.core.common.SharedUrlBus
-import com.comst19.dambom.core.common.ui.SnackbarEventBus
+import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.MessageContent
 import com.comst19.dambom.core.domain.model.ThemeMode
@@ -29,7 +29,7 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
     @Inject lateinit var navigationDispatcher: NavigationDispatcher
 
-    @Inject lateinit var snackbarEventBus: SnackbarEventBus
+    @Inject lateinit var appEventBus: AppEventBus
 
     @Inject lateinit var sharedUrlBus: SharedUrlBus
 
@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                         DambomApp(
                             navigationConfig = AppNavigationConfig.navigation(state.startKey),
                             dispatcher = navigationDispatcher,
-                            snackbarEventBus = snackbarEventBus,
+                            appEventBus = appEventBus,
                             networkAccess = networkAccess,
                         )
                     }

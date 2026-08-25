@@ -6,8 +6,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.comst19.dambom.core.common.suspendRunCatching
-import com.comst19.dambom.core.common.ui.SnackbarEvent
-import com.comst19.dambom.core.common.ui.SnackbarEventBus
+import com.comst19.dambom.core.common.ui.AppEvent
+import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
@@ -34,7 +34,7 @@ internal class LibraryViewModel
         private val navigation: NavigationDispatcher,
         private val savedStateHandle: SavedStateHandle,
         private val fileManager: LibraryFileManager,
-        private val snackbarEventBus: SnackbarEventBus,
+        private val appEventBus: AppEventBus,
     ) : ViewModel() {
         private val selectedId = savedStateHandle.getStateFlow<String?>(SELECTED_ID_KEY, null)
         private val query = savedStateHandle.getStateFlow(QUERY_KEY, "")
@@ -134,7 +134,7 @@ internal class LibraryViewModel
         }
 
         private suspend fun showMessage(message: Int) {
-            snackbarEventBus.send(SnackbarEvent(UiText.Resource(message)))
+            appEventBus.send(AppEvent.ShowSnackbar(UiText.Resource(message)))
         }
     }
 

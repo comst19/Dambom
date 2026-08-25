@@ -1,6 +1,6 @@
 package com.comst19.dambom.presentation
 
-import com.comst19.dambom.core.common.ui.SnackbarEventBus
+import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.domain.error.ErrorHandler
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadRequest
@@ -40,7 +40,7 @@ class MainViewModelTest {
                     FakeDownloadRepository,
                     SuccessfulStartupCoordinator,
                     ErrorHandler(),
-                    SnackbarEventBus(),
+                    AppEventBus(),
                 )
 
             advanceUntilIdle()
@@ -58,7 +58,7 @@ class MainViewModelTest {
                     FakeDownloadRepository,
                     FailingStartupCoordinator,
                     ErrorHandler(),
-                    SnackbarEventBus(),
+                    AppEventBus(),
                 )
 
             advanceUntilIdle()

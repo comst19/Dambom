@@ -1,7 +1,5 @@
 package com.comst19.dambom.feature.library
 
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -89,9 +87,8 @@ import kotlin.math.roundToLong
 @Composable
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 internal fun VideoPlayerRoute(id: String) {
-    val activity = checkNotNull(LocalActivity.current) as ComponentActivity
-    val libraryViewModel: LibraryViewModel = hiltViewModel(activity)
-    val playerViewModel: VideoPlayerViewModel = hiltViewModel(activity)
+    val libraryViewModel: LibraryViewModel = hiltViewModel()
+    val playerViewModel: VideoPlayerViewModel = hiltViewModel()
     val uiState by libraryViewModel.uiState.collectAsStateWithLifecycle()
     val task =
         uiState.selectedVideo?.takeIf { it.id == id }

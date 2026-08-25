@@ -1,7 +1,5 @@
 package com.comst19.dambom.feature.library
 
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -69,9 +67,7 @@ internal fun LibraryRoute(
     isDetailPaneVisible: Boolean,
     onDetailPaneVisibilityChange: (Boolean) -> Unit,
 ) {
-    val activity = checkNotNull(LocalActivity.current) as ComponentActivity
-    val viewModel: LibraryViewModel = hiltViewModel(activity)
-    val playerViewModel: VideoPlayerViewModel = hiltViewModel(activity)
+    val viewModel: LibraryViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val fileActions = rememberLibraryFileActions(viewModel)
     val multiplePanes = currentWindowAdaptiveInfoV2().windowSizeClass.supportsMultiplePanes
@@ -83,7 +79,6 @@ internal fun LibraryRoute(
         onViewModeChange = viewModel::setViewMode,
         onVideoClick = { task ->
             if (multiplePanes && !isDetailPaneVisible) onDetailPaneVisibilityChange(true)
-            playerViewModel.play(task)
             viewModel.openVideo(task.id)
         },
         showInlineEmptyState = !multiplePanes || !isDetailPaneVisible,
@@ -510,8 +505,7 @@ private fun VideoThumbnail(
 
 @Composable
 internal fun LibraryDetailPlaceholderRoute() {
-    val activity = checkNotNull(LocalActivity.current) as ComponentActivity
-    val viewModel: LibraryViewModel = hiltViewModel(activity)
+    val viewModel: LibraryViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (uiState.hasVideos) {

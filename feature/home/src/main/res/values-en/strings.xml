@@ -10,8 +10,10 @@
     <string name="home_other_methods">Other ways to save</string>
     <string name="home_share_title">Share from Chrome or X</string>
     <string name="home_share_description">Choose Dambom in another app’s share menu to bring the link in.</string>
+    <string name="home_external_instruction">Use another app</string>
     <string name="home_browser_title">Browse inside the app</string>
     <string name="home_browser_description">Open multiple web tabs and find videos on the current page.</string>
+    <string name="home_open_browser">Open in-app web</string>
     <string name="home_clipboard_found">A copied link is available</string>
     <string name="home_use_link">Use link</string>
     <string name="home_dismiss">Dismiss</string>

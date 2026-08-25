@@ -10,8 +10,10 @@
     <string name="home_other_methods">다른 방법으로 담기</string>
     <string name="home_share_title">Chrome, X에서 공유하기</string>
     <string name="home_share_description">다른 앱에서 담봄으로 공유하면 링크를 가져와요.</string>
+    <string name="home_external_instruction">외부 앱에서 실행</string>
     <string name="home_browser_title">앱 안에서 웹 찾기</string>
     <string name="home_browser_description">여러 웹 탭을 열고 현재 보고 있는 페이지에서 영상을 찾을 수 있어요.</string>
+    <string name="home_open_browser">앱 내 웹 열기</string>
     <string name="home_clipboard_found">복사한 링크가 있어요</string>
     <string name="home_use_link">입력하기</string>
     <string name="home_dismiss">닫기</string>

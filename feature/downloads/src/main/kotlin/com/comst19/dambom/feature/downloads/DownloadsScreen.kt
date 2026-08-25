@@ -14,12 +14,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ViewList
+import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -56,7 +59,10 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.model.NetworkConnection
 import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
+import com.comst19.dambom.feature.downloads.contract.DownloadsViewMode
 import kotlinx.collections.immutable.persistentListOf
+import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.lazy.items as listItems
 
 @Composable
 internal fun DownloadsRoute(
@@ -74,6 +80,7 @@ internal fun DownloadsRoute(
         onRetry = viewModel::retry,
         onPauseAll = viewModel::pauseAll,
         onResumeAll = viewModel::resumeAll,
+        onViewModeChange = viewModel::setViewMode,
     )
 }
 
@@ -89,6 +96,7 @@ internal fun DownloadsScreen(
     onRetry: (String) -> Unit,
     onPauseAll: () -> Unit,
     onResumeAll: () -> Unit,
+    onViewModeChange: (DownloadsViewMode) -> Unit,
 ) {
     AppScreen(
         topBar = {
@@ -99,6 +107,36 @@ internal fun DownloadsScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                             contentDescription = stringResource(R.string.downloads_back),
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            onViewModeChange(
+                                if (uiState.viewMode == DownloadsViewMode.GRID) {
+                                    DownloadsViewMode.LIST
+                                } else {
+                                    DownloadsViewMode.GRID
+                                },
+                            )
+                        },
+                    ) {
+                        Icon(
+                            imageVector =
+                                if (uiState.viewMode == DownloadsViewMode.GRID) {
+                                    Icons.AutoMirrored.Outlined.ViewList
+                                } else {
+                                    Icons.Outlined.GridView
+                                },
+                            contentDescription =
+                                stringResource(
+                                    if (uiState.viewMode == DownloadsViewMode.GRID) {
+                                        R.string.downloads_view_as_list
+                                    } else {
+                                        R.string.downloads_view_as_grid
+                                    },
+                                ),
                         )
                     }
                 },
@@ -116,16 +154,29 @@ internal fun DownloadsScreen(
             if (uiState.tasks.isEmpty()) {
                 EmptyDownloads()
             } else {
-                DownloadList(
-                    uiState = uiState,
-                    canDownload = canDownload,
-                    onPause = onPause,
-                    onResume = onResume,
-                    onCancel = onCancel,
-                    onRetry = onRetry,
-                    onPauseAll = onPauseAll,
-                    onResumeAll = onResumeAll,
-                )
+                if (uiState.viewMode == DownloadsViewMode.GRID) {
+                    DownloadGrid(
+                        uiState = uiState,
+                        canDownload = canDownload,
+                        onPause = onPause,
+                        onResume = onResume,
+                        onCancel = onCancel,
+                        onRetry = onRetry,
+                        onPauseAll = onPauseAll,
+                        onResumeAll = onResumeAll,
+                    )
+                } else {
+                    DownloadList(
+                        uiState = uiState,
+                        canDownload = canDownload,
+                        onPause = onPause,
+                        onResume = onResume,
+                        onCancel = onCancel,
+                        onRetry = onRetry,
+                        onPauseAll = onPauseAll,
+                        onResumeAll = onResumeAll,
+                    )
+                }
             }
         }
     }
@@ -151,7 +202,7 @@ private fun EmptyDownloads() {
 }
 
 @Composable
-private fun DownloadList(
+private fun DownloadGrid(
     uiState: DownloadsUiState,
     canDownload: Boolean,
     onPause: (String) -> Unit,
@@ -161,14 +212,6 @@ private fun DownloadList(
     onPauseAll: () -> Unit,
     onResumeAll: () -> Unit,
 ) {
-    val groups =
-        listOf(
-            DownloadStatus.DOWNLOADING,
-            DownloadStatus.QUEUED,
-            DownloadStatus.PAUSED,
-            DownloadStatus.FAILED,
-            DownloadStatus.COMPLETED,
-        )
     LazyVerticalGrid(
         columns = GridCells.Adaptive(MIN_DOWNLOAD_CARD_WIDTH),
         modifier = Modifier.fillMaxSize(),
@@ -185,18 +228,66 @@ private fun DownloadList(
             )
             Spacer(Modifier.height(12.dp))
         }
-        groups.forEach { status ->
+        DOWNLOAD_GROUPS.forEach { status ->
             val tasks = uiState.tasks.filter { it.status == status }
             if (tasks.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Text(status.groupTitle(), style = MaterialTheme.typography.titleMedium)
                 }
-                items(
+                gridItems(
                     items = tasks,
                     key = DownloadTask::id,
                     contentType = { DOWNLOAD_ITEM_CONTENT_TYPE },
                 ) { task ->
                     DownloadRow(
+                        task = task,
+                        canDownload = canDownload,
+                        onPause = { onPause(task.id) },
+                        onResume = { onResume(task.id) },
+                        onCancel = { onCancel(task.id) },
+                        onRetry = { onRetry(task.id) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DownloadList(
+    uiState: DownloadsUiState,
+    canDownload: Boolean,
+    onPause: (String) -> Unit,
+    onResume: (String) -> Unit,
+    onCancel: (String) -> Unit,
+    onRetry: (String) -> Unit,
+    onPauseAll: () -> Unit,
+    onResumeAll: () -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        item {
+            DownloadSummary(
+                state = uiState,
+                canDownload = canDownload,
+                onPauseAll = onPauseAll,
+                onResumeAll = onResumeAll,
+            )
+            Spacer(Modifier.height(12.dp))
+        }
+        DOWNLOAD_GROUPS.forEach { status ->
+            val tasks = uiState.tasks.filter { it.status == status }
+            if (tasks.isNotEmpty()) {
+                item { Text(status.groupTitle(), style = MaterialTheme.typography.titleMedium) }
+                listItems(
+                    items = tasks,
+                    key = DownloadTask::id,
+                    contentType = { DOWNLOAD_ITEM_CONTENT_TYPE },
+                ) { task ->
+                    DownloadListRow(
                         task = task,
                         canDownload = canDownload,
                         onPause = { onPause(task.id) },
@@ -327,30 +418,145 @@ private fun DownloadRow(
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    when (task.status) {
-                        DownloadStatus.DOWNLOADING, DownloadStatus.QUEUED -> {
-                            TextButton(onClick = onPause) { Text(stringResource(R.string.downloads_pause)) }
-                            TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_cancel)) }
-                        }
+                if (task.status != DownloadStatus.COMPLETED) {
+                    DownloadActions(
+                        task = task,
+                        canDownload = canDownload,
+                        onPause = onPause,
+                        onResume = onResume,
+                        onCancel = onCancel,
+                        onRetry = onRetry,
+                    )
+                }
+            }
+        }
+    }
+}
 
-                        DownloadStatus.PAUSED -> {
-                            TextButton(onClick = onResume, enabled = canDownload) {
-                                Text(stringResource(R.string.downloads_resume))
-                            }
-                            TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_cancel)) }
-                        }
-
-                        DownloadStatus.FAILED -> {
-                            TextButton(onClick = onRetry, enabled = canDownload) {
-                                Text(stringResource(R.string.downloads_retry))
-                            }
-                            TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_remove)) }
-                        }
-
-                        DownloadStatus.COMPLETED -> {}
+@Composable
+private fun DownloadListRow(
+    task: DownloadTask,
+    canDownload: Boolean,
+    onPause: () -> Unit,
+    onResume: () -> Unit,
+    onCancel: () -> Unit,
+    onRetry: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        shape = DambomShapes.Card,
+    ) {
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier =
+                        Modifier
+                            .width(LIST_THUMBNAIL_WIDTH)
+                            .aspectRatio(VIDEO_ASPECT_RATIO)
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.VideoLibrary,
+                        contentDescription = null,
+                        modifier = Modifier.size(36.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    VideoThumbnail(
+                        data = task.localFilePath ?: task.url,
+                        contentDescription = stringResource(R.string.downloads_thumbnail, task.title),
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+                Column(
+                    modifier = Modifier.weight(1f).padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        task.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        task.status.statusText(),
+                        color = task.status.statusColor(),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                    Text(
+                        stringResource(
+                            R.string.downloads_bytes,
+                            task.downloadedBytes.formatBytes(),
+                            task.expectedBytes?.formatBytes() ?: stringResource(R.string.downloads_unknown_size),
+                            task.quality,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 2,
+                    )
+                    if (task.status == DownloadStatus.DOWNLOADING) {
+                        LinearProgressIndicator(
+                            progress = { task.progress },
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .semantics { progressBarRangeInfo = ProgressBarRangeInfo(task.progress, 0f..1f) },
+                        )
+                    }
+                    task.failureReason?.let {
+                        Text(
+                            it.failureText(),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
                     }
                 }
+            }
+            if (task.status != DownloadStatus.COMPLETED) {
+                DownloadActions(
+                    task = task,
+                    canDownload = canDownload,
+                    onPause = onPause,
+                    onResume = onResume,
+                    onCancel = onCancel,
+                    onRetry = onRetry,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DownloadActions(
+    task: DownloadTask,
+    canDownload: Boolean,
+    onPause: () -> Unit,
+    onResume: () -> Unit,
+    onCancel: () -> Unit,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        when {
+            task.status == DownloadStatus.DOWNLOADING || task.status == DownloadStatus.QUEUED -> {
+                TextButton(onClick = onPause) { Text(stringResource(R.string.downloads_pause)) }
+                TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_cancel)) }
+            }
+
+            task.status == DownloadStatus.PAUSED -> {
+                TextButton(onClick = onResume, enabled = canDownload) {
+                    Text(stringResource(R.string.downloads_resume))
+                }
+                TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_cancel)) }
+            }
+
+            task.status == DownloadStatus.FAILED -> {
+                TextButton(onClick = onRetry, enabled = canDownload) {
+                    Text(stringResource(R.string.downloads_retry))
+                }
+                TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_remove)) }
             }
         }
     }
@@ -398,6 +604,15 @@ private fun Long.formatBytes(): String {
 }
 
 private val MIN_DOWNLOAD_CARD_WIDTH = 340.dp
+private val LIST_THUMBNAIL_WIDTH = 144.dp
+private val DOWNLOAD_GROUPS =
+    listOf(
+        DownloadStatus.DOWNLOADING,
+        DownloadStatus.QUEUED,
+        DownloadStatus.PAUSED,
+        DownloadStatus.FAILED,
+        DownloadStatus.COMPLETED,
+    )
 private const val DOWNLOAD_ITEM_CONTENT_TYPE = "download"
 private const val VIDEO_ASPECT_RATIO = 16f / 9f
 
@@ -423,6 +638,7 @@ private fun DownloadsScreenPreview() {
             onRetry = {},
             onPauseAll = {},
             onResumeAll = {},
+            onViewModeChange = {},
         )
     }
 }

@@ -1,6 +1,8 @@
 <resources>
     <string name="downloads_title">Downloads</string>
     <string name="downloads_back">Back</string>
+    <string name="downloads_view_as_list">View as list</string>
+    <string name="downloads_view_as_grid">View as grid</string>
     <string name="downloads_empty_title">No downloads in progress</string>
     <string name="downloads_empty_description">Videos selected from Find videos appear here.</string>
     <string name="downloads_summary">%1$d downloading · %2$d total</string>

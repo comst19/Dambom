@@ -1,16 +1,19 @@
 package com.comst19.dambom.feature.downloads
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
+import com.comst19.dambom.feature.downloads.contract.DownloadsViewMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,15 +24,31 @@ internal class DownloadsViewModel
     constructor(
         private val repository: DownloadRepository,
         private val navigation: NavigationDispatcher,
+        private val savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
+        private val viewMode =
+            MutableStateFlow(
+                savedStateHandle
+                    .get<String>(VIEW_MODE_KEY)
+                    ?.let { stored -> DownloadsViewMode.entries.firstOrNull { it.name == stored } }
+                    ?: DownloadsViewMode.GRID,
+            )
         val uiState: StateFlow<DownloadsUiState> =
-            repository.downloads
-                .map { tasks -> DownloadsUiState(tasks.toPersistentList()) }
-                .stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-                    initialValue = DownloadsUiState(),
+            combine(repository.downloads, viewMode) { tasks, currentViewMode ->
+                DownloadsUiState(
+                    tasks = tasks.toPersistentList(),
+                    viewMode = currentViewMode,
                 )
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+                initialValue = DownloadsUiState(viewMode = viewMode.value),
+            )
+
+        fun setViewMode(mode: DownloadsViewMode) {
+            viewMode.value = mode
+            savedStateHandle[VIEW_MODE_KEY] = mode.name
+        }
 
         fun pause(id: String) = launchCommand { repository.pause(id) }
 
@@ -53,3 +72,4 @@ internal class DownloadsViewModel
     }
 
 private const val STOP_TIMEOUT_MILLIS = 5_000L
+private const val VIEW_MODE_KEY = "downloads-view-mode"

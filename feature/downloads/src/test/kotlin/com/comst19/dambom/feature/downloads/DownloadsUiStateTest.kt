@@ -1,14 +1,26 @@
 package com.comst19.dambom.feature.downloads
 
+import androidx.lifecycle.SavedStateHandle
+import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
+import com.comst19.dambom.core.domain.repository.DownloadRepository
+import com.comst19.dambom.core.testing.MainDispatcherRule
+import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
+import com.comst19.dambom.feature.downloads.contract.DownloadsViewMode
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 
 class DownloadsUiStateTest {
+    @get:Rule val mainDispatcherRule = MainDispatcherRule()
+
     @Test
     fun `summary counts active queue and weighted progress`() {
         val state =
@@ -25,7 +37,47 @@ class DownloadsUiStateTest {
         assertEquals(3, state.totalCount)
         assertEquals(0.5f, state.progress)
         assertTrue(state.canPauseAll)
+        assertEquals(DownloadsViewMode.GRID, state.viewMode)
     }
+
+    @Test
+    fun `view mode restores from saved state`() {
+        val savedStateHandle = SavedStateHandle()
+        DownloadsViewModel(EmptyDownloadRepository, SpyNavigationDispatcher(), savedStateHandle)
+            .setViewMode(DownloadsViewMode.LIST)
+
+        val restored = DownloadsViewModel(EmptyDownloadRepository, SpyNavigationDispatcher(), savedStateHandle)
+
+        assertEquals(DownloadsViewMode.LIST, restored.uiState.value.viewMode)
+    }
+}
+
+private object EmptyDownloadRepository : DownloadRepository {
+    override val downloads: Flow<List<DownloadTask>> = flowOf(emptyList())
+
+    override suspend fun enqueue(requests: List<DownloadRequest>): EnqueueDownloadsResult =
+        EnqueueDownloadsResult(addedCount = 0, duplicateCount = 0)
+
+    override suspend fun pause(id: String) = Unit
+
+    override suspend fun resume(id: String) = Unit
+
+    override suspend fun cancel(id: String) = Unit
+
+    override suspend fun rename(
+        id: String,
+        title: String,
+    ) = Unit
+
+    override suspend fun delete(id: String) = Unit
+
+    override suspend fun retry(id: String) = Unit
+
+    override suspend fun pauseAll() = Unit
+
+    override suspend fun resumeAll() = Unit
+
+    override suspend fun refreshNetworkPolicy() = Unit
 }
 
 private fun task(

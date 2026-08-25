@@ -1,6 +1,8 @@
 <resources>
     <string name="downloads_title">다운로드</string>
     <string name="downloads_back">뒤로</string>
+    <string name="downloads_view_as_list">목록으로 보기</string>
+    <string name="downloads_view_as_grid">그리드로 보기</string>
     <string name="downloads_empty_title">진행 중인 다운로드가 없어요</string>
     <string name="downloads_empty_description">영상 찾기에서 선택한 항목이 여기에 표시돼요.</string>
     <string name="downloads_summary">%1$d개 다운로드 중 · 전체 %2$d개</string>

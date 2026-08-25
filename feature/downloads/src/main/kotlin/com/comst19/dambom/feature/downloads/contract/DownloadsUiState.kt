@@ -9,6 +9,7 @@ import kotlinx.collections.immutable.persistentListOf
 @Immutable
 internal data class DownloadsUiState(
     val tasks: PersistentList<DownloadTask> = persistentListOf(),
+    val viewMode: DownloadsViewMode = DownloadsViewMode.GRID,
 ) {
     val activeCount: Int
         get() = tasks.count { it.status == DownloadStatus.DOWNLOADING }
@@ -32,4 +33,9 @@ internal data class DownloadsUiState(
                 0f
             }
         }
+}
+
+internal enum class DownloadsViewMode {
+    GRID,
+    LIST,
 }

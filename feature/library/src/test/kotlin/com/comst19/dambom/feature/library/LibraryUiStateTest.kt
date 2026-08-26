@@ -3,6 +3,7 @@ package com.comst19.dambom.feature.library
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
+import com.comst19.dambom.feature.library.file.suggestedFileName
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

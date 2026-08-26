@@ -47,9 +47,9 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.NavigationState
 import com.comst19.dambom.core.navigation.Navigator
-import com.comst19.dambom.presentation.AppNavigationConfig
 import com.comst19.dambom.presentation.R
-import com.comst19.dambom.presentation.appChrome
+import com.comst19.dambom.presentation.navigation.AppNavigationConfig
+import com.comst19.dambom.presentation.navigation.appChrome
 import com.comst19.dambom.presentation.system.SystemBarAppearance
 import kotlinx.coroutines.launch
 

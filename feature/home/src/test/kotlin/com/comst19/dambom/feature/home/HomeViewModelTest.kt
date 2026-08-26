@@ -2,7 +2,7 @@ package com.comst19.dambom.feature.home
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
-import com.comst19.dambom.core.common.SharedUrlBus
+import com.comst19.dambom.core.common.url.SharedUrlBus
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadTask

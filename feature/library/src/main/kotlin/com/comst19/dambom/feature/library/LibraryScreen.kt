@@ -55,8 +55,13 @@ import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.feature.library.component.LibraryFileActions
+import com.comst19.dambom.feature.library.component.VideoActionsButton
+import com.comst19.dambom.feature.library.component.rememberLibraryFileActions
 import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
+import com.comst19.dambom.feature.library.media.LocalVideoMetadata
+import com.comst19.dambom.feature.library.media.rememberLocalVideoMetadata
 import kotlinx.collections.immutable.persistentListOf
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.items as listItems

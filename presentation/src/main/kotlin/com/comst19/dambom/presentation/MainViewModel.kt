@@ -2,11 +2,11 @@ package com.comst19.dambom.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.comst19.dambom.core.common.suspendRunCatching
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.SnackbarDuration
 import com.comst19.dambom.core.common.ui.UiText
+import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.domain.error.AppDecodingException
 import com.comst19.dambom.core.domain.error.AppErrorCode
 import com.comst19.dambom.core.domain.error.AppNetworkException
@@ -22,6 +22,7 @@ import com.comst19.dambom.core.domain.repository.NetworkMonitor
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.presentation.contract.AppStartupState
 import com.comst19.dambom.presentation.contract.StartupFailure
+import com.comst19.dambom.presentation.startup.StartupCoordinator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

@@ -14,8 +14,8 @@ import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.comst19.dambom.core.common.SharedUrlBus
 import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.common.url.SharedUrlBus
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.MessageContent
 import com.comst19.dambom.core.domain.model.ThemeMode
@@ -23,6 +23,7 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
 import com.comst19.dambom.presentation.contract.AppStartupState
+import com.comst19.dambom.presentation.navigation.AppNavigationConfig
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject

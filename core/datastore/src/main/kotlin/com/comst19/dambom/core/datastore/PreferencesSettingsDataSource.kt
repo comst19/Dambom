@@ -1,18 +1,11 @@
 package com.comst19.dambom.core.datastore
 
-import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
-import dagger.Binds
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -71,23 +64,3 @@ class PreferencesSettingsDataSource
             const val SYSTEM_THEME_MODE = "SYSTEM"
         }
     }
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class DataStoreModule {
-    @Binds
-    abstract fun bindSettingsDataSource(implementation: PreferencesSettingsDataSource): SettingsDataSource
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-object DataStoreProviderModule {
-    @Provides
-    @Singleton
-    fun provideSettingsDataStore(
-        @ApplicationContext context: Context,
-    ): DataStore<Preferences> =
-        androidx.datastore.preferences.core.PreferenceDataStoreFactory.create {
-            context.filesDir.resolve("datastore/settings.preferences_pb")
-        }
-}

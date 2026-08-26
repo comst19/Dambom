@@ -1,5 +1,6 @@
 package com.comst19.dambom.core.data.repository
 
+import com.comst19.dambom.core.data.network.fxtwitter.FxTwitterMediaDetector
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason

@@ -1,8 +1,8 @@
 package com.comst19.dambom
 
 import android.app.Application
-import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.comst19.dambom.work.LegacyWorkerFactory
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -11,7 +11,7 @@ class DambomApplication :
     Application(),
     Configuration.Provider {
     @Inject
-    lateinit var workerFactory: HiltWorkerFactory
+    lateinit var workerFactory: LegacyWorkerFactory
 
     override val workManagerConfiguration: Configuration
         get() =

@@ -1,6 +1,8 @@
 package com.comst19.dambom.core.data.repository
 
 import com.comst19.dambom.core.coroutine.IoDispatcher
+import com.comst19.dambom.core.data.download.DownloadFileStore
+import com.comst19.dambom.core.data.download.DownloadWorkScheduler
 import com.comst19.dambom.core.database.download.DownloadTaskDao
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadFailureReason

@@ -80,6 +80,11 @@ import androidx.window.core.layout.WindowSizeClass
 import com.comst19.dambom.core.common.ui.AppScreen
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.ORIGINAL_QUALITY
+import com.comst19.dambom.feature.library.component.LibraryFileActions
+import com.comst19.dambom.feature.library.component.VideoActionsButton
+import com.comst19.dambom.feature.library.component.rememberLibraryFileActions
+import com.comst19.dambom.feature.library.media.LocalVideoMetadata
+import com.comst19.dambom.feature.library.media.rememberLocalVideoMetadata
 import java.text.DateFormat
 import java.util.Date
 import kotlin.math.roundToLong

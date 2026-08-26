@@ -3,6 +3,9 @@ package com.comst19.dambom.core.data.repository
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import com.comst19.dambom.core.data.download.DownloadFileStore
+import com.comst19.dambom.core.data.download.DownloadWorkScheduler
+import com.comst19.dambom.core.data.download.selectNextDownload
 import com.comst19.dambom.core.database.DambomDatabase
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadRequest

@@ -1,6 +1,6 @@
 package com.comst19.dambom.core.network
 
-import com.comst19.dambom.core.common.AppEnvironment
+import com.comst19.dambom.core.common.model.AppEnvironment
 import okhttp3.logging.HttpLoggingInterceptor
 import org.junit.Assert.assertEquals
 import org.junit.Test

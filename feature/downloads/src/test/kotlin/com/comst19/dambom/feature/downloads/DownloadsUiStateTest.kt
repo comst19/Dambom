@@ -1,6 +1,9 @@
 package com.comst19.dambom.feature.downloads
 
 import androidx.lifecycle.SavedStateHandle
+import com.comst19.dambom.core.common.ui.AppEvent
+import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
@@ -11,14 +14,19 @@ import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
 import com.comst19.dambom.feature.downloads.contract.DownloadsViewMode
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class DownloadsUiStateTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
@@ -44,10 +52,10 @@ class DownloadsUiStateTest {
     @Test
     fun `view mode restores from saved state`() {
         val savedStateHandle = SavedStateHandle()
-        DownloadsViewModel(EmptyDownloadRepository, SpyNavigationDispatcher(), savedStateHandle)
+        DownloadsViewModel(EmptyDownloadRepository, SpyNavigationDispatcher(), savedStateHandle, AppEventBus())
             .setViewMode(DownloadsViewMode.LIST)
 
-        val restored = DownloadsViewModel(EmptyDownloadRepository, SpyNavigationDispatcher(), savedStateHandle)
+        val restored = DownloadsViewModel(EmptyDownloadRepository, SpyNavigationDispatcher(), savedStateHandle, AppEventBus())
 
         assertEquals(DownloadsViewMode.LIST, restored.uiState.value.viewMode)
     }
@@ -67,6 +75,27 @@ class DownloadsUiStateTest {
             ).thumbnailSource(),
         )
     }
+
+    @Test
+    fun `repository command failure is reported without crashing`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val events = AppEventBus()
+            val viewModel =
+                DownloadsViewModel(
+                    FailingDownloadRepository,
+                    SpyNavigationDispatcher(),
+                    SavedStateHandle(),
+                    events,
+                )
+
+            viewModel.pause("video")
+            advanceUntilIdle()
+
+            assertEquals(
+                AppEvent.ShowSnackbar(UiText.Resource(R.string.downloads_command_failed)),
+                events.events.first(),
+            )
+        }
 }
 
 private object EmptyDownloadRepository : DownloadRepository {
@@ -95,6 +124,10 @@ private object EmptyDownloadRepository : DownloadRepository {
     override suspend fun resumeAll() = Unit
 
     override suspend fun refreshNetworkPolicy() = Unit
+}
+
+private object FailingDownloadRepository : DownloadRepository by EmptyDownloadRepository {
+    override suspend fun pause(id: String): Unit = error("database unavailable")
 }
 
 private fun task(

@@ -173,6 +173,7 @@ internal class WebViewModel
             }
             updatePage(tabId, safeUrl, title)
             readyPageGenerations[tabId] = generation
+            if (safeUrl.hasVideoExtension()) onMediaRequest(tabId, generation, safeUrl)
         }
 
         fun scanCurrentTab() {

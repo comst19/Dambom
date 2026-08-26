@@ -27,4 +27,5 @@
     <string name="downloads_error_storage">Couldn’t save the file. Check storage space.</string>
     <string name="downloads_error_server">The server couldn’t process the download.</string>
     <string name="downloads_error_unknown">Something went wrong while downloading.</string>
+    <string name="downloads_command_failed">Couldn’t update the download. Try again.</string>
 </resources>

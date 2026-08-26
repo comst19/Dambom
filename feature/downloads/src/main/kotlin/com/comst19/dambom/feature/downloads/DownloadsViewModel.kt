@@ -3,6 +3,10 @@ package com.comst19.dambom.feature.downloads
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.comst19.dambom.core.common.ui.AppEvent
+import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.common.ui.UiText
+import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
@@ -25,6 +29,7 @@ internal class DownloadsViewModel
         private val repository: DownloadRepository,
         private val navigation: NavigationDispatcher,
         private val savedStateHandle: SavedStateHandle,
+        private val appEventBus: AppEventBus,
     ) : ViewModel() {
         private val viewMode =
             MutableStateFlow(
@@ -67,7 +72,14 @@ internal class DownloadsViewModel
         }
 
         private fun launchCommand(block: suspend () -> Unit) {
-            viewModelScope.launch { block() }
+            viewModelScope.launch {
+                suspendRunCatching(block)
+                    .onFailure {
+                        appEventBus.send(
+                            AppEvent.ShowSnackbar(UiText.Resource(R.string.downloads_command_failed)),
+                        )
+                    }
+            }
         }
     }
 

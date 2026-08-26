@@ -240,6 +240,24 @@ class WebViewModelTest {
         }
 
     @Test
+    fun `direct video url is detected when the page finishes`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = createViewModel()
+            val tabId = viewModel.uiState.value.currentTabId
+            val videoUrl = "https://example.com/direct.mp4"
+
+            viewModel.onPageStarted(tabId, videoUrl, "Direct", 1L)
+            viewModel.onPageFinished(tabId, videoUrl, "Direct", 1L)
+            runCurrent()
+
+            assertEquals(
+                WebDetectionState.Found(1),
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+        }
+
+    @Test
     fun `scan result from a previous page is ignored`() =
         runTest(mainDispatcherRule.dispatcher) {
             val repository = ControllableMediaDetectionRepository()

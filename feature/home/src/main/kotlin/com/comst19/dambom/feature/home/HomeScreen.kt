@@ -46,6 +46,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.appScaffoldPadding
+import com.comst19.dambom.core.common.ui.currentAdaptiveLayoutInfo
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
@@ -100,6 +101,10 @@ internal fun HomeScreen(
     onAnalyzeSharedUrl: () -> Unit,
     onDismissSharedUrl: () -> Unit,
 ) {
+    val compactHeight = currentAdaptiveLayoutInfo().isCompactHeight
+    val screenVerticalPadding = if (compactHeight) 8.dp else 16.dp
+    val sectionSpacing = if (compactHeight) 16.dp else 28.dp
+
     Box(
         modifier =
             Modifier
@@ -113,10 +118,10 @@ internal fun HomeScreen(
                     .widthIn(max = HOME_CONTENT_MAX_WIDTH)
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                    .padding(horizontal = 20.dp, vertical = screenVerticalPadding),
         ) {
             HomeHeader(onOpenSettings)
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(sectionSpacing))
             HomePrimarySection(
                 uiState = uiState,
                 canUseInternet = canUseInternet,
@@ -125,8 +130,9 @@ internal fun HomeScreen(
                 onAnalyze = onAnalyze,
                 onUseClipboardSuggestion = onUseClipboardSuggestion,
                 onDismissClipboardSuggestion = onDismissClipboardSuggestion,
+                compactHeight = compactHeight,
             )
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(sectionSpacing))
             HomeSupportingSection(
                 downloadSummary = uiState.downloadSummary,
                 canUseInternet = canUseInternet,
@@ -158,21 +164,26 @@ private fun HomePrimarySection(
     onAnalyze: () -> Unit,
     onUseClipboardSuggestion: () -> Unit,
     onDismissClipboardSuggestion: () -> Unit,
+    compactHeight: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val descriptionSpacing = if (compactHeight) 4.dp else 8.dp
+    val inputSpacing = if (compactHeight) 12.dp else 24.dp
+    val actionSpacing = if (compactHeight) 8.dp else 12.dp
+
     Column(modifier) {
         Text(
             text = stringResource(R.string.home_title),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground,
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(descriptionSpacing))
         Text(
             text = stringResource(R.string.home_description),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(inputSpacing))
         OutlinedTextField(
             value = uiState.url,
             onValueChange = onUrlChange,
@@ -190,7 +201,7 @@ private fun HomePrimarySection(
             },
             shape = DambomShapes.Control,
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(actionSpacing))
         Button(
             onClick = onAnalyze,
             modifier = Modifier.fillMaxWidth().height(54.dp),

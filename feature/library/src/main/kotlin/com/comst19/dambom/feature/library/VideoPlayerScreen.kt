@@ -36,8 +36,6 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -76,8 +74,8 @@ import androidx.media3.common.Player
 import androidx.media3.ui.compose.ContentFrame
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
-import androidx.window.core.layout.WindowSizeClass
 import com.comst19.dambom.core.common.ui.AppScreen
+import com.comst19.dambom.core.common.ui.currentAdaptiveLayoutInfo
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.ORIGINAL_QUALITY
 import com.comst19.dambom.feature.library.component.LibraryFileActions
@@ -90,7 +88,6 @@ import java.util.Date
 import kotlin.math.roundToLong
 
 @Composable
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 internal fun VideoPlayerRoute(id: String) {
     val libraryViewModel: LibraryViewModel = hiltViewModel()
     val playerViewModel: VideoPlayerViewModel = hiltViewModel()
@@ -98,7 +95,7 @@ internal fun VideoPlayerRoute(id: String) {
     val task =
         uiState.selectedVideo?.takeIf { it.id == id }
             ?: uiState.videos.firstOrNull { it.id == id }
-    val multiplePanes = currentWindowAdaptiveInfoV2().windowSizeClass.supportsMultiplePanes
+    val multiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
     val fileActions =
         rememberLibraryFileActions(
             viewModel = libraryViewModel,
@@ -542,9 +539,6 @@ private fun PlayerControls(
         style = MaterialTheme.typography.bodySmall,
     )
 }
-
-private val WindowSizeClass.supportsMultiplePanes: Boolean
-    get() = isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
 
 internal fun Long.toTimeText(): String {
     val totalSeconds = coerceAtLeast(0L) / 1_000L

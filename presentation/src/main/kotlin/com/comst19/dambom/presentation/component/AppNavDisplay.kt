@@ -5,14 +5,18 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
+import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
+import com.comst19.dambom.core.common.ui.currentAdaptiveLayoutInfo
 import com.comst19.dambom.core.navigation.Navigator
 
 /**
@@ -28,8 +32,22 @@ internal fun AppNavDisplay(
     modifier: Modifier,
 ) {
     val paneExpansionState = rememberPaneExpansionState()
+    val supportsMultiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
+    val defaultDirective = calculatePaneScaffoldDirective(currentWindowAdaptiveInfoV2())
+    val directive =
+        if (supportsMultiplePanes) {
+            defaultDirective
+        } else {
+            defaultDirective.copy(
+                maxHorizontalPartitions = 1,
+                horizontalPartitionSpacerSize = 0.dp,
+            )
+        }
     val listDetailSceneStrategy =
-        rememberListDetailSceneStrategy<NavKey>(paneExpansionState = paneExpansionState)
+        rememberListDetailSceneStrategy<NavKey>(
+            directive = directive,
+            paneExpansionState = paneExpansionState,
+        )
 
     LaunchedEffect(isLibraryDetailPaneVisible) {
         if (isLibraryDetailPaneVisible) {

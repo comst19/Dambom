@@ -34,8 +34,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -49,8 +47,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.window.core.layout.WindowSizeClass
 import com.comst19.dambom.core.common.ui.appScaffoldPadding
+import com.comst19.dambom.core.common.ui.currentAdaptiveLayoutInfo
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.domain.model.DownloadStatus
@@ -67,7 +65,6 @@ import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.items as listItems
 
 @Composable
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 internal fun LibraryRoute(
     isDetailPaneVisible: Boolean,
     onDetailPaneVisibilityChange: (Boolean) -> Unit,
@@ -75,7 +72,7 @@ internal fun LibraryRoute(
     val viewModel: LibraryViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val fileActions = rememberLibraryFileActions(viewModel)
-    val multiplePanes = currentWindowAdaptiveInfoV2().windowSizeClass.supportsMultiplePanes
+    val multiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
 
     LibraryScreen(
         uiState = uiState,
@@ -600,6 +597,3 @@ private val MIN_VIDEO_CARD_WIDTH = 156.dp
 private val LIST_THUMBNAIL_WIDTH = 112.dp
 private const val VIDEO_ASPECT_RATIO = 16f / 9f
 private const val VIDEO_ITEM_CONTENT_TYPE = "video"
-
-private val WindowSizeClass.supportsMultiplePanes: Boolean
-    get() = isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)

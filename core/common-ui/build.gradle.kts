@@ -9,6 +9,7 @@ android { namespace = "com.comst19.dambom.core.common.ui" }
 
 dependencies {
     implementation(projects.core.common)
+    implementation(libs.androidx.compose.material3.adaptive)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.video)

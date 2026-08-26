@@ -18,6 +18,7 @@ import kotlinx.collections.immutable.mutate
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.collections.immutable.toPersistentSet
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,40 +37,30 @@ internal class DetectionViewModel
         private val mutableUiState = MutableStateFlow<DetectionUiState>(DetectionUiState.Loading)
         val uiState: StateFlow<DetectionUiState> = mutableUiState.asStateFlow()
         private var loadedUrl: String? = null
+        private var detectionJob: Job? = null
+        private var requestGeneration = 0L
 
         fun detect(url: String) {
-            if (loadedUrl == url && mutableUiState.value !is DetectionUiState.Unsupported) return
+            if (loadedUrl == url &&
+                (mutableUiState.value is DetectionUiState.Loading || mutableUiState.value is DetectionUiState.Content)
+            ) {
+                return
+            }
+            val generation = ++requestGeneration
+            detectionJob?.cancel()
             loadedUrl = url
             mutableUiState.value = DetectionUiState.Loading
-            viewModelScope.launch {
-                when (val result = repository.detect(url)) {
-                    is MediaDetectionResult.Success -> {
-                        mutableUiState.value =
-                            DetectionUiState.Content(
-                                pageTitle = result.pageTitle,
-                                candidates = result.candidates.toPersistentList(),
-                                selectedIds =
-                                    result.candidates
-                                        .takeIf { it.size == 1 }
-                                        .orEmpty()
-                                        .map { it.id }
-                                        .toPersistentSet(),
-                                selectedVariantUrls =
-                                    result.candidates
-                                        .associate { candidate -> candidate.id to candidate.url }
-                                        .toPersistentMap(),
-                            )
-                    }
-
-                    is MediaDetectionResult.Unsupported -> {
-                        if (result.reason == UnsupportedReason.INVALID_URL) {
-                            mutableUiState.value = DetectionUiState.Unsupported(result.reason)
-                        } else {
-                            navigation.dispatch(NavigationEvent.Replace(WebKey(url)))
+            detectionJob =
+                viewModelScope.launch {
+                    suspendRunCatching { repository.detect(url) }
+                        .onSuccess { result ->
+                            if (generation == requestGeneration) applyDetectionResult(url, result)
+                        }.onFailure {
+                            if (generation == requestGeneration) {
+                                navigation.dispatch(NavigationEvent.Replace(WebKey(url)))
+                            }
                         }
-                    }
                 }
-            }
         }
 
         fun retry() {
@@ -86,8 +77,43 @@ internal class DetectionViewModel
         }
 
         fun setNetworkUnavailable() {
+            requestGeneration++
+            detectionJob?.cancel()
             if (mutableUiState.value !is DetectionUiState.Content) {
                 mutableUiState.value = DetectionUiState.NetworkUnavailable
+            }
+        }
+
+        private suspend fun applyDetectionResult(
+            url: String,
+            result: MediaDetectionResult,
+        ) {
+            when (result) {
+                is MediaDetectionResult.Success -> {
+                    mutableUiState.value =
+                        DetectionUiState.Content(
+                            pageTitle = result.pageTitle,
+                            candidates = result.candidates.toPersistentList(),
+                            selectedIds =
+                                result.candidates
+                                    .takeIf { it.size == 1 }
+                                    .orEmpty()
+                                    .map { it.id }
+                                    .toPersistentSet(),
+                            selectedVariantUrls =
+                                result.candidates
+                                    .associate { candidate -> candidate.id to candidate.url }
+                                    .toPersistentMap(),
+                        )
+                }
+
+                is MediaDetectionResult.Unsupported -> {
+                    if (result.reason == UnsupportedReason.INVALID_URL) {
+                        mutableUiState.value = DetectionUiState.Unsupported(result.reason)
+                    } else {
+                        navigation.dispatch(NavigationEvent.Replace(WebKey(url)))
+                    }
+                }
             }
         }
 

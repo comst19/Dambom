@@ -105,6 +105,7 @@ import com.comst19.dambom.feature.web.contract.WebUiState
 import kotlinx.collections.immutable.PersistentList
 import java.io.ByteArrayInputStream
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 
 @Composable
 internal fun WebRoute(
@@ -120,6 +121,8 @@ internal fun WebRoute(
         uiState = uiState,
         onBack = viewModel::goBack,
         onNavigate = viewModel::navigateCurrentTab,
+        onPageStarted = viewModel::onPageStarted,
+        onPageFinished = viewModel::onPageFinished,
         onPageChanged = viewModel::updatePage,
         onMediaRequest = viewModel::onMediaRequest,
         onScan = viewModel::scanCurrentTab,
@@ -141,8 +144,10 @@ internal fun WebScreen(
     uiState: WebUiState,
     onBack: () -> Unit,
     onNavigate: (String) -> Unit,
+    onPageStarted: (Long, String?, String?, Long) -> Unit,
+    onPageFinished: (Long, String?, String?, Long) -> Unit,
     onPageChanged: (Long, String?, String?) -> Unit,
-    onMediaRequest: (Long, String) -> Unit,
+    onMediaRequest: (Long, Long, String) -> Unit,
     onScan: () -> Unit,
     onOpenDetectedMedia: () -> Unit,
     onCreateTab: (String?) -> Unit,
@@ -204,6 +209,8 @@ internal fun WebScreen(
                     tab = currentTab,
                     savedState = savedWebState(currentTab.id),
                     onWebViewReady = { currentWebView = it },
+                    onPageStarted = onPageStarted,
+                    onPageFinished = onPageFinished,
                     onPageChanged = onPageChanged,
                     onMediaRequest = onMediaRequest,
                     onSaveWebState = onSaveWebState,
@@ -429,8 +436,10 @@ private fun ColumnScope.WebContent(
     tab: WebTab,
     savedState: Bundle?,
     onWebViewReady: (WebView?) -> Unit,
+    onPageStarted: (Long, String?, String?, Long) -> Unit,
+    onPageFinished: (Long, String?, String?, Long) -> Unit,
     onPageChanged: (Long, String?, String?) -> Unit,
-    onMediaRequest: (Long, String) -> Unit,
+    onMediaRequest: (Long, Long, String) -> Unit,
     onSaveWebState: (Long, Bundle) -> Unit,
     onScan: () -> Unit,
     onOpenDetectedMedia: () -> Unit,
@@ -462,6 +471,8 @@ private fun ColumnScope.WebContent(
                         context = context,
                         tab = tab,
                         savedState = savedState,
+                        onPageStarted = onPageStarted,
+                        onPageFinished = onPageFinished,
                         onPageChanged = onPageChanged,
                         onMediaRequest = onMediaRequest,
                         onProgress = { loadingProgress = it },
@@ -732,13 +743,16 @@ private fun createWebView(
     context: android.content.Context,
     tab: WebTab,
     savedState: Bundle?,
+    onPageStarted: (Long, String?, String?, Long) -> Unit,
+    onPageFinished: (Long, String?, String?, Long) -> Unit,
     onPageChanged: (Long, String?, String?) -> Unit,
-    onMediaRequest: (Long, String) -> Unit,
+    onMediaRequest: (Long, Long, String) -> Unit,
     onProgress: (Int) -> Unit,
     onNavigationFailure: (WebNavigationFailure?) -> Unit,
     onRendererGone: () -> Unit,
 ): WebView =
     WebView(context).apply {
+        val pageGeneration = AtomicLong()
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
         settings.allowFileAccess = false
@@ -758,14 +772,16 @@ private fun createWebView(
                     favicon: Bitmap?,
                 ) {
                     onNavigationFailure(null)
-                    onPageChanged(tab.id, url, view?.title)
+                    val generation = nextWebPageGeneration.incrementAndGet()
+                    pageGeneration.set(generation)
+                    onPageStarted(tab.id, url, view?.title, generation)
                 }
 
                 override fun onPageFinished(
                     view: WebView?,
                     url: String?,
                 ) {
-                    onPageChanged(tab.id, url, view?.title)
+                    onPageFinished(tab.id, url, view?.title, pageGeneration.get())
                 }
 
                 override fun shouldInterceptRequest(
@@ -773,7 +789,7 @@ private fun createWebView(
                     request: WebResourceRequest?,
                 ): WebResourceResponse? {
                     val url = request?.url?.toString() ?: return null
-                    onMediaRequest(tab.id, url)
+                    onMediaRequest(tab.id, pageGeneration.get(), url)
                     return if (shouldBlockWebVideo(url, mediaGuardInstalled)) blockedVideoResponse() else null
                 }
 
@@ -844,6 +860,7 @@ internal fun classifyWebNavigationFailure(
 ): WebNavigationFailure? = if (isForMainFrame && errorCode != null) WebNavigationFailure.CONNECTION else null
 
 private val WEB_VIDEO_EXTENSIONS = setOf(".mp4", ".webm", ".mov", ".m4v")
+private val nextWebPageGeneration = AtomicLong()
 
 internal const val WEB_MEDIA_GUARD_SCRIPT =
     """

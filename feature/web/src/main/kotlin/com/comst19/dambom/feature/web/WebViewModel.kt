@@ -18,6 +18,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.mutate
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,6 +39,9 @@ internal class WebViewModel
         val uiState: StateFlow<WebUiState> = mutableUiState.asStateFlow()
         private val savedWebStates = mutableMapOf<Long, Bundle>()
         private val detectedMediaKeys = mutableMapOf<Long, MutableSet<String>>()
+        private val pageGenerations = mutableMapOf<Long, Long>()
+        private val readyPageGenerations = mutableMapOf<Long, Long>()
+        private val scanJobs = mutableMapOf<Long, Job>()
         private var nextTabId = savedStateHandle[NEXT_TAB_ID_KEY] ?: (uiState.value.tabs.maxOfOrNull(WebTab::id) ?: 0L) + 1L
         private var initialUrlApplied = savedStateHandle[INITIAL_URL_APPLIED_KEY] ?: false
 
@@ -66,7 +70,7 @@ internal class WebViewModel
 
         fun closeTab(id: Long) {
             savedWebStates.remove(id)
-            detectedMediaKeys.remove(id)
+            invalidatePage(id)
             updateState { state ->
                 if (state.tabs.size == 1) {
                     val emptyTab = WebTab(id = nextTabId++)
@@ -91,6 +95,7 @@ internal class WebViewModel
 
         fun navigateCurrentTab(value: String) {
             val url = value.normalizeAddress() ?: return
+            invalidatePage(uiState.value.currentTabId)
             updateCurrentTab { tab ->
                 tab.copy(
                     url = url,
@@ -106,6 +111,12 @@ internal class WebViewModel
             title: String?,
         ) {
             val safeUrl = url?.takeIf { it.startsWith("http://") || it.startsWith("https://") } ?: return
+            val previousUrl =
+                uiState.value.tabs
+                    .firstOrNull { it.id == tabId }
+                    ?.url
+            val pageChanged = previousUrl != safeUrl
+            if (pageChanged) invalidatePage(tabId)
             updateState { state ->
                 val tabs =
                     state.tabs
@@ -114,6 +125,7 @@ internal class WebViewModel
                                 tab.copy(
                                     url = safeUrl,
                                     title = title?.takeIf(String::isNotBlank) ?: safeUrl.hostLabel(),
+                                    detectionState = if (pageChanged) WebDetectionState.Idle else tab.detectionState,
                                 )
                             } else {
                                 tab
@@ -133,25 +145,58 @@ internal class WebViewModel
             }
         }
 
+        fun onPageStarted(
+            tabId: Long,
+            url: String?,
+            title: String?,
+            generation: Long,
+        ) {
+            invalidatePage(tabId)
+            pageGenerations[tabId] = generation
+            updatePage(tabId, url, title)
+            pageGenerations[tabId] = generation
+        }
+
+        fun onPageFinished(
+            tabId: Long,
+            url: String?,
+            title: String?,
+            generation: Long,
+        ) {
+            val safeUrl = url?.takeIf { it.startsWith("http://") || it.startsWith("https://") } ?: return
+            if (pageGenerations[tabId] != generation) return
+            if (uiState.value.tabs
+                    .firstOrNull { it.id == tabId }
+                    ?.url != safeUrl
+            ) {
+                return
+            }
+            updatePage(tabId, safeUrl, title)
+            readyPageGenerations[tabId] = generation
+        }
+
         fun scanCurrentTab() {
             val tab = uiState.value.currentTab ?: return
             val url = tab.url ?: return
+            val generation = pageGenerations[tab.id]
+            scanJobs.remove(tab.id)?.cancel()
             updateCurrentTab { it.copy(detectionState = WebDetectionState.Scanning) }
-            viewModelScope.launch {
-                when (val result = mediaDetectionRepository.detect(url)) {
-                    is MediaDetectionResult.Success -> {
-                        updateCurrentTabIf(tab.id) {
-                            it.copy(detectionState = WebDetectionState.Found(result.candidates.size))
+            scanJobs[tab.id] =
+                viewModelScope.launch {
+                    when (val result = mediaDetectionRepository.detect(url)) {
+                        is MediaDetectionResult.Success -> {
+                            updateTabIfCurrentPage(tab.id, url, generation) {
+                                it.copy(detectionState = WebDetectionState.Found(result.candidates.size))
+                            }
                         }
-                    }
 
-                    is MediaDetectionResult.Unsupported -> {
-                        updateCurrentTabIf(tab.id) {
-                            it.copy(detectionState = WebDetectionState.NotFound(result.reason))
+                        is MediaDetectionResult.Unsupported -> {
+                            updateTabIfCurrentPage(tab.id, url, generation) {
+                                it.copy(detectionState = WebDetectionState.NotFound(result.reason))
+                            }
                         }
                     }
                 }
-            }
         }
 
         fun openDetectedMedia() {
@@ -162,14 +207,18 @@ internal class WebViewModel
 
         fun onMediaRequest(
             tabId: Long,
+            generation: Long,
             url: String,
         ) {
             if (!url.hasVideoExtension()) return
-            val count =
-                synchronized(detectedMediaKeys) {
-                    detectedMediaKeys.getOrPut(tabId, ::mutableSetOf).apply { add(url.detectedVideoKey()) }.size
+            viewModelScope.launch {
+                if (readyPageGenerations[tabId] != generation) return@launch
+                val keys = detectedMediaKeys.getOrPut(tabId, ::mutableSetOf)
+                val changed = keys.add(url.detectedVideoKey())
+                if (changed) {
+                    updateCurrentTabIf(tabId) { it.copy(detectionState = WebDetectionState.Found(keys.size)) }
                 }
-            updateCurrentTabIf(tabId) { it.copy(detectionState = WebDetectionState.Found(count)) }
+            }
         }
 
         fun saveWebState(
@@ -203,6 +252,29 @@ internal class WebViewModel
             updateState { state ->
                 state.copy(tabs = state.tabs.map { if (it.id == tabId) transform(it) else it }.toPersistentList())
             }
+        }
+
+        private fun updateTabIfCurrentPage(
+            tabId: Long,
+            url: String,
+            generation: Long?,
+            transform: (WebTab) -> WebTab,
+        ) {
+            if (pageGenerations[tabId] != generation) return
+            if (uiState.value.tabs
+                    .firstOrNull { it.id == tabId }
+                    ?.url != url
+            ) {
+                return
+            }
+            updateCurrentTabIf(tabId, transform)
+        }
+
+        private fun invalidatePage(tabId: Long) {
+            scanJobs.remove(tabId)?.cancel()
+            detectedMediaKeys.remove(tabId)
+            pageGenerations.remove(tabId)
+            readyPageGenerations.remove(tabId)
         }
 
         private fun updateState(transform: (WebUiState) -> WebUiState) {

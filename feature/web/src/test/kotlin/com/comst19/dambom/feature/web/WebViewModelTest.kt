@@ -11,10 +11,12 @@ import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.web.contract.RecentPage
 import com.comst19.dambom.feature.web.contract.WebDetectionState
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -67,7 +69,10 @@ class WebViewModelTest {
         val viewModel = createViewModel()
         val firstTabId = viewModel.uiState.value.currentTabId
 
-        viewModel.onMediaRequest(firstTabId, "https://example.com/video.mp4")
+        viewModel.onPageStarted(firstTabId, FIRST_PAGE_URL, "First", 1L)
+        viewModel.onPageFinished(firstTabId, FIRST_PAGE_URL, "First", 1L)
+        viewModel.onMediaRequest(firstTabId, 1L, "https://example.com/video.mp4")
+        mainDispatcherRule.dispatcher.scheduler.runCurrent()
         viewModel.createTab()
 
         val firstTab =
@@ -90,19 +95,25 @@ class WebViewModelTest {
     fun `x quality requests count as one detected video`() {
         val viewModel = createViewModel()
         val tabId = viewModel.uiState.value.currentTabId
+        viewModel.onPageStarted(tabId, FIRST_PAGE_URL, "First", 1L)
+        viewModel.onPageFinished(tabId, FIRST_PAGE_URL, "First", 1L)
 
         viewModel.onMediaRequest(
             tabId,
+            1L,
             "https://video.twimg.com/ext_tw_video/123/pu/vid/180x320/low.mp4",
         )
         viewModel.onMediaRequest(
             tabId,
+            1L,
             "https://video.twimg.com/ext_tw_video/123/pu/vid/360x640/medium.mp4",
         )
         viewModel.onMediaRequest(
             tabId,
+            1L,
             "https://video.twimg.com/ext_tw_video/123/pu/vid/720x1280/high.mp4",
         )
+        mainDispatcherRule.dispatcher.scheduler.runCurrent()
 
         assertEquals(
             WebDetectionState.Found(1),
@@ -151,6 +162,18 @@ class WebViewModelTest {
             val navigation = SpyNavigationDispatcher()
             val viewModel = WebViewModel(FakeMediaDetectionRepository, navigation, SavedStateHandle())
             viewModel.applyInitialUrl("https://example.com")
+            viewModel.onPageStarted(
+                viewModel.uiState.value.currentTabId,
+                "https://example.com",
+                "Example",
+                1L,
+            )
+            viewModel.onPageFinished(
+                viewModel.uiState.value.currentTabId,
+                "https://example.com",
+                "Example",
+                1L,
+            )
 
             viewModel.openDetectedMedia()
             advanceUntilIdle()
@@ -158,8 +181,10 @@ class WebViewModelTest {
 
             viewModel.onMediaRequest(
                 viewModel.uiState.value.currentTabId,
+                1L,
                 "https://example.com/video.mp4",
             )
+            runCurrent()
             viewModel.openDetectedMedia()
             advanceUntilIdle()
 
@@ -168,6 +193,82 @@ class WebViewModelTest {
                 navigation.dispatched.single(),
             )
         }
+
+    @Test
+    fun `page navigation clears media detected on the previous page`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = createViewModel()
+            val tabId = viewModel.uiState.value.currentTabId
+            viewModel.navigateCurrentTab(FIRST_PAGE_URL)
+            viewModel.onPageStarted(tabId, FIRST_PAGE_URL, "First", 1L)
+            viewModel.onPageFinished(tabId, FIRST_PAGE_URL, "First", 1L)
+            viewModel.onMediaRequest(tabId, 1L, "https://example.com/first.mp4")
+            runCurrent()
+
+            viewModel.updatePage(tabId, SECOND_PAGE_URL, "Second")
+
+            assertEquals(
+                WebDetectionState.Idle,
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+        }
+
+    @Test
+    fun `media request is ignored until the current page finishes`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = createViewModel()
+            val tabId = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(tabId, FIRST_PAGE_URL, "First", 1L)
+
+            viewModel.onMediaRequest(tabId, 1L, "https://example.com/first.mp4")
+            runCurrent()
+            assertEquals(
+                WebDetectionState.Idle,
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+
+            viewModel.onPageFinished(tabId, FIRST_PAGE_URL, "First", 1L)
+            viewModel.onMediaRequest(tabId, 1L, "https://example.com/first.mp4")
+            runCurrent()
+            assertEquals(
+                WebDetectionState.Found(1),
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+        }
+
+    @Test
+    fun `scan result from a previous page is ignored`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val repository = ControllableMediaDetectionRepository()
+            val viewModel = WebViewModel(repository, FakeNavigationDispatcher, SavedStateHandle())
+            val tabId = viewModel.uiState.value.currentTabId
+            viewModel.navigateCurrentTab(FIRST_PAGE_URL)
+            viewModel.scanCurrentTab()
+            runCurrent()
+
+            viewModel.updatePage(tabId, SECOND_PAGE_URL, "Second")
+            repository.complete(MediaDetectionResult.Unsupported(UnsupportedReason.NO_MEDIA))
+            advanceUntilIdle()
+
+            assertEquals(
+                WebDetectionState.Idle,
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+        }
+}
+
+private class ControllableMediaDetectionRepository : MediaDetectionRepository {
+    private val result = CompletableDeferred<MediaDetectionResult>()
+
+    override suspend fun detect(url: String): MediaDetectionResult = result.await()
+
+    fun complete(value: MediaDetectionResult) {
+        result.complete(value)
+    }
 }
 
 private fun createViewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) =
@@ -182,3 +283,6 @@ private object FakeNavigationDispatcher : NavigationDispatcher {
 
     override suspend fun dispatch(event: NavigationEvent) = Unit
 }
+
+private const val FIRST_PAGE_URL = "https://example.com/first"
+private const val SECOND_PAGE_URL = "https://example.com/second"

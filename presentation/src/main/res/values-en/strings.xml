@@ -9,4 +9,5 @@
     <string name="download_feedback_started">Started downloading %1$s.</string>
     <string name="download_feedback_completed">Finished downloading %1$s.</string>
     <string name="download_feedback_failed">Couldn’t download %1$s.</string>
+    <string name="download_recovery_failed">Couldn’t restore pending downloads. Try again from Downloads.</string>
 </resources>

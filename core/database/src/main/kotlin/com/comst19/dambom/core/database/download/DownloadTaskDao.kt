@@ -49,7 +49,7 @@ interface DownloadTaskDao {
         SET downloadedBytes = :downloadedBytes,
             expectedBytes = :expectedBytes,
             updatedAtMillis = :updatedAtMillis
-        WHERE id = :id
+        WHERE id = :id AND status = 'DOWNLOADING'
         """,
     )
     suspend fun updateProgress(
@@ -57,7 +57,7 @@ interface DownloadTaskDao {
         downloadedBytes: Long,
         expectedBytes: Long?,
         updatedAtMillis: Long,
-    )
+    ): Int
 
     @Query(
         """
@@ -79,14 +79,14 @@ interface DownloadTaskDao {
         """
         UPDATE download_tasks
         SET status = 'FAILED', failureReason = :reason, updatedAtMillis = :updatedAtMillis
-        WHERE id = :id
+        WHERE id = :id AND status = 'DOWNLOADING'
         """,
     )
     suspend fun markFailed(
         id: String,
         reason: String,
         updatedAtMillis: Long,
-    )
+    ): Int
 
     @Query(
         """

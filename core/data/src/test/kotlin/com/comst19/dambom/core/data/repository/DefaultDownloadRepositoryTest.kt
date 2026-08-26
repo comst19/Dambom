@@ -124,6 +124,47 @@ class DefaultDownloadRepositoryTest {
         }
 
     @Test
+    fun `paused download cannot be overwritten by a late failure`() =
+        runTest {
+            val dao = database.downloadTaskDao()
+            dao.insert(entity(TEST_ID, "media.example").copy(status = DownloadStatus.DOWNLOADING.name))
+            dao.pause(TEST_ID, 2L)
+
+            dao.updateProgress(TEST_ID, 512L, 1024L, 3L)
+            dao.markFailed(TEST_ID, "NETWORK", 3L)
+
+            repository = createRepository(testScheduler)
+            val task = repository.downloads.first().single()
+            assertEquals(DownloadStatus.PAUSED, task.status)
+            assertEquals(0L, task.downloadedBytes)
+        }
+
+    @Test
+    fun `duplicate enqueue repairs scheduling after an earlier scheduler failure`() =
+        runTest {
+            repository = createRepository(testScheduler)
+            scheduler.failSchedule = true
+            assertTrue(runCatching { repository.enqueue(listOf(testRequest())) }.isFailure)
+            scheduler.failSchedule = false
+
+            val result = repository.enqueue(listOf(testRequest()))
+
+            assertEquals(1, result.duplicateCount)
+            assertEquals(1, scheduler.successfulEnsureCount)
+        }
+
+    @Test
+    fun `startup scheduling check restores queued work`() =
+        runTest {
+            repository = createRepository(testScheduler)
+            database.downloadTaskDao().insert(entity(TEST_ID, "media.example"))
+
+            repository.ensureDownloadsScheduled()
+
+            assertEquals(1, scheduler.successfulEnsureCount)
+        }
+
+    @Test
     fun `rename updates the saved title`() =
         runTest {
             repository = createRepository(testScheduler)
@@ -201,10 +242,19 @@ class DefaultDownloadRepositoryTest {
 
 private class RecordingScheduler : DownloadWorkScheduler {
     var scheduleCount = 0
+    var successfulScheduleCount = 0
+    var successfulEnsureCount = 0
     var rescheduleCount = 0
+    var failSchedule = false
 
     override suspend fun schedule() {
         scheduleCount++
+        if (failSchedule) error("scheduler failure")
+        successfulScheduleCount++
+    }
+
+    override suspend fun ensureScheduled() {
+        successfulEnsureCount++
     }
 
     override suspend fun reschedule() {

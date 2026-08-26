@@ -17,6 +17,8 @@ import javax.inject.Inject
 internal interface DownloadWorkScheduler {
     suspend fun schedule()
 
+    suspend fun ensureScheduled()
+
     suspend fun reschedule()
 }
 
@@ -30,6 +32,10 @@ internal class WorkManagerDownloadScheduler
 
         override suspend fun schedule() {
             enqueue(ExistingWorkPolicy.APPEND_OR_REPLACE)
+        }
+
+        override suspend fun ensureScheduled() {
+            enqueue(ExistingWorkPolicy.KEEP)
         }
 
         override suspend fun reschedule() {

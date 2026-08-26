@@ -17,6 +17,13 @@ internal class DownloadFileStore
 
         fun partialFile(id: String): File = partialDirectory.resolve("$id.part")
 
+        fun partialValidatorFile(id: String): File = partialDirectory.resolve("$id.part.validator")
+
+        fun clearPartial(id: String) {
+            partialFile(id).delete()
+            partialValidatorFile(id).delete()
+        }
+
         fun completedFile(
             id: String,
             url: String,
@@ -33,7 +40,7 @@ internal class DownloadFileStore
             id: String,
             localFileName: String?,
         ) {
-            partialFile(id).delete()
+            clearPartial(id)
             localFileName?.let { fileName ->
                 val videoFile = videoDirectory.resolve(fileName)
                 videoFile.delete()

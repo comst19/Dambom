@@ -9,4 +9,5 @@
     <string name="download_feedback_started">다운로드를 시작했어요: %1$s</string>
     <string name="download_feedback_completed">다운로드가 완료됐어요: %1$s</string>
     <string name="download_feedback_failed">다운로드하지 못했어요: %1$s</string>
+    <string name="download_recovery_failed">대기 중인 다운로드를 복구하지 못했어요. 다운로드 화면에서 다시 시도해 주세요.</string>
 </resources>

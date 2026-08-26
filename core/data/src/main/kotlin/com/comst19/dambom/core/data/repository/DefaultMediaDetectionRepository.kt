@@ -1,14 +1,17 @@
 package com.comst19.dambom.core.data.repository
 
+import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.data.network.fxtwitter.FxTwitterMediaDetector
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.ResponseBody
+import okio.Buffer
 import java.io.IOException
 import java.net.URI
 import java.security.MessageDigest
@@ -19,9 +22,10 @@ internal class DefaultMediaDetectionRepository
     constructor(
         private val client: OkHttpClient,
         private val fxTwitterDetector: FxTwitterMediaDetector,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : MediaDetectionRepository {
         override suspend fun detect(url: String): MediaDetectionResult =
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
                 val normalizedUrl = normalizeUrl(url) ?: return@withContext unsupported(UnsupportedReason.INVALID_URL)
                 try {
                     fxTwitterDetector.detect(normalizedUrl)?.let { result ->
@@ -63,7 +67,7 @@ internal class DefaultMediaDetectionRepository
             if (contentType?.contains("html") != true) {
                 return unsupported(UnsupportedReason.UNSUPPORTED_FORMAT)
             }
-            val html = body.string()
+            val html = body.readUtf8UpTo(MAX_HTML_BYTES) ?: return unsupported(UnsupportedReason.UNSUPPORTED_FORMAT)
             val pageTitle =
                 TITLE_REGEX
                     .find(html)
@@ -178,6 +182,18 @@ private fun String.stripHtml(): String = replace(HTML_TAG_REGEX, "").trim()
 
 private fun unsupported(reason: UnsupportedReason) = MediaDetectionResult.Unsupported(reason)
 
+private fun ResponseBody.readUtf8UpTo(limit: Long): String? {
+    if (contentLength() > limit) return null
+    val buffer = Buffer()
+    val source = source()
+    while (buffer.size <= limit) {
+        val read = source.read(buffer, minOf(HTML_READ_BUFFER_BYTES, limit + 1L - buffer.size))
+        if (read == -1L) return buffer.readUtf8()
+        if (buffer.size > limit) return null
+    }
+    return null
+}
+
 private val TITLE_REGEX = Regex("<title[^>]*>(.*?)</title>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
 private val MEDIA_TAG_REGEX =
     Regex(
@@ -203,3 +219,5 @@ private val LEADING_RESULT_COUNT_REGEX = Regex("^[\\d,+]+개의\\s+(?:최고의\
 private const val HTTP_UNAUTHORIZED = 401
 private const val HTTP_FORBIDDEN = 403
 private const val MAX_CANDIDATE_PAGE_TITLE_LENGTH = 48
+private const val MAX_HTML_BYTES = 2L * 1024L * 1024L
+private const val HTML_READ_BUFFER_BYTES = 8L * 1024L

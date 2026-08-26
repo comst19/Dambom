@@ -29,5 +29,7 @@ interface DownloadRepository {
 
     suspend fun resumeAll()
 
+    suspend fun ensureDownloadsScheduled() = Unit
+
     suspend fun refreshNetworkPolicy()
 }

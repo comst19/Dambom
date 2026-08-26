@@ -46,7 +46,11 @@ class DefaultDownloadRepository
                     val inserted = dao.insert(request.toEntity(System.currentTimeMillis()))
                     if (inserted == INSERT_IGNORED) duplicateCount++ else addedCount++
                 }
-                if (addedCount > 0) scheduler.schedule()
+                if (addedCount > 0) {
+                    scheduler.schedule()
+                } else if (dao.countSchedulable() > 0) {
+                    scheduler.ensureScheduled()
+                }
                 EnqueueDownloadsResult(addedCount, duplicateCount)
             }
 
@@ -89,6 +93,10 @@ class DefaultDownloadRepository
         override suspend fun resumeAll() {
             dao.resumeAll(System.currentTimeMillis())
             scheduler.schedule()
+        }
+
+        override suspend fun ensureDownloadsScheduled() {
+            if (dao.countSchedulable() > 0) scheduler.ensureScheduled()
         }
 
         override suspend fun refreshNetworkPolicy() {

@@ -3,6 +3,7 @@ package com.comst19.dambom.core.data.repository
 import com.comst19.dambom.core.data.network.fxtwitter.FxTwitterMediaDetector
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -39,6 +40,7 @@ class DefaultMediaDetectionRepositoryTest {
             DefaultMediaDetectionRepository(
                 client = client,
                 fxTwitterDetector = FxTwitterMediaDetector(client, Json { ignoreUnknownKeys = true }),
+                ioDispatcher = Dispatchers.IO,
             )
     }
 
@@ -102,6 +104,20 @@ class DefaultMediaDetectionRepositoryTest {
             val result = repository.detect(server.url("/private").toString())
 
             assertEquals(MediaDetectionResult.Unsupported(UnsupportedReason.ACCESS_RESTRICTED), result)
+        }
+
+    @Test
+    fun `oversized html response is rejected before parsing`() =
+        runTest {
+            server.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "text/html")
+                    .setBody("x".repeat(2 * 1024 * 1024 + 1)),
+            )
+
+            val result = repository.detect(server.url("/large").toString())
+
+            assertEquals(MediaDetectionResult.Unsupported(UnsupportedReason.UNSUPPORTED_FORMAT), result)
         }
 
     @Test

@@ -72,8 +72,13 @@ internal fun rememberLibraryFileActions(
                 exportLauncher.launch(task.suggestedFileName())
             },
             onShare = { task ->
+                val intent = viewModel.createShareIntent(task)
+                if (intent == null) {
+                    viewModel.notifyShareFailure()
+                    return@LibraryFileActions
+                }
                 try {
-                    context.startActivity(viewModel.createShareIntent(task))
+                    context.startActivity(intent)
                 } catch (_: ActivityNotFoundException) {
                     viewModel.notifyShareFailure()
                 } catch (_: IllegalArgumentException) {

@@ -20,19 +20,28 @@ internal data class LocalVideoMetadata(
     val height: Int?,
 )
 
+internal data class LocalVideoCacheKey(
+    val path: String,
+    val revision: Long,
+)
+
 @Composable
-internal fun rememberLocalVideoMetadata(path: String?): State<LocalVideoMetadata?> =
+internal fun rememberLocalVideoMetadata(
+    path: String?,
+    revision: Long,
+): State<LocalVideoMetadata?> =
     LocalContext.current.let { context ->
-        produceState<LocalVideoMetadata?>(initialValue = null, key1 = context, key2 = path) {
-            value = path?.let { LocalVideoMetadataLoader.load(context.applicationContext, it) }
+        val cacheKey = path?.let { LocalVideoCacheKey(it, revision) }
+        produceState<LocalVideoMetadata?>(initialValue = null, key1 = context, key2 = cacheKey) {
+            value = cacheKey?.let { LocalVideoMetadataLoader.load(context.applicationContext, it) }
         }
     }
 
 private object LocalVideoMetadataLoader {
     private val cache =
-        object : LruCache<String, LocalVideoMetadata>(THUMBNAIL_CACHE_KB) {
+        object : LruCache<LocalVideoCacheKey, LocalVideoMetadata>(THUMBNAIL_CACHE_KB) {
             override fun sizeOf(
-                key: String,
+                key: LocalVideoCacheKey,
                 value: LocalVideoMetadata,
             ): Int =
                 value.thumbnail
@@ -44,14 +53,14 @@ private object LocalVideoMetadataLoader {
 
     suspend fun load(
         context: Context,
-        path: String,
+        key: LocalVideoCacheKey,
     ): LocalVideoMetadata =
-        cache[path] ?: withContext(Dispatchers.IO) {
+        cache[key] ?: withContext(Dispatchers.IO) {
             readMetadata(
-                path,
-                loadOrCreateVideoThumbnailFile(context, path)?.let { BitmapFactory.decodeFile(it.absolutePath) },
+                key.path,
+                loadOrCreateVideoThumbnailFile(context, key.path)?.let { BitmapFactory.decodeFile(it.absolutePath) },
             )
-        }.also { cache.put(path, it) }
+        }.also { cache.put(key, it) }
 
     private fun readMetadata(
         path: String,

@@ -300,7 +300,7 @@ private fun VideoPlayerPanel(
 ) {
     val playPauseState = rememberPlayPauseButtonState(player)
     val progressState = rememberProgressStateWithTickInterval(player, PROGRESS_TICK_MILLIS)
-    val metadata by rememberLocalVideoMetadata(task.localFilePath)
+    val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
     var playbackError by remember(player) { mutableStateOf<PlaybackException?>(player.playerError) }
     val surfaceDescription = stringResource(R.string.player_surface_description, task.title)
 

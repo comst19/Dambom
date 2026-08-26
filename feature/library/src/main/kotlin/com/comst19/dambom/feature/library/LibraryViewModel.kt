@@ -110,7 +110,7 @@ internal class LibraryViewModel
             }
         }
 
-        fun createShareIntent(task: DownloadTask): Intent = fileManager.createShareIntent(task)
+        fun createShareIntent(task: DownloadTask): Intent? = fileManager.createShareIntent(task)
 
         fun notifyShareFailure() {
             viewModelScope.launch { showMessage(R.string.library_share_failure) }

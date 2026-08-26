@@ -32,8 +32,8 @@ internal class LibraryFileManager
             Unit
         }
 
-        fun createShareIntent(task: DownloadTask): Intent {
-            val source = task.requireLocalFile()
+        fun createShareIntent(task: DownloadTask): Intent? {
+            val source = task.localFileOrNull() ?: return null
             val uri =
                 FileProvider.getUriForFile(
                     context,
@@ -70,11 +70,9 @@ internal fun DownloadTask.suggestedFileName(): String {
     return if (baseName.endsWith(".$extension", ignoreCase = true)) baseName else "$baseName.$extension"
 }
 
-private fun DownloadTask.requireLocalFile(): File =
-    checkNotNull(localFilePath)
-        .let(::File)
-        .takeIf(File::isFile)
-        ?: error("Saved video file is missing")
+private fun DownloadTask.requireLocalFile(): File = localFileOrNull() ?: error("Saved video file is missing")
+
+private fun DownloadTask.localFileOrNull(): File? = localFilePath?.let(::File)?.takeIf(File::isFile)
 
 private val INVALID_FILE_NAME_CHARACTERS = Regex("[\\\\/:*?\"<>|\\p{Cntrl}]")
 private const val MAX_FILE_NAME_LENGTH = 80

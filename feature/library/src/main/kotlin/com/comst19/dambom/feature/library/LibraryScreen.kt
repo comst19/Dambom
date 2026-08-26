@@ -381,7 +381,7 @@ private fun VideoCard(
     fileActions: LibraryFileActions,
     onClick: () -> Unit,
 ) {
-    val metadata by rememberLocalVideoMetadata(task.localFilePath)
+    val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -432,7 +432,7 @@ private fun VideoListItem(
     fileActions: LibraryFileActions,
     onClick: () -> Unit,
 ) {
-    val metadata by rememberLocalVideoMetadata(task.localFilePath)
+    val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
     Card(
         onClick = onClick,
         colors =

@@ -11,6 +11,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.work.ForegroundInfo
+import com.comst19.dambom.core.data.R
 import com.comst19.dambom.core.domain.model.DownloadFailureReason
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject

@@ -5,7 +5,7 @@ plugins {
     id("dambom.kotlin.serialization")
 }
 
-android { namespace = "com.comst19.dambom.core.data.repository" }
+android { namespace = "com.comst19.dambom.core.data" }
 
 dependencies {
     implementation(projects.core.domain)

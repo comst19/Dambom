@@ -371,11 +371,13 @@ private fun DownloadRow(
                     modifier = Modifier.size(44.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                VideoThumbnail(
-                    data = task.localFilePath ?: task.url,
-                    contentDescription = stringResource(R.string.downloads_thumbnail, task.title),
-                    modifier = Modifier.fillMaxSize(),
-                )
+                task.thumbnailSource()?.let { source ->
+                    VideoThumbnail(
+                        data = source,
+                        contentDescription = stringResource(R.string.downloads_thumbnail, task.title),
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
             Column(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
@@ -463,11 +465,13 @@ private fun DownloadListRow(
                         modifier = Modifier.size(36.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    VideoThumbnail(
-                        data = task.localFilePath ?: task.url,
-                        contentDescription = stringResource(R.string.downloads_thumbnail, task.title),
-                        modifier = Modifier.fillMaxSize(),
-                    )
+                    task.thumbnailSource()?.let { source ->
+                        VideoThumbnail(
+                            data = source,
+                            contentDescription = stringResource(R.string.downloads_thumbnail, task.title),
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
                 }
                 Column(
                     modifier = Modifier.weight(1f).padding(14.dp),
@@ -527,6 +531,8 @@ private fun DownloadListRow(
         }
     }
 }
+
+internal fun DownloadTask.thumbnailSource(): String? = localFilePath
 
 @Composable
 private fun DownloadActions(

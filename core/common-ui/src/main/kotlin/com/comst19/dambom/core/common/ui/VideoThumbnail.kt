@@ -1,15 +1,16 @@
 package com.comst19.dambom.core.common.ui
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
-import coil3.video.VideoFrameDecoder
+import java.io.File
 
 @Composable
 fun VideoThumbnail(
@@ -18,10 +19,14 @@ fun VideoThumbnail(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Crop,
 ) {
+    val context = LocalContext.current
+    val localVideoPath = data.takeIf(::isLocalFilePath)
+    val localThumbnail by produceState<File?>(initialValue = null, key1 = context, key2 = localVideoPath) {
+        value = localVideoPath?.let { loadOrCreateVideoThumbnailFile(context, it) }
+    }
     AsyncImage(
-        model = data,
+        model = localThumbnail ?: data.takeIf { localVideoPath == null },
         contentDescription = contentDescription,
-        imageLoader = VideoThumbnailImageLoader.get(LocalContext.current),
         modifier = modifier,
         contentScale = contentScale,
     )
@@ -30,7 +35,7 @@ fun VideoThumbnail(
 @Composable
 fun PreloadVideoThumbnails(data: List<String>) {
     val context = LocalContext.current
-    val imageLoader = VideoThumbnailImageLoader.get(context)
+    val imageLoader = SingletonImageLoader.get(context)
     DisposableEffect(data, imageLoader) {
         val requests =
             data.map { source ->
@@ -46,18 +51,7 @@ fun PreloadVideoThumbnails(data: List<String>) {
     }
 }
 
-private object VideoThumbnailImageLoader {
-    @Volatile private var instance: ImageLoader? = null
-
-    fun get(context: Context): ImageLoader =
-        instance ?: synchronized(this) {
-            instance ?: ImageLoader
-                .Builder(context.applicationContext)
-                .components { add(VideoFrameDecoder.Factory()) }
-                .build()
-                .also { instance = it }
-        }
-}
+private fun isLocalFilePath(data: String): Boolean = data.startsWith(File.separator)
 
 private const val PRELOAD_WIDTH = 640
 private const val PRELOAD_HEIGHT = 360

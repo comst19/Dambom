@@ -34,7 +34,13 @@ internal class DownloadFileStore
             localFileName: String?,
         ) {
             partialFile(id).delete()
-            localFileName?.let { videoDirectory.resolve(it).delete() }
+            localFileName?.let { fileName ->
+                val videoFile = videoDirectory.resolve(fileName)
+                videoFile.delete()
+                File(videoFile.absolutePath + VIDEO_THUMBNAIL_SUFFIX).delete()
+                File(videoFile.absolutePath + VIDEO_THUMBNAIL_SUFFIX + TEMPORARY_FILE_SUFFIX).delete()
+                File(videoFile.absolutePath + VIDEO_THUMBNAIL_UNAVAILABLE_SUFFIX).delete()
+            }
         }
     }
 
@@ -56,3 +62,7 @@ private fun fileExtension(
         else -> ".mp4"
     }
 }
+
+private const val VIDEO_THUMBNAIL_SUFFIX = ".thumbnail.jpg"
+private const val VIDEO_THUMBNAIL_UNAVAILABLE_SUFFIX = ".thumbnail.unavailable"
+private const val TEMPORARY_FILE_SUFFIX = ".tmp"

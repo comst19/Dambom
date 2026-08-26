@@ -14,6 +14,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -50,6 +51,22 @@ class DownloadsUiStateTest {
 
         assertEquals(DownloadsViewMode.LIST, restored.uiState.value.viewMode)
     }
+
+    @Test
+    fun `thumbnails load only from completed local files`() {
+        assertNull(task("paused", DownloadStatus.PAUSED, 0L, 100L).thumbnailSource())
+        assertNull(task("downloading", DownloadStatus.DOWNLOADING, 50L, 100L).thumbnailSource())
+        assertEquals(
+            "/videos/completed.mp4",
+            task(
+                id = "completed",
+                status = DownloadStatus.COMPLETED,
+                downloadedBytes = 100L,
+                expectedBytes = 100L,
+                localFilePath = "/videos/completed.mp4",
+            ).thumbnailSource(),
+        )
+    }
 }
 
 private object EmptyDownloadRepository : DownloadRepository {
@@ -85,6 +102,7 @@ private fun task(
     status: DownloadStatus,
     downloadedBytes: Long,
     expectedBytes: Long,
+    localFilePath: String? = null,
 ) = DownloadTask(
     id = id,
     url = "https://example.com/$id.mp4",
@@ -97,6 +115,7 @@ private fun task(
     status = status,
     failureReason = null,
     localFileName = null,
+    localFilePath = localFilePath,
     createdAtMillis = 1L,
     updatedAtMillis = 1L,
 )

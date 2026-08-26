@@ -147,6 +147,9 @@ class DefaultDownloadRepositoryTest {
                     parentFile?.mkdirs()
                     writeText("video")
                 }
+            val thumbnailFile = File(localFile.absolutePath + ".thumbnail.jpg").apply { writeText("thumbnail") }
+            val unavailableFile = File(localFile.absolutePath + ".thumbnail.unavailable").apply { writeText("") }
+            val temporaryFile = File(localFile.absolutePath + ".thumbnail.jpg.tmp").apply { writeText("temporary") }
             database.downloadTaskDao().insert(
                 entity(TEST_ID, "media.example").copy(
                     status = DownloadStatus.COMPLETED.name,
@@ -160,6 +163,9 @@ class DefaultDownloadRepositoryTest {
 
             assertTrue(repository.downloads.first().isEmpty())
             assertTrue(!localFile.exists())
+            assertTrue(!thumbnailFile.exists())
+            assertTrue(!unavailableFile.exists())
+            assertTrue(!temporaryFile.exists())
         }
 
     @Test

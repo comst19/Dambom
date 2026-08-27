@@ -28,7 +28,7 @@ rootProject.name = "Dambom"
 
 include(":app")
 include(":presentation")
-include(":benchmarks")
+include(":macrobenchmark")
 include(":core:common")
 include(":core:common-ui")
 include(":core:coroutine")

@@ -1,7 +1,9 @@
-package com.comst19.dambom.benchmarks
+package com.comst19.dambom.macrobenchmark
 
+import androidx.benchmark.macro.BaselineProfileMode
 import androidx.benchmark.macro.CompilationMode
 import androidx.benchmark.macro.StartupMode
+import androidx.benchmark.macro.StartupTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -16,13 +18,26 @@ class StartupBenchmark {
     val benchmarkRule = MacrobenchmarkRule()
 
     @Test
-    fun coldStartup() {
+    fun coldStartupWithoutCompilation() {
+        measureColdStartup(CompilationMode.None())
+    }
+
+    @Test
+    fun coldStartupWithBaselineProfile() {
+        measureColdStartup(
+            CompilationMode.Partial(
+                baselineProfileMode = BaselineProfileMode.Require,
+            ),
+        )
+    }
+
+    private fun measureColdStartup(compilationMode: CompilationMode) {
         benchmarkRule.measureRepeated(
             packageName = TARGET_PACKAGE,
-            metrics = listOf(androidx.benchmark.macro.StartupTimingMetric()),
-            compilationMode = CompilationMode.None(),
+            metrics = listOf(StartupTimingMetric()),
+            compilationMode = compilationMode,
             startupMode = StartupMode.COLD,
-            iterations = 5,
+            iterations = 10,
             setupBlock = { pressHome() },
         ) {
             startActivityAndWait()

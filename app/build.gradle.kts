@@ -2,9 +2,8 @@ plugins {
     id("dambom.android.application")
     id("dambom.android.hilt")
     id("com.google.android.gms.oss-licenses-plugin")
+    alias(libs.plugins.baselineprofile)
 }
-
-apply(plugin = "androidx.baselineprofile")
 
 android {
     namespace = "com.comst19.dambom"
@@ -33,7 +32,6 @@ android {
 }
 
 dependencies {
-    add("baselineProfile", projects.benchmarks)
     implementation(projects.presentation)
     implementation(projects.core.navigation)
     implementation(projects.core.common)
@@ -44,4 +42,12 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.profileinstaller)
     testImplementation(libs.junit)
+}
+
+baselineProfile {
+    variants {
+        create("release") {
+            from(project(":macrobenchmark"))
+        }
+    }
 }

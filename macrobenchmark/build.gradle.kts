@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.comst19.dambom.benchmarks"
+    namespace = "com.comst19.dambom.macrobenchmark"
     compileSdk = 37
 
     defaultConfig {

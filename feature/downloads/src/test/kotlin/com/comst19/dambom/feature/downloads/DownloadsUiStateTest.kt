@@ -11,6 +11,7 @@ import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
+import com.comst19.dambom.feature.downloads.component.thumbnailSource
 import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
 import com.comst19.dambom.feature.downloads.contract.DownloadsViewMode
 import kotlinx.collections.immutable.persistentListOf

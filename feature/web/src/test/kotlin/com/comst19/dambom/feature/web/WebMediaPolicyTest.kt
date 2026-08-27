@@ -2,7 +2,12 @@ package com.comst19.dambom.feature.web
 
 import android.webkit.WebViewClient
 import com.comst19.dambom.core.domain.model.UnsupportedReason
+import com.comst19.dambom.feature.web.component.shouldShowPlaybackHint
 import com.comst19.dambom.feature.web.contract.WebDetectionState
+import com.comst19.dambom.feature.web.webview.WEB_MEDIA_GUARD_SCRIPT
+import com.comst19.dambom.feature.web.webview.WebNavigationFailure
+import com.comst19.dambom.feature.web.webview.classifyWebNavigationFailure
+import com.comst19.dambom.feature.web.webview.shouldBlockWebVideo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

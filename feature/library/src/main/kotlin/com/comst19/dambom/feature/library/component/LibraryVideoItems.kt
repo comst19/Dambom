@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -44,45 +43,22 @@ internal fun VideoCard(
     onClick: () -> Unit,
 ) {
     val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
-    Card(
+    Surface(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    if (selected) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainer
-                    },
-            ),
+        shape = RoundedCornerShape(16.dp),
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
     ) {
-        LibraryVideoThumbnail(
-            metadata = metadata,
-            modifier = Modifier.fillMaxWidth().aspectRatio(VIDEO_ASPECT_RATIO),
-        )
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Text(
-                    text = task.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    minLines = 2,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = task.downloadedBytes.formatBytes(),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-            VideoActionsButton(task = task, actions = fileActions)
+        Column {
+            LibraryVideoThumbnail(
+                metadata = metadata,
+                modifier = Modifier.fillMaxWidth().aspectRatio(VIDEO_ASPECT_RATIO),
+            )
+            VideoItemInfo(
+                task = task,
+                fileActions = fileActions,
+                modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 4.dp, bottom = 12.dp),
+            )
         }
     }
 }
@@ -95,37 +71,51 @@ internal fun VideoListItem(
     onClick: () -> Unit,
 ) {
     val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
-    Card(
+    Surface(
         onClick = onClick,
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
-            ),
+        shape = RoundedCornerShape(16.dp),
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             LibraryVideoThumbnail(
                 metadata = metadata,
                 modifier = Modifier.width(LIST_THUMBNAIL_WIDTH).aspectRatio(VIDEO_ASPECT_RATIO),
             )
-            Column(
-                modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Text(
-                    text = task.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    text = task.downloadedBytes.formatBytes(),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-            VideoActionsButton(task = task, actions = fileActions)
+            VideoItemInfo(
+                task = task,
+                fileActions = fileActions,
+                modifier = Modifier.weight(1f).padding(start = 12.dp, top = 8.dp, end = 4.dp, bottom = 8.dp),
+            )
         }
+    }
+}
+
+@Composable
+private fun VideoItemInfo(
+    task: DownloadTask,
+    fileActions: LibraryFileActions,
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier = modifier) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = task.title,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = task.downloadedBytes.formatBytes(),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        VideoActionsButton(task = task, actions = fileActions)
     }
 }
 
@@ -135,7 +125,7 @@ private fun LibraryVideoThumbnail(
     modifier: Modifier,
 ) {
     Box(
-        modifier = modifier.background(Color.Black),
+        modifier = modifier.clip(THUMBNAIL_SHAPE).background(Color.Black),
         contentAlignment = Alignment.Center,
     ) {
         val thumbnail = metadata?.thumbnail
@@ -172,4 +162,5 @@ private fun LibraryVideoThumbnail(
 }
 
 private val LIST_THUMBNAIL_WIDTH = 112.dp
+private val THUMBNAIL_SHAPE = RoundedCornerShape(12.dp)
 private const val VIDEO_ASPECT_RATIO = 16f / 9f

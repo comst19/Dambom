@@ -4,6 +4,7 @@ import android.os.SystemClock
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,6 +49,7 @@ import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.NavigationState
 import com.comst19.dambom.core.navigation.Navigator
 import com.comst19.dambom.presentation.R
+import com.comst19.dambom.presentation.navigation.AppChrome
 import com.comst19.dambom.presentation.navigation.AppNavigationConfig
 import com.comst19.dambom.presentation.navigation.appChrome
 import com.comst19.dambom.presentation.system.SystemBarAppearance
@@ -66,8 +68,10 @@ internal fun AppScaffold(
     snackbarHostState: SnackbarHostState,
     networkAccess: NetworkAccessState,
     isLibraryDetailPaneVisible: Boolean,
+    isVideoFullscreen: Boolean,
 ) {
     val chrome = appChrome(state.currentKey)
+    val policy = appScaffoldPolicy(chrome, state.isAtRoot, isVideoFullscreen)
     val coroutineScope = rememberCoroutineScope()
     val activity = LocalActivity.current
     val rootBackMessage = stringResource(R.string.root_back_hint)
@@ -81,7 +85,7 @@ internal fun AppScaffold(
             mutableLongStateOf(0L)
         }
 
-    BackHandler(enabled = state.isAtRoot) {
+    BackHandler(enabled = policy.showRootBackHandler) {
         val nowMillis = SystemClock.elapsedRealtime()
         if (isSecondRootBackPress(lastRootBackPressedAtMillis, nowMillis)) {
             activity?.finish()
@@ -91,15 +95,23 @@ internal fun AppScaffold(
         }
         lastRootBackPressedAtMillis = nowMillis
     }
-    SystemBarAppearance(chrome)
+    if (policy.showSystemBarAppearance) {
+        SystemBarAppearance(chrome)
+    }
     Scaffold(
-        contentWindowInsets = WindowInsets.safeDrawing,
+        contentWindowInsets = if (policy.useSafeDrawingInsets) WindowInsets.safeDrawing else WindowInsets(0, 0, 0, 0),
         topBar = {
-            networkAccess.restriction?.let { NetworkRestrictionBanner(it) }
+            if (policy.showNetworkRestrictionBanner) {
+                networkAccess.restriction?.let { NetworkRestrictionBanner(it) }
+            }
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = {
+            if (policy.showSnackbarHost) {
+                SnackbarHost(snackbarHostState)
+            }
+        },
         bottomBar = {
-            if (chrome.showBottomBar) {
+            if (policy.showBottomBar) {
                 NavigationBar {
                     AppNavigationConfig.topLevelDestinations.forEach { destination ->
                         val labelRes = destination.bottomBarLabelRes ?: return@forEach
@@ -126,17 +138,56 @@ internal fun AppScaffold(
             }
         },
     ) { innerPadding ->
-        CompositionLocalProvider(LocalAppScaffoldPadding provides innerPadding) {
+        val appPadding = if (policy.provideZeroPadding) PaddingValues() else innerPadding
+        CompositionLocalProvider(LocalAppScaffoldPadding provides appPadding) {
             // 각 화면이 일반, 목록, 전체 화면 특성에 맞게 이 PaddingValues를 적용합니다.
             AppNavDisplay(
                 entries = entries,
                 navigator = navigator,
                 isLibraryDetailPaneVisible = isLibraryDetailPaneVisible,
+                isVideoFullscreen = isVideoFullscreen,
                 modifier = Modifier.fillMaxSize(),
             )
         }
     }
 }
+
+internal data class AppScaffoldPolicy(
+    val showRootBackHandler: Boolean,
+    val showSystemBarAppearance: Boolean,
+    val showNetworkRestrictionBanner: Boolean,
+    val showSnackbarHost: Boolean,
+    val showBottomBar: Boolean,
+    val useSafeDrawingInsets: Boolean,
+    val provideZeroPadding: Boolean,
+)
+
+internal fun appScaffoldPolicy(
+    chrome: AppChrome,
+    isAtRoot: Boolean,
+    isVideoFullscreen: Boolean,
+): AppScaffoldPolicy =
+    if (isVideoFullscreen) {
+        AppScaffoldPolicy(
+            showRootBackHandler = false,
+            showSystemBarAppearance = false,
+            showNetworkRestrictionBanner = false,
+            showSnackbarHost = false,
+            showBottomBar = false,
+            useSafeDrawingInsets = false,
+            provideZeroPadding = true,
+        )
+    } else {
+        AppScaffoldPolicy(
+            showRootBackHandler = isAtRoot,
+            showSystemBarAppearance = true,
+            showNetworkRestrictionBanner = true,
+            showSnackbarHost = true,
+            showBottomBar = chrome.showBottomBar,
+            useSafeDrawingInsets = true,
+            provideZeroPadding = false,
+        )
+    }
 
 @Composable
 private fun NetworkRestrictionBanner(restriction: NetworkRestriction) {

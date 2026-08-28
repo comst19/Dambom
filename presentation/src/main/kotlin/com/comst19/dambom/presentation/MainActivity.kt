@@ -3,6 +3,7 @@ package com.comst19.dambom.presentation
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -37,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var sharedUrlBus: SharedUrlBus
 
     private val mainViewModel: MainViewModel by viewModels()
+    private var videoFullscreenOrientationState = VideoFullscreenOrientationState()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -70,6 +72,8 @@ class MainActivity : AppCompatActivity() {
                             dispatcher = navigationDispatcher,
                             appEventBus = appEventBus,
                             networkAccess = networkAccess,
+                            onVideoFullscreenChange = ::onVideoFullscreenChange,
+                            onVideoRotate = ::onVideoRotate,
                         )
                     }
 
@@ -87,10 +91,36 @@ class MainActivity : AppCompatActivity() {
         handleSharedText(intent)
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        applyOrientationPolicy(newConfig.smallestScreenWidthDp)
+    }
+
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration,
+    ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        if (isInPictureInPictureMode) {
+            videoFullscreenOrientationState = videoFullscreenOrientationState.withPictureInPictureEntered()
+            applyOrientationPolicy(resources.configuration.smallestScreenWidthDp)
+        }
+    }
+
     @SuppressLint("SourceLockedOrientationActivity")
     private fun applyOrientationPolicy(smallestScreenWidthDp: Int) {
-        val orientation = requestedOrientationFor(smallestScreenWidthDp)
+        val orientation = requestedOrientationFor(smallestScreenWidthDp, videoFullscreenOrientationState)
         if (requestedOrientation != orientation) requestedOrientation = orientation
+    }
+
+    private fun onVideoFullscreenChange(isVideoFullscreen: Boolean) {
+        videoFullscreenOrientationState = videoFullscreenOrientationState.withFullscreen(isVideoFullscreen)
+        applyOrientationPolicy(resources.configuration.smallestScreenWidthDp)
+    }
+
+    private fun onVideoRotate() {
+        videoFullscreenOrientationState = videoFullscreenOrientationState.rotate(resources.configuration.orientation)
+        applyOrientationPolicy(resources.configuration.smallestScreenWidthDp)
     }
 
     private fun handleSharedText(intent: Intent) {
@@ -103,11 +133,42 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-internal fun requestedOrientationFor(smallestScreenWidthDp: Int): Int =
-    if (smallestScreenWidthDp < ROTATION_MIN_SMALLEST_WIDTH_DP) {
-        ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-    } else {
-        ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+internal fun requestedOrientationFor(
+    smallestScreenWidthDp: Int,
+    isVideoFullscreen: Boolean = false,
+): Int = requestedOrientationFor(smallestScreenWidthDp, VideoFullscreenOrientationState(isVideoFullscreen))
+
+internal fun requestedOrientationFor(
+    smallestScreenWidthDp: Int,
+    state: VideoFullscreenOrientationState,
+): Int =
+    when {
+        smallestScreenWidthDp >= ROTATION_MIN_SMALLEST_WIDTH_DP -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        state.manualOrientation != null -> state.manualOrientation
+        state.isFullscreen -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
+
+internal data class VideoFullscreenOrientationState(
+    val isFullscreen: Boolean = false,
+    val manualOrientation: Int? = null,
+) {
+    fun withFullscreen(isFullscreen: Boolean): VideoFullscreenOrientationState =
+        if (isFullscreen) copy(isFullscreen = true) else VideoFullscreenOrientationState()
+
+    fun rotate(currentOrientation: Int): VideoFullscreenOrientationState {
+        if (!isFullscreen) return this
+        return copy(
+            manualOrientation =
+                if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
+                } else {
+                    ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
+                },
+        )
+    }
+
+    fun withPictureInPictureEntered(): VideoFullscreenOrientationState = copy(manualOrientation = null)
+}
 
 private const val ROTATION_MIN_SMALLEST_WIDTH_DP = 600

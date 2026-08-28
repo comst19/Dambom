@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
@@ -34,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.LibraryViewModel
@@ -109,6 +111,8 @@ internal fun rememberLibraryFileActions(
 internal fun VideoActionsButton(
     task: DownloadTask,
     actions: LibraryFileActions,
+    modifier: Modifier = Modifier,
+    iconOffsetY: Dp = 0.dp,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var renameOpen by remember { mutableStateOf(false) }
@@ -116,11 +120,12 @@ internal fun VideoActionsButton(
 
     IconButton(
         onClick = { menuExpanded = true },
-        modifier = Modifier.size(ACTION_TARGET_SIZE),
+        modifier = modifier.size(ACTION_TARGET_SIZE),
     ) {
         Icon(
             imageVector = Icons.Outlined.MoreVert,
             contentDescription = stringResource(R.string.library_more_actions, task.title),
+            modifier = Modifier.offset(y = iconOffsetY),
         )
         DropdownMenu(
             expanded = menuExpanded,

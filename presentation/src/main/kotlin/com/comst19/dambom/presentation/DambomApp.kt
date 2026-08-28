@@ -36,6 +36,8 @@ internal fun DambomApp(
     dispatcher: NavigationDispatcher,
     appEventBus: AppEventBus,
     networkAccess: NetworkAccessState,
+    onVideoFullscreenChange: (Boolean) -> Unit,
+    onVideoRotate: () -> Unit,
 ) {
     val state =
         rememberNavigationState(navigationConfig)
@@ -43,6 +45,11 @@ internal fun DambomApp(
     val snackbarHostState = remember { SnackbarHostState() }
     val currentNetworkAccess = rememberUpdatedState(networkAccess)
     var isLibraryDetailPaneVisible by rememberSaveable { mutableStateOf(true) }
+    var isVideoFullscreen by rememberSaveable { mutableStateOf(false) }
+    val updateVideoFullscreen: (Boolean) -> Unit = { fullscreen ->
+        isVideoFullscreen = fullscreen
+        onVideoFullscreenChange(fullscreen)
+    }
 
     // 모든 feature가 발행한 명령은 이 단일 collector에서 순서대로 NavigationState에 반영합니다.
     LaunchedEffect(dispatcher, navigator) {
@@ -59,6 +66,9 @@ internal fun DambomApp(
                 libraryEntries(
                     isDetailPaneVisible = { isLibraryDetailPaneVisible },
                     onDetailPaneVisibilityChange = { isLibraryDetailPaneVisible = it },
+                    isVideoFullscreen = { isVideoFullscreen },
+                    onVideoFullscreenChange = updateVideoFullscreen,
+                    onVideoRotate = onVideoRotate,
                 )
                 settingsEntries()
                 webEntries()
@@ -73,5 +83,6 @@ internal fun DambomApp(
         snackbarHostState = snackbarHostState,
         networkAccess = networkAccess,
         isLibraryDetailPaneVisible = isLibraryDetailPaneVisible,
+        isVideoFullscreen = isVideoFullscreen,
     )
 }

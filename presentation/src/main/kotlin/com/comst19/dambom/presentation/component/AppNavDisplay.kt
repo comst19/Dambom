@@ -29,13 +29,14 @@ internal fun AppNavDisplay(
     entries: List<NavEntry<NavKey>>,
     navigator: Navigator,
     isLibraryDetailPaneVisible: Boolean,
+    isVideoFullscreen: Boolean,
     modifier: Modifier,
 ) {
     val paneExpansionState = rememberPaneExpansionState()
     val supportsMultiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
     val defaultDirective = calculatePaneScaffoldDirective(currentWindowAdaptiveInfoV2())
     val directive =
-        if (supportsMultiplePanes) {
+        if (!shouldUseSinglePane(supportsMultiplePanes, isVideoFullscreen)) {
             defaultDirective
         } else {
             defaultDirective.copy(
@@ -76,5 +77,10 @@ internal fun AppNavDisplay(
         modifier = modifier,
     )
 }
+
+internal fun shouldUseSinglePane(
+    supportsMultiplePanes: Boolean,
+    isVideoFullscreen: Boolean,
+): Boolean = !supportsMultiplePanes || isVideoFullscreen
 
 private const val NAVIGATION_FADE_DURATION_MILLIS = 700

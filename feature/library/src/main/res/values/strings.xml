@@ -39,9 +39,13 @@
     <string name="player_title">영상 재생</string>
     <string name="player_back">보관함으로 돌아가기</string>
     <string name="player_fullscreen">전체 화면</string>
+    <string name="player_expand_crop">화면 채우기</string>
+    <string name="player_fit_video">원래 크기</string>
+    <string name="player_rotate">화면 회전</string>
     <string name="player_exit_fullscreen">전체 화면 닫기</string>
     <string name="player_missing_file">재생할 파일을 찾을 수 없어요.</string>
     <string name="player_surface_description">%1$s 영상</string>
+    <string name="player_toggle_controls">재생 조작부 표시 또는 숨기기</string>
     <string name="player_error">영상을 재생하지 못했어요.</string>
     <string name="player_seek_description">재생 위치</string>
     <string name="player_rewind">10초 뒤로</string>

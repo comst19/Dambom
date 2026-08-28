@@ -2,12 +2,65 @@ package com.comst19.dambom.presentation.component
 
 import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
+import com.comst19.dambom.presentation.navigation.AppChrome
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AppScaffoldTest {
+    @Test
+    fun `fullscreen collapses Fold list detail to one pane`() {
+        assertTrue(shouldUseSinglePane(supportsMultiplePanes = true, isVideoFullscreen = true))
+    }
+
+    @Test
+    fun `normal Fold keeps multiple panes and phone stays single`() {
+        assertFalse(shouldUseSinglePane(supportsMultiplePanes = true, isVideoFullscreen = false))
+        assertTrue(shouldUseSinglePane(supportsMultiplePanes = false, isVideoFullscreen = false))
+    }
+
+    @Test
+    fun `normal shell keeps chrome padding and root back handling`() {
+        assertEquals(
+            AppScaffoldPolicy(
+                showRootBackHandler = true,
+                showSystemBarAppearance = true,
+                showNetworkRestrictionBanner = true,
+                showSnackbarHost = true,
+                showBottomBar = true,
+                useSafeDrawingInsets = true,
+                provideZeroPadding = false,
+            ),
+            appScaffoldPolicy(
+                chrome = AppChrome(true, true, true),
+                isAtRoot = true,
+                isVideoFullscreen = false,
+            ),
+        )
+    }
+
+    @Test
+    fun `fullscreen shell suppresses chrome padding and root back handling`() {
+        assertEquals(
+            AppScaffoldPolicy(
+                showRootBackHandler = false,
+                showSystemBarAppearance = false,
+                showNetworkRestrictionBanner = false,
+                showSnackbarHost = false,
+                showBottomBar = false,
+                useSafeDrawingInsets = false,
+                provideZeroPadding = true,
+            ),
+            appScaffoldPolicy(
+                chrome = AppChrome(true, true, true),
+                isAtRoot = true,
+                isVideoFullscreen = true,
+            ),
+        )
+    }
+
     @Test
     fun `first root back press does not exit`() {
         assertFalse(isSecondRootBackPress(lastPressedAtMillis = 0L, nowMillis = 1_000L))

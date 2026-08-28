@@ -53,35 +53,106 @@ internal class VideoPlayerViewModel
             player.play()
         }
 
-        fun onUiPaused() {
-            visibilityState.onHidden(player.playWhenReady)
-            player.pause()
-        }
+        fun onUiStarted() = applyPlaybackCommand(visibilityState.onStarted())
 
-        fun onUiResumed() {
-            if (visibilityState.consumeResumeRequest()) player.play()
-        }
+        fun onUiResumed() = applyPlaybackCommand(visibilityState.onResumed())
+
+        fun onUiPaused() = applyPlaybackCommand(visibilityState.onPaused())
+
+        fun onUiStopped() = applyPlaybackCommand(visibilityState.onStopped(player.playWhenReady))
+
+        fun onPictureInPictureEntered() = applyPlaybackCommand(visibilityState.onPictureInPictureEntered())
+
+        fun onPictureInPictureExited() = applyPlaybackCommand(visibilityState.onPictureInPictureExited())
 
         fun stop(id: String) {
             if (player.currentMediaItem?.mediaId != id) return
+            visibilityState.onPlaybackStopped()
             player.stop()
             player.clearMediaItems()
         }
 
         override fun onCleared() {
+            applyPlaybackCommand(visibilityState.onDisposed())
             player.release()
         }
+
+        private fun applyPlaybackCommand(command: PlaybackCommand) {
+            when (command) {
+                PlaybackCommand.Pause -> player.pause()
+                PlaybackCommand.Resume -> player.play()
+                PlaybackCommand.None -> Unit
+            }
+        }
     }
+
+internal enum class PlaybackCommand {
+    Pause,
+    Resume,
+    None,
+}
 
 internal class PlaybackVisibilityState {
     private var resumeRequested = false
+    private var isInPictureInPicture = false
+    private var stoppedWhileInPictureInPicture = false
+    private var isResolvingPictureInPictureExit = false
 
-    fun onHidden(wasPlayWhenReady: Boolean) {
-        resumeRequested = wasPlayWhenReady
+    fun onStarted(): PlaybackCommand =
+        if (resumeRequested) {
+            resumeRequested = false
+            PlaybackCommand.Resume
+        } else {
+            PlaybackCommand.None
+        }
+
+    fun onResumed(): PlaybackCommand {
+        if (isResolvingPictureInPictureExit) {
+            isResolvingPictureInPictureExit = false
+        }
+        return PlaybackCommand.None
     }
 
-    fun consumeResumeRequest(): Boolean =
-        resumeRequested.also {
-            resumeRequested = false
+    fun onPaused(): PlaybackCommand = PlaybackCommand.None
+
+    fun onStopped(wasPlayWhenReady: Boolean): PlaybackCommand {
+        if (isInPictureInPicture) {
+            stoppedWhileInPictureInPicture = true
+            return PlaybackCommand.None
         }
+        resumeRequested = if (isResolvingPictureInPictureExit) false else wasPlayWhenReady
+        isResolvingPictureInPictureExit = false
+        return PlaybackCommand.Pause
+    }
+
+    fun onPictureInPictureEntered(): PlaybackCommand {
+        isInPictureInPicture = true
+        stoppedWhileInPictureInPicture = false
+        return PlaybackCommand.None
+    }
+
+    fun onPictureInPictureExited(): PlaybackCommand {
+        if (isInPictureInPicture) {
+            isInPictureInPicture = false
+            if (stoppedWhileInPictureInPicture) {
+                onPlaybackStopped()
+                return PlaybackCommand.Pause
+            }
+            isResolvingPictureInPictureExit = true
+        }
+
+        return PlaybackCommand.None
+    }
+
+    fun onPlaybackStopped() {
+        resumeRequested = false
+        isInPictureInPicture = false
+        stoppedWhileInPictureInPicture = false
+        isResolvingPictureInPictureExit = false
+    }
+
+    fun onDisposed(): PlaybackCommand {
+        onPlaybackStopped()
+        return PlaybackCommand.Pause
+    }
 }

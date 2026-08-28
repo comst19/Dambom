@@ -18,9 +18,5 @@ object AppConfigModule {
 
     @Provides
     @Singleton
-    fun provideNetworkConfig(appEnvironment: AppEnvironment): NetworkConfig =
-        NetworkConfig.from(
-            baseUrl = BuildConfig.API_BASE_URL,
-            appEnvironment = appEnvironment,
-        )
+    fun provideNetworkConfig(appEnvironment: AppEnvironment): NetworkConfig = NetworkConfig.from(appEnvironment)
 }

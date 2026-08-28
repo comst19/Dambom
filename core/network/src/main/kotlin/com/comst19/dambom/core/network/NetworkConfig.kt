@@ -4,16 +4,11 @@ import com.comst19.dambom.core.common.model.AppEnvironment
 import okhttp3.logging.HttpLoggingInterceptor
 
 data class NetworkConfig(
-    val baseUrl: String,
     val logLevel: HttpLoggingInterceptor.Level,
 ) {
     companion object {
-        fun from(
-            baseUrl: String,
-            appEnvironment: AppEnvironment,
-        ): NetworkConfig =
+        fun from(appEnvironment: AppEnvironment): NetworkConfig =
             NetworkConfig(
-                baseUrl = baseUrl,
                 logLevel =
                     when (appEnvironment) {
                         AppEnvironment.DEBUG,

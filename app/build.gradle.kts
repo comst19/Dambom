@@ -18,15 +18,12 @@ android {
     buildTypes {
         getByName("debug") {
             buildConfigField("String", "APP_ENVIRONMENT", "\"DEBUG\"")
-            buildConfigField("String", "API_BASE_URL", "\"https://dev.example.invalid/\"")
         }
         getByName("qa") {
             buildConfigField("String", "APP_ENVIRONMENT", "\"QA\"")
-            buildConfigField("String", "API_BASE_URL", "\"https://qa.example.invalid/\"")
         }
         getByName("release") {
             buildConfigField("String", "APP_ENVIRONMENT", "\"RELEASE\"")
-            buildConfigField("String", "API_BASE_URL", "\"https://api.example.invalid/\"")
         }
     }
 }

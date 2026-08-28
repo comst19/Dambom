@@ -40,12 +40,26 @@ internal class VideoPlayerViewModel
 
         fun play(task: DownloadTask) {
             val path = task.localFilePath ?: return
-            if (player.currentMediaItem?.mediaId == task.id) return
+            val uri = Uri.fromFile(File(path))
+            if (
+                !shouldReplaceMediaItem(
+                    currentMediaId = player.currentMediaItem?.mediaId,
+                    currentUri =
+                        player.currentMediaItem
+                            ?.localConfiguration
+                            ?.uri
+                            ?.toString(),
+                    targetMediaId = task.id,
+                    targetUri = uri.toString(),
+                )
+            ) {
+                return
+            }
             player.setMediaItem(
                 MediaItem
                     .Builder()
                     .setMediaId(task.id)
-                    .setUri(Uri.fromFile(File(path)))
+                    .setUri(uri)
                     .setMediaMetadata(MediaMetadata.Builder().setTitle(task.title).build())
                     .build(),
             )
@@ -72,6 +86,12 @@ internal class VideoPlayerViewModel
             player.clearMediaItems()
         }
 
+        fun stopUnavailableVideo() {
+            visibilityState.onPlaybackStopped()
+            player.stop()
+            player.clearMediaItems()
+        }
+
         override fun onCleared() {
             applyPlaybackCommand(visibilityState.onDisposed())
             player.release()
@@ -91,6 +111,13 @@ internal enum class PlaybackCommand {
     Resume,
     None,
 }
+
+internal fun shouldReplaceMediaItem(
+    currentMediaId: String?,
+    currentUri: String?,
+    targetMediaId: String,
+    targetUri: String,
+): Boolean = currentMediaId != targetMediaId || currentUri != targetUri
 
 internal class PlaybackVisibilityState {
     private var resumeRequested = false

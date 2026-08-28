@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
@@ -49,6 +50,11 @@ internal fun VideoPlayerRoute(
     val task =
         uiState.selectedVideo?.takeIf { it.id == id }
             ?: uiState.videos.firstOrNull { it.id == id }
+    var isLocalVideoAvailable by rememberLocalVideoAvailable(task)
+
+    fun refreshLocalVideoAvailability() {
+        isLocalVideoAvailable = isLocalVideoAvailable(task)
+    }
     val multiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
     val fileActions =
         rememberLibraryFileActions(
@@ -64,23 +70,36 @@ internal fun VideoPlayerRoute(
         onDispose { onVideoFullscreenChange(false) }
     }
 
-    LifecycleEventEffect(Lifecycle.Event.ON_START) { playerViewModel.onUiStarted() }
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { playerViewModel.onUiResumed() }
+    LifecycleEventEffect(Lifecycle.Event.ON_START) {
+        refreshLocalVideoAvailability()
+        playerViewModel.onUiStarted()
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        refreshLocalVideoAvailability()
+        playerViewModel.onUiResumed()
+    }
     LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) { playerViewModel.onUiPaused() }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { playerViewModel.onUiStopped() }
     VideoPlayerMediaSessionEffect(playerViewModel.player)
-    LaunchedEffect(task?.id) {
-        task?.let(playerViewModel::play)
+    LaunchedEffect(task?.id, task?.localFilePath, isLocalVideoAvailable) {
+        if (isLocalVideoAvailable) {
+            task?.let(playerViewModel::play)
+        } else {
+            playerViewModel.stopUnavailableVideo()
+        }
     }
-    LaunchedEffect(isVideoFullscreen, task) {
-        if (shouldClearVideoFullscreen(isVideoFullscreen, task != null)) {
+    LaunchedEffect(isVideoFullscreen, task, isLocalVideoAvailable) {
+        refreshLocalVideoAvailability()
+        if (shouldClearVideoFullscreen(isVideoFullscreen, isLocalVideoAvailable)) {
             onVideoFullscreenChange(false)
         }
     }
 
+    val playableTask = task?.takeIf { isLocalVideoAvailable }
+
     PipPlatformEffect(
         player = playerViewModel.player,
-        task = task,
+        task = playableTask,
         isFullscreen = isVideoFullscreen,
         onPictureInPictureModeChanged = { inPictureInPictureMode ->
             if (inPictureInPictureMode) {
@@ -91,7 +110,7 @@ internal fun VideoPlayerRoute(
         },
     ) { pipContentOnly, onVideoBoundsChanged ->
         VideoPlayerScreen(
-            task = task,
+            task = playableTask,
             player = playerViewModel.player,
             fileActions = fileActions,
             onBack = libraryViewModel::goBack,

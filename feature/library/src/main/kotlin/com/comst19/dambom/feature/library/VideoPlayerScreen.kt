@@ -96,7 +96,6 @@ internal fun VideoPlayerRoute(
             fileActions = fileActions,
             onBack = libraryViewModel::goBack,
             showBack = !multiplePanes,
-            deferFullscreenControlsOnEntry = multiplePanes,
             isVideoFullscreen = isVideoFullscreen,
             onVideoFullscreenChange = onVideoFullscreenChange,
             onVideoRotate = onVideoRotate,
@@ -114,7 +113,6 @@ internal fun VideoPlayerScreen(
     fileActions: LibraryFileActions,
     onBack: () -> Unit,
     showBack: Boolean,
-    deferFullscreenControlsOnEntry: Boolean = false,
     isVideoFullscreen: Boolean,
     onVideoFullscreenChange: (Boolean) -> Unit,
     onVideoRotate: () -> Unit,
@@ -184,7 +182,6 @@ internal fun VideoPlayerScreen(
             onDismiss = { onVideoFullscreenChange(false) },
             onRotate = onVideoRotate,
             showRotationControl = showRotationControl,
-            deferFullscreenControlsOnEntry = deferFullscreenControlsOnEntry,
             isPipContentOnly = isPipContentOnly,
             onVideoBoundsChanged = onVideoBoundsChanged,
         )

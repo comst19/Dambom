@@ -2,12 +2,6 @@ package com.comst19.dambom.feature.library.component
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.changedToUp
@@ -15,7 +9,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
-import kotlinx.coroutines.delay
 
 internal fun Modifier.fullscreenPlayerGestures(
     toggleControlsLabel: String,
@@ -92,21 +85,3 @@ internal fun shouldAutoHideFullscreenControls(
     isPlaying: Boolean,
     isControlsInteracting: Boolean,
 ): Boolean = controlsVisible && isPlaying && !isControlsInteracting
-
-@Composable
-internal fun rememberFullscreenControlsEntryEligible(
-    deferOnEntry: Boolean,
-    isPipContentOnly: Boolean,
-): Boolean {
-    var eligible by remember(deferOnEntry, isPipContentOnly) { mutableStateOf(!deferOnEntry && !isPipContentOnly) }
-    LaunchedEffect(deferOnEntry, isPipContentOnly) {
-        eligible = !deferOnEntry && !isPipContentOnly
-        if (deferOnEntry && !isPipContentOnly) {
-            delay(FULLSCREEN_CONTROLS_ENTRY_DELAY_MILLIS)
-            eligible = true
-        }
-    }
-    return eligible
-}
-
-internal const val FULLSCREEN_CONTROLS_ENTRY_DELAY_MILLIS = 750L

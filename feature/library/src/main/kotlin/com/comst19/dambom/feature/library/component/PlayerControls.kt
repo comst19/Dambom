@@ -17,30 +17,20 @@ import androidx.compose.material.icons.outlined.Forward10
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Replay10
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.disabled
-import androidx.compose.ui.semantics.progressBarRangeInfo
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.setProgress
-import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
 import com.comst19.dambom.feature.library.R
@@ -48,7 +38,6 @@ import com.comst19.dambom.feature.library.toTimeText
 import kotlin.math.roundToLong
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 internal fun PlayerControls(
     player: Player,
     showPlay: Boolean,
@@ -72,18 +61,17 @@ internal fun PlayerControls(
     val positionText = positionMillis.toTimeText()
     val durationText = safeDuration.toTimeText()
     val seekDescription = stringResource(R.string.player_seek_description)
-    val interactionSource = remember { MutableInteractionSource() }
     val rewindInteractionSource = remember { MutableInteractionSource() }
     val playPauseInteractionSource = remember { MutableInteractionSource() }
     val forwardInteractionSource = remember { MutableInteractionSource() }
-    val isControlPressed by interactionSource.collectIsPressedAsState()
-    val isControlDragged by interactionSource.collectIsDraggedAsState()
     val isRewindPressed by rewindInteractionSource.collectIsPressedAsState()
     val isPlayPausePressed by playPauseInteractionSource.collectIsPressedAsState()
     val isForwardPressed by forwardInteractionSource.collectIsPressedAsState()
 
-    LaunchedEffect(isControlPressed, isControlDragged, isRewindPressed, isPlayPausePressed, isForwardPressed) {
-        val isInteracting = isControlPressed || isControlDragged || isRewindPressed || isPlayPausePressed || isForwardPressed
+    var isTimelineInteracting by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isTimelineInteracting, isRewindPressed, isPlayPausePressed, isForwardPressed) {
+        val isInteracting = isTimelineInteracting || isRewindPressed || isPlayPausePressed || isForwardPressed
         onInteractionChanged(isInteracting)
         if (isInteracting) onInteraction()
     }
@@ -115,7 +103,8 @@ internal fun PlayerControls(
                 positionText = positionText,
                 durationText = durationText,
                 seekDescription = seekDescription,
-                interactionSource = interactionSource,
+                onInteraction = onInteraction,
+                onInteractionChanged = { isTimelineInteracting = it },
             )
             Text(
                 text = "$positionText / $durationText",
@@ -128,7 +117,6 @@ internal fun PlayerControls(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun PlayerTimeline(
     player: Player,
     safeDuration: Long,
@@ -136,55 +124,20 @@ private fun PlayerTimeline(
     positionText: String,
     durationText: String,
     seekDescription: String,
-    interactionSource: MutableInteractionSource,
+    onInteraction: () -> Unit,
+    onInteractionChanged: (Boolean) -> Unit,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(PLAYER_CONTROL_SIZE)
-                .semantics(mergeDescendants = true) {
-                    contentDescription = seekDescription
-                    stateDescription = "$positionText / $durationText"
-                    progressBarRangeInfo = ProgressBarRangeInfo(progress, 0f..1f)
-                    if (safeDuration > 0L) {
-                        setProgress { targetProgress ->
-                            player.seekTo((targetProgress.coerceIn(0f, 1f) * safeDuration).roundToLong())
-                            true
-                        }
-                    } else {
-                        disabled()
-                    }
-                },
-        contentAlignment = Alignment.Center,
-    ) {
-        Slider(
-            value = progress,
-            onValueChange = { value ->
-                if (safeDuration > 0L) player.seekTo((value * safeDuration).roundToLong())
-            },
-            modifier = Modifier.fillMaxWidth().clearAndSetSemantics {},
-            enabled = safeDuration > 0L,
-            interactionSource = interactionSource,
-            thumb = {
-                SliderDefaults.Thumb(
-                    interactionSource = interactionSource,
-                    enabled = safeDuration > 0L,
-                    thumbSize = DpSize(16.dp, 16.dp),
-                )
-            },
-            track = { sliderState ->
-                SliderDefaults.Track(
-                    sliderState = sliderState,
-                    modifier = Modifier.height(4.dp),
-                    enabled = safeDuration > 0L,
-                    drawStopIndicator = null,
-                    thumbTrackGapSize = 0.dp,
-                    trackInsideCornerSize = 0.dp,
-                )
-            },
-        )
-    }
+    DambomSeekBar(
+        value = progress,
+        enabled = isDambomSeekBarEnabled(safeDuration),
+        contentDescription = seekDescription,
+        stateDescription = "$positionText / $durationText",
+        onValueChange = { value -> player.seekTo((value * safeDuration).roundToLong()) },
+        onInteractionChanged = { interacting ->
+            onInteractionChanged(interacting)
+            if (interacting) onInteraction()
+        },
+    )
 }
 
 @Composable

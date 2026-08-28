@@ -65,7 +65,6 @@ internal fun FullscreenVideoPlayer(
     onDismiss: () -> Unit,
     onRotate: () -> Unit,
     showRotationControl: Boolean,
-    deferFullscreenControlsOnEntry: Boolean,
     isPipContentOnly: Boolean,
     onVideoBoundsChanged: (IntRect?) -> Unit,
 ) {
@@ -77,7 +76,6 @@ internal fun FullscreenVideoPlayer(
     var controlsVisible by remember(task.id) { mutableStateOf(true) }
     var controlsInteracting by remember(task.id) { mutableStateOf(false) }
     var controlsInteractionRevision by remember(task.id) { mutableStateOf(0) }
-    val controlsEntryEligible = rememberFullscreenControlsEntryEligible(deferFullscreenControlsOnEntry, isPipContentOnly)
     val contentMode = fullscreenContentModeFor(selectedContentMode, isPipContentOnly)
     LaunchedEffect(isPipContentOnly) { if (isPipContentOnly) selectedContentMode = FullscreenContentMode.Fit }
     LaunchedEffect(controlsVisible, playPauseState.showPlay, controlsInteracting, controlsInteractionRevision) {
@@ -102,35 +100,33 @@ internal fun FullscreenVideoPlayer(
                             onContentModeChanged = { selectedContentMode = it },
                         ),
                 )
-                if (controlsEntryEligible) {
-                    AnimatedVisibility(
-                        visible = controlsVisible,
-                        enter = fadeIn(tween(FULLSCREEN_CONTROLS_FADE_MILLIS)),
-                        exit = fadeOut(tween(FULLSCREEN_CONTROLS_FADE_MILLIS)),
-                        modifier = Modifier.matchParentSize(),
-                    ) {
-                        Box(Modifier.fillMaxSize()) {
-                            FullscreenOverlayControls(
-                                task,
-                                player,
-                                fileActions,
-                                onDismiss,
-                                onRotate,
-                                showRotationControl,
-                                contentMode,
-                                { selectedContentMode = contentMode.toggled() },
-                                playPauseState.showPlay,
-                                playPauseState.isEnabled,
-                                playPauseState::onClick,
-                                progressState.currentPositionMs,
-                                progressState.durationMs,
-                                {
-                                    controlsVisible = true
-                                    controlsInteractionRevision++
-                                },
-                                { controlsInteracting = it },
-                            )
-                        }
+                AnimatedVisibility(
+                    visible = controlsVisible,
+                    enter = fadeIn(tween(FULLSCREEN_CONTROLS_FADE_MILLIS)),
+                    exit = fadeOut(tween(FULLSCREEN_CONTROLS_FADE_MILLIS)),
+                    modifier = Modifier.matchParentSize(),
+                ) {
+                    Box(Modifier.fillMaxSize()) {
+                        FullscreenOverlayControls(
+                            task,
+                            player,
+                            fileActions,
+                            onDismiss,
+                            onRotate,
+                            showRotationControl,
+                            contentMode,
+                            { selectedContentMode = contentMode.toggled() },
+                            playPauseState.showPlay,
+                            playPauseState.isEnabled,
+                            playPauseState::onClick,
+                            progressState.currentPositionMs,
+                            progressState.durationMs,
+                            {
+                                controlsVisible = true
+                                controlsInteractionRevision++
+                            },
+                            { controlsInteracting = it },
+                        )
                     }
                 }
             }

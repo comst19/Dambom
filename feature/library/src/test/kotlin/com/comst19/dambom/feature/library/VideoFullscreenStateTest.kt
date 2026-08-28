@@ -2,8 +2,6 @@ package com.comst19.dambom.feature.library
 
 import android.content.Context
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
@@ -14,7 +12,6 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.component.FullscreenContentMode
 import com.comst19.dambom.feature.library.component.LibraryFileActions
 import com.comst19.dambom.feature.library.component.fullscreenContentModeFor
-import com.comst19.dambom.feature.library.component.rememberFullscreenControlsEntryEligible
 import com.comst19.dambom.feature.library.component.shouldAutoHideFullscreenControls
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -107,50 +104,6 @@ class VideoFullscreenStateTest {
     fun `fullscreen rotate action is available only on compact phone windows`() {
         assertTrue(shouldShowFullscreenRotationControl(smallestScreenWidthDp = 599))
         assertFalse(shouldShowFullscreenRotationControl(smallestScreenWidthDp = 600))
-    }
-
-    @Test
-    fun `fullscreen controls enter immediately on phone`() {
-        var eligible = false
-        composeRule.setContent { eligible = rememberFullscreenControlsEntryEligible(false, false) }
-        composeRule.runOnIdle { assertTrue(eligible) }
-    }
-
-    @Test
-    fun `Fold controls enter only after scene transition delay`() {
-        var eligible = true
-        composeRule.mainClock.autoAdvance = false
-        composeRule.setContent { eligible = rememberFullscreenControlsEntryEligible(true, false) }
-        composeRule.mainClock.advanceTimeBy(749)
-        composeRule.runOnIdle { assertFalse(eligible) }
-        composeRule.mainClock.advanceTimeBy(1)
-        composeRule.runOnIdle { assertTrue(eligible) }
-    }
-
-    @Test
-    fun `PiP controls remain ineligible after scene transition delay`() {
-        var eligible = true
-        composeRule.mainClock.autoAdvance = false
-        composeRule.setContent { eligible = rememberFullscreenControlsEntryEligible(true, true) }
-        composeRule.mainClock.advanceTimeBy(751)
-        composeRule.runOnIdle { assertFalse(eligible) }
-    }
-
-    @Test
-    fun `disposing Fold controls before delay prevents later eligibility`() {
-        val showControls = mutableStateOf(true)
-        val observedEligibility = mutableListOf<Boolean>()
-        composeRule.mainClock.autoAdvance = false
-        composeRule.setContent {
-            if (showControls.value) {
-                val eligible = rememberFullscreenControlsEntryEligible(true, false)
-                SideEffect { observedEligibility += eligible }
-            }
-        }
-        composeRule.mainClock.advanceTimeBy(100)
-        composeRule.runOnIdle { showControls.value = false }
-        composeRule.mainClock.advanceTimeBy(750)
-        composeRule.runOnIdle { assertFalse(observedEligibility.contains(true)) }
     }
 
     @Test

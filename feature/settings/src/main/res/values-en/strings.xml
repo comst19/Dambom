@@ -43,5 +43,5 @@
     <string name="help_step_download_title">4. Manage downloads</string>
     <string name="help_step_download_description">Check queue progress and pause, resume, cancel, or retry each download.</string>
     <string name="help_step_library_title">5. Watch in Library</string>
-    <string name="help_step_library_description">Play completed videos, rename them, export, share, or delete them.</string>
+    <string name="help_step_library_description">When you leave while a completed local video is playing full screen, playback continues in PiP on supported devices. Inline, paused, or missing videos do not enter automatically, and no background playback service is provided.</string>
 </resources>

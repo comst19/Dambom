@@ -17,14 +17,11 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -214,63 +211,6 @@ private fun ActionMenuItem(
         text = { Text(label) },
         onClick = onClick,
         leadingIcon = icon,
-    )
-}
-
-@Composable
-private fun RenameVideoDialog(
-    task: DownloadTask,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit,
-) {
-    var title by remember(task.id, task.title) { mutableStateOf(task.title) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.library_rename_title)) },
-        text = {
-            TextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text(stringResource(R.string.library_video_name)) },
-                singleLine = true,
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { onConfirm(title) },
-                enabled = title.isNotBlank() && title.trim() != task.title,
-            ) {
-                Text(stringResource(R.string.library_rename_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.library_cancel))
-            }
-        },
-    )
-}
-
-@Composable
-private fun DeleteVideoDialog(
-    task: DownloadTask,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.library_delete_title)) },
-        text = { Text(stringResource(R.string.library_delete_description, task.title)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.library_delete_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.library_cancel))
-            }
-        },
     )
 }
 

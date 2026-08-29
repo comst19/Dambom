@@ -17,8 +17,6 @@ import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -49,7 +47,7 @@ internal fun DetectionCandidateItem(
     onSelectVariant: (String) -> Unit,
     onPreview: () -> Unit,
 ) {
-    var qualityMenuExpanded by remember(candidate.id) { mutableStateOf(false) }
+    var showQualitySheet by remember(candidate.id) { mutableStateOf(false) }
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         colors =
@@ -105,24 +103,8 @@ internal fun DetectionCandidateItem(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Box {
-                        TextButton(onClick = { qualityMenuExpanded = true }) {
-                            Text(selectedVariant.quality)
-                        }
-                        DropdownMenu(
-                            expanded = qualityMenuExpanded,
-                            onDismissRequest = { qualityMenuExpanded = false },
-                        ) {
-                            candidate.downloadVariants.forEach { variant ->
-                                DropdownMenuItem(
-                                    text = { Text(variant.quality) },
-                                    onClick = {
-                                        qualityMenuExpanded = false
-                                        onSelectVariant(variant.url)
-                                    },
-                                )
-                            }
-                        }
+                    TextButton(onClick = { showQualitySheet = true }) {
+                        Text(selectedVariant.quality)
                     }
                     selectedVariant.contentLength?.let {
                         Text(
@@ -145,10 +127,22 @@ internal fun DetectionCandidateItem(
             }
         }
     }
+    if (showQualitySheet) {
+        DetectionQualitySheet(
+            candidate = candidate,
+            selectedVariant = selectedVariant,
+            title = candidate.displayTitle(index),
+            onDismiss = { showQualitySheet = false },
+            onSelect = { variant ->
+                showQualitySheet = false
+                onSelectVariant(variant.url)
+            },
+        )
+    }
 }
 
 @Composable
-private fun MediaCandidate.displayTitle(index: Int): String =
+internal fun MediaCandidate.displayTitle(index: Int): String =
     if (title.isBlank() || UUID_TITLE_REGEX.matches(title)) {
         stringResource(R.string.detection_video_number, index)
     } else {
@@ -156,11 +150,6 @@ private fun MediaCandidate.displayTitle(index: Int): String =
     }
 
 private fun MediaCandidate.sourceLabel(): String = Uri.parse(url).host?.removePrefix("www.") ?: url
-
-private fun Long.formatBytes(): String {
-    val megabytes = this / (1024.0 * 1024.0)
-    return "%.1f MB".format(megabytes)
-}
 
 private val UUID_TITLE_REGEX = Regex("[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}")
 private const val VIDEO_ASPECT_RATIO = 16f / 9f

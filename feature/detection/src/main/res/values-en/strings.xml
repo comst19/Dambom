@@ -8,6 +8,8 @@
     <string name="detection_video_number">Video %1$d</string>
     <string name="detection_thumbnail">Video %1$d thumbnail</string>
     <string name="detection_preview">Preview</string>
+    <string name="detection_choose_quality">Choose download quality</string>
+    <string name="detection_quality_selected">Selected</string>
     <string name="detection_close_preview">Close</string>
     <string name="detection_download_selected">Download %1$d</string>
     <string name="detection_adding_to_queue">Adding %1$d</string>

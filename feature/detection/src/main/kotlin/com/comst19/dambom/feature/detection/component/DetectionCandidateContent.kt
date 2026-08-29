@@ -42,6 +42,7 @@ internal fun DetectionCandidateContent(
     onDownload: () -> Unit,
 ) {
     var previewCandidate by remember { mutableStateOf<MediaCandidate?>(null) }
+    var pendingDownloadQuality by remember { mutableStateOf<MediaCandidate?>(null) }
     val gridState = rememberLazyGridState()
     val preloadUrls by
         remember(gridState, state.candidates) {
@@ -108,10 +109,41 @@ internal fun DetectionCandidateContent(
                 )
             }
         }
-        DetectionActions(state, networkAccess, onDownload)
+        DetectionActions(
+            state = state,
+            networkAccess = networkAccess,
+            onDownload = {
+                val selectedCandidate =
+                    state.candidates
+                        .singleOrNull { it.id in state.selectedIds }
+                        ?.takeIf { it.downloadVariants.size > 1 }
+                if (selectedCandidate == null) {
+                    onDownload()
+                } else {
+                    pendingDownloadQuality = selectedCandidate
+                }
+            },
+        )
     }
     previewCandidate?.let { candidate ->
         CandidatePreviewDialog(candidate = candidate, onDismiss = { previewCandidate = null })
+    }
+    pendingDownloadQuality?.let { candidate ->
+        val selectedVariant =
+            candidate.downloadVariants.firstOrNull {
+                it.url == state.selectedVariantUrls[candidate.id]
+            } ?: candidate.downloadVariants.first()
+        DetectionQualitySheet(
+            candidate = candidate,
+            selectedVariant = selectedVariant,
+            title = candidate.displayTitle(state.candidates.indexOf(candidate) + 1),
+            onDismiss = { pendingDownloadQuality = null },
+            onSelect = { variant ->
+                pendingDownloadQuality = null
+                onSelectVariant(candidate.id, variant.url)
+                onDownload()
+            },
+        )
     }
 }
 

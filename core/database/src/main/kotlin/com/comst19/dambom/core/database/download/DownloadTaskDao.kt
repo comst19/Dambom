@@ -11,6 +11,9 @@ interface DownloadTaskDao {
     @Query("SELECT * FROM download_tasks ORDER BY createdAtMillis ASC")
     fun observeAll(): Flow<List<DownloadTaskEntity>>
 
+    @Query("SELECT * FROM download_tasks WHERE status = 'COMPLETED' ORDER BY createdAtMillis ASC")
+    fun observeCompleted(): Flow<List<DownloadTaskEntity>>
+
     @Query("SELECT * FROM download_tasks WHERE id = :id")
     suspend fun getById(id: String): DownloadTaskEntity?
 

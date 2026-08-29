@@ -50,8 +50,9 @@ internal class HomeViewModel
                 val active = downloads.filter { it.status == DownloadStatus.DOWNLOADING || it.status == DownloadStatus.QUEUED }
                 val pausedCount = downloads.count { it.status == DownloadStatus.PAUSED }
                 val failedCount = downloads.count { it.status == DownloadStatus.FAILED }
-                val totalBytes = active.mapNotNull { it.expectedBytes }.sum()
-                val downloadedBytes = active.sumOf { it.downloadedBytes }
+                val measurable = active.filter { (it.expectedBytes ?: 0L) > 0L }
+                val totalBytes = measurable.sumOf { it.expectedBytes ?: 0L }
+                val downloadedBytes = measurable.sumOf { it.downloadedBytes }
                 HomeUiState(
                     url = url,
                     isUrlValid = url.isValidHttpUrl(),

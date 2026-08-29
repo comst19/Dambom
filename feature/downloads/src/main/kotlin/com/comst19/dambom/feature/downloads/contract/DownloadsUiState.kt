@@ -26,9 +26,10 @@ internal data class DownloadsUiState(
     val progress: Float
         get() {
             val relevant = tasks.filter { it.status != DownloadStatus.FAILED }
-            val totalBytes = relevant.mapNotNull { it.expectedBytes }.sum()
+            val measurable = relevant.filter { (it.expectedBytes ?: 0L) > 0L }
+            val totalBytes = measurable.sumOf { it.expectedBytes ?: 0L }
             return if (totalBytes > 0L) {
-                (relevant.sumOf { it.downloadedBytes }.toFloat() / totalBytes).coerceIn(0f, 1f)
+                (measurable.sumOf { it.downloadedBytes }.toFloat() / totalBytes).coerceIn(0f, 1f)
             } else {
                 0f
             }

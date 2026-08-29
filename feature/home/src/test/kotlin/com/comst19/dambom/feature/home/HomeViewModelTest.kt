@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.comst19.dambom.core.common.url.SharedUrlBus
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadRequest
+import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.model.ThemeMode
@@ -64,13 +65,25 @@ class HomeViewModelTest {
                 assertEquals(null, viewModel.uiState.value.clipboardUrl)
             }
         }
+
+    @Test
+    fun `download progress excludes bytes with unknown expected size`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = createViewModel(MixedExpectedSizeDownloadRepository)
+
+            viewModel.uiState.test {
+                awaitItem()
+
+                assertEquals(0.25f, awaitItem().downloadSummary.progress, 0f)
+            }
+        }
 }
 
-private fun createViewModel() =
+private fun createViewModel(downloadRepository: DownloadRepository = EmptyDownloadRepository) =
     HomeViewModel(
         navigation = SpyNavigationDispatcher(),
         settingsRepository = EnabledClipboardSettingsRepository,
-        downloadRepository = EmptyDownloadRepository,
+        downloadRepository = downloadRepository,
         sharedUrlBus = SharedUrlBus(),
         savedStateHandle = SavedStateHandle(),
     )
@@ -126,6 +139,36 @@ private object EmptyDownloadRepository : DownloadRepository {
 
     override suspend fun refreshNetworkPolicy() = Unit
 }
+
+private object MixedExpectedSizeDownloadRepository : DownloadRepository by EmptyDownloadRepository {
+    override val downloads: Flow<List<DownloadTask>> =
+        flowOf(
+            listOf(
+                activeDownload(id = "known", expectedBytes = 100L, downloadedBytes = 25L),
+                activeDownload(id = "unknown", expectedBytes = null, downloadedBytes = 1_000L),
+            ),
+        )
+}
+
+private fun activeDownload(
+    id: String,
+    expectedBytes: Long?,
+    downloadedBytes: Long,
+) = DownloadTask(
+    id = id,
+    url = "https://example.com/$id.mp4",
+    sourcePageUrl = "https://example.com",
+    title = id,
+    mimeType = "video/mp4",
+    expectedBytes = expectedBytes,
+    downloadedBytes = downloadedBytes,
+    quality = "원본",
+    status = DownloadStatus.DOWNLOADING,
+    failureReason = null,
+    localFileName = null,
+    createdAtMillis = 0L,
+    updatedAtMillis = 0L,
+)
 
 private const val FIRST_URL = "https://example.com/first"
 private const val SECOND_URL = "https://example.com/second"

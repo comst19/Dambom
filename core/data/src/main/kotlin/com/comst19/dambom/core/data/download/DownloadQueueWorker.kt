@@ -105,10 +105,21 @@ internal class DownloadQueueWorker
             try {
                 download(task, allowRestart = true)
                 DownloadOutcome.COMPLETED
-            } catch (_: PausedDownloadException) {
-                DownloadOutcome.PAUSED
-            } catch (_: CancelledDownloadException) {
-                DownloadOutcome.CANCELLED
+            } catch (stopped: DownloadStoppedException) {
+                when (stopped.reason) {
+                    DownloadStopReason.PAUSED -> {
+                        DownloadOutcome.PAUSED
+                    }
+
+                    DownloadStopReason.OWNERSHIP_LOST -> {
+                        DownloadOutcome.OWNERSHIP_LOST
+                    }
+
+                    DownloadStopReason.CANCELLED -> {
+                        fileStore.clearPartial(task.id)
+                        DownloadOutcome.CANCELLED
+                    }
+                }
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (_: IOException) {
@@ -214,12 +225,8 @@ internal class DownloadQueueWorker
             totalBytes: Long?,
         ) {
             dao.updateProgress(id, downloadedBytes, totalBytes, System.currentTimeMillis())
-            val current = dao.getById(id)
-            setForeground(notifier.foreground(current?.title, downloadedBytes, totalBytes))
-            when (current?.status) {
-                DownloadStatus.PAUSED.name -> throw PausedDownloadException()
-                null -> throw CancelledDownloadException()
-            }
+            val current = requireActiveTask(id)
+            setForeground(notifier.foreground(current.title, downloadedBytes, totalBytes))
         }
 
         private suspend fun complete(
@@ -227,8 +234,7 @@ internal class DownloadQueueWorker
             partialFile: File,
             downloadedBytes: Long,
         ) {
-            val current = dao.getById(task.id) ?: throw CancelledDownloadException()
-            if (current.status == DownloadStatus.PAUSED.name) throw PausedDownloadException()
+            requireActiveTask(task.id)
             val completedFile = fileStore.completedFile(task.id, task.url, task.mimeType)
             completedFile.delete()
             if (!partialFile.renameTo(completedFile)) throw DownloadFailureException(DownloadFailureReason.STORAGE)
@@ -241,10 +247,22 @@ internal class DownloadQueueWorker
                 )
             if (completed == 0) {
                 completedFile.delete()
-                throw CancelledDownloadException()
+                throw DownloadStoppedException(DownloadStopReason.CANCELLED)
             }
             fileStore.partialValidatorFile(task.id).delete()
             notifier.completed(task.id, task.title)
+        }
+
+        private suspend fun requireActiveTask(id: String): DownloadTaskEntity {
+            val current = dao.getById(id)
+            if (current?.status == DownloadStatus.DOWNLOADING.name) return current
+            val reason =
+                when (current?.status) {
+                    DownloadStatus.PAUSED.name -> DownloadStopReason.PAUSED
+                    null -> DownloadStopReason.CANCELLED
+                    else -> DownloadStopReason.OWNERSHIP_LOST
+                }
+            throw DownloadStoppedException(reason)
         }
 
         private suspend fun markFailed(
@@ -264,6 +282,7 @@ private data class RunningDownload(
 private enum class DownloadOutcome {
     COMPLETED,
     PAUSED,
+    OWNERSHIP_LOST,
     CANCELLED,
     RETRYABLE_FAILURE,
     PERMANENT_FAILURE,
@@ -273,9 +292,15 @@ private class DownloadFailureException(
     val reason: DownloadFailureReason,
 ) : Exception()
 
-private class PausedDownloadException : Exception()
+private class DownloadStoppedException(
+    val reason: DownloadStopReason,
+) : Exception()
 
-private class CancelledDownloadException : Exception()
+private enum class DownloadStopReason {
+    PAUSED,
+    OWNERSHIP_LOST,
+    CANCELLED,
+}
 
 private class RetryQueueException : IOException()
 

@@ -51,6 +51,20 @@ class DownloadsUiStateTest {
     }
 
     @Test
+    fun `summary progress excludes bytes with unknown expected size`() {
+        val state =
+            DownloadsUiState(
+                tasks =
+                    persistentListOf(
+                        task("known", DownloadStatus.DOWNLOADING, 25L, 100L),
+                        task("unknown", DownloadStatus.DOWNLOADING, 1_000L, null),
+                    ),
+            )
+
+        assertEquals(0.25f, state.progress)
+    }
+
+    @Test
     fun `view mode restores from saved state`() {
         val savedStateHandle = SavedStateHandle()
         DownloadsViewModel(EmptyDownloadRepository, SpyNavigationDispatcher(), savedStateHandle, AppEventBus())
@@ -135,7 +149,7 @@ private fun task(
     id: String,
     status: DownloadStatus,
     downloadedBytes: Long,
-    expectedBytes: Long,
+    expectedBytes: Long?,
     localFilePath: String? = null,
 ) = DownloadTask(
     id = id,

@@ -183,6 +183,24 @@ class DefaultDownloadRepositoryTest {
         }
 
     @Test
+    fun `completed downloads excludes active rows`() =
+        runTest {
+            val dao = database.downloadTaskDao()
+            dao.insert(entity("queued", "media.example"))
+            dao.insert(
+                entity("completed", "media.example").copy(
+                    status = DownloadStatus.COMPLETED.name,
+                    localFileName = "completed.mp4",
+                ),
+            )
+            repository = createRepository(testScheduler)
+
+            val completed = repository.completedDownloads.first()
+
+            assertEquals(listOf("completed"), completed.map { it.id })
+        }
+
+    @Test
     fun `delete removes the saved task and local file`() =
         runTest {
             val context = ApplicationProvider.getApplicationContext<Context>()

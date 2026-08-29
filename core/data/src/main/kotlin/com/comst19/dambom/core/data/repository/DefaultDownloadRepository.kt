@@ -13,6 +13,7 @@ import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -36,7 +37,18 @@ class DefaultDownloadRepository
                     entities.map { entity ->
                         entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
                     }
-                }.flowOn(ioDispatcher)
+                }.distinctUntilChanged()
+                .flowOn(ioDispatcher)
+
+        override val completedDownloads: Flow<List<DownloadTask>> =
+            dao
+                .observeCompleted()
+                .map { entities ->
+                    entities.map { entity ->
+                        entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
+                    }
+                }.distinctUntilChanged()
+                .flowOn(ioDispatcher)
 
         override suspend fun enqueue(requests: List<DownloadRequest>): EnqueueDownloadsResult =
             withContext(ioDispatcher) {
@@ -61,10 +73,6 @@ class DefaultDownloadRepository
         override suspend fun resume(id: String) {
             dao.queueAgain(id, System.currentTimeMillis())
             scheduler.schedule()
-        }
-
-        override suspend fun cancel(id: String) {
-            delete(id)
         }
 
         override suspend fun rename(

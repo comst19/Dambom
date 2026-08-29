@@ -11,13 +11,19 @@ import com.comst19.dambom.core.database.DambomDatabase
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -121,6 +127,62 @@ class DownloadQueueWorkerTest {
             assertEquals("new", fileStore.completedFile(task.id, task.url, task.mimeType).readText())
         }
 
+    @Test
+    fun `quick resume stops the previous transfer and continues from its partial file`() =
+        runTest {
+            successfulServer.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "video/mp4")
+                    .setHeader("ETag", "\"v1\"")
+                    .setBody("v".repeat(2 * 1024 * 1024))
+                    .throttleBody(64 * 1024L, 50L, TimeUnit.MILLISECONDS),
+            )
+            successfulServer.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "video/mp4")
+                    .setBody("resumed"),
+            )
+            val task = entity("quick-resume", successfulServer.url("/quick-resume.mp4").toString())
+            val dao = database.downloadTaskDao()
+            dao.insert(task)
+            val work = async(Dispatchers.IO) { createWorker().doWork() }
+            awaitCondition {
+                dao.getById(task.id)?.status == DownloadStatus.DOWNLOADING.name &&
+                    fileStore.partialFile(task.id).length() >= 128 * 1024L
+            }
+
+            dao.pause(task.id, 2L)
+            dao.queueAgain(task.id, 3L)
+            work.await()
+
+            successfulServer.takeRequest()
+            val resumedRequest = successfulServer.takeRequest()
+            assertNotNull(resumedRequest.getHeader("Range"))
+        }
+
+    @Test
+    fun `cancelling before the response body removes the late partial file`() =
+        runTest {
+            successfulServer.enqueue(
+                MockResponse()
+                    .setHeadersDelay(500L, TimeUnit.MILLISECONDS)
+                    .setHeader("Content-Type", "video/mp4")
+                    .setBody("video"),
+            )
+            val task = entity("cancelled", successfulServer.url("/cancelled.mp4").toString())
+            val dao = database.downloadTaskDao()
+            dao.insert(task)
+            val work = async(Dispatchers.IO) { createWorker().doWork() }
+            assertNotNull(successfulServer.takeRequest(2L, TimeUnit.SECONDS))
+
+            dao.delete(task.id)
+            fileStore.clearPartial(task.id)
+            work.await()
+
+            assertFalse(fileStore.partialFile(task.id).exists())
+            assertFalse(fileStore.partialValidatorFile(task.id).exists())
+        }
+
     private fun createWorker(): DownloadQueueWorker =
         TestListenableWorkerBuilder<DownloadQueueWorker>(context, runAttemptCount = 0)
             .setWorkerFactory(
@@ -141,6 +203,14 @@ class DownloadQueueWorkerTest {
                         )
                 },
             ).build()
+}
+
+private suspend fun awaitCondition(condition: suspend () -> Boolean) {
+    withContext(Dispatchers.IO) {
+        withTimeout(5_000L) {
+            while (!condition()) delay(10L)
+        }
+    }
 }
 
 private fun entity(

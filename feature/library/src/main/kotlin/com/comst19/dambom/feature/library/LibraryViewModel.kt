@@ -63,7 +63,7 @@ internal class LibraryViewModel
 
         val uiState: StateFlow<LibraryUiState> =
             combine(
-                repository.downloads,
+                repository.completedDownloads,
                 selectedId,
                 query,
                 displayPreferences,

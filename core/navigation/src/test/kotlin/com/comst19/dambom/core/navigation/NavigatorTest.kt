@@ -2,6 +2,8 @@ package com.comst19.dambom.core.navigation
 
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.comst19.dambom.core.navigation.contract.AppNavKey
+import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test

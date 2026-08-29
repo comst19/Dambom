@@ -8,7 +8,7 @@ plugins {
 android { namespace = "com.comst19.dambom.core.navigation" }
 
 dependencies {
-    api(libs.androidx.navigation3.runtime)
+    api(projects.core.navigationContract)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.kotlinx.coroutines.core)
 }

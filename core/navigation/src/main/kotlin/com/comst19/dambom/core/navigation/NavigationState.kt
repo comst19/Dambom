@@ -14,6 +14,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
 
 /** 현재 top-level root에서 Back 했을 때 앱이 종료 경계에 도달하는 방식을 선택합니다. */
 enum class TopLevelBackBehavior {

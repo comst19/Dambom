@@ -12,8 +12,8 @@ import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.NetworkMonitor
 import com.comst19.dambom.core.domain.repository.SettingsRepository
-import com.comst19.dambom.core.navigation.TopLevelNavKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
+import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.presentation.contract.AppStartupState
 import com.comst19.dambom.presentation.contract.StartupFailure

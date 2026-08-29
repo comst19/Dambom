@@ -1,7 +1,7 @@
 package com.comst19.dambom.presentation.contract
 
 import androidx.compose.runtime.Immutable
-import com.comst19.dambom.core.navigation.TopLevelNavKey
+import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
 
 @Immutable
 sealed interface AppStartupState {

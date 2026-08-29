@@ -1,6 +1,7 @@
 package com.comst19.dambom.core.navigation
 
 import app.cash.turbine.test
+import com.comst19.dambom.core.navigation.contract.AppNavKey
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test

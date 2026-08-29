@@ -7,5 +7,5 @@ plugins {
 android { namespace = "com.comst19.dambom.core.navigation.contract" }
 
 dependencies {
-    api(projects.core.navigation)
+    api(libs.androidx.navigation3.runtime)
 }

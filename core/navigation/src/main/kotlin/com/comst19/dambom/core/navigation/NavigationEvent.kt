@@ -1,5 +1,8 @@
 package com.comst19.dambom.core.navigation
 
+import com.comst19.dambom.core.navigation.contract.AppNavKey
+import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
+
 /** ViewModel과 앱 셸 사이에서 전달하는 일회성 navigation 명령입니다. */
 sealed interface NavigationEvent {
     /**

@@ -10,9 +10,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.comst19.dambom.core.navigation.NavigationConfig
 import com.comst19.dambom.core.navigation.TopLevelBackBehavior
-import com.comst19.dambom.core.navigation.TopLevelNavKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.LibraryKey
+import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
 import com.comst19.dambom.presentation.R
 
 /** 독립 top-level key와 선택적인 바텀바 표시 정보를 함께 보관하는 앱 설정입니다. */

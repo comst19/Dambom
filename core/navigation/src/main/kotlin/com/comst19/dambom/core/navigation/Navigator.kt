@@ -1,5 +1,8 @@
 package com.comst19.dambom.core.navigation
 
+import com.comst19.dambom.core.navigation.contract.AppNavKey
+import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
+
 /** [NavigationEvent]를 해석해 [NavigationState]만 변경하는 navigation 명령 처리기입니다. */
 class Navigator(
     private val state: NavigationState,

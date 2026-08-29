@@ -1,4 +1,4 @@
-package com.comst19.dambom.core.navigation
+package com.comst19.dambom.core.navigation.contract
 
 import androidx.navigation3.runtime.NavKey
 

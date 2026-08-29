@@ -3,6 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.hilt.core)
+    implementation(libs.javax.inject)
     implementation(libs.kotlinx.coroutines.core)
 }

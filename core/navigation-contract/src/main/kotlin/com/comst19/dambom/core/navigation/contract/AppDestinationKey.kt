@@ -1,7 +1,5 @@
 package com.comst19.dambom.core.navigation.contract
 
-import com.comst19.dambom.core.navigation.AppNavKey
-import com.comst19.dambom.core.navigation.TopLevelNavKey
 import kotlinx.serialization.Serializable
 
 sealed interface HomeGraph : AppNavKey {

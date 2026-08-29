@@ -1,5 +1,7 @@
 package com.comst19.dambom.core.navigation
 
+import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
+
 /** 앱 셸이 주입하는 top-level navigation 구성입니다. */
 data class NavigationConfig(
     val startKey: TopLevelNavKey,

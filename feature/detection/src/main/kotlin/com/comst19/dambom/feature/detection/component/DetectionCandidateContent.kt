@@ -42,7 +42,7 @@ internal fun DetectionCandidateContent(
     onDownload: () -> Unit,
 ) {
     var previewCandidate by remember { mutableStateOf<MediaCandidate?>(null) }
-    var pendingDownloadQuality by remember { mutableStateOf<MediaCandidate?>(null) }
+    var pendingDownloadQualityIds by remember { mutableStateOf(emptyList<String>()) }
     val gridState = rememberLazyGridState()
     val preloadUrls by
         remember(gridState, state.candidates) {
@@ -113,14 +113,12 @@ internal fun DetectionCandidateContent(
             state = state,
             networkAccess = networkAccess,
             onDownload = {
-                val selectedCandidate =
+                pendingDownloadQualityIds =
                     state.candidates
-                        .singleOrNull { it.id in state.selectedIds }
-                        ?.takeIf { it.downloadVariants.size > 1 }
-                if (selectedCandidate == null) {
+                        .filter { it.id in state.selectedIds && it.downloadVariants.size > 1 }
+                        .map(MediaCandidate::id)
+                if (pendingDownloadQualityIds.isEmpty()) {
                     onDownload()
-                } else {
-                    pendingDownloadQuality = selectedCandidate
                 }
             },
         )
@@ -128,6 +126,8 @@ internal fun DetectionCandidateContent(
     previewCandidate?.let { candidate ->
         CandidatePreviewDialog(candidate = candidate, onDismiss = { previewCandidate = null })
     }
+    val pendingDownloadQuality =
+        pendingDownloadQualityIds.firstOrNull()?.let { id -> state.candidates.firstOrNull { it.id == id } }
     pendingDownloadQuality?.let { candidate ->
         val selectedVariant =
             candidate.downloadVariants.firstOrNull {
@@ -137,11 +137,11 @@ internal fun DetectionCandidateContent(
             candidate = candidate,
             selectedVariant = selectedVariant,
             title = candidate.displayTitle(state.candidates.indexOf(candidate) + 1),
-            onDismiss = { pendingDownloadQuality = null },
+            onDismiss = { pendingDownloadQualityIds = emptyList() },
             onSelect = { variant ->
-                pendingDownloadQuality = null
                 onSelectVariant(candidate.id, variant.url)
-                onDownload()
+                pendingDownloadQualityIds = pendingDownloadQualityIds.drop(1)
+                if (pendingDownloadQualityIds.isEmpty()) onDownload()
             },
         )
     }

@@ -14,6 +14,9 @@
     <string name="detection_download_selected">Download %1$d</string>
     <string name="detection_adding_to_queue">Adding %1$d</string>
     <string name="detection_enqueue_failed">Couldn’t add these videos to the queue. Try again.</string>
+    <string name="detection_enqueue_added">Added to the download queue: %1$d</string>
+    <string name="detection_enqueue_added_with_duplicates">Added: %1$d · Already present: %2$d</string>
+    <string name="detection_enqueue_duplicates">All selected videos are already in the queue or library.</string>
     <string name="detection_network_unavailable">Internet connection required</string>
     <string name="detection_network_unavailable_description">Video detection restarts automatically after reconnecting.</string>
     <string name="detection_download_offline">Connect to the internet to download.</string>

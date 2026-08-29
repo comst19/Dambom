@@ -68,27 +68,44 @@ class MainViewModelTest {
         }
 
     @Test
-    fun `download feedback reports visible changes without constraint reset noise`() {
+    fun `download feedback ignores non actionable transitions and reports failures`() {
         val task = downloadTask(DownloadStatus.DOWNLOADING)
 
         assertEquals(
-            listOf(DownloadFeedback(DownloadFeedbackType.STARTED, task.title)),
-            downloadFeedback(mapOf(task.id to DownloadStatus.QUEUED), listOf(task)),
+            null,
+            downloadFailureFeedback(mapOf(task.id to DownloadStatus.QUEUED), listOf(task)),
         )
         assertEquals(
-            listOf(DownloadFeedback(DownloadFeedbackType.COMPLETED, task.title)),
-            downloadFeedback(
+            null,
+            downloadFailureFeedback(
                 mapOf(task.id to DownloadStatus.DOWNLOADING),
                 listOf(task.copy(status = DownloadStatus.COMPLETED)),
             ),
         )
         assertEquals(
-            emptyList<DownloadFeedback>(),
-            downloadFeedback(
+            DownloadFailureFeedback(task.title),
+            downloadFailureFeedback(
                 mapOf(task.id to DownloadStatus.DOWNLOADING),
-                listOf(task.copy(status = DownloadStatus.QUEUED)),
+                listOf(task.copy(status = DownloadStatus.FAILED)),
             ),
         )
+    }
+
+    @Test
+    fun `download feedback groups multiple failures`() {
+        val first = downloadTask(DownloadStatus.FAILED).copy(id = "video-1", title = "영상 1")
+        val second = downloadTask(DownloadStatus.FAILED).copy(id = "video-2", title = "영상 2")
+
+        val feedback =
+            checkNotNull(
+                downloadFailureFeedback(
+                    previousStatuses = mapOf(first.id to DownloadStatus.DOWNLOADING, second.id to DownloadStatus.DOWNLOADING),
+                    tasks = listOf(first, second),
+                ),
+            )
+
+        assertEquals(2, feedback.count)
+        assertEquals(null, feedback.title)
     }
 }
 

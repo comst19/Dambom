@@ -14,6 +14,9 @@
     <string name="detection_download_selected">%1$d개 다운로드</string>
     <string name="detection_adding_to_queue">%1$d개 추가 중</string>
     <string name="detection_enqueue_failed">대기열에 추가하지 못했어요. 다시 시도해 주세요.</string>
+    <string name="detection_enqueue_added">%1$d개 영상을 다운로드 대기열에 추가했어요.</string>
+    <string name="detection_enqueue_added_with_duplicates">%1$d개 추가했고, 이미 있는 %2$d개는 제외했어요.</string>
+    <string name="detection_enqueue_duplicates">선택한 영상은 이미 다운로드 중이거나 보관함에 있어요.</string>
     <string name="detection_network_unavailable">인터넷 연결이 필요해요</string>
     <string name="detection_network_unavailable_description">연결되면 영상 찾기를 자동으로 다시 시작해요.</string>
     <string name="detection_download_offline">인터넷에 연결되면 다운로드할 수 있어요.</string>

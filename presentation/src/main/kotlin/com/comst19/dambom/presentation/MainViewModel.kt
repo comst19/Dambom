@@ -93,16 +93,11 @@ class MainViewModel
                 var previousStatuses: Map<String, DownloadStatus>? = null
                 repository.downloads.collect { tasks ->
                     previousStatuses?.let { previous ->
-                        downloadFeedback(previous, tasks).forEach { feedback ->
+                        downloadFailureFeedback(previous, tasks)?.let { feedback ->
                             appEventBus.send(
                                 AppEvent.ShowSnackbar(
-                                    message = UiText.Resource(feedback.type.messageRes, listOf(feedback.title)),
-                                    duration =
-                                        if (feedback.type == DownloadFeedbackType.FAILED) {
-                                            SnackbarDuration.Long
-                                        } else {
-                                            SnackbarDuration.Short
-                                        },
+                                    message = feedback.message,
+                                    duration = SnackbarDuration.Long,
                                 ),
                             )
                         }
@@ -143,58 +138,30 @@ class MainViewModel
 
 private const val SETTINGS_STOP_TIMEOUT_MILLIS = 5_000L
 
-internal data class DownloadFeedback(
-    val type: DownloadFeedbackType,
-    val title: String,
+internal data class DownloadFailureFeedback(
+    val title: String?,
+    val count: Int = 1,
 )
 
-internal enum class DownloadFeedbackType {
-    QUEUED,
-    STARTED,
-    COMPLETED,
-    FAILED,
-}
-
-internal fun downloadFeedback(
+internal fun downloadFailureFeedback(
     previousStatuses: Map<String, DownloadStatus>,
     tasks: List<DownloadTask>,
-): List<DownloadFeedback> =
-    tasks.mapNotNull { task ->
-        val previous = previousStatuses[task.id]
-        val type =
-            when (task.status) {
-                DownloadStatus.QUEUED -> {
-                    if (previous == null || previous == DownloadStatus.PAUSED || previous == DownloadStatus.FAILED) {
-                        DownloadFeedbackType.QUEUED
-                    } else {
-                        null
-                    }
-                }
+): DownloadFailureFeedback? {
+    val failures =
+        tasks.filter { task ->
+            task.status == DownloadStatus.FAILED && previousStatuses[task.id] != DownloadStatus.FAILED
+        }
+    if (failures.isEmpty()) return null
+    return DownloadFailureFeedback(
+        title = failures.singleOrNull()?.title,
+        count = failures.size,
+    )
+}
 
-                DownloadStatus.DOWNLOADING -> {
-                    DownloadFeedbackType.STARTED.takeIf { previous != DownloadStatus.DOWNLOADING }
-                }
-
-                DownloadStatus.COMPLETED -> {
-                    DownloadFeedbackType.COMPLETED.takeIf { previous != DownloadStatus.COMPLETED }
-                }
-
-                DownloadStatus.FAILED -> {
-                    DownloadFeedbackType.FAILED.takeIf { previous != DownloadStatus.FAILED }
-                }
-
-                DownloadStatus.PAUSED -> {
-                    null
-                }
-            }
-        type?.let { DownloadFeedback(it, task.title) }
-    }
-
-private val DownloadFeedbackType.messageRes: Int
+private val DownloadFailureFeedback.message: UiText
     get() =
-        when (this) {
-            DownloadFeedbackType.QUEUED -> R.string.download_feedback_queued
-            DownloadFeedbackType.STARTED -> R.string.download_feedback_started
-            DownloadFeedbackType.COMPLETED -> R.string.download_feedback_completed
-            DownloadFeedbackType.FAILED -> R.string.download_feedback_failed
+        if (count == 1 && title != null) {
+            UiText.Resource(R.string.download_feedback_failed, listOf(title))
+        } else {
+            UiText.Resource(R.string.download_feedback_failed_multiple, listOf(count))
         }

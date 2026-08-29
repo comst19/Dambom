@@ -1,5 +1,8 @@
 package com.comst19.dambom.feature.detection
 
+import com.comst19.dambom.core.common.ui.AppEvent
+import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
@@ -15,10 +18,14 @@ import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.detection.contract.DetectionUiState
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -37,7 +44,7 @@ class DetectionViewModelTest {
         runTest(mainDispatcherRule.dispatcher) {
             val downloads = RecordingDownloadRepository()
             val navigation = SpyNavigationDispatcher()
-            val viewModel = DetectionViewModel(SuccessfulDetectionRepository, downloads, navigation)
+            val viewModel = DetectionViewModel(SuccessfulDetectionRepository, downloads, navigation, AppEventBus())
 
             viewModel.detect(SOURCE_URL)
             advanceUntilIdle()
@@ -58,6 +65,7 @@ class DetectionViewModelTest {
                     SuccessfulDetectionRepository,
                     downloads,
                     SpyNavigationDispatcher(),
+                    AppEventBus(),
                 )
 
             viewModel.detect(SOURCE_URL)
@@ -71,6 +79,39 @@ class DetectionViewModelTest {
         }
 
     @Test
+    fun `multiple selected videos emit one batch feedback event`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val events = AppEventBus()
+            val feedback =
+                backgroundScope.async(
+                    context = UnconfinedTestDispatcher(testScheduler),
+                    start = CoroutineStart.UNDISPATCHED,
+                ) {
+                    events.events.first()
+                }
+            val viewModel =
+                DetectionViewModel(
+                    MultipleVideoDetectionRepository,
+                    RecordingDownloadRepository(),
+                    SpyNavigationDispatcher(),
+                    events,
+                )
+
+            viewModel.detect(SOURCE_URL)
+            advanceUntilIdle()
+            viewModel.toggleCandidate("video-1")
+            viewModel.toggleCandidate("video-2")
+            viewModel.downloadSelected()
+            advanceUntilIdle()
+
+            assertTrue(feedback.isCompleted)
+            assertEquals(
+                AppEvent.ShowSnackbar(UiText.Resource(R.string.detection_enqueue_added, listOf(2))),
+                feedback.await(),
+            )
+        }
+
+    @Test
     fun `multiple detected videos require an explicit selection`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel =
@@ -78,6 +119,7 @@ class DetectionViewModelTest {
                     MultipleVideoDetectionRepository,
                     RecordingDownloadRepository(),
                     SpyNavigationDispatcher(),
+                    AppEventBus(),
                 )
 
             viewModel.detect(SOURCE_URL)
@@ -96,6 +138,7 @@ class DetectionViewModelTest {
                     UnsupportedDetectionRepository,
                     RecordingDownloadRepository(),
                     navigation,
+                    AppEventBus(),
                 )
 
             viewModel.detect(SOURCE_URL)
@@ -113,6 +156,7 @@ class DetectionViewModelTest {
                     repository,
                     RecordingDownloadRepository(),
                     SpyNavigationDispatcher(),
+                    AppEventBus(),
                 )
 
             viewModel.detect(FIRST_SOURCE_URL)
@@ -137,6 +181,7 @@ class DetectionViewModelTest {
                     repository,
                     RecordingDownloadRepository(),
                     SpyNavigationDispatcher(),
+                    AppEventBus(),
                 )
 
             viewModel.detect(SOURCE_URL)

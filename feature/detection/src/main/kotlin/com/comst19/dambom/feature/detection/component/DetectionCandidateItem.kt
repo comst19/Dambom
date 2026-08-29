@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -84,35 +85,42 @@ internal fun DetectionCandidateItem(
                     )
                 }
             }
-            Row(
+            Column(
                 modifier = Modifier.padding(start = 8.dp, end = 12.dp, top = 10.dp, bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Checkbox(selected, onCheckedChange = { onClick() })
-                Column(Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
                         candidate.displayTitle(index),
+                        modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
+                    Checkbox(
+                        checked = selected,
+                        onCheckedChange = { onClick() },
+                        modifier = Modifier.testTag("detection-selection-checkbox"),
+                    )
+                }
+                Text(
+                    candidate.sourceLabel(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                TextButton(onClick = { showQualitySheet = true }) {
+                    Text(selectedVariant.quality)
+                }
+                selectedVariant.contentLength?.let {
                     Text(
-                        candidate.sourceLabel(),
+                        it.formatBytes(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
                     )
-                    TextButton(onClick = { showQualitySheet = true }) {
-                        Text(selectedVariant.quality)
-                    }
-                    selectedVariant.contentLength?.let {
-                        Text(
-                            it.formatBytes(),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
                 }
             }
             TextButton(

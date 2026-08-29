@@ -2,8 +2,12 @@ package com.comst19.dambom.feature.detection
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.comst19.dambom.core.common.ui.AppEvent
+import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.domain.model.DownloadRequest
+import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.DownloadRepository
@@ -33,6 +37,7 @@ internal class DetectionViewModel
         private val repository: MediaDetectionRepository,
         private val downloadRepository: DownloadRepository,
         private val navigation: NavigationDispatcher,
+        private val appEventBus: AppEventBus,
     ) : ViewModel() {
         private val mutableUiState = MutableStateFlow<DetectionUiState>(DetectionUiState.Loading)
         val uiState: StateFlow<DetectionUiState> = mutableUiState.asStateFlow()
@@ -165,8 +170,10 @@ internal class DetectionViewModel
                             )
                         }
                 suspendRunCatching { downloadRepository.enqueue(requests) }
-                    .onSuccess { navigation.dispatch(NavigationEvent.Replace(DownloadsKey)) }
-                    .onFailure {
+                    .onSuccess { result ->
+                        appEventBus.send(AppEvent.ShowSnackbar(result.feedbackMessage))
+                        navigation.dispatch(NavigationEvent.Replace(DownloadsKey))
+                    }.onFailure {
                         mutableUiState.update { current ->
                             if (current is DetectionUiState.Content) {
                                 current.copy(isSubmitting = false, enqueueFailed = true)
@@ -182,3 +189,22 @@ internal class DetectionViewModel
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Back) }
         }
     }
+
+private val EnqueueDownloadsResult.feedbackMessage: UiText
+    get() =
+        when {
+            addedCount > 0 && duplicateCount > 0 -> {
+                UiText.Resource(
+                    R.string.detection_enqueue_added_with_duplicates,
+                    listOf(addedCount, duplicateCount),
+                )
+            }
+
+            addedCount > 0 -> {
+                UiText.Resource(R.string.detection_enqueue_added, listOf(addedCount))
+            }
+
+            else -> {
+                UiText.Resource(R.string.detection_enqueue_duplicates)
+            }
+        }

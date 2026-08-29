@@ -5,7 +5,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
-import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
@@ -24,7 +23,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.net.URI
 import javax.inject.Inject
 
 @HiltViewModel
@@ -284,122 +282,6 @@ internal class WebViewModel
         }
     }
 
-private fun String.normalizeAddress(): String? =
-    runCatching {
-        val value = trim()
-        val candidate = if (value.contains("://")) value else "https://$value"
-        val uri = URI(candidate)
-        if ((uri.scheme == "http" || uri.scheme == "https") && !uri.host.isNullOrBlank()) candidate else null
-    }.getOrNull()
-
-private fun String.hostLabel(): String = runCatching { URI(this).host.removePrefix("www.") }.getOrDefault(this)
-
-private fun String.hasVideoExtension(): Boolean =
-    VIDEO_EXTENSIONS.any { extension -> substringBefore('?').endsWith(extension, ignoreCase = true) }
-
-private fun String.detectedVideoKey(): String =
-    runCatching {
-        val uri = URI(this)
-        if (uri.host.equals(X_MEDIA_HOST, ignoreCase = true)) {
-            X_MEDIA_ID_REGEX
-                .find(uri.path)
-                ?.groupValues
-                ?.get(1)
-                ?.let { return "x:$it" }
-        }
-        substringBefore('#')
-    }.getOrDefault(this)
-
-private val VIDEO_EXTENSIONS = setOf(".mp4", ".webm", ".mov", ".m4v")
-private val X_MEDIA_ID_REGEX = Regex("/(?:ext_tw_video|amplify_video)/(\\d+)/")
-private const val X_MEDIA_HOST = "video.twimg.com"
 private const val MAX_RECENT_PAGES = 8
-private const val TAB_IDS_KEY = "web-tab-ids"
-private const val TAB_TITLES_KEY = "web-tab-titles"
-private const val TAB_URLS_KEY = "web-tab-urls"
-private const val TAB_DETECTION_STATES_KEY = "web-tab-detection-states"
-private const val CURRENT_TAB_ID_KEY = "web-current-tab-id"
-private const val RECENT_TITLES_KEY = "web-recent-titles"
-private const val RECENT_URLS_KEY = "web-recent-urls"
 private const val NEXT_TAB_ID_KEY = "web-next-tab-id"
 private const val INITIAL_URL_APPLIED_KEY = "web-initial-url-applied"
-private const val NULL_URL = ""
-
-private fun SavedStateHandle.restoreWebUiState(): WebUiState {
-    val ids = get<LongArray>(TAB_IDS_KEY) ?: longArrayOf()
-    val titles = get<ArrayList<String>>(TAB_TITLES_KEY).orEmpty()
-    val urls = get<ArrayList<String>>(TAB_URLS_KEY).orEmpty()
-    val detectionStates = get<ArrayList<String>>(TAB_DETECTION_STATES_KEY).orEmpty()
-    val tabs =
-        ids
-            .mapIndexed { index, id ->
-                WebTab(
-                    id = id,
-                    title = titles.getOrNull(index).orEmpty().ifBlank { "새 탭" },
-                    url = urls.getOrNull(index)?.takeIf(String::isNotBlank),
-                    detectionState = detectionStates.getOrNull(index).toDetectionState(),
-                )
-            }.ifEmpty { listOf(WebTab(id = 1L)) }
-            .toPersistentList()
-    val currentTabId = get<Long>(CURRENT_TAB_ID_KEY)?.takeIf { id -> tabs.any { it.id == id } } ?: tabs.first().id
-    val recentTitles = get<ArrayList<String>>(RECENT_TITLES_KEY).orEmpty()
-    val recentUrls = get<ArrayList<String>>(RECENT_URLS_KEY).orEmpty()
-    val recentPages =
-        recentUrls
-            .mapIndexed { index, url ->
-                RecentPage(
-                    title = recentTitles.getOrNull(index).orEmpty().ifBlank { url.hostLabel() },
-                    url = url,
-                )
-            }.toPersistentList()
-    return WebUiState(tabs = tabs, currentTabId = currentTabId, recentPages = recentPages)
-}
-
-private fun SavedStateHandle.persist(
-    state: WebUiState,
-    nextTabId: Long,
-) {
-    this[TAB_IDS_KEY] = state.tabs.map(WebTab::id).toLongArray()
-    this[TAB_TITLES_KEY] = ArrayList(state.tabs.map(WebTab::title))
-    this[TAB_URLS_KEY] = ArrayList(state.tabs.map { it.url ?: NULL_URL })
-    this[TAB_DETECTION_STATES_KEY] = ArrayList(state.tabs.map { it.detectionState.persistedValue() })
-    this[CURRENT_TAB_ID_KEY] = state.currentTabId
-    this[RECENT_TITLES_KEY] = ArrayList(state.recentPages.map(RecentPage::title))
-    this[RECENT_URLS_KEY] = ArrayList(state.recentPages.map(RecentPage::url))
-    this[NEXT_TAB_ID_KEY] = nextTabId
-}
-
-private fun WebDetectionState.persistedValue(): String =
-    when (this) {
-        WebDetectionState.Idle, WebDetectionState.Scanning -> DETECTION_IDLE
-        is WebDetectionState.Found -> "$DETECTION_FOUND_PREFIX$count"
-        is WebDetectionState.NotFound -> "$DETECTION_NOT_FOUND_PREFIX${reason.name}"
-    }
-
-private fun String?.toDetectionState(): WebDetectionState =
-    when {
-        this == null || this == DETECTION_IDLE -> {
-            WebDetectionState.Idle
-        }
-
-        startsWith(DETECTION_FOUND_PREFIX) -> {
-            val count = removePrefix(DETECTION_FOUND_PREFIX).toIntOrNull() ?: return WebDetectionState.Idle
-            WebDetectionState.Found(count)
-        }
-
-        startsWith(DETECTION_NOT_FOUND_PREFIX) -> {
-            val reason =
-                runCatching { UnsupportedReason.valueOf(removePrefix(DETECTION_NOT_FOUND_PREFIX)) }
-                    .getOrNull()
-                    ?: return WebDetectionState.Idle
-            WebDetectionState.NotFound(reason)
-        }
-
-        else -> {
-            WebDetectionState.Idle
-        }
-    }
-
-private const val DETECTION_IDLE = "idle"
-private const val DETECTION_FOUND_PREFIX = "found:"
-private const val DETECTION_NOT_FOUND_PREFIX = "not-found:"

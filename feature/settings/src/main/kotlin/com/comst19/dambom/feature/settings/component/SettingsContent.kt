@@ -1,0 +1,194 @@
+package com.comst19.dambom.feature.settings.component
+
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.ContentPaste
+import androidx.compose.material.icons.outlined.Feedback
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Gavel
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Wifi
+import androidx.compose.material3.Switch
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.domain.model.ThemeMode
+import com.comst19.dambom.feature.settings.R
+import com.comst19.dambom.feature.settings.contract.AppLanguage
+
+@Immutable
+internal data class SettingsContentState(
+    val themeMode: ThemeMode,
+    val language: AppLanguage,
+    val clipboardSuggestionEnabled: Boolean,
+    val wifiOnlyDownloads: Boolean,
+    val versionName: String,
+)
+
+@Immutable
+internal data class SettingsActions(
+    val onBack: () -> Unit,
+    val download: DownloadSettingsActions,
+    val general: GeneralSettingsActions,
+    val support: SupportSettingsActions,
+)
+
+@Immutable
+internal data class DownloadSettingsActions(
+    val onWifiOnlyDownloadsChange: (Boolean) -> Unit,
+)
+
+@Immutable
+internal data class GeneralSettingsActions(
+    val onThemeModeChange: (ThemeMode) -> Unit,
+    val onLanguageChange: (AppLanguage) -> Unit,
+    val onClipboardSuggestionChange: (Boolean) -> Unit,
+)
+
+@Immutable
+internal data class SupportSettingsActions(
+    val onHelp: () -> Unit,
+    val onFeedback: () -> Unit,
+    val onLicenses: () -> Unit,
+)
+
+@Composable
+internal fun SettingsContent(
+    state: SettingsContentState,
+    actions: SettingsActions,
+    onThemeClick: () -> Unit,
+    onLanguageClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(bottom = 32.dp),
+    ) {
+        downloadSection(state, actions)
+        item { SettingsDivider() }
+        generalSection(state, actions, onThemeClick, onLanguageClick)
+        item { SettingsDivider() }
+        supportSection(actions)
+        item { SettingsDivider() }
+        informationSection(state, actions)
+    }
+}
+
+private fun LazyListScope.downloadSection(
+    state: SettingsContentState,
+    actions: SettingsActions,
+) {
+    item { SettingsSectionTitle(stringResource(R.string.settings_section_download)) }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.Folder,
+            title = stringResource(R.string.settings_download_location),
+            subtitle = stringResource(R.string.settings_download_location_value),
+        )
+    }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.Wifi,
+            title = stringResource(R.string.settings_wifi_only),
+            subtitle = stringResource(R.string.settings_wifi_only_description),
+            onClick = { actions.download.onWifiOnlyDownloadsChange(!state.wifiOnlyDownloads) },
+            trailing = { Switch(checked = state.wifiOnlyDownloads, onCheckedChange = null) },
+        )
+    }
+}
+
+private fun LazyListScope.generalSection(
+    state: SettingsContentState,
+    actions: SettingsActions,
+    onThemeClick: () -> Unit,
+    onLanguageClick: () -> Unit,
+) {
+    item { SettingsSectionTitle(stringResource(R.string.settings_section_general)) }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.Palette,
+            title = stringResource(R.string.settings_theme),
+            subtitle = stringResource(state.themeMode.labelRes),
+            onClick = onThemeClick,
+        )
+    }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.Language,
+            title = stringResource(R.string.settings_language),
+            subtitle = stringResource(state.language.labelRes),
+            onClick = onLanguageClick,
+        )
+    }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.ContentPaste,
+            title = stringResource(R.string.settings_clipboard_suggestion),
+            subtitle = stringResource(R.string.settings_clipboard_suggestion_description),
+            trailing = {
+                Switch(
+                    checked = state.clipboardSuggestionEnabled,
+                    onCheckedChange = actions.general.onClipboardSuggestionChange,
+                )
+            },
+        )
+    }
+}
+
+private fun LazyListScope.supportSection(actions: SettingsActions) {
+    item { SettingsSectionTitle(stringResource(R.string.settings_section_support)) }
+    item {
+        SettingsRow(
+            icon = Icons.AutoMirrored.Outlined.HelpOutline,
+            title = stringResource(R.string.settings_help),
+            subtitle = stringResource(R.string.settings_help_description),
+            onClick = actions.support.onHelp,
+        )
+    }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.Feedback,
+            title = stringResource(R.string.settings_feedback),
+            subtitle = stringResource(R.string.settings_feedback_description),
+            onClick = actions.support.onFeedback,
+        )
+    }
+}
+
+private fun LazyListScope.informationSection(
+    state: SettingsContentState,
+    actions: SettingsActions,
+) {
+    item { SettingsSectionTitle(stringResource(R.string.settings_section_information)) }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.Info,
+            title = stringResource(R.string.settings_version),
+            subtitle = state.versionName,
+        )
+    }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.Code,
+            title = stringResource(R.string.settings_open_source),
+            subtitle = stringResource(R.string.settings_open_source_description),
+            onClick = actions.support.onLicenses,
+        )
+    }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.Gavel,
+            title = stringResource(R.string.settings_legal),
+            subtitle = stringResource(R.string.settings_legal_pending),
+            enabled = false,
+        )
+    }
+}

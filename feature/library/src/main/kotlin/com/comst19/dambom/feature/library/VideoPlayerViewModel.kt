@@ -25,6 +25,8 @@ internal class VideoPlayerViewModel
         val player: ExoPlayer =
             ExoPlayer
                 .Builder(context)
+                .setSeekBackIncrementMs(SEEK_INCREMENT_MILLIS)
+                .setSeekForwardIncrementMs(SEEK_INCREMENT_MILLIS)
                 .build()
                 .apply {
                     setAudioAttributes(
@@ -105,6 +107,8 @@ internal class VideoPlayerViewModel
             }
         }
     }
+
+private const val SEEK_INCREMENT_MILLIS = 10_000L
 
 internal enum class PlaybackCommand {
     Pause,

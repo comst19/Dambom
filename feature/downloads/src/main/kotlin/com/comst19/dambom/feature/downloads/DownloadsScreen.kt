@@ -23,6 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.AppScreen
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
+import com.comst19.dambom.core.designsystem.previewNoOp
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.NetworkAccessState
@@ -148,14 +149,14 @@ private fun DownloadsScreenPreview() {
                         ),
                 ),
             canDownload = NetworkAccessState(NetworkConnection.UNMETERED).canDownload,
-            onBack = {},
-            onPause = {},
-            onResume = {},
-            onCancel = {},
-            onRetry = {},
-            onPauseAll = {},
-            onResumeAll = {},
-            onViewModeChange = {},
+            onBack = ::previewNoOp,
+            onPause = ::previewNoOp,
+            onResume = ::previewNoOp,
+            onCancel = ::previewNoOp,
+            onRetry = ::previewNoOp,
+            onPauseAll = ::previewNoOp,
+            onResumeAll = ::previewNoOp,
+            onViewModeChange = ::previewNoOp,
         )
     }
 }

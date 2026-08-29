@@ -10,6 +10,7 @@ import com.comst19.dambom.core.common.ui.appScaffoldPadding
 import com.comst19.dambom.core.common.ui.currentAdaptiveLayoutInfo
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
+import com.comst19.dambom.core.designsystem.previewNoOp
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.component.EmptyLibrary
@@ -121,17 +122,17 @@ private fun LibraryScreenPreview() {
                 ),
             fileActions =
                 LibraryFileActions(
-                    onRename = { _, _ -> },
-                    onExport = {},
-                    onShareVideo = {},
-                    onShareLink = {},
-                    onCopyLink = {},
-                    onOpenOriginal = {},
-                    onDelete = {},
+                    onRename = ::previewNoOp,
+                    onExport = ::previewNoOp,
+                    onShareVideo = ::previewNoOp,
+                    onShareLink = ::previewNoOp,
+                    onCopyLink = ::previewNoOp,
+                    onOpenOriginal = ::previewNoOp,
+                    onDelete = ::previewNoOp,
                 ),
-            onQueryChange = {},
-            onViewModeChange = {},
-            onVideoClick = {},
+            onQueryChange = ::previewNoOp,
+            onViewModeChange = ::previewNoOp,
+            onVideoClick = ::previewNoOp,
         )
     }
 }

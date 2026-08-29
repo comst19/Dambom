@@ -27,6 +27,7 @@ import com.comst19.dambom.core.common.ui.appScaffoldPadding
 import com.comst19.dambom.core.common.ui.currentAdaptiveLayoutInfo
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
+import com.comst19.dambom.core.designsystem.previewNoOp
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.feature.home.component.ClipboardConsentDialog
 import com.comst19.dambom.feature.home.component.HomeHeader
@@ -153,17 +154,17 @@ private fun HomeScreenPreview() {
         HomeScreen(
             uiState = HomeUiState(url = "https://example.com/video", isUrlValid = true),
             canUseInternet = true,
-            onUrlChange = {},
-            onPaste = {},
-            onAnalyze = {},
-            onOpenWeb = {},
-            onOpenDownloads = {},
-            onOpenSettings = {},
-            onClipboardConsent = {},
-            onUseClipboardSuggestion = {},
-            onDismissClipboardSuggestion = {},
-            onAnalyzeSharedUrl = {},
-            onDismissSharedUrl = {},
+            onUrlChange = ::previewNoOp,
+            onPaste = ::previewNoOp,
+            onAnalyze = ::previewNoOp,
+            onOpenWeb = ::previewNoOp,
+            onOpenDownloads = ::previewNoOp,
+            onOpenSettings = ::previewNoOp,
+            onClipboardConsent = ::previewNoOp,
+            onUseClipboardSuggestion = ::previewNoOp,
+            onDismissClipboardSuggestion = ::previewNoOp,
+            onAnalyzeSharedUrl = ::previewNoOp,
+            onDismissSharedUrl = ::previewNoOp,
         )
     }
 }

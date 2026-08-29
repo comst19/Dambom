@@ -29,7 +29,7 @@ private fun DambomButtonPreview() {
     PreviewTheme {
         DambomButton(
             text = "Continue",
-            onClick = {},
+            onClick = ::previewNoOp,
         )
     }
 }

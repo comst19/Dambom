@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.AppScreen
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
+import com.comst19.dambom.core.designsystem.previewNoOp
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.model.NetworkConnection
@@ -162,12 +163,12 @@ private fun DetectionScreenPreview() {
                     selectedIds = persistentSetOf("1"),
                 ),
             networkAccess = NetworkAccessState(NetworkConnection.UNMETERED),
-            onBack = {},
-            onRetry = {},
-            onOpenWeb = {},
-            onToggleCandidate = {},
-            onSelectVariant = { _, _ -> },
-            onDownload = {},
+            onBack = ::previewNoOp,
+            onRetry = ::previewNoOp,
+            onOpenWeb = ::previewNoOp,
+            onToggleCandidate = ::previewNoOp,
+            onSelectVariant = ::previewNoOp,
+            onDownload = ::previewNoOp,
         )
     }
 }

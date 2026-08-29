@@ -22,6 +22,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.AppScreen
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
+import com.comst19.dambom.core.designsystem.previewNoOp
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.feature.settings.component.APP_LANGUAGE_ENTRIES
 import com.comst19.dambom.feature.settings.component.DownloadSettingsActions
@@ -152,15 +153,20 @@ private fun SettingsScreenPreview() {
                 ),
             actions =
                 SettingsActions(
-                    onBack = {},
-                    download = DownloadSettingsActions(onWifiOnlyDownloadsChange = {}),
+                    onBack = ::previewNoOp,
+                    download = DownloadSettingsActions(onWifiOnlyDownloadsChange = ::previewNoOp),
                     general =
                         GeneralSettingsActions(
-                            onThemeModeChange = {},
-                            onLanguageChange = {},
-                            onClipboardSuggestionChange = {},
+                            onThemeModeChange = ::previewNoOp,
+                            onLanguageChange = ::previewNoOp,
+                            onClipboardSuggestionChange = ::previewNoOp,
                         ),
-                    support = SupportSettingsActions(onHelp = {}, onFeedback = {}, onLicenses = {}),
+                    support =
+                        SupportSettingsActions(
+                            onHelp = ::previewNoOp,
+                            onFeedback = ::previewNoOp,
+                            onLicenses = ::previewNoOp,
+                        ),
                 ),
         )
     }

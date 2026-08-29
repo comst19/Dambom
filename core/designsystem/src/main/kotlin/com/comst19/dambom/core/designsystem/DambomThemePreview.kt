@@ -52,7 +52,7 @@ private fun DambomThemePreviewContent() {
             Text("Dambom Theme", style = MaterialTheme.typography.headlineSmall)
             Text("Body text", color = colors.onBackground)
             Text("Supporting text", color = colors.onSurfaceVariant)
-            Button(onClick = {}) { Text("Primary action") }
+            Button(onClick = ::previewNoOp) { Text("Primary action") }
             ThemeColorContainer(
                 color = colors.primaryContainer,
                 contentColor = colors.onPrimaryContainer,

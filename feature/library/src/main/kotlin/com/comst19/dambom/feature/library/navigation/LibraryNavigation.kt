@@ -14,6 +14,7 @@ import com.comst19.dambom.feature.library.VideoPlayerRoute
 fun EntryProviderScope<NavKey>.libraryEntries(
     isDetailPaneVisible: () -> Boolean,
     onDetailPaneVisibilityChange: (Boolean) -> Unit,
+    onListPaneWidthChange: (Int) -> Unit,
     isVideoFullscreen: () -> Boolean,
     onVideoFullscreenChange: (Boolean) -> Unit,
     onVideoRotate: () -> Unit,
@@ -27,6 +28,7 @@ fun EntryProviderScope<NavKey>.libraryEntries(
         LibraryRoute(
             isDetailPaneVisible = isDetailPaneVisible(),
             onDetailPaneVisibilityChange = onDetailPaneVisibilityChange,
+            onListPaneWidthChange = onListPaneWidthChange,
         )
     }
     entry<VideoDetailKey>(metadata = ListDetailSceneStrategy.detailPane()) { key ->

@@ -1,9 +1,11 @@
 package com.comst19.dambom.feature.library
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.appScaffoldPadding
@@ -27,32 +29,40 @@ import kotlinx.collections.immutable.persistentListOf
 internal fun LibraryRoute(
     isDetailPaneVisible: Boolean,
     onDetailPaneVisibilityChange: (Boolean) -> Unit,
+    onListPaneWidthChange: (Int) -> Unit,
 ) {
     val viewModel: LibraryViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val fileActions = rememberLibraryFileActions(viewModel)
     val multiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
 
-    LibraryScreen(
-        uiState = uiState,
-        fileActions = fileActions,
-        onQueryChange = viewModel::updateQuery,
-        onViewModeChange = viewModel::setViewMode,
-        onSourceFilterChange = viewModel::setSourceFilter,
-        onStartSelection = viewModel::startSelection,
-        onToggleSelection = viewModel::toggleSelection,
-        onSelectAll = viewModel::selectAllVisible,
-        onClearSelection = viewModel::clearSelection,
-        onDeleteSelected = viewModel::deleteSelected,
-        onVideoClick = { task ->
-            if (multiplePanes && !isDetailPaneVisible) onDetailPaneVisibilityChange(true)
-            viewModel.openVideo(task.id)
-        },
-        showInlineEmptyState = !multiplePanes || !isDetailPaneVisible,
-        showDetailPaneControl = multiplePanes,
-        isDetailPaneVisible = isDetailPaneVisible,
-        onDetailPaneVisibilityChange = onDetailPaneVisibilityChange,
-    )
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .onSizeChanged { size -> onListPaneWidthChange(if (multiplePanes) size.width else 0) },
+    ) {
+        LibraryScreen(
+            uiState = uiState,
+            fileActions = fileActions,
+            onQueryChange = viewModel::updateQuery,
+            onViewModeChange = viewModel::setViewMode,
+            onSourceFilterChange = viewModel::setSourceFilter,
+            onStartSelection = viewModel::startSelection,
+            onToggleSelection = viewModel::toggleSelection,
+            onSelectAll = viewModel::selectAllVisible,
+            onClearSelection = viewModel::clearSelection,
+            onDeleteSelected = viewModel::deleteSelected,
+            onVideoClick = { task ->
+                if (multiplePanes && !isDetailPaneVisible) onDetailPaneVisibilityChange(true)
+                viewModel.openVideo(task.id)
+            },
+            showInlineEmptyState = !multiplePanes || !isDetailPaneVisible,
+            showDetailPaneControl = multiplePanes,
+            isDetailPaneVisible = isDetailPaneVisible,
+            onDetailPaneVisibilityChange = onDetailPaneVisibilityChange,
+        )
+    }
 }
 
 @Composable

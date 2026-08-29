@@ -32,6 +32,17 @@ class AppScaffoldTest {
     }
 
     @Test
+    fun `Fold list detail limits bottom navigation to the list pane`() {
+        val detail = VideoDetailKey("video")
+
+        assertEquals(824, bottomBarWidthPx(detail, true, true, listPaneWidthPx = 824, windowWidthPx = 2_600))
+        assertEquals(2_600, bottomBarWidthPx(detail, true, false, listPaneWidthPx = 824, windowWidthPx = 2_600))
+        assertEquals(2_600, bottomBarWidthPx(detail, false, true, listPaneWidthPx = 824, windowWidthPx = 2_600))
+        assertEquals(2_600, bottomBarWidthPx(HomeKey, true, true, listPaneWidthPx = 824, windowWidthPx = 2_600))
+        assertEquals(2_600, bottomBarWidthPx(detail, true, true, listPaneWidthPx = 0, windowWidthPx = 2_600))
+    }
+
+    @Test
     fun `normal shell keeps chrome padding and root back handling`() {
         assertEquals(
             AppScaffoldPolicy(

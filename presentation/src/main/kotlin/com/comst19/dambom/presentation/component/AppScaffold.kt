@@ -4,15 +4,22 @@ import android.os.SystemClock
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SignalWifiOff
 import androidx.compose.material.icons.outlined.WifiFind
@@ -34,6 +41,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -70,8 +78,10 @@ internal fun AppScaffold(
     snackbarHostState: SnackbarHostState,
     networkAccess: NetworkAccessState,
     isLibraryDetailPaneVisible: Boolean,
+    libraryListPaneWidthPx: Int,
     isVideoFullscreen: Boolean,
 ) {
+    val supportsMultiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
     val defaultChrome = appChrome(state.currentKey)
     val chrome =
         defaultChrome.copy(
@@ -79,7 +89,7 @@ internal fun AppScaffold(
                 shouldShowBottomBar(
                     currentKey = state.currentKey,
                     defaultVisible = defaultChrome.showBottomBar,
-                    supportsMultiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes,
+                    supportsMultiplePanes = supportsMultiplePanes,
                 ),
         )
     val policy = appScaffoldPolicy(chrome, state.isAtRoot, isVideoFullscreen)
@@ -123,27 +133,49 @@ internal fun AppScaffold(
         },
         bottomBar = {
             if (policy.showBottomBar) {
-                NavigationBar {
-                    AppNavigationConfig.topLevelDestinations.forEach { destination ->
-                        val labelRes = destination.bottomBarLabelRes ?: return@forEach
-                        val selectedIcon = destination.selectedIcon ?: return@forEach
-                        val unselectedIcon = destination.unselectedIcon ?: return@forEach
-                        val isSelected = state.currentTopLevel == destination.key
-                        NavigationBarItem(
-                            selected = isSelected,
-                            onClick = {
-                                coroutineScope.launch {
-                                    dispatcher.dispatch(NavigationEvent.NavigateTopLevel(destination.key))
-                                }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = if (isSelected) selectedIcon else unselectedIcon,
-                                    contentDescription = null,
-                                )
-                            },
-                            label = { Text(stringResource(labelRes)) },
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val density = LocalDensity.current
+                    val bottomBarWidthPx =
+                        bottomBarWidthPx(
+                            currentKey = state.currentKey,
+                            supportsMultiplePanes = supportsMultiplePanes,
+                            isLibraryDetailPaneVisible = isLibraryDetailPaneVisible,
+                            listPaneWidthPx = libraryListPaneWidthPx,
+                            windowWidthPx = with(density) { maxWidth.roundToPx() },
                         )
+                    Column(
+                        modifier =
+                            Modifier
+                                .width(with(density) { bottomBarWidthPx.toDp() })
+                                .align(Alignment.CenterStart),
+                    ) {
+                        NavigationBar(
+                            modifier = Modifier.fillMaxWidth().height(APP_NAVIGATION_BAR_HEIGHT),
+                            windowInsets = WindowInsets(0, 0, 0, 0),
+                        ) {
+                            AppNavigationConfig.topLevelDestinations.forEach { destination ->
+                                val labelRes = destination.bottomBarLabelRes ?: return@forEach
+                                val selectedIcon = destination.selectedIcon ?: return@forEach
+                                val unselectedIcon = destination.unselectedIcon ?: return@forEach
+                                val isSelected = state.currentTopLevel == destination.key
+                                NavigationBarItem(
+                                    selected = isSelected,
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            dispatcher.dispatch(NavigationEvent.NavigateTopLevel(destination.key))
+                                        }
+                                    },
+                                    icon = {
+                                        Icon(
+                                            imageVector = if (isSelected) selectedIcon else unselectedIcon,
+                                            contentDescription = null,
+                                        )
+                                    },
+                                    label = { Text(stringResource(labelRes)) },
+                                )
+                            }
+                        }
+                        Spacer(Modifier.fillMaxWidth().windowInsetsBottomHeight(WindowInsets.navigationBars))
                     }
                 }
             }
@@ -178,6 +210,24 @@ internal fun shouldShowBottomBar(
     defaultVisible: Boolean,
     supportsMultiplePanes: Boolean,
 ): Boolean = defaultVisible || (supportsMultiplePanes && currentKey is VideoDetailKey)
+
+internal fun bottomBarWidthPx(
+    currentKey: NavKey,
+    supportsMultiplePanes: Boolean,
+    isLibraryDetailPaneVisible: Boolean,
+    listPaneWidthPx: Int,
+    windowWidthPx: Int,
+): Int =
+    if (
+        supportsMultiplePanes &&
+        isLibraryDetailPaneVisible &&
+        currentKey is VideoDetailKey &&
+        listPaneWidthPx in 1 until windowWidthPx
+    ) {
+        listPaneWidthPx
+    } else {
+        windowWidthPx
+    }
 
 internal fun appScaffoldPolicy(
     chrome: AppChrome,
@@ -251,3 +301,4 @@ internal data class RootBackPressResetKey(
 )
 
 private const val ROOT_BACK_INTERVAL_MILLIS = 2_000L
+private val APP_NAVIGATION_BAR_HEIGHT = 64.dp

@@ -9,7 +9,7 @@ internal enum class VideoSourceKind {
 
 internal data class VideoSourcePresentation(
     val kind: VideoSourceKind,
-    val host: String,
+    val host: String?,
 )
 
 internal fun videoSourcePresentation(sourcePageUrl: String): VideoSourcePresentation {
@@ -22,6 +22,6 @@ internal fun videoSourcePresentation(sourcePageUrl: String): VideoSourcePresenta
     val isX = host == "x.com" || host.endsWith(".x.com") || host == "twitter.com" || host.endsWith(".twitter.com")
     return VideoSourcePresentation(
         kind = if (isX) VideoSourceKind.X else VideoSourceKind.WEBSITE,
-        host = if (isX) "x.com" else host.ifEmpty { "web" },
+        host = host.takeUnless { isX || it.isEmpty() },
     )
 }

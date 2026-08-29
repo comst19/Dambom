@@ -24,7 +24,7 @@ internal data class LibraryVideoItemStyle(
     val sourceBadgeContentColor: Color,
     val border: BorderStroke?,
     val sourceLabel: String,
-    val sourceHost: String,
+    val sourceHost: String?,
     val sourceDescription: String,
 )
 
@@ -80,7 +80,10 @@ internal fun libraryVideoItemStyle(
             if (isXSource) {
                 stringResource(R.string.library_source_x_accessibility)
             } else {
-                stringResource(R.string.library_source_website_accessibility, source.host)
+                stringResource(
+                    R.string.library_source_website_accessibility,
+                    source.host ?: stringResource(R.string.library_source_website_label),
+                )
             },
     )
 }

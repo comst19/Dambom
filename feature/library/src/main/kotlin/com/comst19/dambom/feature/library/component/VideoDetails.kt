@@ -2,14 +2,25 @@ package com.comst19.dambom.feature.library.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
@@ -30,7 +41,10 @@ internal fun VideoDetails(
     task: DownloadTask,
     metadata: LocalVideoMetadata?,
     onOpenOriginal: () -> Unit,
+    onCopyLink: () -> Unit,
+    onShareLink: () -> Unit,
 ) {
+    var informationExpanded by rememberSaveable(task.id) { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
     val unknown = stringResource(R.string.player_info_unknown)
     val downloadedAt =
@@ -52,30 +66,75 @@ internal fun VideoDetails(
     val videoQuality = listOfNotNull(resolution, quality).joinToString(" · ").ifEmpty { unknown }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(18.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer,
-        ) {
-            Column(
-                modifier = Modifier.padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.player_info_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                VideoMetadataItem(stringResource(R.string.player_info_duration), duration)
-                VideoMetadataItem(stringResource(R.string.player_info_size), task.downloadedBytes.formatBytes())
-                VideoMetadataItem(stringResource(R.string.player_info_video_quality), videoQuality)
-                VideoMetadataItem(stringResource(R.string.player_info_downloaded_at), downloadedAt)
-            }
-        }
+        VideoInformationCard(
+            expanded = informationExpanded,
+            information =
+                VideoInformation(
+                    duration = duration,
+                    fileSize = task.downloadedBytes.formatBytes(),
+                    videoQuality = videoQuality,
+                    downloadedAt = downloadedAt,
+                ),
+            onToggle = { informationExpanded = !informationExpanded },
+        )
         VideoSourceCard(
             sourcePageUrl = task.sourcePageUrl,
             onOpenOriginal = onOpenOriginal,
+            onCopyLink = onCopyLink,
+            onShareLink = onShareLink,
         )
+    }
+}
+
+@Immutable
+private data class VideoInformation(
+    val duration: String,
+    val fileSize: String,
+    val videoQuality: String,
+    val downloadedAt: String,
+)
+
+@Composable
+private fun VideoInformationCard(
+    expanded: Boolean,
+    information: VideoInformation,
+    onToggle: () -> Unit,
+) {
+    Surface(
+        onClick = onToggle,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(R.string.player_info_title),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Icon(
+                    imageVector = if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+                    contentDescription =
+                        stringResource(
+                            if (expanded) R.string.player_info_collapse else R.string.player_info_expand,
+                        ),
+                )
+            }
+            if (expanded) {
+                VideoMetadataItem(stringResource(R.string.player_info_duration), information.duration)
+                VideoMetadataItem(stringResource(R.string.player_info_size), information.fileSize)
+                VideoMetadataItem(stringResource(R.string.player_info_video_quality), information.videoQuality)
+                VideoMetadataItem(stringResource(R.string.player_info_downloaded_at), information.downloadedAt)
+            }
+        }
     }
 }
 

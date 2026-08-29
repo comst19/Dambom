@@ -36,6 +36,8 @@ import com.comst19.dambom.feature.library.component.MissingVideo
 import com.comst19.dambom.feature.library.component.VideoActionsButton
 import com.comst19.dambom.feature.library.component.VideoPlayerPanel
 import com.comst19.dambom.feature.library.component.rememberLibraryFileActions
+import com.comst19.dambom.feature.library.file.isLocalVideoAvailable
+import com.comst19.dambom.feature.library.file.rememberLocalVideoAvailable
 import com.comst19.dambom.feature.library.pip.PipPlatformEffect
 
 @Composable
@@ -202,6 +204,8 @@ internal fun VideoPlayerScreen(
                     task = task,
                     player = player,
                     onOpenOriginal = { fileActions.onOpenOriginal(task) },
+                    onCopyLink = { fileActions.onCopyLink(task) },
+                    onShareLink = { fileActions.onShareLink(task) },
                     modifier =
                         Modifier
                             .fillMaxSize()

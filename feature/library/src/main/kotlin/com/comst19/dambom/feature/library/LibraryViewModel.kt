@@ -169,6 +169,10 @@ internal class LibraryViewModel
             viewModelScope.launch { showMessage(R.string.library_share_failure) }
         }
 
+        fun notifyShareLinkFailure() {
+            viewModelScope.launch { showMessage(R.string.library_share_link_failure) }
+        }
+
         fun notifyLinkCopied() {
             viewModelScope.launch { showMessage(R.string.library_copy_link_success) }
         }

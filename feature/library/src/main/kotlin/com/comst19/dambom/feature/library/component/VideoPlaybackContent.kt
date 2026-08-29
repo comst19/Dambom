@@ -60,6 +60,8 @@ internal fun VideoPlayerPanel(
     task: DownloadTask,
     player: Player,
     onOpenOriginal: () -> Unit,
+    onCopyLink: () -> Unit,
+    onShareLink: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val playPauseState = rememberPlayPauseButtonState(player)
@@ -123,7 +125,13 @@ internal fun VideoPlayerPanel(
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-        VideoDetails(task = task, metadata = metadata, onOpenOriginal = onOpenOriginal)
+        VideoDetails(
+            task = task,
+            metadata = metadata,
+            onOpenOriginal = onOpenOriginal,
+            onCopyLink = onCopyLink,
+            onShareLink = onShareLink,
+        )
     }
 }
 

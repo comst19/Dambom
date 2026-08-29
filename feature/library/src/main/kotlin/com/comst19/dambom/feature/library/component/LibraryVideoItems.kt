@@ -144,7 +144,7 @@ private fun VideoItemInfo(
     sourceBadgeContainerColor: Color,
     sourceBadgeContentColor: Color,
     sourceLabel: String,
-    sourceHost: String,
+    sourceHost: String?,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
@@ -168,14 +168,16 @@ private fun VideoItemInfo(
                         fontWeight = FontWeight.Bold,
                     )
                 }
-                Text(
-                    text = sourceHost,
-                    color = metadataColor,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                sourceHost?.let { host ->
+                    Text(
+                        text = host,
+                        color = metadataColor,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             Text(
                 text = task.title,

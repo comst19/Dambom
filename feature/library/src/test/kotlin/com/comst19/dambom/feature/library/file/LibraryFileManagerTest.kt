@@ -21,9 +21,24 @@ class LibraryFileManagerTest {
 
         assertNull(manager.createShareIntent(missingFileTask()))
     }
+
+    @Test
+    fun `file outside configured provider path returns no share intent`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val manager = LibraryFileManager(context, Dispatchers.IO)
+        val unsupportedFile = context.cacheDir.resolve("outside-provider.mp4").apply { writeBytes(byteArrayOf(1)) }
+
+        try {
+            assertNull(manager.createShareIntent(taskWithPath(unsupportedFile.path)))
+        } finally {
+            unsupportedFile.delete()
+        }
+    }
 }
 
-private fun missingFileTask() =
+private fun missingFileTask() = taskWithPath("/does/not/exist/missing.mp4")
+
+private fun taskWithPath(localFilePath: String) =
     DownloadTask(
         id = "missing",
         url = "https://example.com/video.mp4",
@@ -36,7 +51,7 @@ private fun missingFileTask() =
         status = DownloadStatus.COMPLETED,
         failureReason = null,
         localFileName = "missing.mp4",
-        localFilePath = "/does/not/exist/missing.mp4",
+        localFilePath = localFilePath,
         createdAtMillis = 1L,
         updatedAtMillis = 1L,
     )

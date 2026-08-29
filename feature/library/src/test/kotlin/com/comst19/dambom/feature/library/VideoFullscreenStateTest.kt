@@ -15,6 +15,7 @@ import com.comst19.dambom.feature.library.component.FullscreenContentMode
 import com.comst19.dambom.feature.library.component.LibraryFileActions
 import com.comst19.dambom.feature.library.component.fullscreenContentModeFor
 import com.comst19.dambom.feature.library.component.shouldAutoHideFullscreenControls
+import com.comst19.dambom.feature.library.file.isLocalVideoAvailable
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -208,7 +209,8 @@ class VideoFullscreenStateTest {
         LibraryFileActions(
             onRename = { _, _ -> },
             onExport = {},
-            onShare = {},
+            onShareVideo = {},
+            onShareLink = {},
             onCopyLink = {},
             onOpenOriginal = {},
             onDelete = {},

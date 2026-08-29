@@ -123,7 +123,8 @@ private fun LibraryScreenPreview() {
                 LibraryFileActions(
                     onRename = { _, _ -> },
                     onExport = {},
-                    onShare = {},
+                    onShareVideo = {},
+                    onShareLink = {},
                     onCopyLink = {},
                     onOpenOriginal = {},
                     onDelete = {},

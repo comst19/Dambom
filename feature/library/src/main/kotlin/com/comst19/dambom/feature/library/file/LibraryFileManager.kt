@@ -32,26 +32,31 @@ internal class LibraryFileManager
             Unit
         }
 
-        fun createShareIntent(task: DownloadTask): Intent? {
-            val source = task.localFileOrNull() ?: return null
-            val uri =
+        fun createShareIntent(task: DownloadTask): Intent? =
+            task.localFileOrNull()?.shareUriOrNull()?.let { uri ->
+                val sendIntent =
+                    Intent(Intent.ACTION_SEND)
+                        .setType(task.mimeType ?: "video/*")
+                        .putExtra(Intent.EXTRA_STREAM, uri)
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        .apply {
+                            clipData = ClipData.newUri(context.contentResolver, task.title, uri)
+                        }
+                Intent
+                    .createChooser(sendIntent, context.getString(R.string.library_share_chooser))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+
+        private fun File.shareUriOrNull(): Uri? =
+            try {
                 FileProvider.getUriForFile(
                     context,
                     "${context.packageName}.fileprovider",
-                    source,
+                    this,
                 )
-            val sendIntent =
-                Intent(Intent.ACTION_SEND)
-                    .setType(task.mimeType ?: "video/*")
-                    .putExtra(Intent.EXTRA_STREAM, uri)
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    .apply {
-                        clipData = ClipData.newUri(context.contentResolver, task.title, uri)
-                    }
-            return Intent
-                .createChooser(sendIntent, context.getString(R.string.library_share_chooser))
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+            } catch (_: IllegalArgumentException) {
+                null
+            }
     }
 
 internal fun DownloadTask.suggestedFileName(): String {

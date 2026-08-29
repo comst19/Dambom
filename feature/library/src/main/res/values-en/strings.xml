@@ -30,9 +30,11 @@
     <string name="library_source_website_label">Web video</string>
     <string name="library_rename">Rename</string>
     <string name="library_export">Save to device</string>
-    <string name="library_share">Share</string>
-    <string name="library_copy_link">Copy link</string>
-    <string name="library_open_original">Open original</string>
+    <string name="library_share_video">Share video file</string>
+    <string name="library_share_link">Share original link</string>
+    <string name="library_share_link_short">Share link</string>
+    <string name="library_copy_link">Copy original link</string>
+    <string name="library_copy_link_short">Copy link</string>
     <string name="library_delete">Remove from library</string>
     <string name="library_rename_title">Rename video</string>
     <string name="library_video_name">Video name</string>
@@ -51,9 +53,11 @@
     <string name="library_export_success">Video saved to your device.</string>
     <string name="library_export_failure">Couldn’t save the video to your device.</string>
     <string name="library_share_failure">No app is available to share this video.</string>
+    <string name="library_share_link_failure">No app is available to share this link.</string>
     <string name="library_copy_link_success">Original link copied.</string>
     <string name="library_open_original_failure">Couldn’t open the original page.</string>
     <string name="library_share_chooser">Share video</string>
+    <string name="library_share_link_chooser">Share original link</string>
     <string name="player_title">Video player</string>
     <string name="player_back">Back to Library</string>
     <string name="player_fullscreen">Enter full screen</string>
@@ -71,6 +75,8 @@
     <string name="player_pause">Pause</string>
     <string name="player_forward">Forward 10 seconds</string>
     <string name="player_info_title">Video information</string>
+    <string name="player_info_expand">Expand video information</string>
+    <string name="player_info_collapse">Collapse video information</string>
     <string name="player_info_duration">Duration</string>
     <string name="player_info_size">File size</string>
     <string name="player_info_downloaded_at">Downloaded</string>

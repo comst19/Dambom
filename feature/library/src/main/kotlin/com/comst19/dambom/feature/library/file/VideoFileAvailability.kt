@@ -1,4 +1,4 @@
-package com.comst19.dambom.feature.library
+package com.comst19.dambom.feature.library.file
 
 import android.os.FileObserver
 import android.os.Handler
@@ -19,7 +19,10 @@ internal fun isLocalVideoAvailable(task: DownloadTask?): Boolean =
 
 @Composable
 internal fun rememberLocalVideoAvailable(task: DownloadTask?): MutableState<Boolean> {
-    val availability = remember(task?.id, task?.status, task?.localFilePath) { mutableStateOf(isLocalVideoAvailable(task)) }
+    val availability =
+        remember(task?.id, task?.status, task?.localFilePath) {
+            mutableStateOf(isLocalVideoAvailable(task))
+        }
     val latestTask by rememberUpdatedState(task)
     DisposableEffect(task?.id, task?.status, task?.localFilePath) {
         val file = task?.localFilePath?.let(::File)

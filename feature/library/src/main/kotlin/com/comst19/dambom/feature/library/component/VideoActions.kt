@@ -1,8 +1,6 @@
 package com.comst19.dambom.feature.library.component
 
 import android.content.ActivityNotFoundException
-import android.content.ClipData
-import android.content.ClipboardManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.offset
@@ -35,14 +33,19 @@ import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.LibraryViewModel
 import com.comst19.dambom.feature.library.R
+import com.comst19.dambom.feature.library.VideoSourceKind
+import com.comst19.dambom.feature.library.external.copyOriginalLink
+import com.comst19.dambom.feature.library.external.openOriginalLink
+import com.comst19.dambom.feature.library.external.shareOriginalLink
 import com.comst19.dambom.feature.library.file.suggestedFileName
-import com.comst19.dambom.feature.library.openOriginalLink
+import com.comst19.dambom.feature.library.videoSourcePresentation
 
 @Immutable
 internal data class LibraryFileActions(
     val onRename: (DownloadTask, String) -> Unit,
     val onExport: (DownloadTask) -> Unit,
-    val onShare: (DownloadTask) -> Unit,
+    val onShareVideo: (DownloadTask) -> Unit,
+    val onShareLink: (DownloadTask) -> Unit,
     val onCopyLink: (DownloadTask) -> Unit,
     val onOpenOriginal: (DownloadTask) -> Unit,
     val onDelete: (DownloadTask) -> Unit,
@@ -69,7 +72,7 @@ internal fun rememberLibraryFileActions(
                 pendingExport = task
                 exportLauncher.launch(task.suggestedFileName())
             },
-            onShare = { task ->
+            onShareVideo = { task ->
                 val intent = viewModel.createShareIntent(task)
                 if (intent == null) {
                     viewModel.notifyShareFailure()
@@ -83,10 +86,14 @@ internal fun rememberLibraryFileActions(
                     viewModel.notifyShareFailure()
                 }
             },
+            onShareLink = { task ->
+                val chooserTitle = context.getString(R.string.library_share_link_chooser)
+                if (!shareOriginalLink(context, task.sourcePageUrl, chooserTitle)) {
+                    viewModel.notifyShareLinkFailure()
+                }
+            },
             onCopyLink = { task ->
-                context
-                    .getSystemService(ClipboardManager::class.java)
-                    .setPrimaryClip(ClipData.newPlainText("URL", task.sourcePageUrl))
+                copyOriginalLink(context, task.sourcePageUrl)
                 viewModel.notifyLinkCopied()
             },
             onOpenOriginal = { task ->
@@ -107,6 +114,7 @@ internal fun VideoActionsButton(
     var menuExpanded by remember { mutableStateOf(false) }
     var renameOpen by remember { mutableStateOf(false) }
     var deleteOpen by remember { mutableStateOf(false) }
+    val sourceKind = videoSourcePresentation(task.sourcePageUrl).kind
 
     IconButton(
         onClick = { menuExpanded = true },
@@ -130,11 +138,19 @@ internal fun VideoActionsButton(
                 },
             )
             ActionMenuItem(
-                label = stringResource(R.string.library_share),
+                label = stringResource(R.string.library_share_video),
                 icon = { Icon(Icons.Outlined.Share, contentDescription = null) },
                 onClick = {
                     menuExpanded = false
-                    actions.onShare(task)
+                    actions.onShareVideo(task)
+                },
+            )
+            ActionMenuItem(
+                label = stringResource(R.string.library_share_link),
+                icon = { Icon(Icons.Outlined.Share, contentDescription = null) },
+                onClick = {
+                    menuExpanded = false
+                    actions.onShareLink(task)
                 },
             )
             ActionMenuItem(
@@ -146,7 +162,14 @@ internal fun VideoActionsButton(
                 },
             )
             ActionMenuItem(
-                label = stringResource(R.string.library_open_original),
+                label =
+                    stringResource(
+                        if (sourceKind == VideoSourceKind.X) {
+                            R.string.player_open_in_x
+                        } else {
+                            R.string.player_open_website
+                        },
+                    ),
                 icon = { Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null) },
                 onClick = {
                     menuExpanded = false

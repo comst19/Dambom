@@ -9,8 +9,10 @@ import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
+import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.repository.DownloadRepository
+import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
@@ -33,6 +35,7 @@ internal class LibraryViewModel
     @Inject
     constructor(
         private val repository: DownloadRepository,
+        settingsRepository: SettingsRepository,
         private val navigation: NavigationDispatcher,
         private val savedStateHandle: SavedStateHandle,
         private val fileManager: LibraryFileManager,
@@ -50,6 +53,13 @@ internal class LibraryViewModel
                     sourceFilter = LibrarySourceFilter.entries.firstOrNull { it.name == sourceFilter } ?: LibrarySourceFilter.ALL,
                 )
             }
+
+        val settings: StateFlow<AppSettings> =
+            settingsRepository.settings.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+                initialValue = AppSettings(),
+            )
 
         val uiState: StateFlow<LibraryUiState> =
             combine(
@@ -159,6 +169,14 @@ internal class LibraryViewModel
         ) {
             viewModelScope.launch {
                 suspendRunCatching { fileManager.export(task, destination) }
+                    .notifyResult(R.string.library_export_success, R.string.library_export_failure)
+            }
+        }
+
+        fun exportToConfiguredLocation(task: DownloadTask) {
+            val treeUri = settings.value.downloadTreeUri?.let(Uri::parse)
+            viewModelScope.launch {
+                suspendRunCatching { fileManager.exportToConfiguredLocation(task, treeUri) }
                     .notifyResult(R.string.library_export_success, R.string.library_export_failure)
             }
         }

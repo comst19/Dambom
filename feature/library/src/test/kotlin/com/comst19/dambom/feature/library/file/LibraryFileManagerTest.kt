@@ -1,10 +1,12 @@
 package com.comst19.dambom.feature.library.file
 
 import android.content.Context
+import android.provider.MediaStore
 import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import kotlinx.coroutines.Dispatchers
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,6 +16,11 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class LibraryFileManagerTest {
+    @Test
+    fun `default export uses the downloads collection`() {
+        assertEquals(MediaStore.Downloads.EXTERNAL_CONTENT_URI, defaultDownloadCollectionUri())
+    }
+
     @Test
     fun `missing local file returns no share intent instead of throwing`() {
         val context = ApplicationProvider.getApplicationContext<Context>()

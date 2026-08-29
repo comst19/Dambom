@@ -92,6 +92,11 @@ private object EnabledClipboardSettingsRepository : SettingsRepository {
     ) = Unit
 
     override suspend fun setWifiOnlyDownloads(enabled: Boolean) = Unit
+
+    override suspend fun setDownloadLocation(
+        enabled: Boolean,
+        treeUri: String?,
+    ) = Unit
 }
 
 private object EmptyDownloadRepository : DownloadRepository {

@@ -1,6 +1,9 @@
 package com.comst19.dambom.feature.library.component
 
+import android.Manifest
 import android.content.ActivityNotFoundException
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.offset
@@ -30,6 +33,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.LibraryViewModel
 import com.comst19.dambom.feature.library.R
@@ -57,6 +62,8 @@ internal fun rememberLibraryFileActions(
     onDelete: ((DownloadTask) -> Unit)? = null,
 ): LibraryFileActions {
     val context = LocalContext.current
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val currentSettings = rememberUpdatedState(settings)
     var pendingExport by remember { mutableStateOf<DownloadTask?>(null) }
     val exportLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("video/*")) { destination ->
@@ -64,13 +71,43 @@ internal fun rememberLibraryFileActions(
             pendingExport = null
             if (destination != null && task != null) viewModel.export(task, destination)
         }
+    var pendingDefaultExport by remember { mutableStateOf<DownloadTask?>(null) }
+    val legacyStoragePermissionLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            val task = pendingDefaultExport
+            pendingDefaultExport = null
+            if (task == null) return@rememberLauncherForActivityResult
+            if (granted) {
+                viewModel.exportToConfiguredLocation(task)
+            } else {
+                pendingExport = task
+                exportLauncher.launch(task.suggestedFileName())
+            }
+        }
     val currentOnDelete = rememberUpdatedState(onDelete)
-    return remember(viewModel, context, exportLauncher) {
+    return remember(viewModel, context, exportLauncher, legacyStoragePermissionLauncher) {
         LibraryFileActions(
             onRename = viewModel::rename,
             onExport = { task ->
-                pendingExport = task
-                exportLauncher.launch(task.suggestedFileName())
+                val downloadSettings = currentSettings.value
+                when {
+                    !downloadSettings.useConfiguredDownloadLocation -> {
+                        pendingExport = task
+                        exportLauncher.launch(task.suggestedFileName())
+                    }
+
+                    Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
+                        downloadSettings.downloadTreeUri == null &&
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                        PackageManager.PERMISSION_GRANTED -> {
+                        pendingDefaultExport = task
+                        legacyStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    }
+
+                    else -> {
+                        viewModel.exportToConfiguredLocation(task)
+                    }
+                }
             },
             onShareVideo = { task ->
                 val intent = viewModel.createShareIntent(task)

@@ -35,6 +35,8 @@ class PreferencesSettingsDataSource
                     clipboardPromptShown = values[CLIPBOARD_PROMPT_SHOWN] ?: false,
                     clipboardSuggestionEnabled = values[CLIPBOARD_SUGGESTION_ENABLED] ?: false,
                     wifiOnlyDownloads = values[WIFI_ONLY_DOWNLOADS] ?: false,
+                    useConfiguredDownloadLocation = values[USE_CONFIGURED_DOWNLOAD_LOCATION] ?: true,
+                    downloadTreeUri = values[DOWNLOAD_TREE_URI],
                 )
             }
 
@@ -56,11 +58,27 @@ class PreferencesSettingsDataSource
             dataStore.edit { preferences -> preferences[WIFI_ONLY_DOWNLOADS] = enabled }
         }
 
+        override suspend fun setDownloadLocation(
+            enabled: Boolean,
+            treeUri: String?,
+        ) {
+            dataStore.edit { preferences ->
+                preferences[USE_CONFIGURED_DOWNLOAD_LOCATION] = enabled
+                if (treeUri == null) {
+                    preferences.remove(DOWNLOAD_TREE_URI)
+                } else {
+                    preferences[DOWNLOAD_TREE_URI] = treeUri
+                }
+            }
+        }
+
         private companion object {
             val THEME_MODE = stringPreferencesKey("theme_mode")
             val CLIPBOARD_PROMPT_SHOWN = booleanPreferencesKey("clipboard_prompt_shown")
             val CLIPBOARD_SUGGESTION_ENABLED = booleanPreferencesKey("clipboard_suggestion_enabled")
             val WIFI_ONLY_DOWNLOADS = booleanPreferencesKey("wifi_only_downloads")
+            val USE_CONFIGURED_DOWNLOAD_LOCATION = booleanPreferencesKey("use_configured_download_location")
+            val DOWNLOAD_TREE_URI = stringPreferencesKey("download_tree_uri")
             const val SYSTEM_THEME_MODE = "SYSTEM"
         }
     }

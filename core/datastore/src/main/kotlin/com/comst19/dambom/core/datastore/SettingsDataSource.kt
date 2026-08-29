@@ -13,6 +13,11 @@ interface SettingsDataSource {
     )
 
     suspend fun setWifiOnlyDownloads(enabled: Boolean)
+
+    suspend fun setDownloadLocation(
+        enabled: Boolean,
+        treeUri: String?,
+    )
 }
 
 data class StoredSettings(
@@ -20,4 +25,6 @@ data class StoredSettings(
     val clipboardPromptShown: Boolean = false,
     val clipboardSuggestionEnabled: Boolean = false,
     val wifiOnlyDownloads: Boolean = false,
+    val useConfiguredDownloadLocation: Boolean = true,
+    val downloadTreeUri: String? = null,
 )

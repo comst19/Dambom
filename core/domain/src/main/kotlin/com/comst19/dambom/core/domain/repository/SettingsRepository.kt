@@ -15,4 +15,9 @@ interface SettingsRepository {
     )
 
     suspend fun setWifiOnlyDownloads(enabled: Boolean)
+
+    suspend fun setDownloadLocation(
+        enabled: Boolean,
+        treeUri: String?,
+    )
 }

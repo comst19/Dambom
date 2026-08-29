@@ -20,6 +20,8 @@ class DefaultSettingsRepository
                     clipboardPromptShown = settings.clipboardPromptShown,
                     clipboardSuggestionEnabled = settings.clipboardSuggestionEnabled,
                     wifiOnlyDownloads = settings.wifiOnlyDownloads,
+                    useConfiguredDownloadLocation = settings.useConfiguredDownloadLocation,
+                    downloadTreeUri = settings.downloadTreeUri,
                 )
             }
 
@@ -31,4 +33,9 @@ class DefaultSettingsRepository
         ) = dataSource.setClipboardSuggestion(promptShown, enabled)
 
         override suspend fun setWifiOnlyDownloads(enabled: Boolean) = dataSource.setWifiOnlyDownloads(enabled)
+
+        override suspend fun setDownloadLocation(
+            enabled: Boolean,
+            treeUri: String?,
+        ) = dataSource.setDownloadLocation(enabled, treeUri)
     }

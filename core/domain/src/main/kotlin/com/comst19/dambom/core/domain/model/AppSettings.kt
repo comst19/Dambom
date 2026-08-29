@@ -5,6 +5,8 @@ data class AppSettings(
     val clipboardPromptShown: Boolean = false,
     val clipboardSuggestionEnabled: Boolean = false,
     val wifiOnlyDownloads: Boolean = false,
+    val useConfiguredDownloadLocation: Boolean = true,
+    val downloadTreeUri: String? = null,
 )
 
 enum class ThemeMode {

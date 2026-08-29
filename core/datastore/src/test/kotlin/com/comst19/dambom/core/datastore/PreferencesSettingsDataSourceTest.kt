@@ -61,6 +61,22 @@ class PreferencesSettingsDataSourceTest {
                 )
                 cancelAndIgnoreRemainingEvents()
             }
+            source.settings.test {
+                awaitItem()
+                source.setDownloadLocation(enabled = false, treeUri = "content://downloads/tree/dambom")
+                assertEquals(
+                    StoredSettings(
+                        themeMode = "DARK",
+                        clipboardPromptShown = true,
+                        clipboardSuggestionEnabled = true,
+                        wifiOnlyDownloads = true,
+                        useConfiguredDownloadLocation = false,
+                        downloadTreeUri = "content://downloads/tree/dambom",
+                    ),
+                    awaitItem(),
+                )
+                cancelAndIgnoreRemainingEvents()
+            }
             scope.cancel()
         }
 

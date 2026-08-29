@@ -33,6 +33,12 @@ class DefaultSettingsRepositoryTest {
                 repository.setWifiOnlyDownloads(true)
 
                 assertEquals(true, awaitItem().wifiOnlyDownloads)
+
+                repository.setDownloadLocation(enabled = false, treeUri = "content://downloads/tree/dambom")
+
+                val downloadLocation = awaitItem()
+                assertEquals(false, downloadLocation.useConfiguredDownloadLocation)
+                assertEquals("content://downloads/tree/dambom", downloadLocation.downloadTreeUri)
                 cancelAndIgnoreRemainingEvents()
             }
         }
@@ -60,5 +66,16 @@ private class FakeSettingsDataSource : SettingsDataSource {
 
     override suspend fun setWifiOnlyDownloads(enabled: Boolean) {
         settingsState.value = settingsState.value.copy(wifiOnlyDownloads = enabled)
+    }
+
+    override suspend fun setDownloadLocation(
+        enabled: Boolean,
+        treeUri: String?,
+    ) {
+        settingsState.value =
+            settingsState.value.copy(
+                useConfiguredDownloadLocation = enabled,
+                downloadTreeUri = treeUri,
+            )
     }
 }

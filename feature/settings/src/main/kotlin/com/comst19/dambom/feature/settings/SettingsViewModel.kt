@@ -1,10 +1,15 @@
 package com.comst19.dambom.feature.settings
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.comst19.dambom.core.common.ui.AppEvent
+import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.domain.repository.DownloadRepository
@@ -29,7 +34,8 @@ internal class SettingsViewModel
         private val repository: SettingsRepository,
         private val downloadRepository: DownloadRepository,
         private val navigation: NavigationDispatcher,
-        @ApplicationContext context: Context,
+        private val appEventBus: AppEventBus,
+        @ApplicationContext private val context: Context,
     ) : ViewModel() {
         val settings: StateFlow<AppSettings> =
             repository.settings.stateIn(
@@ -64,6 +70,28 @@ internal class SettingsViewModel
             viewModelScope.launch {
                 repository.setWifiOnlyDownloads(enabled)
                 downloadRepository.refreshNetworkPolicy()
+            }
+        }
+
+        fun setUseConfiguredDownloadLocation(enabled: Boolean) {
+            viewModelScope.launch {
+                repository.setDownloadLocation(enabled, settings.value.downloadTreeUri)
+            }
+        }
+
+        fun setDownloadDirectory(uri: Uri) {
+            viewModelScope.launch {
+                try {
+                    context.contentResolver.takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                    )
+                    repository.setDownloadLocation(enabled = true, treeUri = uri.toString())
+                } catch (_: SecurityException) {
+                    appEventBus.send(
+                        AppEvent.ShowSnackbar(UiText.Resource(R.string.settings_download_location_failure)),
+                    )
+                }
             }
         }
 

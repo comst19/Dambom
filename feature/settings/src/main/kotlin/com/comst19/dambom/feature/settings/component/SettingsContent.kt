@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.ContentPaste
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
@@ -30,6 +31,8 @@ internal data class SettingsContentState(
     val language: AppLanguage,
     val clipboardSuggestionEnabled: Boolean,
     val wifiOnlyDownloads: Boolean,
+    val useConfiguredDownloadLocation: Boolean,
+    val downloadLocation: String,
     val versionName: String,
 )
 
@@ -43,6 +46,8 @@ internal data class SettingsActions(
 
 @Immutable
 internal data class DownloadSettingsActions(
+    val onUseConfiguredDownloadLocationChange: (Boolean) -> Unit,
+    val onDownloadLocationClick: () -> Unit,
     val onWifiOnlyDownloadsChange: (Boolean) -> Unit,
 )
 
@@ -90,8 +95,33 @@ private fun LazyListScope.downloadSection(
     item {
         SettingsRow(
             icon = Icons.Outlined.Folder,
+            title = stringResource(R.string.settings_use_download_location),
+            subtitle =
+                stringResource(
+                    if (state.useConfiguredDownloadLocation) {
+                        R.string.settings_use_download_location_enabled_description
+                    } else {
+                        R.string.settings_use_download_location_disabled_description
+                    },
+                ),
+            onClick = {
+                actions.download.onUseConfiguredDownloadLocationChange(!state.useConfiguredDownloadLocation)
+            },
+            trailing = {
+                Switch(
+                    checked = state.useConfiguredDownloadLocation,
+                    onCheckedChange = actions.download.onUseConfiguredDownloadLocationChange,
+                )
+            },
+        )
+    }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.FolderOpen,
             title = stringResource(R.string.settings_download_location),
-            subtitle = stringResource(R.string.settings_download_location_value),
+            subtitle = state.downloadLocation,
+            enabled = state.useConfiguredDownloadLocation,
+            onClick = actions.download.onDownloadLocationClick,
         )
     }
     item {

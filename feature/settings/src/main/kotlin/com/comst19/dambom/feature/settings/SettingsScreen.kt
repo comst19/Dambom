@@ -1,5 +1,9 @@
 package com.comst19.dambom.feature.settings
 
+import android.net.Uri
+import android.provider.DocumentsContract
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -47,6 +51,11 @@ internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
     val feedbackBody = stringResource(R.string.settings_feedback_body, viewModel.versionName)
     val feedbackFailure = stringResource(R.string.settings_external_action_failure)
     val licensesTitle = stringResource(R.string.settings_open_source)
+    val defaultDownloadLocation = stringResource(R.string.settings_download_location_value)
+    val downloadDirectoryLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            uri?.let(viewModel::setDownloadDirectory)
+        }
 
     SettingsScreen(
         state =
@@ -55,12 +64,21 @@ internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
                 language = language,
                 clipboardSuggestionEnabled = settings.clipboardSuggestionEnabled,
                 wifiOnlyDownloads = settings.wifiOnlyDownloads,
+                useConfiguredDownloadLocation = settings.useConfiguredDownloadLocation,
+                downloadLocation = downloadLocationLabel(settings.downloadTreeUri, defaultDownloadLocation),
                 versionName = viewModel.versionName,
             ),
         actions =
             SettingsActions(
                 onBack = viewModel::goBack,
-                download = DownloadSettingsActions(viewModel::setWifiOnlyDownloads),
+                download =
+                    DownloadSettingsActions(
+                        onUseConfiguredDownloadLocationChange = viewModel::setUseConfiguredDownloadLocation,
+                        onDownloadLocationClick = {
+                            downloadDirectoryLauncher.launch(settings.downloadTreeUri?.let(Uri::parse))
+                        },
+                        onWifiOnlyDownloadsChange = viewModel::setWifiOnlyDownloads,
+                    ),
                 general =
                     GeneralSettingsActions(
                         onThemeModeChange = viewModel::setThemeMode,
@@ -149,12 +167,19 @@ private fun SettingsScreenPreview() {
                     language = AppLanguage.SYSTEM,
                     clipboardSuggestionEnabled = true,
                     wifiOnlyDownloads = false,
+                    useConfiguredDownloadLocation = true,
+                    downloadLocation = "Download/Dambom",
                     versionName = "1.0",
                 ),
             actions =
                 SettingsActions(
                     onBack = ::previewNoOp,
-                    download = DownloadSettingsActions(onWifiOnlyDownloadsChange = ::previewNoOp),
+                    download =
+                        DownloadSettingsActions(
+                            onUseConfiguredDownloadLocationChange = ::previewNoOp,
+                            onDownloadLocationClick = ::previewNoOp,
+                            onWifiOnlyDownloadsChange = ::previewNoOp,
+                        ),
                     general =
                         GeneralSettingsActions(
                             onThemeModeChange = ::previewNoOp,
@@ -170,4 +195,16 @@ private fun SettingsScreenPreview() {
                 ),
         )
     }
+}
+
+internal fun downloadLocationLabel(
+    treeUri: String?,
+    defaultLabel: String,
+): String {
+    if (treeUri == null) return defaultLabel
+    val documentId =
+        runCatching { DocumentsContract.getTreeDocumentId(Uri.parse(treeUri)) }
+            .getOrNull()
+            ?: return defaultLabel
+    return Uri.decode(documentId.substringAfter(':', documentId)).ifBlank { defaultLabel }
 }

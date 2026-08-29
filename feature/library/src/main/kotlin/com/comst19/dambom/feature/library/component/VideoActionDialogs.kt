@@ -69,3 +69,26 @@ internal fun DeleteVideoDialog(
         },
     )
 }
+
+@Composable
+internal fun DeleteSelectedVideosDialog(
+    count: Int,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.library_delete_selected_title)) },
+        text = { Text(stringResource(R.string.library_delete_selected_description, count)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(stringResource(R.string.library_delete_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.library_cancel))
+            }
+        },
+    )
+}

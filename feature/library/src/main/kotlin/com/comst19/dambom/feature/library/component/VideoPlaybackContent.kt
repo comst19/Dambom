@@ -59,6 +59,7 @@ internal fun MissingVideo(modifier: Modifier = Modifier) {
 internal fun VideoPlayerPanel(
     task: DownloadTask,
     player: Player,
+    onOpenOriginal: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val playPauseState = rememberPlayPauseButtonState(player)
@@ -122,7 +123,7 @@ internal fun VideoPlayerPanel(
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-        VideoDetails(task = task, metadata = metadata)
+        VideoDetails(task = task, metadata = metadata, onOpenOriginal = onOpenOriginal)
     }
 }
 

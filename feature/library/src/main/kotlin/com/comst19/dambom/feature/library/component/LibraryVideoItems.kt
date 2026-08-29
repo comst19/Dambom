@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,6 +28,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.domain.model.DownloadTask
@@ -39,15 +43,26 @@ import com.comst19.dambom.feature.library.toTimeText
 internal fun VideoCard(
     task: DownloadTask,
     selected: Boolean,
+    selectionSelected: Boolean,
+    isSelecting: Boolean,
     fileActions: LibraryFileActions,
     onClick: () -> Unit,
+    onToggleSelection: () -> Unit,
 ) {
     val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
+    val style = libraryVideoItemStyle(task.sourcePageUrl, selected || selectionSelected)
     Surface(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .semantics {
+                    stateDescription = style.sourceDescription
+                },
+        shape = style.shape,
+        color = style.containerColor,
+        contentColor = style.contentColor,
+        border = style.border,
     ) {
         Column {
             LibraryVideoThumbnail(
@@ -57,6 +72,14 @@ internal fun VideoCard(
             VideoItemInfo(
                 task = task,
                 fileActions = fileActions,
+                selectionSelected = selectionSelected,
+                isSelecting = isSelecting,
+                onToggleSelection = onToggleSelection,
+                metadataColor = style.metadataColor,
+                sourceBadgeContainerColor = style.sourceBadgeContainerColor,
+                sourceBadgeContentColor = style.sourceBadgeContentColor,
+                sourceLabel = style.sourceLabel,
+                sourceHost = style.sourceHost,
                 modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 4.dp, bottom = 12.dp),
             )
         }
@@ -67,14 +90,24 @@ internal fun VideoCard(
 internal fun VideoListItem(
     task: DownloadTask,
     selected: Boolean,
+    selectionSelected: Boolean,
+    isSelecting: Boolean,
     fileActions: LibraryFileActions,
     onClick: () -> Unit,
+    onToggleSelection: () -> Unit,
 ) {
     val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
+    val style = libraryVideoItemStyle(task.sourcePageUrl, selected || selectionSelected)
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        color = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+        modifier =
+            Modifier.semantics {
+                stateDescription = style.sourceDescription
+            },
+        shape = style.shape,
+        color = style.containerColor,
+        contentColor = style.contentColor,
+        border = style.border,
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -86,6 +119,14 @@ internal fun VideoListItem(
             VideoItemInfo(
                 task = task,
                 fileActions = fileActions,
+                selectionSelected = selectionSelected,
+                isSelecting = isSelecting,
+                onToggleSelection = onToggleSelection,
+                metadataColor = style.metadataColor,
+                sourceBadgeContainerColor = style.sourceBadgeContainerColor,
+                sourceBadgeContentColor = style.sourceBadgeContentColor,
+                sourceLabel = style.sourceLabel,
+                sourceHost = style.sourceHost,
                 modifier = Modifier.weight(1f).padding(start = 12.dp, top = 8.dp, end = 4.dp, bottom = 8.dp),
             )
         }
@@ -96,6 +137,14 @@ internal fun VideoListItem(
 private fun VideoItemInfo(
     task: DownloadTask,
     fileActions: LibraryFileActions,
+    selectionSelected: Boolean,
+    isSelecting: Boolean,
+    onToggleSelection: () -> Unit,
+    metadataColor: Color,
+    sourceBadgeContainerColor: Color,
+    sourceBadgeContentColor: Color,
+    sourceLabel: String,
+    sourceHost: String,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier) {
@@ -103,6 +152,31 @@ private fun VideoItemInfo(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = sourceBadgeContainerColor,
+                    contentColor = sourceBadgeContentColor,
+                ) {
+                    Text(
+                        text = sourceLabel,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                Text(
+                    text = sourceHost,
+                    color = metadataColor,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
             Text(
                 text = task.title,
                 style = MaterialTheme.typography.titleSmall,
@@ -111,11 +185,22 @@ private fun VideoItemInfo(
             )
             Text(
                 text = task.downloadedBytes.formatBytes(),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = metadataColor,
                 style = MaterialTheme.typography.bodySmall,
             )
         }
-        VideoActionsButton(task = task, actions = fileActions)
+        if (isSelecting) {
+            Checkbox(
+                checked = selectionSelected,
+                onCheckedChange = { onToggleSelection() },
+            )
+        } else {
+            VideoActionsButton(
+                task = task,
+                actions = fileActions,
+                iconOffsetY = (-8).dp,
+            )
+        }
     }
 }
 

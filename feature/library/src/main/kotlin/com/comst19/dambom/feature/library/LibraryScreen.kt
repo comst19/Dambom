@@ -17,6 +17,7 @@ import com.comst19.dambom.feature.library.component.EmptyLibraryDetail
 import com.comst19.dambom.feature.library.component.LibraryFileActions
 import com.comst19.dambom.feature.library.component.LibraryPane
 import com.comst19.dambom.feature.library.component.rememberLibraryFileActions
+import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
 import kotlinx.collections.immutable.persistentListOf
@@ -36,6 +37,12 @@ internal fun LibraryRoute(
         fileActions = fileActions,
         onQueryChange = viewModel::updateQuery,
         onViewModeChange = viewModel::setViewMode,
+        onSourceFilterChange = viewModel::setSourceFilter,
+        onStartSelection = viewModel::startSelection,
+        onToggleSelection = viewModel::toggleSelection,
+        onSelectAll = viewModel::selectAllVisible,
+        onClearSelection = viewModel::clearSelection,
+        onDeleteSelected = viewModel::deleteSelected,
         onVideoClick = { task ->
             if (multiplePanes && !isDetailPaneVisible) onDetailPaneVisibilityChange(true)
             viewModel.openVideo(task.id)
@@ -53,7 +60,13 @@ internal fun LibraryScreen(
     fileActions: LibraryFileActions,
     onQueryChange: (String) -> Unit,
     onViewModeChange: (LibraryViewMode) -> Unit,
+    onSourceFilterChange: (LibrarySourceFilter) -> Unit = {},
     onVideoClick: (DownloadTask) -> Unit,
+    onStartSelection: () -> Unit = {},
+    onToggleSelection: (String) -> Unit = {},
+    onSelectAll: () -> Unit = {},
+    onClearSelection: () -> Unit = {},
+    onDeleteSelected: () -> Unit = {},
     showInlineEmptyState: Boolean = true,
     showDetailPaneControl: Boolean = false,
     isDetailPaneVisible: Boolean = true,
@@ -64,7 +77,13 @@ internal fun LibraryScreen(
         fileActions = fileActions,
         onQueryChange = onQueryChange,
         onViewModeChange = onViewModeChange,
+        onSourceFilterChange = onSourceFilterChange,
         onVideoClick = onVideoClick,
+        onStartSelection = onStartSelection,
+        onToggleSelection = onToggleSelection,
+        onSelectAll = onSelectAll,
+        onClearSelection = onClearSelection,
+        onDeleteSelected = onDeleteSelected,
         showInlineEmptyState = showInlineEmptyState,
         showDetailPaneControl = showDetailPaneControl,
         isDetailPaneVisible = isDetailPaneVisible,

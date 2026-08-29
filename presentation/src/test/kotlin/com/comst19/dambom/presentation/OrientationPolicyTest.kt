@@ -3,7 +3,6 @@ package com.comst19.dambom.presentation
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -21,9 +20,9 @@ class OrientationPolicyTest {
     }
 
     @Test
-    fun `compact fullscreen follows the user's system rotation preference and restores portrait on exit`() {
+    fun `compact fullscreen maximizes video in landscape and restores portrait on exit`() {
         assertEquals(
-            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED,
+            ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE,
             requestedOrientationFor(smallestScreenWidthDp = 599, isVideoFullscreen = true),
         )
         assertEquals(
@@ -66,10 +65,14 @@ class OrientationPolicyTest {
         val cleared = state.withPictureInPictureEntered()
 
         assertTrue(cleared.isFullscreen)
-        assertNull(cleared.manualOrientation)
+        assertEquals(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED, cleared.manualOrientation)
         assertEquals(
             ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED,
             requestedOrientationFor(smallestScreenWidthDp = 599, state = cleared),
+        )
+        assertEquals(
+            ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE,
+            requestedOrientationFor(smallestScreenWidthDp = 599, state = cleared.withPictureInPictureExited()),
         )
     }
 }

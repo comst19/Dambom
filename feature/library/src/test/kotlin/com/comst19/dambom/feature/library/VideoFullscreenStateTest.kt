@@ -2,7 +2,9 @@ package com.comst19.dambom.feature.library
 
 import android.content.Context
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.media3.exoplayer.ExoPlayer
@@ -70,6 +72,31 @@ class VideoFullscreenStateTest {
         composeRule.onNodeWithContentDescription(fullscreenDescription).performClick()
 
         assertTrue(isVideoFullscreen)
+    }
+
+    @Test
+    fun `fullscreen composes exactly one player surface`() {
+        val surfaceDescription =
+            ApplicationProvider.getApplicationContext<Context>().getString(R.string.player_surface_description, "video")
+
+        composeRule.setContent {
+            MaterialTheme {
+                VideoPlayerScreen(
+                    task = task(),
+                    player = player,
+                    fileActions = fileActions(),
+                    onBack = {},
+                    showBack = true,
+                    isVideoFullscreen = true,
+                    onVideoFullscreenChange = {},
+                    onVideoRotate = {},
+                )
+            }
+        }
+
+        composeRule
+            .onAllNodesWithContentDescription(surfaceDescription, useUnmergedTree = true)
+            .assertCountEquals(1)
     }
 
     @Test

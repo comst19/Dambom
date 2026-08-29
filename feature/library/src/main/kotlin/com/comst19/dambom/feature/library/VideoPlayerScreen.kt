@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -141,59 +142,7 @@ internal fun VideoPlayerScreen(
     BackHandler(enabled = isVideoFullscreen) { onVideoFullscreenChange(false) }
     val showRotationControl = shouldShowFullscreenRotationControl(LocalConfiguration.current.smallestScreenWidthDp)
 
-    AppScreen(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = task?.title ?: stringResource(R.string.player_title),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
-                navigationIcon =
-                    if (showBack) {
-                        {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                                    contentDescription = stringResource(R.string.player_back),
-                                )
-                            }
-                        }
-                    } else {
-                        {}
-                    },
-                actions = {
-                    task?.let {
-                        IconButton(onClick = { onVideoFullscreenChange(true) }) {
-                            Icon(
-                                imageVector = Icons.Outlined.Fullscreen,
-                                contentDescription = stringResource(R.string.player_fullscreen),
-                            )
-                        }
-                        VideoActionsButton(task = it, actions = fileActions)
-                    }
-                },
-            )
-        },
-    ) { innerPadding ->
-        if (task == null) {
-            MissingVideo(Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding))
-        } else {
-            VideoPlayerPanel(
-                task = task,
-                player = player,
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .consumeWindowInsets(innerPadding),
-            )
-        }
-    }
-
-    if (isVideoFullscreen && task != null) {
+    if ((isVideoFullscreen || isPipContentOnly) && task != null) {
         FullscreenVideoPlayer(
             task = task,
             player = player,
@@ -204,6 +153,63 @@ internal fun VideoPlayerScreen(
             isPipContentOnly = isPipContentOnly,
             onVideoBoundsChanged = onVideoBoundsChanged,
         )
+    } else {
+        AppScreen(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = task?.title ?: stringResource(R.string.player_title),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
+                    navigationIcon =
+                        if (showBack) {
+                            {
+                                IconButton(onClick = onBack) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                                        contentDescription = stringResource(R.string.player_back),
+                                    )
+                                }
+                            }
+                        } else {
+                            {}
+                        },
+                    actions = {
+                        task?.let {
+                            IconButton(onClick = { onVideoFullscreenChange(true) }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Fullscreen,
+                                    contentDescription = stringResource(R.string.player_fullscreen),
+                                )
+                            }
+                            VideoActionsButton(
+                                task = it,
+                                actions = fileActions,
+                                modifier = Modifier.padding(end = 8.dp),
+                            )
+                        }
+                    },
+                )
+            },
+        ) { innerPadding ->
+            if (task == null) {
+                MissingVideo(Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding))
+            } else {
+                VideoPlayerPanel(
+                    task = task,
+                    player = player,
+                    onOpenOriginal = { fileActions.onOpenOriginal(task) },
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .consumeWindowInsets(innerPadding),
+                )
+            }
+        }
     }
 }
 

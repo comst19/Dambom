@@ -9,21 +9,22 @@ import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
-import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
+import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
 import com.comst19.dambom.feature.library.file.LibraryFileManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,14 +41,31 @@ internal class LibraryViewModel
         private val selectedId = savedStateHandle.getStateFlow<String?>(SELECTED_ID_KEY, null)
         private val query = savedStateHandle.getStateFlow(QUERY_KEY, "")
         private val viewMode = savedStateHandle.getStateFlow(VIEW_MODE_KEY, LibraryViewMode.GRID.name)
+        private val sourceFilter = savedStateHandle.getStateFlow(SOURCE_FILTER_KEY, LibrarySourceFilter.ALL.name)
+        private val selection = MutableStateFlow(LibrarySelectionState())
+        private val displayPreferences =
+            combine(viewMode, sourceFilter) { viewMode, sourceFilter ->
+                LibraryDisplayPreferences(
+                    viewMode = LibraryViewMode.entries.firstOrNull { it.name == viewMode } ?: LibraryViewMode.GRID,
+                    sourceFilter = LibrarySourceFilter.entries.firstOrNull { it.name == sourceFilter } ?: LibrarySourceFilter.ALL,
+                )
+            }
 
         val uiState: StateFlow<LibraryUiState> =
-            combine(repository.downloads, selectedId, query, viewMode) { tasks, selectedId, query, viewMode ->
+            combine(
+                repository.downloads,
+                selectedId,
+                query,
+                displayPreferences,
+                selection,
+            ) { tasks, selectedId, query, preferences, selection ->
                 toLibraryUiState(
                     tasks = tasks,
                     selectedId = selectedId,
                     query = query,
-                    viewMode = LibraryViewMode.entries.firstOrNull { it.name == viewMode } ?: LibraryViewMode.GRID,
+                    viewMode = preferences.viewMode,
+                    sourceFilter = preferences.sourceFilter,
+                    selection = selection,
                 )
             }.stateIn(
                 scope = viewModelScope,
@@ -70,6 +88,41 @@ internal class LibraryViewModel
 
         fun setViewMode(viewMode: LibraryViewMode) {
             savedStateHandle[VIEW_MODE_KEY] = viewMode.name
+        }
+
+        fun setSourceFilter(sourceFilter: LibrarySourceFilter) {
+            savedStateHandle[SOURCE_FILTER_KEY] = sourceFilter.name
+        }
+
+        fun startSelection() {
+            selection.update { it.copy(isActive = true) }
+        }
+
+        fun toggleSelection(id: String) {
+            selection.update { it.toggle(id) }
+        }
+
+        fun selectAllVisible() {
+            selection.update { it.selectAll(uiState.value.videos.map(DownloadTask::id)) }
+        }
+
+        fun clearSelection() {
+            selection.update(LibrarySelectionState::clear)
+        }
+
+        fun deleteSelected() {
+            val ids = uiState.value.selectedIds
+            if (ids.isEmpty()) return
+            viewModelScope.launch {
+                suspendRunCatching { ids.forEach { repository.delete(it) } }.fold(
+                    onSuccess = {
+                        if (selectedId.value in ids) savedStateHandle[SELECTED_ID_KEY] = null
+                        selection.value = LibrarySelectionState()
+                        showMessage(R.string.library_delete_selected_success, ids.size)
+                    },
+                    onFailure = { showMessage(R.string.library_delete_failure) },
+                )
+            }
         }
 
         fun rename(
@@ -134,38 +187,21 @@ internal class LibraryViewModel
             )
         }
 
-        private suspend fun showMessage(message: Int) {
-            appEventBus.send(AppEvent.ShowSnackbar(UiText.Resource(message)))
+        private suspend fun showMessage(
+            message: Int,
+            vararg args: Any,
+        ) {
+            appEventBus.send(AppEvent.ShowSnackbar(UiText.Resource(message, args.toList())))
         }
     }
 
-internal fun toLibraryUiState(
-    tasks: List<DownloadTask>,
-    selectedId: String?,
-    query: String = "",
-    viewMode: LibraryViewMode = LibraryViewMode.GRID,
-): LibraryUiState {
-    val savedVideos =
-        tasks.filter { task ->
-            task.status == DownloadStatus.COMPLETED && task.localFilePath != null
-        }
-    val trimmedQuery = query.trim()
-    val videos =
-        if (trimmedQuery.isEmpty()) {
-            savedVideos
-        } else {
-            savedVideos.filter { it.title.contains(trimmedQuery, ignoreCase = true) }
-        }
-    return LibraryUiState(
-        videos = videos.toPersistentList(),
-        selectedVideo = savedVideos.firstOrNull { it.id == selectedId },
-        query = query,
-        hasVideos = savedVideos.isNotEmpty(),
-        viewMode = viewMode,
-    )
-}
+private data class LibraryDisplayPreferences(
+    val viewMode: LibraryViewMode,
+    val sourceFilter: LibrarySourceFilter,
+)
 
 private const val SELECTED_ID_KEY = "library-selected-video-id"
 private const val QUERY_KEY = "library-search-query"
 private const val VIEW_MODE_KEY = "library-view-mode"
+private const val SOURCE_FILTER_KEY = "library-source-filter"
 private const val STOP_TIMEOUT_MILLIS = 5_000L

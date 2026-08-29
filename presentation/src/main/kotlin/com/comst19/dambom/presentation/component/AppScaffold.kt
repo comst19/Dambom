@@ -42,12 +42,14 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import com.comst19.dambom.core.common.ui.LocalAppScaffoldPadding
+import com.comst19.dambom.core.common.ui.currentAdaptiveLayoutInfo
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.model.NetworkRestriction
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.NavigationState
 import com.comst19.dambom.core.navigation.Navigator
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
 import com.comst19.dambom.presentation.R
 import com.comst19.dambom.presentation.navigation.AppChrome
 import com.comst19.dambom.presentation.navigation.AppNavigationConfig
@@ -70,7 +72,16 @@ internal fun AppScaffold(
     isLibraryDetailPaneVisible: Boolean,
     isVideoFullscreen: Boolean,
 ) {
-    val chrome = appChrome(state.currentKey)
+    val defaultChrome = appChrome(state.currentKey)
+    val chrome =
+        defaultChrome.copy(
+            showBottomBar =
+                shouldShowBottomBar(
+                    currentKey = state.currentKey,
+                    defaultVisible = defaultChrome.showBottomBar,
+                    supportsMultiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes,
+                ),
+        )
     val policy = appScaffoldPolicy(chrome, state.isAtRoot, isVideoFullscreen)
     val coroutineScope = rememberCoroutineScope()
     val activity = LocalActivity.current
@@ -161,6 +172,12 @@ internal data class AppScaffoldPolicy(
     val useSafeDrawingInsets: Boolean,
     val provideZeroPadding: Boolean,
 )
+
+internal fun shouldShowBottomBar(
+    currentKey: NavKey,
+    defaultVisible: Boolean,
+    supportsMultiplePanes: Boolean,
+): Boolean = defaultVisible || (supportsMultiplePanes && currentKey is VideoDetailKey)
 
 internal fun appScaffoldPolicy(
     chrome: AppChrome,

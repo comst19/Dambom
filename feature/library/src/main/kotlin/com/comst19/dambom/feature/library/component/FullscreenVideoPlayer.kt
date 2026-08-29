@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,6 +78,7 @@ internal fun FullscreenVideoPlayer(
     var controlsInteracting by remember(task.id) { mutableStateOf(false) }
     var controlsInteractionRevision by remember(task.id) { mutableStateOf(0) }
     val contentMode = fullscreenContentModeFor(selectedContentMode, isPipContentOnly)
+    val currentOnVideoBoundsChanged by rememberUpdatedState(onVideoBoundsChanged)
     LaunchedEffect(isPipContentOnly) { if (isPipContentOnly) selectedContentMode = FullscreenContentMode.Fit }
     LaunchedEffect(controlsVisible, playPauseState.showPlay, controlsInteracting, controlsInteractionRevision) {
         if (shouldAutoHideFullscreenControls(controlsVisible, !playPauseState.showPlay, controlsInteracting)) {
@@ -85,6 +87,9 @@ internal fun FullscreenVideoPlayer(
         }
     }
     FullscreenSystemBars(enabled = !isPipContentOnly)
+    DisposableEffect(task.id) {
+        onDispose { currentOnVideoBoundsChanged(null) }
+    }
     Surface(modifier = Modifier.fillMaxSize(), color = Color.Black, contentColor = Color.White) {
         if (isPipContentOnly) {
             FullscreenContentFrame(player, surfaceDescription, Modifier.fillMaxSize(), onVideoBoundsChanged, contentMode)

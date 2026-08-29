@@ -2,10 +2,13 @@ package com.comst19.dambom.feature.library
 
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
 import com.comst19.dambom.feature.library.file.suggestedFileName
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class LibraryUiStateTest {
@@ -67,6 +70,33 @@ class LibraryUiStateTest {
             )
 
         assertEquals(LibraryViewMode.LIST, state.viewMode)
+    }
+
+    @Test
+    fun `selection state supports individual all and clear actions`() {
+        val individual = LibrarySelectionState(isActive = true).toggle("one")
+        val all = individual.selectAll(listOf("one", "two"))
+
+        assertTrue(individual.isActive)
+        assertEquals(setOf("one"), individual.selectedIds)
+        assertEquals(setOf("one", "two"), all.selectedIds)
+        assertFalse(all.clear().isActive)
+        assertTrue(all.clear().selectedIds.isEmpty())
+    }
+
+    @Test
+    fun `source filter shows all X or web videos independently`() {
+        val web = task("web", DownloadStatus.COMPLETED, "/video/web.mp4")
+        val x = task("x", DownloadStatus.COMPLETED, "/video/x.mp4").copy(sourcePageUrl = "https://x.com/user/status/1")
+
+        val all = toLibraryUiState(listOf(web, x), selectedId = null, sourceFilter = LibrarySourceFilter.ALL)
+        val xOnly = toLibraryUiState(listOf(web, x), selectedId = null, sourceFilter = LibrarySourceFilter.X)
+        val webOnly = toLibraryUiState(listOf(web, x), selectedId = null, sourceFilter = LibrarySourceFilter.WEB)
+
+        assertEquals(listOf(web, x), all.videos)
+        assertEquals(listOf(x), xOnly.videos)
+        assertEquals(listOf(web), webOnly.videos)
+        assertEquals(2, xOnly.totalVideoCount)
     }
 
     @Test

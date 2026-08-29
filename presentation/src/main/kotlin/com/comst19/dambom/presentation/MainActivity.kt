@@ -103,8 +103,10 @@ class MainActivity : AppCompatActivity() {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         if (isInPictureInPictureMode) {
             videoFullscreenOrientationState = videoFullscreenOrientationState.withPictureInPictureEntered()
-            applyOrientationPolicy(resources.configuration.smallestScreenWidthDp)
+        } else {
+            videoFullscreenOrientationState = videoFullscreenOrientationState.withPictureInPictureExited()
         }
+        applyOrientationPolicy(resources.configuration.smallestScreenWidthDp)
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -145,7 +147,7 @@ internal fun requestedOrientationFor(
     when {
         smallestScreenWidthDp >= ROTATION_MIN_SMALLEST_WIDTH_DP -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         state.manualOrientation != null -> state.manualOrientation
-        state.isFullscreen -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        state.isFullscreen -> ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
         else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
@@ -168,7 +170,10 @@ internal data class VideoFullscreenOrientationState(
         )
     }
 
-    fun withPictureInPictureEntered(): VideoFullscreenOrientationState = copy(manualOrientation = null)
+    fun withPictureInPictureEntered(): VideoFullscreenOrientationState =
+        copy(manualOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+
+    fun withPictureInPictureExited(): VideoFullscreenOrientationState = if (isFullscreen) copy(manualOrientation = null) else this
 }
 
 private const val ROTATION_MIN_SMALLEST_WIDTH_DP = 600

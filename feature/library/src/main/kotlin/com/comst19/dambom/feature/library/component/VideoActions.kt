@@ -3,8 +3,6 @@ package com.comst19.dambom.feature.library.component
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.offset
@@ -38,6 +36,7 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.LibraryViewModel
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.file.suggestedFileName
+import com.comst19.dambom.feature.library.openOriginalLink
 
 @Immutable
 internal data class LibraryFileActions(
@@ -91,13 +90,7 @@ internal fun rememberLibraryFileActions(
                 viewModel.notifyLinkCopied()
             },
             onOpenOriginal = { task ->
-                try {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(task.sourcePageUrl)))
-                } catch (_: ActivityNotFoundException) {
-                    viewModel.notifyOpenOriginalFailure()
-                } catch (_: IllegalArgumentException) {
-                    viewModel.notifyOpenOriginalFailure()
-                }
+                if (!openOriginalLink(context, task.sourcePageUrl)) viewModel.notifyOpenOriginalFailure()
             },
             onDelete = { task -> currentOnDelete.value?.invoke(task) ?: viewModel.delete(task) },
         )

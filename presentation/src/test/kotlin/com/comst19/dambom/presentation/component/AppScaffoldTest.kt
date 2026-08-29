@@ -1,6 +1,7 @@
 package com.comst19.dambom.presentation.component
 
 import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
 import com.comst19.dambom.presentation.navigation.AppChrome
 import org.junit.Assert.assertEquals
@@ -19,6 +20,15 @@ class AppScaffoldTest {
     fun `normal Fold keeps multiple panes and phone stays single`() {
         assertFalse(shouldUseSinglePane(supportsMultiplePanes = true, isVideoFullscreen = false))
         assertTrue(shouldUseSinglePane(supportsMultiplePanes = false, isVideoFullscreen = false))
+    }
+
+    @Test
+    fun `Library detail keeps bottom navigation only in a multi pane scene`() {
+        val detail = VideoDetailKey("video")
+
+        assertFalse(shouldShowBottomBar(currentKey = detail, defaultVisible = false, supportsMultiplePanes = false))
+        assertTrue(shouldShowBottomBar(currentKey = detail, defaultVisible = false, supportsMultiplePanes = true))
+        assertTrue(shouldShowBottomBar(currentKey = HomeKey, defaultVisible = true, supportsMultiplePanes = false))
     }
 
     @Test

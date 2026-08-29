@@ -1,6 +1,7 @@
 package com.comst19.dambom.presentation.component
 
 import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.LibraryKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
 import com.comst19.dambom.presentation.navigation.AppChrome
@@ -40,6 +41,14 @@ class AppScaffoldTest {
         assertEquals(2_600, bottomBarWidthPx(detail, false, true, listPaneWidthPx = 824, windowWidthPx = 2_600))
         assertEquals(2_600, bottomBarWidthPx(HomeKey, true, true, listPaneWidthPx = 824, windowWidthPx = 2_600))
         assertEquals(2_600, bottomBarWidthPx(detail, true, true, listPaneWidthPx = 0, windowWidthPx = 2_600))
+    }
+
+    @Test
+    fun `Fold library placeholder limits bottom navigation to the list pane`() {
+        assertEquals(
+            824,
+            bottomBarWidthPx(LibraryKey, true, true, listPaneWidthPx = 824, windowWidthPx = 2_600),
+        )
     }
 
     @Test

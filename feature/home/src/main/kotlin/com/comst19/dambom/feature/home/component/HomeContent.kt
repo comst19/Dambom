@@ -3,6 +3,7 @@ package com.comst19.dambom.feature.home.component
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -145,6 +146,7 @@ internal fun HomeSupportingSection(
         TextButton(
             onClick = onOpenWeb,
             enabled = canUseInternet,
+            contentPadding = PaddingValues(0.dp),
         ) {
             Icon(imageVector = Icons.Outlined.Language, contentDescription = null)
             Text(

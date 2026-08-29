@@ -1,6 +1,7 @@
 package com.comst19.dambom.feature.settings
 
 import android.net.Uri
+import android.os.Build
 import android.provider.DocumentsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,18 +39,32 @@ import com.comst19.dambom.feature.settings.component.SettingsContentState
 import com.comst19.dambom.feature.settings.component.SupportSettingsActions
 import com.comst19.dambom.feature.settings.component.THEME_MODE_ENTRIES
 import com.comst19.dambom.feature.settings.component.labelRes
+import com.comst19.dambom.feature.settings.component.openExternalPage
 import com.comst19.dambom.feature.settings.component.openSourceLicenses
-import com.comst19.dambom.feature.settings.component.sendFeedback
+import com.comst19.dambom.feature.settings.component.sendSupportEmail
 import com.comst19.dambom.feature.settings.contract.AppLanguage
+
+private const val TERMS_OF_SERVICE_URL =
+    "https://waiting-manchego-38d.notion.site/3cbeb6bb8cd580a0a03fc0287ed2420f"
+private const val PRIVACY_POLICY_URL =
+    "https://waiting-manchego-38d.notion.site/3cbeb6bb8cd580ab8b02cb81694a4288"
 
 @Composable
 internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val language by viewModel.language.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val feedbackTitle = stringResource(R.string.settings_feedback_chooser)
-    val feedbackBody = stringResource(R.string.settings_feedback_body, viewModel.versionName)
-    val feedbackFailure = stringResource(R.string.settings_external_action_failure)
+    val bugReportSubject = stringResource(R.string.settings_bug_report_subject)
+    val bugReportBody =
+        stringResource(
+            R.string.settings_bug_report_body,
+            viewModel.versionName,
+            Build.VERSION.RELEASE,
+            Build.MODEL,
+        )
+    val featureRequestSubject = stringResource(R.string.settings_feature_request_subject)
+    val featureRequestBody = stringResource(R.string.settings_feature_request_body, viewModel.versionName)
+    val externalActionFailure = stringResource(R.string.settings_external_action_failure)
     val licensesTitle = stringResource(R.string.settings_open_source)
     val defaultDownloadLocation = stringResource(R.string.settings_download_location_value)
     val downloadDirectoryLauncher =
@@ -88,8 +103,15 @@ internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
                 support =
                     SupportSettingsActions(
                         onHelp = viewModel::openHelp,
-                        onFeedback = { context.sendFeedback(feedbackTitle, feedbackBody, feedbackFailure) },
+                        onBugReport = {
+                            context.sendSupportEmail(bugReportSubject, bugReportBody, externalActionFailure)
+                        },
+                        onFeatureRequest = {
+                            context.sendSupportEmail(featureRequestSubject, featureRequestBody, externalActionFailure)
+                        },
                         onLicenses = { context.openSourceLicenses(licensesTitle) },
+                        onTerms = { context.openExternalPage(TERMS_OF_SERVICE_URL, externalActionFailure) },
+                        onPrivacy = { context.openExternalPage(PRIVACY_POLICY_URL, externalActionFailure) },
                     ),
             ),
     )
@@ -169,7 +191,7 @@ private fun SettingsScreenPreview() {
                     wifiOnlyDownloads = false,
                     useConfiguredDownloadLocation = true,
                     downloadLocation = "Download/Dambom",
-                    versionName = "1.0",
+                    versionName = "1.0.0",
                 ),
             actions =
                 SettingsActions(
@@ -189,8 +211,11 @@ private fun SettingsScreenPreview() {
                     support =
                         SupportSettingsActions(
                             onHelp = ::previewNoOp,
-                            onFeedback = ::previewNoOp,
+                            onBugReport = ::previewNoOp,
+                            onFeatureRequest = ::previewNoOp,
                             onLicenses = ::previewNoOp,
+                            onTerms = ::previewNoOp,
+                            onPrivacy = ::previewNoOp,
                         ),
                 ),
         )

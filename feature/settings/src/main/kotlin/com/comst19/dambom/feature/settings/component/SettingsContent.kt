@@ -5,15 +5,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.ContentPaste
-import androidx.compose.material.icons.outlined.Feedback
+import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.FolderOpen
-import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
+import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.Wifi
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
@@ -61,8 +63,11 @@ internal data class GeneralSettingsActions(
 @Immutable
 internal data class SupportSettingsActions(
     val onHelp: () -> Unit,
-    val onFeedback: () -> Unit,
+    val onBugReport: () -> Unit,
+    val onFeatureRequest: () -> Unit,
     val onLicenses: () -> Unit,
+    val onTerms: () -> Unit,
+    val onPrivacy: () -> Unit,
 )
 
 @Composable
@@ -185,10 +190,18 @@ private fun LazyListScope.supportSection(actions: SettingsActions) {
     }
     item {
         SettingsRow(
-            icon = Icons.Outlined.Feedback,
-            title = stringResource(R.string.settings_feedback),
-            subtitle = stringResource(R.string.settings_feedback_description),
-            onClick = actions.support.onFeedback,
+            icon = Icons.Outlined.BugReport,
+            title = stringResource(R.string.settings_bug_report),
+            subtitle = stringResource(R.string.settings_bug_report_description),
+            onClick = actions.support.onBugReport,
+        )
+    }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.Lightbulb,
+            title = stringResource(R.string.settings_feature_request),
+            subtitle = stringResource(R.string.settings_feature_request_description),
+            onClick = actions.support.onFeatureRequest,
         )
     }
 }
@@ -207,18 +220,26 @@ private fun LazyListScope.informationSection(
     }
     item {
         SettingsRow(
-            icon = Icons.Outlined.Code,
-            title = stringResource(R.string.settings_open_source),
-            subtitle = stringResource(R.string.settings_open_source_description),
-            onClick = actions.support.onLicenses,
+            icon = Icons.Outlined.Description,
+            title = stringResource(R.string.settings_terms),
+            subtitle = stringResource(R.string.settings_terms_description),
+            onClick = actions.support.onTerms,
         )
     }
     item {
         SettingsRow(
-            icon = Icons.Outlined.Gavel,
-            title = stringResource(R.string.settings_legal),
-            subtitle = stringResource(R.string.settings_legal_pending),
-            enabled = false,
+            icon = Icons.Outlined.PrivacyTip,
+            title = stringResource(R.string.settings_privacy),
+            subtitle = stringResource(R.string.settings_privacy_description),
+            onClick = actions.support.onPrivacy,
+        )
+    }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.Code,
+            title = stringResource(R.string.settings_open_source),
+            subtitle = stringResource(R.string.settings_open_source_description),
+            onClick = actions.support.onLicenses,
         )
     }
 }

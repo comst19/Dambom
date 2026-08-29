@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId = "com.comst19.dambom"
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
     }
 
     buildFeatures { buildConfig = true }

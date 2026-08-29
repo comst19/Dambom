@@ -3,25 +3,38 @@ package com.comst19.dambom.feature.settings.component
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import com.comst19.dambom.core.designsystem.DambomDarkColorScheme
 import com.comst19.dambom.core.designsystem.DambomLightColorScheme
 import com.comst19.dambom.core.designsystem.DambomTypography
 import com.google.android.gms.oss.licenses.v2.OssLicensesMenuActivity
 
-internal fun Context.sendFeedback(
-    chooserTitle: String,
+private const val SUPPORT_EMAIL = "madeatnaru@gmail.com"
+
+internal fun Context.sendSupportEmail(
+    subject: String,
     body: String,
     failureMessage: String,
 ) {
     val intent =
-        Intent.createChooser(
-            Intent(Intent.ACTION_SEND)
-                .setType("text/plain")
-                .putExtra(Intent.EXTRA_SUBJECT, chooserTitle)
-                .putExtra(Intent.EXTRA_TEXT, body),
-            chooserTitle,
-        )
+        Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$SUPPORT_EMAIL"))
+            .putExtra(Intent.EXTRA_SUBJECT, subject)
+            .putExtra(Intent.EXTRA_TEXT, body)
+    startExternalActivity(intent, failureMessage)
+}
+
+internal fun Context.openExternalPage(
+    url: String,
+    failureMessage: String,
+) {
+    startExternalActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)), failureMessage)
+}
+
+private fun Context.startExternalActivity(
+    intent: Intent,
+    failureMessage: String,
+) {
     try {
         startActivity(intent)
     } catch (_: ActivityNotFoundException) {

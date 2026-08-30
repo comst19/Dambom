@@ -1,5 +1,6 @@
 package com.comst19.dambom.feature.library
 
+import com.comst19.dambom.core.domain.model.DownloadTask
 import java.net.URI
 
 internal enum class VideoSourceKind {
@@ -25,3 +26,5 @@ internal fun videoSourcePresentation(sourcePageUrl: String): VideoSourcePresenta
         host = host.takeUnless { isX || it.isEmpty() },
     )
 }
+
+internal fun DownloadTask.libraryContentType(): VideoSourceKind = videoSourcePresentation(sourcePageUrl).kind

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.contract.LibraryUiState
+import com.comst19.dambom.feature.library.libraryContentType
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.items as listItems
 
@@ -32,7 +33,7 @@ internal fun VideoGrid(
         gridItems(
             items = uiState.videos,
             key = DownloadTask::id,
-            contentType = { VIDEO_ITEM_CONTENT_TYPE },
+            contentType = DownloadTask::libraryContentType,
         ) { task ->
             VideoCard(
                 task = task,
@@ -63,7 +64,7 @@ internal fun VideoList(
         listItems(
             items = uiState.videos,
             key = DownloadTask::id,
-            contentType = { VIDEO_ITEM_CONTENT_TYPE },
+            contentType = DownloadTask::libraryContentType,
         ) { task ->
             VideoListItem(
                 task = task,
@@ -79,4 +80,3 @@ internal fun VideoList(
 }
 
 private val MIN_VIDEO_CARD_WIDTH = 240.dp
-private const val VIDEO_ITEM_CONTENT_TYPE = "video"

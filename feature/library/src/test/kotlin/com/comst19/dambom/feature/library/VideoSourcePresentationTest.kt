@@ -2,6 +2,8 @@ package com.comst19.dambom.feature.library
 
 import android.content.Intent
 import androidx.core.content.IntentCompat
+import com.comst19.dambom.core.domain.model.DownloadStatus
+import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.external.originalLinkIntents
 import com.comst19.dambom.feature.library.external.originalLinkShareIntent
 import org.junit.Assert.assertEquals
@@ -14,6 +16,12 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class VideoSourcePresentationTest {
+    @Test
+    fun `lazy content type separates X and website videos`() {
+        assertEquals(VideoSourceKind.X, task("https://x.com/user/status/1").libraryContentType())
+        assertEquals(VideoSourceKind.WEBSITE, task("https://example.com/video").libraryContentType())
+    }
+
     @Test
     fun `x and legacy Twitter links are recognized as X posts`() {
         assertEquals(VideoSourceKind.X, videoSourcePresentation("https://x.com/user/status/1").kind)
@@ -48,3 +56,21 @@ class VideoSourcePresentationTest {
         assertEquals("https://x.com/user/status/1", sendIntent?.getStringExtra(Intent.EXTRA_TEXT))
     }
 }
+
+private fun task(sourcePageUrl: String) =
+    DownloadTask(
+        id = sourcePageUrl,
+        url = "https://media.example.com/video.mp4",
+        sourcePageUrl = sourcePageUrl,
+        title = "video",
+        mimeType = "video/mp4",
+        expectedBytes = 100L,
+        downloadedBytes = 100L,
+        quality = "원본",
+        status = DownloadStatus.COMPLETED,
+        failureReason = null,
+        localFileName = "video.mp4",
+        localFilePath = "/video.mp4",
+        createdAtMillis = 1L,
+        updatedAtMillis = 1L,
+    )

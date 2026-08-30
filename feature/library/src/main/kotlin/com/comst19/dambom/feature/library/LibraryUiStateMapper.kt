@@ -16,10 +16,11 @@ internal fun toLibraryUiState(
     sourceFilter: LibrarySourceFilter = LibrarySourceFilter.ALL,
     selection: LibrarySelectionState = LibrarySelectionState(),
 ): LibraryUiState {
-    val savedVideos =
+    val completedTasks =
         tasks.filter { task ->
             task.status == DownloadStatus.COMPLETED && task.localFilePath != null
         }
+    val savedVideos = completedTasks.sortedByDescending(DownloadTask::updatedAtMillis)
     val sourceVideos =
         savedVideos.filter { task ->
             when (sourceFilter) {

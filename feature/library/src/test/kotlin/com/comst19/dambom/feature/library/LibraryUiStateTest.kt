@@ -42,6 +42,17 @@ class LibraryUiStateTest {
     }
 
     @Test
+    fun `newest completed video is shown first`() {
+        val older = task("older", DownloadStatus.COMPLETED, "/video/older.mp4").copy(updatedAtMillis = 100L)
+        val newer = task("newer", DownloadStatus.COMPLETED, "/video/newer.mp4").copy(updatedAtMillis = 300L)
+        val middle = task("middle", DownloadStatus.COMPLETED, "/video/middle.mp4").copy(updatedAtMillis = 200L)
+
+        val state = toLibraryUiState(listOf(older, newer, middle), selectedId = null)
+
+        assertEquals(listOf(newer, middle, older), state.videos)
+    }
+
+    @Test
     fun `search filters titles without hiding the selected detail`() {
         val selected = task("selected", DownloadStatus.COMPLETED, "/video/selected.mp4")
         val matching =

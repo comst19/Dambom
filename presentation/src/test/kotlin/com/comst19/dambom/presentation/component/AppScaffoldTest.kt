@@ -13,6 +13,12 @@ import org.junit.Test
 
 class AppScaffoldTest {
     @Test
+    fun `outgoing destination clears before incoming fade finishes`() {
+        assertTrue(NAVIGATION_EXIT_DURATION_MILLIS < NAVIGATION_ENTER_DURATION_MILLIS)
+        assertTrue(NAVIGATION_EXIT_DURATION_MILLIS <= 120)
+    }
+
+    @Test
     fun `fullscreen collapses Fold list detail to one pane`() {
         assertTrue(shouldUseSinglePane(supportsMultiplePanes = true, isVideoFullscreen = true))
     }

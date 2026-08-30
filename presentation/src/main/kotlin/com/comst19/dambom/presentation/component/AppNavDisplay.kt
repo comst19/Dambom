@@ -63,16 +63,16 @@ internal fun AppNavDisplay(
         sceneStrategies = listOf(listDetailSceneStrategy),
         // Navigation 3 기본 scale 전환 대신 화면 크기가 유지되는 fade 전환을 사용합니다.
         transitionSpec = {
-            fadeIn(tween(NAVIGATION_FADE_DURATION_MILLIS)) togetherWith
-                fadeOut(tween(NAVIGATION_FADE_DURATION_MILLIS))
+            fadeIn(tween(NAVIGATION_ENTER_DURATION_MILLIS)) togetherWith
+                fadeOut(tween(NAVIGATION_EXIT_DURATION_MILLIS))
         },
         popTransitionSpec = {
-            fadeIn(tween(NAVIGATION_FADE_DURATION_MILLIS)) togetherWith
-                fadeOut(tween(NAVIGATION_FADE_DURATION_MILLIS))
+            fadeIn(tween(NAVIGATION_ENTER_DURATION_MILLIS)) togetherWith
+                fadeOut(tween(NAVIGATION_EXIT_DURATION_MILLIS))
         },
         predictivePopTransitionSpec = {
-            fadeIn(tween(NAVIGATION_FADE_DURATION_MILLIS)) togetherWith
-                fadeOut(tween(NAVIGATION_FADE_DURATION_MILLIS))
+            fadeIn(tween(NAVIGATION_ENTER_DURATION_MILLIS)) togetherWith
+                fadeOut(tween(NAVIGATION_EXIT_DURATION_MILLIS))
         },
         modifier = modifier,
     )
@@ -83,4 +83,5 @@ internal fun shouldUseSinglePane(
     isVideoFullscreen: Boolean,
 ): Boolean = !supportsMultiplePanes || isVideoFullscreen
 
-private const val NAVIGATION_FADE_DURATION_MILLIS = 700
+internal const val NAVIGATION_ENTER_DURATION_MILLIS = 220
+internal const val NAVIGATION_EXIT_DURATION_MILLIS = 90

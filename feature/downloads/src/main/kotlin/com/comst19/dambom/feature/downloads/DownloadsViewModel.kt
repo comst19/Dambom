@@ -7,6 +7,8 @@ import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
+import com.comst19.dambom.core.domain.model.DownloadStatus
+import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
@@ -40,10 +42,7 @@ internal class DownloadsViewModel
             )
         val uiState: StateFlow<DownloadsUiState> =
             combine(repository.downloads, viewMode) { tasks, currentViewMode ->
-                DownloadsUiState(
-                    tasks = tasks.toPersistentList(),
-                    viewMode = currentViewMode,
-                )
+                toDownloadsUiState(tasks, currentViewMode)
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
@@ -82,6 +81,15 @@ internal class DownloadsViewModel
             }
         }
     }
+
+internal fun toDownloadsUiState(
+    tasks: List<DownloadTask>,
+    viewMode: DownloadsViewMode,
+): DownloadsUiState =
+    DownloadsUiState(
+        tasks = tasks.filterNot { it.status == DownloadStatus.COMPLETED }.toPersistentList(),
+        viewMode = viewMode,
+    )
 
 private const val STOP_TIMEOUT_MILLIS = 5_000L
 private const val VIEW_MODE_KEY = "downloads-view-mode"

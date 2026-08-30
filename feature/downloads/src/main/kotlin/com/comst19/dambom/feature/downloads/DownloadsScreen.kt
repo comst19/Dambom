@@ -80,33 +80,35 @@ internal fun DownloadsScreen(
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = {
-                            onViewModeChange(
-                                if (uiState.viewMode == DownloadsViewMode.GRID) {
-                                    DownloadsViewMode.LIST
-                                } else {
-                                    DownloadsViewMode.GRID
-                                },
-                            )
-                        },
-                    ) {
-                        Icon(
-                            imageVector =
-                                if (uiState.viewMode == DownloadsViewMode.GRID) {
-                                    Icons.AutoMirrored.Outlined.ViewList
-                                } else {
-                                    Icons.Outlined.GridView
-                                },
-                            contentDescription =
-                                stringResource(
+                    if (uiState.tasks.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                onViewModeChange(
                                     if (uiState.viewMode == DownloadsViewMode.GRID) {
-                                        R.string.downloads_view_as_list
+                                        DownloadsViewMode.LIST
                                     } else {
-                                        R.string.downloads_view_as_grid
+                                        DownloadsViewMode.GRID
                                     },
-                                ),
-                        )
+                                )
+                            },
+                        ) {
+                            Icon(
+                                imageVector =
+                                    if (uiState.viewMode == DownloadsViewMode.GRID) {
+                                        Icons.AutoMirrored.Outlined.ViewList
+                                    } else {
+                                        Icons.Outlined.GridView
+                                    },
+                                contentDescription =
+                                    stringResource(
+                                        if (uiState.viewMode == DownloadsViewMode.GRID) {
+                                            R.string.downloads_view_as_list
+                                        } else {
+                                            R.string.downloads_view_as_grid
+                                        },
+                                    ),
+                            )
+                        }
                     }
                 },
             )

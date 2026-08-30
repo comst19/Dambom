@@ -5,7 +5,8 @@
     <string name="downloads_view_as_grid">View as grid</string>
     <string name="downloads_empty_title">No downloads in progress</string>
     <string name="downloads_empty_description">Videos selected from Find videos appear here.</string>
-    <string name="downloads_summary">%1$d downloading · %2$d total</string>
+    <string name="downloads_summary">%1$d downloading</string>
+    <string name="downloads_summary_remaining">%1$d remaining</string>
     <string name="downloads_pause_all">Pause all</string>
     <string name="downloads_resume_all">Resume all</string>
     <string name="downloads_group_active">Downloading</string>
@@ -13,6 +14,7 @@
     <string name="downloads_group_paused">Paused</string>
     <string name="downloads_group_failed">Failed</string>
     <string name="downloads_group_completed">Completed</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
     <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
     <string name="downloads_thumbnail">%1$s thumbnail</string>
     <string name="downloads_unknown_size">Checking size</string>

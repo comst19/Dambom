@@ -65,6 +65,26 @@ class DownloadsUiStateTest {
     }
 
     @Test
+    fun `completed downloads disappear from the downloads screen`() {
+        val downloading = task("downloading", DownloadStatus.DOWNLOADING, 50L, 100L)
+        val paused = task("paused", DownloadStatus.PAUSED, 25L, 100L)
+
+        val state =
+            toDownloadsUiState(
+                tasks =
+                    listOf(
+                        task("completed", DownloadStatus.COMPLETED, 100L, 100L),
+                        downloading,
+                        paused,
+                    ),
+                viewMode = DownloadsViewMode.GRID,
+            )
+
+        assertEquals(listOf(downloading, paused), state.tasks)
+        assertEquals(2, state.totalCount)
+    }
+
+    @Test
     fun `view mode restores from saved state`() {
         val savedStateHandle = SavedStateHandle()
         DownloadsViewModel(EmptyDownloadRepository, SpyNavigationDispatcher(), savedStateHandle, AppEventBus())

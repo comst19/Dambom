@@ -8,13 +8,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Downloading
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -79,13 +83,19 @@ private fun EmptyDownloads() {
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
     ) {
-        Text(stringResource(R.string.downloads_empty_title), style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier.height(8.dp))
+        Icon(
+            imageVector = Icons.Outlined.Downloading,
+            contentDescription = null,
+            modifier = Modifier.size(52.dp),
+            tint = MaterialTheme.colorScheme.primary,
+        )
+        Text(stringResource(R.string.downloads_empty_title), style = MaterialTheme.typography.titleMedium)
         Text(
             stringResource(R.string.downloads_empty_description),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
         )
     }
 }
@@ -116,7 +126,7 @@ private fun DownloadGrid(
             val tasks = uiState.tasks.filter { it.status == status }
             if (tasks.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    Text(status.groupTitle(), style = MaterialTheme.typography.titleMedium)
+                    DownloadGroupTitle(status, tasks.size)
                 }
                 gridItems(
                     items = tasks,
@@ -160,7 +170,7 @@ private fun DownloadList(
         DOWNLOAD_GROUPS.forEach { status ->
             val tasks = uiState.tasks.filter { it.status == status }
             if (tasks.isNotEmpty()) {
-                item { Text(status.groupTitle(), style = MaterialTheme.typography.titleMedium) }
+                item { DownloadGroupTitle(status, tasks.size) }
                 listItems(
                     items = tasks,
                     key = DownloadTask::id,
@@ -193,20 +203,40 @@ private fun DownloadSummary(
         shape = DambomShapes.Summary,
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(
-                stringResource(R.string.downloads_summary, state.activeCount, state.totalCount),
-                style = MaterialTheme.typography.headlineSmall,
-            )
-            LinearProgressIndicator(
-                progress = { state.progress },
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .semantics { progressBarRangeInfo = ProgressBarRangeInfo(state.progress, 0f..1f) },
-            )
+            androidx.compose.foundation.layout.Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Downloading,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.downloads_summary, state.activeCount),
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    Text(
+                        stringResource(R.string.downloads_summary_remaining, state.totalCount),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
+            if (state.activeCount > 0) {
+                LinearProgressIndicator(
+                    progress = { state.progress },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .semantics { progressBarRangeInfo = ProgressBarRangeInfo(state.progress, 0f..1f) },
+                )
+            }
             androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (state.canPauseAll) {
                     OutlinedButton(onClick = onPauseAll) { Text(stringResource(R.string.downloads_pause_all)) }
@@ -221,6 +251,18 @@ private fun DownloadSummary(
     }
 }
 
+@Composable
+private fun DownloadGroupTitle(
+    status: DownloadStatus,
+    count: Int,
+) {
+    Text(
+        text = stringResource(R.string.downloads_group_count, status.groupTitle(), count),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+}
+
 private val MIN_DOWNLOAD_CARD_WIDTH = 340.dp
 private val DOWNLOAD_GROUPS =
     listOf(
@@ -228,6 +270,5 @@ private val DOWNLOAD_GROUPS =
         DownloadStatus.QUEUED,
         DownloadStatus.PAUSED,
         DownloadStatus.FAILED,
-        DownloadStatus.COMPLETED,
     )
 private const val DOWNLOAD_ITEM_CONTENT_TYPE = "download"

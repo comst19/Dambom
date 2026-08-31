@@ -19,7 +19,7 @@
     <string name="home_clipboard_consent_allow">제안 받기</string>
     <string name="home_clipboard_consent_deny">직접 붙여넣기</string>
     <string name="home_shared_url_title">공유한 링크를 가져왔어요</string>
-    <string name="home_shared_url_description">링크를 확인한 뒤 바로 영상 찾기를 시작할 수 있어요.</string>
+    <string name="home_shared_url_description">링크를 확인한 뒤 영상 찾기를 시작할 수 있어요.</string>
     <string name="home_analyze_now">영상 찾기</string>
     <string name="home_cancel">취소</string>
     <string name="home_download_active">%1$d개 다운로드 중</string>

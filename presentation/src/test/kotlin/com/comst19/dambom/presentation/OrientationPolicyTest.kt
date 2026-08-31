@@ -2,6 +2,8 @@ package com.comst19.dambom.presentation
 
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import com.comst19.dambom.presentation.system.VideoFullscreenOrientationState
+import com.comst19.dambom.presentation.system.requestedOrientationFor
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

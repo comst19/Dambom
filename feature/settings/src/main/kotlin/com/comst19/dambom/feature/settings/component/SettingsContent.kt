@@ -96,7 +96,7 @@ private fun LazyListScope.downloadSection(
     state: SettingsContentState,
     actions: SettingsActions,
 ) {
-    item { SettingsSectionTitle(stringResource(R.string.settings_section_download)) }
+    item { SettingsSectionTitle(stringResource(R.string.settings_section_download), topPadding = 0.dp) }
     item {
         SettingsRow(
             icon = Icons.Outlined.Folder,

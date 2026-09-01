@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.comst19.dambom.core.common.ui.AppScreen
+import com.comst19.dambom.core.common.ui.AppScreenDefaults
 
 @Composable
 internal fun HelpRoute(viewModel: SettingsViewModel = hiltViewModel()) {
@@ -86,6 +87,7 @@ private fun SettingsSubScreen(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     AppScreen(
+        maxWidth = AppScreenDefaults.SinglePaneMaxWidth,
         topBar = {
             TopAppBar(
                 title = { Text(title) },
@@ -103,7 +105,7 @@ private fun SettingsSubScreen(
         content(
             PaddingValues(
                 start = 24.dp,
-                top = innerPadding.calculateTopPadding() + 16.dp,
+                top = innerPadding.calculateTopPadding(),
                 end = 24.dp,
                 bottom = innerPadding.calculateBottomPadding() + 32.dp,
             ),

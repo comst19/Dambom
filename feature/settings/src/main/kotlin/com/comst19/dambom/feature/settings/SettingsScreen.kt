@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.AppScreen
+import com.comst19.dambom.core.common.ui.AppScreenDefaults
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.designsystem.previewNoOp
@@ -127,6 +128,7 @@ internal fun SettingsScreen(
     var showLanguageDialog by remember { mutableStateOf(false) }
 
     AppScreen(
+        maxWidth = AppScreenDefaults.SinglePaneMaxWidth,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.settings_title)) },

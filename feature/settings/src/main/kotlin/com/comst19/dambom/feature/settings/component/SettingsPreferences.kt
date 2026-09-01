@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.feature.settings.R
@@ -28,10 +29,13 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 
 @Composable
-internal fun SettingsSectionTitle(title: String) {
+internal fun SettingsSectionTitle(
+    title: String,
+    topPadding: Dp = 24.dp,
+) {
     Text(
         text = title,
-        modifier = Modifier.padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 8.dp),
+        modifier = Modifier.padding(start = 24.dp, top = topPadding, end = 24.dp, bottom = 8.dp),
         color = MaterialTheme.colorScheme.primary,
         style = MaterialTheme.typography.labelLarge,
         fontWeight = FontWeight.SemiBold,

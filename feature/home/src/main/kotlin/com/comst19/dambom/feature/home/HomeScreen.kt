@@ -2,35 +2,43 @@ package com.comst19.dambom.feature.home
 
 import android.content.ClipboardManager
 import android.content.Context
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.comst19.dambom.core.common.ui.appScaffoldPadding
+import com.comst19.dambom.core.common.ui.AppScreen
+import com.comst19.dambom.core.common.ui.AppScreenDefaults
 import com.comst19.dambom.core.common.ui.currentAdaptiveLayoutInfo
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.designsystem.previewNoOp
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.feature.home.component.ClipboardConsentDialog
-import com.comst19.dambom.feature.home.component.HomeHeader
 import com.comst19.dambom.feature.home.component.HomePrimarySection
 import com.comst19.dambom.feature.home.component.HomeSupportingSection
 import com.comst19.dambom.feature.home.component.SharedUrlDialog
@@ -68,6 +76,7 @@ internal fun HomeRoute(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 internal fun HomeScreen(
     uiState: HomeUiState,
     canUseInternet: Boolean,
@@ -87,23 +96,41 @@ internal fun HomeScreen(
     val screenVerticalPadding = if (compactHeight) 8.dp else 16.dp
     val sectionSpacing = if (compactHeight) 16.dp else 28.dp
 
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .appScaffoldPadding(),
-        contentAlignment = Alignment.TopCenter,
-    ) {
+    AppScreen(
+        maxWidth = AppScreenDefaults.SinglePaneMaxWidth,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.home_brand),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                },
+                actions = {
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = stringResource(R.string.home_open_settings),
+                        )
+                    }
+                },
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        titleContentColor = MaterialTheme.colorScheme.primary,
+                    ),
+            )
+        },
+    ) { innerPadding ->
         Column(
             modifier =
                 Modifier
-                    .widthIn(max = HOME_CONTENT_MAX_WIDTH)
-                    .fillMaxWidth()
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp, vertical = screenVerticalPadding),
+                    .padding(start = 16.dp, end = 16.dp, bottom = screenVerticalPadding),
         ) {
-            HomeHeader(onOpenSettings)
-            Spacer(Modifier.height(sectionSpacing))
             HomePrimarySection(
                 uiState = uiState,
                 canUseInternet = canUseInternet,
@@ -143,8 +170,6 @@ private fun Context.clipboardText(): String? =
         ?.getItemAt(0)
         ?.coerceToText(this)
         ?.toString()
-
-private val HOME_CONTENT_MAX_WIDTH = 720.dp
 
 @Preview
 @FormFactorPreviews

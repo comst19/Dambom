@@ -9,14 +9,12 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.domain.model.DownloadTask
@@ -24,48 +22,47 @@ import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
+import com.comst19.dambom.feature.library.formatBytes
 
 @Composable
 internal fun LibraryPane(
     uiState: LibraryUiState,
     fileActions: LibraryFileActions,
     onQueryChange: (String) -> Unit,
-    onViewModeChange: (LibraryViewMode) -> Unit,
     onSourceFilterChange: (LibrarySourceFilter) -> Unit,
     onVideoClick: (DownloadTask) -> Unit,
-    onStartSelection: () -> Unit,
     onToggleSelection: (String) -> Unit,
-    onSelectAll: () -> Unit,
-    onClearSelection: () -> Unit,
-    onDeleteSelected: () -> Unit,
     showInlineEmptyState: Boolean,
-    showDetailPaneControl: Boolean,
-    isDetailPaneVisible: Boolean,
-    onDetailPaneVisibilityChange: (Boolean) -> Unit,
     modifier: Modifier,
 ) {
-    var deleteSelectedOpen by remember { mutableStateOf(false) }
     Column(modifier) {
-        LibraryHeader(
-            viewMode = uiState.viewMode,
-            onViewModeChange = onViewModeChange,
-            showDetailPaneControl = showDetailPaneControl,
-            isDetailPaneVisible = isDetailPaneVisible,
-            onDetailPaneVisibilityChange = onDetailPaneVisibilityChange,
-            hasVideos = uiState.hasVideos,
-            isSelecting = uiState.isSelecting,
-            selectedCount = uiState.selectedIds.size,
-            videoCount = uiState.totalVideoCount,
-            totalBytes = uiState.totalBytes,
-            onStartSelection = onStartSelection,
-            onSelectAll = onSelectAll,
-            onDeleteSelected = { deleteSelectedOpen = true },
-            onClearSelection = onClearSelection,
-        )
+        if (!uiState.isSelecting && uiState.hasVideos) {
+            Text(
+                text =
+                    stringResource(
+                        R.string.library_storage_summary,
+                        uiState.totalVideoCount,
+                        uiState.totalBytes.formatBytes(),
+                    ),
+                modifier =
+                    Modifier.padding(
+                        start = LibraryHorizontalPadding,
+                        end = LibraryHorizontalPadding,
+                        bottom = 8.dp,
+                    ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
         LibrarySearchField(
             query = uiState.query,
             onQueryChange = onQueryChange,
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 8.dp),
+            modifier =
+                Modifier.padding(
+                    start = LibraryHorizontalPadding,
+                    end = LibraryHorizontalPadding,
+                    bottom = 8.dp,
+                ),
         )
         LibrarySourceFilters(
             selected = uiState.sourceFilter,
@@ -102,17 +99,10 @@ internal fun LibraryPane(
             )
         }
     }
-    if (deleteSelectedOpen) {
-        DeleteSelectedVideosDialog(
-            count = uiState.selectedIds.size,
-            onDismiss = { deleteSelectedOpen = false },
-            onConfirm = {
-                deleteSelectedOpen = false
-                onDeleteSelected()
-            },
-        )
-    }
 }
+
+internal val LibraryHorizontalPadding = 16.dp
+internal const val LIBRARY_SEARCH_FIELD_TAG = "library-search-field"
 
 @Composable
 private fun LibrarySearchField(
@@ -123,7 +113,7 @@ private fun LibrarySearchField(
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().testTag(LIBRARY_SEARCH_FIELD_TAG),
         placeholder = { Text(stringResource(R.string.library_search_placeholder)) },
         leadingIcon = {
             Icon(

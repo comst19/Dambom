@@ -4,8 +4,6 @@ import android.os.SystemClock
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,25 +11,23 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SignalWifiOff
 import androidx.compose.material.icons.outlined.WifiFind
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -41,7 +37,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -57,7 +52,6 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.NavigationState
 import com.comst19.dambom.core.navigation.Navigator
-import com.comst19.dambom.core.navigation.contract.LibraryGraph.LibraryKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
 import com.comst19.dambom.presentation.R
 import com.comst19.dambom.presentation.navigation.AppChrome
@@ -67,7 +61,7 @@ import com.comst19.dambom.presentation.system.SystemBarAppearance
 import kotlinx.coroutines.launch
 
 /**
- * NavigationState에 맞춰 공통 바텀바, 시스템 바, Snackbar와 앱 종료 경계 Back을 표시합니다.
+ * NavigationState와 Window에 맞춰 공통 NavigationBar/Rail, 시스템 바, Snackbar와 앱 종료 경계 Back을 표시합니다.
  * destination 내부 UI는 [entries]를 표시하는 AppNavDisplay에 위임합니다.
  */
 @Composable
@@ -79,17 +73,16 @@ internal fun AppScaffold(
     snackbarHostState: SnackbarHostState,
     networkAccess: NetworkAccessState,
     isLibraryDetailPaneVisible: Boolean,
-    libraryListPaneWidthPx: Int,
     isVideoFullscreen: Boolean,
 ) {
     val supportsMultiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
-    val defaultChrome = appChrome(state.currentKey)
+    val defaultChrome = appChrome(state.currentKey, usesNavigationRail = supportsMultiplePanes)
     val chrome =
         defaultChrome.copy(
-            showBottomBar =
-                shouldShowBottomBar(
+            showNavigation =
+                shouldShowNavigation(
                     currentKey = state.currentKey,
-                    defaultVisible = defaultChrome.showBottomBar,
+                    defaultVisible = defaultChrome.showNavigation,
                     supportsMultiplePanes = supportsMultiplePanes,
                 ),
         )
@@ -120,78 +113,60 @@ internal fun AppScaffold(
     if (policy.showSystemBarAppearance) {
         SystemBarAppearance(chrome)
     }
-    Scaffold(
-        contentWindowInsets = if (policy.useSafeDrawingInsets) WindowInsets.safeDrawing else WindowInsets(0, 0, 0, 0),
-        topBar = {
-            if (policy.showNetworkRestrictionBanner) {
-                networkAccess.restriction?.let { NetworkRestrictionBanner(it) }
-            }
-        },
-        snackbarHost = {
-            if (policy.showSnackbarHost) {
-                SnackbarHost(snackbarHostState)
-            }
-        },
-        bottomBar = {
-            if (policy.showBottomBar) {
-                BoxWithConstraints(Modifier.fillMaxWidth()) {
-                    val density = LocalDensity.current
-                    val bottomBarWidthPx =
-                        bottomBarWidthPx(
-                            currentKey = state.currentKey,
-                            supportsMultiplePanes = supportsMultiplePanes,
-                            isLibraryDetailPaneVisible = isLibraryDetailPaneVisible,
-                            listPaneWidthPx = libraryListPaneWidthPx,
-                            windowWidthPx = with(density) { maxWidth.roundToPx() },
-                        )
-                    Column(
-                        modifier =
-                            Modifier
-                                .width(with(density) { bottomBarWidthPx.toDp() })
-                                .align(Alignment.CenterStart),
-                    ) {
-                        NavigationBar(
-                            modifier = Modifier.fillMaxWidth().height(APP_NAVIGATION_BAR_HEIGHT),
-                            windowInsets = WindowInsets(0, 0, 0, 0),
-                        ) {
-                            AppNavigationConfig.topLevelDestinations.forEach { destination ->
-                                val labelRes = destination.bottomBarLabelRes ?: return@forEach
-                                val selectedIcon = destination.selectedIcon ?: return@forEach
-                                val unselectedIcon = destination.unselectedIcon ?: return@forEach
-                                val isSelected = state.currentTopLevel == destination.key
-                                NavigationBarItem(
-                                    selected = isSelected,
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            dispatcher.dispatch(NavigationEvent.NavigateTopLevel(destination.key))
-                                        }
-                                    },
-                                    icon = {
-                                        Icon(
-                                            imageVector = if (isSelected) selectedIcon else unselectedIcon,
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    label = { Text(stringResource(labelRes)) },
-                                )
-                            }
-                        }
-                        Spacer(Modifier.fillMaxWidth().windowInsetsBottomHeight(WindowInsets.navigationBars))
-                    }
+    NavigationSuiteScaffold(
+        navigationSuiteType = navigationSuiteType(policy.showNavigation, supportsMultiplePanes),
+        navigationItemVerticalArrangement = Arrangement.Center,
+        navigationItems = {
+            AppNavigationConfig.topLevelDestinations.forEachIndexed { index, destination ->
+                val labelRes = destination.bottomBarLabelRes ?: return@forEachIndexed
+                val selectedIcon = destination.selectedIcon ?: return@forEachIndexed
+                val unselectedIcon = destination.unselectedIcon ?: return@forEachIndexed
+                val isSelected = state.currentTopLevel == destination.key
+                if (supportsMultiplePanes && index > 0) {
+                    Spacer(Modifier.height(NAVIGATION_RAIL_ITEM_SPACING))
                 }
+                NavigationSuiteItem(
+                    selected = isSelected,
+                    onClick = {
+                        coroutineScope.launch {
+                            dispatcher.dispatch(NavigationEvent.NavigateTopLevel(destination.key))
+                        }
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = if (isSelected) selectedIcon else unselectedIcon,
+                            contentDescription = null,
+                        )
+                    },
+                    label = { Text(stringResource(labelRes)) },
+                )
             }
         },
-    ) { innerPadding ->
-        val appPadding = if (policy.provideZeroPadding) PaddingValues() else innerPadding
-        CompositionLocalProvider(LocalAppScaffoldPadding provides appPadding) {
-            // 각 화면이 일반, 목록, 전체 화면 특성에 맞게 이 PaddingValues를 적용합니다.
-            AppNavDisplay(
-                entries = entries,
-                navigator = navigator,
-                isLibraryDetailPaneVisible = isLibraryDetailPaneVisible,
-                isVideoFullscreen = isVideoFullscreen,
-                modifier = Modifier.fillMaxSize(),
-            )
+    ) {
+        Scaffold(
+            contentWindowInsets =
+                if (policy.useSafeDrawingInsets) WindowInsets.safeDrawing else WindowInsets(0, 0, 0, 0),
+            topBar = {
+                if (policy.showNetworkRestrictionBanner) {
+                    networkAccess.restriction?.let { NetworkRestrictionBanner(it) }
+                }
+            },
+            snackbarHost = {
+                if (policy.showSnackbarHost) {
+                    SnackbarHost(snackbarHostState)
+                }
+            },
+        ) { innerPadding ->
+            val appPadding = if (policy.provideZeroPadding) PaddingValues() else innerPadding
+            CompositionLocalProvider(LocalAppScaffoldPadding provides appPadding) {
+                AppNavDisplay(
+                    entries = entries,
+                    navigator = navigator,
+                    isLibraryDetailPaneVisible = isLibraryDetailPaneVisible,
+                    isVideoFullscreen = isVideoFullscreen,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
     }
 }
@@ -201,33 +176,25 @@ internal data class AppScaffoldPolicy(
     val showSystemBarAppearance: Boolean,
     val showNetworkRestrictionBanner: Boolean,
     val showSnackbarHost: Boolean,
-    val showBottomBar: Boolean,
+    val showNavigation: Boolean,
     val useSafeDrawingInsets: Boolean,
     val provideZeroPadding: Boolean,
 )
 
-internal fun shouldShowBottomBar(
+internal fun shouldShowNavigation(
     currentKey: NavKey,
     defaultVisible: Boolean,
     supportsMultiplePanes: Boolean,
 ): Boolean = defaultVisible || (supportsMultiplePanes && currentKey is VideoDetailKey)
 
-internal fun bottomBarWidthPx(
-    currentKey: NavKey,
+internal fun navigationSuiteType(
+    showNavigation: Boolean,
     supportsMultiplePanes: Boolean,
-    isLibraryDetailPaneVisible: Boolean,
-    listPaneWidthPx: Int,
-    windowWidthPx: Int,
-): Int =
-    if (
-        supportsMultiplePanes &&
-        isLibraryDetailPaneVisible &&
-        (currentKey is LibraryKey || currentKey is VideoDetailKey) &&
-        listPaneWidthPx in 1 until windowWidthPx
-    ) {
-        listPaneWidthPx
-    } else {
-        windowWidthPx
+): NavigationSuiteType =
+    when {
+        !showNavigation -> NavigationSuiteType.None
+        supportsMultiplePanes -> NavigationSuiteType.NavigationRail
+        else -> NavigationSuiteType.NavigationBar
     }
 
 internal fun appScaffoldPolicy(
@@ -241,7 +208,7 @@ internal fun appScaffoldPolicy(
             showSystemBarAppearance = false,
             showNetworkRestrictionBanner = false,
             showSnackbarHost = false,
-            showBottomBar = false,
+            showNavigation = false,
             useSafeDrawingInsets = false,
             provideZeroPadding = true,
         )
@@ -251,7 +218,7 @@ internal fun appScaffoldPolicy(
             showSystemBarAppearance = true,
             showNetworkRestrictionBanner = true,
             showSnackbarHost = true,
-            showBottomBar = chrome.showBottomBar,
+            showNavigation = chrome.showNavigation,
             useSafeDrawingInsets = true,
             provideZeroPadding = false,
         )
@@ -302,4 +269,4 @@ internal data class RootBackPressResetKey(
 )
 
 private const val ROOT_BACK_INTERVAL_MILLIS = 2_000L
-private val APP_NAVIGATION_BAR_HEIGHT = 64.dp
+private val NAVIGATION_RAIL_ITEM_SPACING = 16.dp

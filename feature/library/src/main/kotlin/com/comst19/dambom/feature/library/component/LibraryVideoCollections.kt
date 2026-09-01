@@ -26,7 +26,12 @@ internal fun VideoGrid(
     LazyVerticalGrid(
         columns = GridCells.Adaptive(MIN_VIDEO_CARD_WIDTH),
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 24.dp),
+        contentPadding =
+            PaddingValues(
+                start = LibraryHorizontalPadding,
+                end = LibraryHorizontalPadding,
+                bottom = 24.dp,
+            ),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -58,7 +63,12 @@ internal fun VideoList(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 24.dp),
+        contentPadding =
+            PaddingValues(
+                start = LibraryHorizontalPadding,
+                end = LibraryHorizontalPadding,
+                bottom = 24.dp,
+            ),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         listItems(

@@ -1,7 +1,7 @@
 package com.comst19.dambom.presentation.component
 
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
-import com.comst19.dambom.core.navigation.contract.LibraryGraph.LibraryKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
 import com.comst19.dambom.presentation.navigation.AppChrome
@@ -30,31 +30,23 @@ class AppScaffoldTest {
     }
 
     @Test
-    fun `Library detail keeps bottom navigation only in a multi pane scene`() {
+    fun `Library detail keeps app navigation only in a multi pane scene`() {
         val detail = VideoDetailKey("video")
 
-        assertFalse(shouldShowBottomBar(currentKey = detail, defaultVisible = false, supportsMultiplePanes = false))
-        assertTrue(shouldShowBottomBar(currentKey = detail, defaultVisible = false, supportsMultiplePanes = true))
-        assertTrue(shouldShowBottomBar(currentKey = HomeKey, defaultVisible = true, supportsMultiplePanes = false))
+        assertFalse(shouldShowNavigation(currentKey = detail, defaultVisible = false, supportsMultiplePanes = false))
+        assertTrue(shouldShowNavigation(currentKey = detail, defaultVisible = false, supportsMultiplePanes = true))
+        assertTrue(shouldShowNavigation(currentKey = HomeKey, defaultVisible = true, supportsMultiplePanes = false))
     }
 
     @Test
-    fun `Fold list detail limits bottom navigation to the list pane`() {
-        val detail = VideoDetailKey("video")
-
-        assertEquals(824, bottomBarWidthPx(detail, true, true, listPaneWidthPx = 824, windowWidthPx = 2_600))
-        assertEquals(2_600, bottomBarWidthPx(detail, true, false, listPaneWidthPx = 824, windowWidthPx = 2_600))
-        assertEquals(2_600, bottomBarWidthPx(detail, false, true, listPaneWidthPx = 824, windowWidthPx = 2_600))
-        assertEquals(2_600, bottomBarWidthPx(HomeKey, true, true, listPaneWidthPx = 824, windowWidthPx = 2_600))
-        assertEquals(2_600, bottomBarWidthPx(detail, true, true, listPaneWidthPx = 0, windowWidthPx = 2_600))
+    fun `Phone uses bottom navigation and Fold uses a stable rail`() {
+        assertEquals(NavigationSuiteType.NavigationBar, navigationSuiteType(true, supportsMultiplePanes = false))
+        assertEquals(NavigationSuiteType.NavigationRail, navigationSuiteType(true, supportsMultiplePanes = true))
     }
 
     @Test
-    fun `Fold library placeholder limits bottom navigation to the list pane`() {
-        assertEquals(
-            824,
-            bottomBarWidthPx(LibraryKey, true, true, listPaneWidthPx = 824, windowWidthPx = 2_600),
-        )
+    fun `hidden app navigation uses no navigation suite`() {
+        assertEquals(NavigationSuiteType.None, navigationSuiteType(false, supportsMultiplePanes = true))
     }
 
     @Test
@@ -65,7 +57,7 @@ class AppScaffoldTest {
                 showSystemBarAppearance = true,
                 showNetworkRestrictionBanner = true,
                 showSnackbarHost = true,
-                showBottomBar = true,
+                showNavigation = true,
                 useSafeDrawingInsets = true,
                 provideZeroPadding = false,
             ),
@@ -85,7 +77,7 @@ class AppScaffoldTest {
                 showSystemBarAppearance = false,
                 showNetworkRestrictionBanner = false,
                 showSnackbarHost = false,
-                showBottomBar = false,
+                showNavigation = false,
                 useSafeDrawingInsets = false,
                 provideZeroPadding = true,
             ),

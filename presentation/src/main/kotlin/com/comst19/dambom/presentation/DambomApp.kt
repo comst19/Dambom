@@ -4,7 +4,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -46,7 +45,6 @@ internal fun DambomApp(
     val snackbarHostState = remember { SnackbarHostState() }
     val currentNetworkAccess = rememberUpdatedState(networkAccess)
     var isLibraryDetailPaneVisible by rememberSaveable { mutableStateOf(true) }
-    var libraryListPaneWidthPx by remember { mutableIntStateOf(0) }
     var isVideoFullscreen by rememberSaveable { mutableStateOf(false) }
     val updateVideoFullscreen: (Boolean) -> Unit = { fullscreen ->
         isVideoFullscreen = fullscreen
@@ -68,7 +66,6 @@ internal fun DambomApp(
                 libraryEntries(
                     isDetailPaneVisible = { isLibraryDetailPaneVisible },
                     onDetailPaneVisibilityChange = { isLibraryDetailPaneVisible = it },
-                    onListPaneWidthChange = { libraryListPaneWidthPx = it },
                     isVideoFullscreen = { isVideoFullscreen },
                     onVideoFullscreenChange = updateVideoFullscreen,
                     onVideoRotate = onVideoRotate,
@@ -86,7 +83,6 @@ internal fun DambomApp(
         snackbarHostState = snackbarHostState,
         networkAccess = networkAccess,
         isLibraryDetailPaneVisible = isLibraryDetailPaneVisible,
-        libraryListPaneWidthPx = libraryListPaneWidthPx,
         isVideoFullscreen = isVideoFullscreen,
     )
 }

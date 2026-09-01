@@ -19,7 +19,10 @@ internal fun LibrarySourceFilters(
     onSelected: (LibrarySourceFilter) -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = LibraryHorizontalPadding, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         LibrarySourceFilter.entries.forEach { filter ->

@@ -9,20 +9,27 @@ import androidx.navigation3.runtime.NavKey
 
 @Immutable
 internal data class AppChrome(
-    val showBottomBar: Boolean,
+    val showNavigation: Boolean,
     val useDarkStatusBarIcons: Boolean,
     val useDarkNavigationBarIcons: Boolean,
 )
 
 @Composable
-internal fun appChrome(currentKey: NavKey): AppChrome {
-    val showBottomBar = currentKey in AppNavigationConfig.bottomBarKeys
+internal fun appChrome(
+    currentKey: NavKey,
+    usesNavigationRail: Boolean,
+): AppChrome {
+    val showNavigation = currentKey in AppNavigationConfig.bottomBarKeys
     val statusBarBackground = MaterialTheme.colorScheme.surface
     val navigationBarBackground =
-        if (showBottomBar) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surface
+        if (showNavigation && !usesNavigationRail) {
+            MaterialTheme.colorScheme.surfaceContainer
+        } else {
+            MaterialTheme.colorScheme.surface
+        }
 
     return AppChrome(
-        showBottomBar = showBottomBar,
+        showNavigation = showNavigation,
         useDarkStatusBarIcons = statusBarBackground.isLightBackground(),
         useDarkNavigationBarIcons = navigationBarBackground.isLightBackground(),
     )

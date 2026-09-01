@@ -2,6 +2,7 @@ plugins {
     id("dambom.android.library")
     id("dambom.android.hilt")
     id("dambom.android.test")
+    id("dambom.kotlin.serialization")
 }
 
 android {

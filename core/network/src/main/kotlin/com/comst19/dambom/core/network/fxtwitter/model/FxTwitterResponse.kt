@@ -1,4 +1,4 @@
-package com.comst19.dambom.core.data.network.fxtwitter.model
+package com.comst19.dambom.core.network.fxtwitter.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

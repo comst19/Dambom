@@ -1,8 +1,8 @@
 package com.comst19.dambom.core.data.repository
 
-import com.comst19.dambom.core.data.network.fxtwitter.FxTwitterMediaDetector
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
+import com.comst19.dambom.core.network.fxtwitter.FxTwitterNetworkDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -39,7 +39,7 @@ class DefaultMediaDetectionRepositoryTest {
         repository =
             DefaultMediaDetectionRepository(
                 client = client,
-                fxTwitterDetector = FxTwitterMediaDetector(client, Json { ignoreUnknownKeys = true }),
+                fxTwitterNetworkDataSource = FxTwitterNetworkDataSource(client, Json { ignoreUnknownKeys = true }),
                 ioDispatcher = Dispatchers.IO,
             )
     }

@@ -1,11 +1,12 @@
 package com.comst19.dambom.core.data.repository
 
 import com.comst19.dambom.core.coroutine.IoDispatcher
-import com.comst19.dambom.core.data.network.fxtwitter.FxTwitterMediaDetector
+import com.comst19.dambom.core.data.mapper.toDomain
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
+import com.comst19.dambom.core.network.fxtwitter.FxTwitterNetworkDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -21,15 +22,15 @@ internal class DefaultMediaDetectionRepository
     @Inject
     constructor(
         private val client: OkHttpClient,
-        private val fxTwitterDetector: FxTwitterMediaDetector,
+        private val fxTwitterNetworkDataSource: FxTwitterNetworkDataSource,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : MediaDetectionRepository {
         override suspend fun detect(url: String): MediaDetectionResult =
             withContext(ioDispatcher) {
                 val normalizedUrl = normalizeUrl(url) ?: return@withContext unsupported(UnsupportedReason.INVALID_URL)
                 try {
-                    fxTwitterDetector.detect(normalizedUrl)?.let { result ->
-                        return@withContext result
+                    fxTwitterNetworkDataSource.detect(normalizedUrl)?.let { result ->
+                        return@withContext result.toDomain()
                     }
                     client.newCall(buildRequest(normalizedUrl)).execute().use { response ->
                         when (response.code) {

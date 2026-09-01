@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.feature.settings.R
 import com.comst19.dambom.feature.settings.contract.AppLanguage
+import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 
@@ -139,6 +140,7 @@ internal fun <T> SettingsChoiceDialog(
 
 internal val THEME_MODE_ENTRIES = ThemeMode.entries.toPersistentList()
 internal val APP_LANGUAGE_ENTRIES = AppLanguage.entries.toPersistentList()
+internal val SAVE_LOCATION_MODE_ENTRIES = SaveLocationMode.entries.toPersistentList()
 
 internal val ThemeMode.labelRes: Int
     get() =
@@ -154,4 +156,11 @@ internal val AppLanguage.labelRes: Int
             AppLanguage.SYSTEM -> R.string.language_system
             AppLanguage.KOREAN -> R.string.language_korean
             AppLanguage.ENGLISH -> R.string.language_english
+        }
+
+internal val SaveLocationMode.labelRes: Int
+    get() =
+        when (this) {
+            SaveLocationMode.DEFAULT_FOLDER -> R.string.settings_save_method_default_folder
+            SaveLocationMode.CHOOSE_EACH_TIME -> R.string.settings_save_method_choose_each_time
         }

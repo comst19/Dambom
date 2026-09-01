@@ -14,6 +14,7 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.feature.settings.contract.AppLanguage
+import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 import com.comst19.dambom.feature.settings.platform.SettingsPlatformActions
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -54,6 +55,18 @@ class SettingsViewModelTest {
             advanceUntilIdle()
 
             assertEquals(DOWNLOAD_TREE_URI, repository.downloadTreeUri)
+        }
+
+    @Test
+    fun `save location mode maps to the repository flag`() =
+        runTest {
+            val repository = RecordingSettingsRepository()
+            val viewModel = createViewModel(repository = repository)
+
+            viewModel.setSaveLocationMode(SaveLocationMode.CHOOSE_EACH_TIME)
+            advanceUntilIdle()
+
+            assertEquals(false, repository.useConfiguredDownloadLocation)
         }
 
     @Test
@@ -107,6 +120,7 @@ private class FakeSettingsPlatformActions(
 
 private class RecordingSettingsRepository : SettingsRepository {
     override val settings: Flow<AppSettings> = flowOf(AppSettings())
+    var useConfiguredDownloadLocation: Boolean? = null
     var downloadTreeUri: String? = null
 
     override suspend fun setThemeMode(mode: ThemeMode) = Unit
@@ -122,6 +136,7 @@ private class RecordingSettingsRepository : SettingsRepository {
         enabled: Boolean,
         treeUri: String?,
     ) {
+        useConfiguredDownloadLocation = enabled
         downloadTreeUri = treeUri
     }
 }

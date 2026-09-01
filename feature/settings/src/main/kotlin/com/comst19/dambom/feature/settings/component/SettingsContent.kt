@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.feature.settings.R
 import com.comst19.dambom.feature.settings.contract.AppLanguage
+import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 
 @Immutable
 internal data class SettingsContentState(
@@ -33,7 +34,7 @@ internal data class SettingsContentState(
     val language: AppLanguage,
     val clipboardSuggestionEnabled: Boolean,
     val wifiOnlyDownloads: Boolean,
-    val useConfiguredDownloadLocation: Boolean,
+    val saveLocationMode: SaveLocationMode,
     val downloadLocation: String,
     val versionName: String,
 )
@@ -41,6 +42,7 @@ internal data class SettingsContentState(
 @Immutable
 internal data class SettingsActions(
     val onBack: () -> Unit,
+    val saveToDevice: DeviceSaveActions,
     val download: DownloadSettingsActions,
     val general: GeneralSettingsActions,
     val support: SupportSettingsActions,
@@ -48,9 +50,13 @@ internal data class SettingsActions(
 
 @Immutable
 internal data class DownloadSettingsActions(
-    val onUseConfiguredDownloadLocationChange: (Boolean) -> Unit,
-    val onDownloadLocationClick: () -> Unit,
     val onWifiOnlyDownloadsChange: (Boolean) -> Unit,
+)
+
+@Immutable
+internal data class DeviceSaveActions(
+    val onSaveLocationModeChange: (SaveLocationMode) -> Unit,
+    val onDownloadLocationClick: () -> Unit,
 )
 
 @Immutable
@@ -74,6 +80,7 @@ internal data class SupportSettingsActions(
 internal fun SettingsContent(
     state: SettingsContentState,
     actions: SettingsActions,
+    onSaveMethodClick: () -> Unit,
     onThemeClick: () -> Unit,
     onLanguageClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -82,7 +89,9 @@ internal fun SettingsContent(
         modifier = modifier,
         contentPadding = PaddingValues(bottom = 32.dp),
     ) {
-        downloadSection(state, actions)
+        saveToDeviceSection(state, actions.saveToDevice, onSaveMethodClick)
+        item { SettingsDivider() }
+        downloadSection(state, actions.download)
         item { SettingsDivider() }
         generalSection(state, actions, onThemeClick, onLanguageClick)
         item { SettingsDivider() }
@@ -92,49 +101,43 @@ internal fun SettingsContent(
     }
 }
 
-private fun LazyListScope.downloadSection(
+private fun LazyListScope.saveToDeviceSection(
     state: SettingsContentState,
-    actions: SettingsActions,
+    actions: DeviceSaveActions,
+    onSaveMethodClick: () -> Unit,
 ) {
-    item { SettingsSectionTitle(stringResource(R.string.settings_section_download), topPadding = 0.dp) }
+    item { SettingsSectionTitle(stringResource(R.string.settings_section_save_to_device), topPadding = 0.dp) }
     item {
         SettingsRow(
             icon = Icons.Outlined.Folder,
-            title = stringResource(R.string.settings_use_download_location),
-            subtitle =
-                stringResource(
-                    if (state.useConfiguredDownloadLocation) {
-                        R.string.settings_use_download_location_enabled_description
-                    } else {
-                        R.string.settings_use_download_location_disabled_description
-                    },
-                ),
-            onClick = {
-                actions.download.onUseConfiguredDownloadLocationChange(!state.useConfiguredDownloadLocation)
-            },
-            trailing = {
-                Switch(
-                    checked = state.useConfiguredDownloadLocation,
-                    onCheckedChange = actions.download.onUseConfiguredDownloadLocationChange,
-                )
-            },
+            title = stringResource(R.string.settings_save_method),
+            subtitle = stringResource(state.saveLocationMode.labelRes),
+            onClick = onSaveMethodClick,
         )
     }
-    item {
-        SettingsRow(
-            icon = Icons.Outlined.FolderOpen,
-            title = stringResource(R.string.settings_download_location),
-            subtitle = state.downloadLocation,
-            enabled = state.useConfiguredDownloadLocation,
-            onClick = actions.download.onDownloadLocationClick,
-        )
+    if (state.saveLocationMode == SaveLocationMode.DEFAULT_FOLDER) {
+        item {
+            SettingsRow(
+                icon = Icons.Outlined.FolderOpen,
+                title = stringResource(R.string.settings_default_download_location),
+                subtitle = state.downloadLocation,
+                onClick = actions.onDownloadLocationClick,
+            )
+        }
     }
+}
+
+private fun LazyListScope.downloadSection(
+    state: SettingsContentState,
+    actions: DownloadSettingsActions,
+) {
+    item { SettingsSectionTitle(stringResource(R.string.settings_section_download)) }
     item {
         SettingsRow(
             icon = Icons.Outlined.Wifi,
             title = stringResource(R.string.settings_wifi_only),
             subtitle = stringResource(R.string.settings_wifi_only_description),
-            onClick = { actions.download.onWifiOnlyDownloadsChange(!state.wifiOnlyDownloads) },
+            onClick = { actions.onWifiOnlyDownloadsChange(!state.wifiOnlyDownloads) },
             trailing = { Switch(checked = state.wifiOnlyDownloads, onCheckedChange = null) },
         )
     }

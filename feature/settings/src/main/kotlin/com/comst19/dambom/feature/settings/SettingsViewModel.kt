@@ -13,6 +13,7 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.HelpKey
 import com.comst19.dambom.feature.settings.contract.AppLanguage
+import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 import com.comst19.dambom.feature.settings.platform.SettingsPlatformActions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,9 +64,9 @@ internal class SettingsViewModel
             }
         }
 
-        fun setUseConfiguredDownloadLocation(enabled: Boolean) {
+        fun setSaveLocationMode(mode: SaveLocationMode) {
             viewModelScope.launch {
-                repository.setDownloadLocation(enabled, settings.value.downloadTreeUri)
+                repository.setDownloadLocation(mode.usesConfiguredFolder, settings.value.downloadTreeUri)
             }
         }
 

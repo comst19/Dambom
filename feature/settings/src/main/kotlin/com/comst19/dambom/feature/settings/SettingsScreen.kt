@@ -31,8 +31,10 @@ import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.designsystem.previewNoOp
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.feature.settings.component.APP_LANGUAGE_ENTRIES
+import com.comst19.dambom.feature.settings.component.DeviceSaveActions
 import com.comst19.dambom.feature.settings.component.DownloadSettingsActions
 import com.comst19.dambom.feature.settings.component.GeneralSettingsActions
+import com.comst19.dambom.feature.settings.component.SAVE_LOCATION_MODE_ENTRIES
 import com.comst19.dambom.feature.settings.component.SettingsActions
 import com.comst19.dambom.feature.settings.component.SettingsChoiceDialog
 import com.comst19.dambom.feature.settings.component.SettingsContent
@@ -44,6 +46,7 @@ import com.comst19.dambom.feature.settings.component.openExternalPage
 import com.comst19.dambom.feature.settings.component.openSourceLicenses
 import com.comst19.dambom.feature.settings.component.sendSupportEmail
 import com.comst19.dambom.feature.settings.contract.AppLanguage
+import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 
 private const val TERMS_OF_SERVICE_URL =
     "https://waiting-manchego-38d.notion.site/3cbeb6bb8cd580a0a03fc0287ed2420f"
@@ -80,21 +83,21 @@ internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
                 language = language,
                 clipboardSuggestionEnabled = settings.clipboardSuggestionEnabled,
                 wifiOnlyDownloads = settings.wifiOnlyDownloads,
-                useConfiguredDownloadLocation = settings.useConfiguredDownloadLocation,
+                saveLocationMode = SaveLocationMode.from(settings.useConfiguredDownloadLocation),
                 downloadLocation = downloadLocationLabel(settings.downloadTreeUri, defaultDownloadLocation),
                 versionName = viewModel.versionName,
             ),
         actions =
             SettingsActions(
                 onBack = viewModel::goBack,
-                download =
-                    DownloadSettingsActions(
-                        onUseConfiguredDownloadLocationChange = viewModel::setUseConfiguredDownloadLocation,
+                saveToDevice =
+                    DeviceSaveActions(
+                        onSaveLocationModeChange = viewModel::setSaveLocationMode,
                         onDownloadLocationClick = {
                             downloadDirectoryLauncher.launch(settings.downloadTreeUri?.let(Uri::parse))
                         },
-                        onWifiOnlyDownloadsChange = viewModel::setWifiOnlyDownloads,
                     ),
+                download = DownloadSettingsActions(onWifiOnlyDownloadsChange = viewModel::setWifiOnlyDownloads),
                 general =
                     GeneralSettingsActions(
                         onThemeModeChange = viewModel::setThemeMode,
@@ -126,6 +129,7 @@ internal fun SettingsScreen(
 ) {
     var showThemeDialog by remember { mutableStateOf(false) }
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showSaveMethodDialog by remember { mutableStateOf(false) }
 
     AppScreen(
         maxWidth = AppScreenDefaults.SinglePaneMaxWidth,
@@ -146,9 +150,24 @@ internal fun SettingsScreen(
         SettingsContent(
             state = state,
             actions = actions,
+            onSaveMethodClick = { showSaveMethodDialog = true },
             onThemeClick = { showThemeDialog = true },
             onLanguageClick = { showLanguageDialog = true },
             modifier = Modifier.fillMaxSize().padding(innerPadding),
+        )
+    }
+
+    if (showSaveMethodDialog) {
+        SettingsChoiceDialog(
+            title = stringResource(R.string.settings_save_method),
+            entries = SAVE_LOCATION_MODE_ENTRIES,
+            selected = state.saveLocationMode,
+            label = { stringResource(it.labelRes) },
+            onDismiss = { showSaveMethodDialog = false },
+            onSelect = {
+                showSaveMethodDialog = false
+                actions.saveToDevice.onSaveLocationModeChange(it)
+            },
         )
     }
 
@@ -191,19 +210,19 @@ private fun SettingsScreenPreview() {
                     language = AppLanguage.SYSTEM,
                     clipboardSuggestionEnabled = true,
                     wifiOnlyDownloads = false,
-                    useConfiguredDownloadLocation = true,
+                    saveLocationMode = SaveLocationMode.DEFAULT_FOLDER,
                     downloadLocation = "Download/Dambom",
                     versionName = "1.0.1",
                 ),
             actions =
                 SettingsActions(
                     onBack = ::previewNoOp,
-                    download =
-                        DownloadSettingsActions(
-                            onUseConfiguredDownloadLocationChange = ::previewNoOp,
+                    saveToDevice =
+                        DeviceSaveActions(
+                            onSaveLocationModeChange = ::previewNoOp,
                             onDownloadLocationClick = ::previewNoOp,
-                            onWifiOnlyDownloadsChange = ::previewNoOp,
                         ),
+                    download = DownloadSettingsActions(onWifiOnlyDownloadsChange = ::previewNoOp),
                     general =
                         GeneralSettingsActions(
                             onThemeModeChange = ::previewNoOp,

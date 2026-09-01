@@ -23,7 +23,7 @@ class DefaultStartupCoordinator
         private val appEventBus: AppEventBus,
     ) : StartupCoordinator {
         override suspend fun initialize(): TopLevelNavKey {
-            suspendRunCatching { downloadRepository.ensureDownloadsScheduled() }
+            suspendRunCatching { downloadRepository.recoverPendingDownloads() }
                 .onFailure {
                     appEventBus.send(
                         AppEvent.ShowSnackbar(UiText.Resource(R.string.download_recovery_failed)),

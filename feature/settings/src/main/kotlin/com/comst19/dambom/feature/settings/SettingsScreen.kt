@@ -70,7 +70,7 @@ internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
     val defaultDownloadLocation = stringResource(R.string.settings_download_location_value)
     val downloadDirectoryLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-            uri?.let(viewModel::setDownloadDirectory)
+            uri?.toString()?.let(viewModel::setDownloadDirectory)
         }
 
     SettingsScreen(

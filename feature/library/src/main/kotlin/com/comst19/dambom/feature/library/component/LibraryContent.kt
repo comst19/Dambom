@@ -17,12 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.common.ui.format.formatFileSize
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
-import com.comst19.dambom.feature.library.formatBytes
 
 @Composable
 internal fun LibraryPane(
@@ -42,7 +42,7 @@ internal fun LibraryPane(
                     stringResource(
                         R.string.library_storage_summary,
                         uiState.totalVideoCount,
-                        uiState.totalBytes.formatBytes(),
+                        uiState.totalBytes.formatFileSize(),
                     ),
                 modifier =
                     Modifier.padding(

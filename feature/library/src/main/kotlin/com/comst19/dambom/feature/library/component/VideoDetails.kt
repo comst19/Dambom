@@ -26,10 +26,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.common.ui.format.formatFileSize
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.ORIGINAL_QUALITY
 import com.comst19.dambom.feature.library.R
-import com.comst19.dambom.feature.library.formatBytes
 import com.comst19.dambom.feature.library.media.LocalVideoMetadata
 import com.comst19.dambom.feature.library.toTimeText
 import java.text.DateFormat
@@ -71,7 +71,7 @@ internal fun VideoDetails(
             information =
                 VideoInformation(
                     duration = duration,
-                    fileSize = task.downloadedBytes.formatBytes(),
+                    fileSize = task.downloadedBytes.formatFileSize(),
                     videoQuality = videoQuality,
                     downloadedAt = downloadedAt,
                 ),

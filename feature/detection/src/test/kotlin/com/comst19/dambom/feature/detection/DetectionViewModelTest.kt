@@ -286,6 +286,8 @@ private class RecordingDownloadRepository : DownloadRepository {
 
     override suspend fun resumeAll() = Unit
 
+    override suspend fun recoverPendingDownloads() = Unit
+
     override suspend fun refreshNetworkPolicy() = Unit
 }
 

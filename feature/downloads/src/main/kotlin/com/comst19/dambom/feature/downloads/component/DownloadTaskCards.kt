@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.common.ui.format.formatFileSize
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
@@ -139,8 +140,8 @@ private fun DownloadTaskDetails(
     Text(
         stringResource(
             R.string.downloads_bytes,
-            task.downloadedBytes.formatBytes(),
-            task.expectedBytes?.formatBytes() ?: stringResource(R.string.downloads_unknown_size),
+            task.downloadedBytes.formatFileSize(),
+            task.expectedBytes?.formatFileSize() ?: stringResource(R.string.downloads_unknown_size),
             task.quality,
         ),
         color = MaterialTheme.colorScheme.onSurfaceVariant,

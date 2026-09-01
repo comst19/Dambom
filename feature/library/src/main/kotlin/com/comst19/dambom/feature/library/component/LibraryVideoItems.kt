@@ -33,8 +33,8 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.common.ui.format.formatFileSize
 import com.comst19.dambom.core.domain.model.DownloadTask
-import com.comst19.dambom.feature.library.formatBytes
 import com.comst19.dambom.feature.library.media.LocalVideoMetadata
 import com.comst19.dambom.feature.library.media.rememberLocalVideoMetadata
 import com.comst19.dambom.feature.library.toTimeText
@@ -186,7 +186,7 @@ private fun VideoItemInfo(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = task.downloadedBytes.formatBytes(),
+                text = task.downloadedBytes.formatFileSize(),
                 color = metadataColor,
                 style = MaterialTheme.typography.bodySmall,
             )

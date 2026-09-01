@@ -87,8 +87,3 @@ internal fun DownloadFailureReason.failureText(): String =
             DownloadFailureReason.UNKNOWN -> R.string.downloads_error_unknown
         },
     )
-
-internal fun Long.formatBytes(): String {
-    val megabytes = this / (1024.0 * 1024.0)
-    return if (megabytes >= 1.0) "%.1f MB".format(megabytes) else "%.0f KB".format(this / 1024.0)
-}

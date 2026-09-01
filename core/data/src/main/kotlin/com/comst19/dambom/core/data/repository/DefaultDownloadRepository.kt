@@ -103,7 +103,7 @@ class DefaultDownloadRepository
             scheduler.schedule()
         }
 
-        override suspend fun ensureDownloadsScheduled() {
+        override suspend fun recoverPendingDownloads() {
             if (dao.countSchedulable() > 0) scheduler.ensureScheduled()
         }
 

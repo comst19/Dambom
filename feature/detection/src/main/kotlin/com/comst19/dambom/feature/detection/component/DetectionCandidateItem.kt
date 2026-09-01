@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.common.ui.VideoThumbnail
+import com.comst19.dambom.core.common.ui.format.formatFileSize
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaVariant
@@ -117,7 +118,7 @@ internal fun DetectionCandidateItem(
                 }
                 selectedVariant.contentLength?.let {
                     Text(
-                        it.formatBytes(),
+                        it.formatFileSize(),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

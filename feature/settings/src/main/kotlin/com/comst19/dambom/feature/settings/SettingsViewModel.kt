@@ -1,10 +1,5 @@
 package com.comst19.dambom.feature.settings
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.comst19.dambom.core.common.ui.AppEvent
@@ -18,8 +13,8 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.HelpKey
 import com.comst19.dambom.feature.settings.contract.AppLanguage
+import com.comst19.dambom.feature.settings.platform.SettingsPlatformActions
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +30,7 @@ internal class SettingsViewModel
         private val downloadRepository: DownloadRepository,
         private val navigation: NavigationDispatcher,
         private val appEventBus: AppEventBus,
-        @ApplicationContext private val context: Context,
+        private val platformActions: SettingsPlatformActions,
     ) : ViewModel() {
         val settings: StateFlow<AppSettings> =
             repository.settings.stateIn(
@@ -43,13 +38,8 @@ internal class SettingsViewModel
                 started = SharingStarted.WhileSubscribed(SETTINGS_STOP_TIMEOUT_MILLIS),
                 initialValue = AppSettings(),
             )
-        val language = MutableStateFlow(AppLanguage.from(AppCompatDelegate.getApplicationLocales().toLanguageTags()))
-        val versionName: String =
-            context.packageManager
-                .getPackageInfo(context.packageName, 0)
-                .versionName
-                .orEmpty()
-                .ifBlank { "-" }
+        val language = MutableStateFlow(AppLanguage.from(platformActions.currentLanguageTags))
+        val versionName: String = platformActions.versionName
 
         fun setThemeMode(mode: ThemeMode) {
             viewModelScope.launch { repository.setThemeMode(mode) }
@@ -57,7 +47,7 @@ internal class SettingsViewModel
 
         fun setLanguage(language: AppLanguage) {
             this.language.value = language
-            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(language.languageTag))
+            platformActions.applyLanguage(language.languageTag)
         }
 
         fun setClipboardSuggestion(enabled: Boolean) {
@@ -79,15 +69,11 @@ internal class SettingsViewModel
             }
         }
 
-        fun setDownloadDirectory(uri: Uri) {
+        fun setDownloadDirectory(treeUri: String) {
             viewModelScope.launch {
-                try {
-                    context.contentResolver.takePersistableUriPermission(
-                        uri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
-                    )
-                    repository.setDownloadLocation(enabled = true, treeUri = uri.toString())
-                } catch (_: SecurityException) {
+                if (platformActions.persistDownloadDirectory(treeUri)) {
+                    repository.setDownloadLocation(enabled = true, treeUri = treeUri)
+                } else {
                     appEventBus.send(
                         AppEvent.ShowSnackbar(UiText.Resource(R.string.settings_download_location_failure)),
                     )

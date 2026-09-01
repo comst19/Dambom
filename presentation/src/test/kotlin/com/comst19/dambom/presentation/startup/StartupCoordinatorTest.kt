@@ -55,7 +55,7 @@ private object FailingRecoveryRepository : DownloadRepository {
 
     override suspend fun resumeAll() = Unit
 
-    override suspend fun ensureDownloadsScheduled(): Unit = error("WorkManager unavailable")
+    override suspend fun recoverPendingDownloads(): Unit = error("WorkManager unavailable")
 
     override suspend fun refreshNetworkPolicy() = Unit
 }

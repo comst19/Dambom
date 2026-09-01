@@ -159,7 +159,7 @@ class DefaultDownloadRepositoryTest {
             repository = createRepository(testScheduler)
             database.downloadTaskDao().insert(entity(TEST_ID, "media.example"))
 
-            repository.ensureDownloadsScheduled()
+            repository.recoverPendingDownloads()
 
             assertEquals(1, scheduler.successfulEnsureCount)
         }

@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.common.ui.VideoThumbnail
+import com.comst19.dambom.core.common.ui.format.formatFileSize
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaVariant
 import com.comst19.dambom.feature.detection.R
@@ -114,7 +115,7 @@ internal fun DetectionQualitySheet(
                     )
                     variant.contentLength?.let { contentLength ->
                         Text(
-                            text = contentLength.formatBytes(),
+                            text = contentLength.formatFileSize(),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyLarge,
                         )
@@ -132,9 +133,4 @@ internal fun DetectionQualitySheet(
             Spacer(Modifier.height(12.dp))
         }
     }
-}
-
-internal fun Long.formatBytes(): String {
-    val megabytes = this / (1024.0 * 1024.0)
-    return "%.1f MB".format(megabytes)
 }

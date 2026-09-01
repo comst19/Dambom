@@ -145,11 +145,6 @@ internal fun LibraryDetailPlaceholderRoute() {
     }
 }
 
-internal fun Long.formatBytes(): String {
-    val megabytes = this / (1024.0 * 1024.0)
-    return if (megabytes >= 1.0) "%.1f MB".format(megabytes) else "%.0f KB".format(this / 1024.0)
-}
-
 @FormFactorPreviews
 @Composable
 private fun LibraryScreenPreview() {

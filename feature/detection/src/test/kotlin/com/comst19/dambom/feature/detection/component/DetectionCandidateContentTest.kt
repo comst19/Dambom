@@ -31,6 +31,62 @@ class DetectionCandidateContentTest {
     @get:Rule val composeRule = createComposeRule()
 
     @Test
+    fun `candidate text follows one horizontal grid`() {
+        val candidate = candidate("video-1", "Video title", "High", "Low")
+
+        composeRule.setContent {
+            DambomTheme {
+                Box(Modifier.width(360.dp)) {
+                    DetectionCandidateItem(
+                        candidate = candidate,
+                        selectedVariant = candidate.downloadVariants.first(),
+                        index = 1,
+                        selected = true,
+                        onClick = {},
+                        onSelectVariant = {},
+                        onPreview = {},
+                    )
+                }
+            }
+        }
+
+        val titleLeft = composeRule.onNodeWithText("Video title", useUnmergedTree = true).getUnclippedBoundsInRoot().left
+        val sourceLeft = composeRule.onNodeWithText("example.com", useUnmergedTree = true).getUnclippedBoundsInRoot().left
+        val qualityLeft = composeRule.onNodeWithText("High", useUnmergedTree = true).getUnclippedBoundsInRoot().left
+
+        assertEquals(titleLeft, sourceLeft)
+        assertEquals(titleLeft, qualityLeft)
+    }
+
+    @Test
+    fun `detection content uses the app horizontal grid`() {
+        val candidate = candidate("video-1", "Video title", "High", "Low")
+
+        composeRule.setContent {
+            DambomTheme {
+                Box(Modifier.width(360.dp)) {
+                    DetectionCandidateContent(
+                        state =
+                            DetectionUiState.Content(
+                                pageTitle = "Videos",
+                                candidates = persistentListOf(candidate),
+                                selectedIds = persistentSetOf(candidate.id),
+                            ),
+                        networkAccess = NetworkAccessState(NetworkConnection.UNMETERED),
+                        onToggleCandidate = {},
+                        onSelectVariant = { _, _ -> },
+                        onDownload = {},
+                    )
+                }
+            }
+        }
+
+        val pageTitleLeft = composeRule.onNodeWithText("Videos").getUnclippedBoundsInRoot().left
+
+        assertEquals(16.dp, pageTitleLeft)
+    }
+
+    @Test
     fun `checkbox center matches the candidate title center`() {
         val candidate = candidate("video-1", "Video title", "High", "Low")
 
@@ -51,7 +107,8 @@ class DetectionCandidateContentTest {
         }
 
         val checkboxBounds = composeRule.onNodeWithTag(SELECTION_CHECKBOX_TAG).getUnclippedBoundsInRoot()
-        val titleBounds = composeRule.onNodeWithText("Video title").getUnclippedBoundsInRoot()
+        val titleBounds =
+            composeRule.onNodeWithText("Video title", useUnmergedTree = true).getUnclippedBoundsInRoot()
 
         assertEquals(
             (titleBounds.top + titleBounds.bottom) / 2,

@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,9 +23,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.common.ui.PreloadVideoThumbnails
-import com.comst19.dambom.core.designsystem.DambomShapes
+import com.comst19.dambom.core.designsystem.DambomButton
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.model.NetworkRestriction
@@ -67,17 +68,26 @@ internal fun DetectionCandidateContent(
             columns = GridCells.Adaptive(MIN_CANDIDATE_WIDTH),
             modifier = Modifier.weight(1f),
             state = gridState,
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 12.dp),
+            contentPadding = PaddingValues(start = SCREEN_HORIZONTAL_PADDING, end = SCREEN_HORIZONTAL_PADDING, bottom = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Column {
-                    Text(state.pageTitle, style = MaterialTheme.typography.headlineSmall)
-                    Spacer(Modifier.height(6.dp))
+                Column(
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        text = state.pageTitle,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                     Text(
                         stringResource(R.string.detection_found_count, state.candidates.size),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                     if (state.candidates.size > 1) {
                         Text(
@@ -86,7 +96,6 @@ internal fun DetectionCandidateContent(
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
-                    Spacer(Modifier.height(4.dp))
                 }
             }
             itemsIndexed(
@@ -153,21 +162,18 @@ private fun DetectionActions(
     networkAccess: NetworkAccessState,
     onDownload: () -> Unit,
 ) {
-    Column(Modifier.padding(horizontal = 24.dp)) {
+    Column(Modifier.padding(horizontal = SCREEN_HORIZONTAL_PADDING)) {
         Spacer(Modifier.height(8.dp))
-        Button(
-            onClick = onDownload,
-            modifier = Modifier.fillMaxWidth().height(54.dp),
-            enabled = state.selectedIds.isNotEmpty() && !state.isSubmitting && networkAccess.canDownload,
-            shape = DambomShapes.Control,
-        ) {
-            Text(
+        DambomButton(
+            text =
                 stringResource(
                     if (state.isSubmitting) R.string.detection_adding_to_queue else R.string.detection_download_selected,
                     state.selectedIds.size,
                 ),
-            )
-        }
+            onClick = onDownload,
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            enabled = state.selectedIds.isNotEmpty() && !state.isSubmitting && networkAccess.canDownload,
+        )
         if (state.enqueueFailed) {
             Text(
                 text = stringResource(R.string.detection_enqueue_failed),
@@ -196,5 +202,6 @@ private fun DetectionActions(
 }
 
 private val MIN_CANDIDATE_WIDTH = 320.dp
+private val SCREEN_HORIZONTAL_PADDING = 16.dp
 private const val CANDIDATE_CONTENT_TYPE = "candidate"
 private const val PRELOAD_CANDIDATE_COUNT = 2

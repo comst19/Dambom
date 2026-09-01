@@ -193,7 +193,7 @@ private fun SettingsScreenPreview() {
                     wifiOnlyDownloads = false,
                     useConfiguredDownloadLocation = true,
                     downloadLocation = "Download/Dambom",
-                    versionName = "1.0.0",
+                    versionName = "1.0.1",
                 ),
             actions =
                 SettingsActions(

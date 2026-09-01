@@ -28,7 +28,7 @@ internal class WorkManagerDownloadScheduler
         @ApplicationContext context: Context,
         private val settingsRepository: SettingsRepository,
     ) : DownloadWorkScheduler {
-        private val workManager = WorkManager.getInstance(context)
+        private val workManager by lazy { WorkManager.getInstance(context) }
 
         override suspend fun schedule() {
             enqueue(ExistingWorkPolicy.APPEND_OR_REPLACE)

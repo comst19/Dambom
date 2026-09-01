@@ -110,11 +110,11 @@ class MainViewModelTest {
 }
 
 private object SuccessfulStartupCoordinator : StartupCoordinator {
-    override suspend fun initialize(): TopLevelNavKey = HomeKey
+    override fun initialize(): TopLevelNavKey = HomeKey
 }
 
 private object FailingStartupCoordinator : StartupCoordinator {
-    override suspend fun initialize(): TopLevelNavKey = error("Initialization failed")
+    override fun initialize(): TopLevelNavKey = error("Initialization failed")
 }
 
 private class FakeSettingsRepository : SettingsRepository {

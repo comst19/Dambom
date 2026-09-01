@@ -70,16 +70,14 @@ class MainViewModel
         }
 
         private fun initializeStartup() {
-            viewModelScope.launch {
-                suspendRunCatching(startupCoordinator::initialize).fold(
-                    onSuccess = { startKey ->
-                        _startupState.value = AppStartupState.Ready(startKey)
-                    },
-                    onFailure = {
-                        _startupState.value = AppStartupState.Failed(StartupFailure.InitializationFailed)
-                    },
-                )
-            }
+            runCatching(startupCoordinator::initialize).fold(
+                onSuccess = { startKey ->
+                    _startupState.value = AppStartupState.Ready(startKey)
+                },
+                onFailure = {
+                    _startupState.value = AppStartupState.Failed(StartupFailure.InitializationFailed)
+                },
+            )
         }
 
         private fun observeUnhandledErrors() {

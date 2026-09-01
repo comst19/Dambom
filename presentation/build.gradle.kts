@@ -17,6 +17,7 @@ dependencies {
 
     implementation(projects.core.commonUi)
     implementation(projects.core.common)
+    implementation(projects.core.coroutine)
     implementation(projects.core.designsystem)
     implementation(projects.core.domain)
     implementation(projects.core.navigation)

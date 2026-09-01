@@ -1,5 +1,6 @@
 package com.comst19.dambom.macrobenchmark
 
+import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
@@ -25,7 +26,7 @@ class BaselineProfileGenerator {
             pressHome()
             startActivityAndWait()
 
-            device.wait(Until.findObject(By.text(CLIPBOARD_CONSENT_DENY_PATTERN)), UI_TIMEOUT_MILLIS)?.click()
+            dismissClipboardConsent()
             check(device.wait(Until.hasObject(By.text(HOME_READY_PATTERN)), UI_TIMEOUT_MILLIS)) {
                 "Home screen did not become visible"
             }
@@ -41,7 +42,7 @@ class BaselineProfileGenerator {
             pressHome()
             startActivityAndWait()
 
-            device.wait(Until.findObject(By.text(CLIPBOARD_CONSENT_DENY_PATTERN)), UI_TIMEOUT_MILLIS)?.click()
+            dismissClipboardConsent()
             check(device.wait(Until.hasObject(By.text(HOME_READY_PATTERN)), UI_TIMEOUT_MILLIS)) {
                 "Home screen did not become visible"
             }
@@ -51,6 +52,12 @@ class BaselineProfileGenerator {
             check(device.wait(Until.hasObject(By.text(LIBRARY_SEARCH_PATTERN)), UI_TIMEOUT_MILLIS)) {
                 "Library screen did not become visible"
             }
+        }
+    }
+
+    private fun MacrobenchmarkScope.dismissClipboardConsent() {
+        device.wait(Until.findObject(By.text(CLIPBOARD_CONSENT_DENY_PATTERN)), UI_TIMEOUT_MILLIS)?.let { button ->
+            device.click(button.visibleCenter.x, button.visibleCenter.y)
         }
     }
 }

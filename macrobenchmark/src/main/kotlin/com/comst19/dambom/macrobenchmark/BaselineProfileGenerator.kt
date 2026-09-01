@@ -24,6 +24,11 @@ class BaselineProfileGenerator {
         ) {
             pressHome()
             startActivityAndWait()
+
+            device.wait(Until.findObject(By.text(CLIPBOARD_CONSENT_DENY_PATTERN)), UI_TIMEOUT_MILLIS)?.click()
+            check(device.wait(Until.hasObject(By.text(HOME_READY_PATTERN)), UI_TIMEOUT_MILLIS)) {
+                "Home screen did not become visible"
+            }
         }
     }
 
@@ -37,6 +42,9 @@ class BaselineProfileGenerator {
             startActivityAndWait()
 
             device.wait(Until.findObject(By.text(CLIPBOARD_CONSENT_DENY_PATTERN)), UI_TIMEOUT_MILLIS)?.click()
+            check(device.wait(Until.hasObject(By.text(HOME_READY_PATTERN)), UI_TIMEOUT_MILLIS)) {
+                "Home screen did not become visible"
+            }
             val libraryTab = device.wait(Until.findObject(By.text(LIBRARY_TAB_PATTERN)), UI_TIMEOUT_MILLIS)
             checkNotNull(libraryTab) { "Library bottom navigation item was not found" }
             libraryTab.click()
@@ -50,5 +58,6 @@ class BaselineProfileGenerator {
 internal const val TARGET_PACKAGE = "com.comst19.dambom"
 internal const val UI_TIMEOUT_MILLIS = 5_000L
 internal val CLIPBOARD_CONSENT_DENY_PATTERN = Pattern.compile("직접 붙여넣기|Paste manually")
+internal val HOME_READY_PATTERN = Pattern.compile("어떤 영상을 담아볼까요\\?|What would you like to save\\?")
 internal val LIBRARY_TAB_PATTERN = Pattern.compile("보관함|Library")
 internal val LIBRARY_SEARCH_PATTERN = Pattern.compile("저장한 영상 검색|Search saved videos")

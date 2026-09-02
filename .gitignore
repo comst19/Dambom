@@ -18,6 +18,9 @@ obfuscated-stacktrace.txt
 *.apk
 *.aab
 *.ipa
+*.md
+!README.md
+!**/README.md
 .claude/
 .codex/
 .AGENT.md

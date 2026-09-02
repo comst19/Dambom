@@ -1,4 +1,4 @@
-name: Update Baseline Profile
+name: Baseline Profile Maintenance
 
 on:
   schedule:

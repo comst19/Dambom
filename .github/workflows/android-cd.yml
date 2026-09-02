@@ -1,4 +1,4 @@
-name: Release artifacts
+name: Android CD
 
 on:
   push:
@@ -18,8 +18,6 @@ jobs:
     name: Build signed release APK and AAB
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    env:
-      DAMBOM_RELEASE_STORE_FILE: ${{ runner.temp }}/dambom-release.jks
 
     steps:
       - name: Check out repository
@@ -29,6 +27,10 @@ jobs:
         uses: ./.github/actions/setup-android
         with:
           cache-read-only: "false"
+
+      - name: Set release keystore path
+        shell: bash
+        run: echo "DAMBOM_RELEASE_STORE_FILE=$RUNNER_TEMP/dambom-release.jks" >> "$GITHUB_ENV"
 
       - name: Validate signing secrets
         shell: bash

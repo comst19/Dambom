@@ -5,6 +5,11 @@ plugins {
     alias(libs.plugins.baselineprofile)
 }
 
+val releaseStoreFile = providers.environmentVariable("DAMBOM_RELEASE_STORE_FILE").orNull
+val releaseStorePassword = providers.environmentVariable("DAMBOM_RELEASE_STORE_PASSWORD").orNull
+val releaseKeyAlias = providers.environmentVariable("DAMBOM_RELEASE_KEY_ALIAS").orNull
+val releaseKeyPassword = providers.environmentVariable("DAMBOM_RELEASE_KEY_PASSWORD").orNull
+
 android {
     namespace = "com.comst19.dambom"
     defaultConfig {
@@ -15,6 +20,22 @@ android {
 
     buildFeatures { buildConfig = true }
 
+    signingConfigs {
+        if (
+            releaseStoreFile != null &&
+            releaseStorePassword != null &&
+            releaseKeyAlias != null &&
+            releaseKeyPassword != null
+        ) {
+            create("release") {
+                storeFile = file(releaseStoreFile)
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         getByName("debug") {
             buildConfigField("String", "APP_ENVIRONMENT", "\"DEBUG\"")
@@ -24,6 +45,7 @@ android {
         }
         getByName("release") {
             buildConfigField("String", "APP_ENVIRONMENT", "\"RELEASE\"")
+            signingConfigs.findByName("release")?.let { signingConfig = it }
         }
     }
 }

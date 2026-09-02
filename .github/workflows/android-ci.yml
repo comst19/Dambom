@@ -1,0 +1,117 @@
+name: Android CI
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+      - release
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  version:
+    name: Version code
+    if: ${{ github.event_name == 'pull_request' && (github.base_ref == 'release' || github.base_ref == 'main') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository history
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+
+      - name: Require a versionCode increase
+        shell: bash
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          base_version_code=$(git show "origin/$BASE_REF:app/build.gradle.kts" | sed -nE 's/.*versionCode = ([0-9]+).*/\1/p' | head -1)
+          current_version_code=$(sed -nE 's/.*versionCode = ([0-9]+).*/\1/p' app/build.gradle.kts | head -1)
+          if [[ -z "$base_version_code" || -z "$current_version_code" ]]; then
+            echo "::error::Unable to read versionCode from app/build.gradle.kts."
+            exit 1
+          fi
+          if (( current_version_code <= base_version_code )); then
+            echo "::error::versionCode must increase from $base_version_code before promotion."
+            exit 1
+          fi
+
+  checks:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: static-analysis
+            name: Static analysis
+            tasks: ktlintCheck detekt
+          - id: unit-tests
+            name: Unit tests
+            tasks: testDebugUnitTest
+          - id: lint-dependencies
+            name: Lint and dependency analysis
+            tasks: lintDebug lintQa lintRelease buildHealth
+          - id: debug-build
+            name: Debug build
+            tasks: :app:assembleDebug
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Android environment
+        uses: ./.github/actions/setup-android
+        with:
+          cache-read-only: "true"
+
+      - name: Run ${{ matrix.name }}
+        env:
+          GRADLE_TASKS: ${{ matrix.tasks }}
+        run: ./gradlew $GRADLE_TASKS --parallel --stacktrace
+
+      - name: Upload failure reports
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ci-failure-reports-${{ matrix.id }}-${{ github.run_id }}
+          path: |
+            **/build/reports/**
+            **/build/test-results/**
+          if-no-files-found: ignore
+          retention-days: 14
+
+  quality:
+    name: Quality gate
+    if: ${{ always() }}
+    needs:
+      - version
+      - checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Require every parallel check to pass
+        env:
+          CHECKS_RESULT: ${{ needs.checks.result }}
+          VERSION_RESULT: ${{ needs.version.result }}
+        run: |
+          if [[ "$CHECKS_RESULT" != "success" ]]; then
+            echo "::error::One or more parallel CI checks failed."
+            exit 1
+          fi
+          if [[ "$VERSION_RESULT" != "success" && "$VERSION_RESULT" != "skipped" ]]; then
+            echo "::error::versionCode validation failed."
+            exit 1
+          fi

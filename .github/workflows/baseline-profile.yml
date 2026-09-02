@@ -1,0 +1,93 @@
+name: Update Baseline Profile
+
+on:
+  schedule:
+    - cron: "0 17 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: baseline-profile-develop
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    name: Generate Baseline Profile
+    if: ${{ github.repository == 'comst19/Dambom' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Enable KVM
+        shell: bash
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Check out develop
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Set up Android environment
+        uses: ./.github/actions/setup-android
+        with:
+          cache-read-only: "false"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+
+      - name: Generate release Baseline Profile
+        run: >-
+          ./gradlew
+          :app:generateReleaseBaselineProfile
+          -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+          -Pandroid.experimental.testOptions.managedDevices.emulator.showKernelLogging=true
+          --stacktrace
+
+      - name: Upload generated profiles
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: baseline-profile-${{ github.run_id }}
+          path: app/src/release/generated/baselineProfiles/
+          if-no-files-found: error
+          retention-days: 14
+
+  commit:
+    name: Commit Baseline Profile
+    needs: generate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out develop
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Download generated profiles
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: baseline-profile-${{ github.run_id }}
+          path: ${{ runner.temp }}/generated-profiles
+
+      - name: Commit changed profiles without retriggering CI
+        shell: bash
+        run: |
+          rsync -a --delete "$RUNNER_TEMP/generated-profiles/" app/src/release/generated/baselineProfiles/
+          git add app/src/release/generated/baselineProfiles/
+          if git diff --staged --quiet; then
+            echo "Baseline Profile is unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: Baseline Profile 자동 갱신 [skip ci]"
+          git push origin HEAD:develop

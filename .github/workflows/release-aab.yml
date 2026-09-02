@@ -1,0 +1,108 @@
+name: Release AAB
+
+on:
+  push:
+    branches:
+      - release
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-aab-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-release:
+    name: Build signed release AAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DAMBOM_RELEASE_STORE_FILE: ${{ runner.temp }}/dambom-release.jks
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Android environment
+        uses: ./.github/actions/setup-android
+        with:
+          cache-read-only: "false"
+
+      - name: Validate signing secrets
+        shell: bash
+        env:
+          DAMBOM_KEYSTORE_BASE64: ${{ secrets.DAMBOM_KEYSTORE_BASE64 }}
+          DAMBOM_RELEASE_STORE_PASSWORD: ${{ secrets.DAMBOM_RELEASE_STORE_PASSWORD }}
+          DAMBOM_RELEASE_KEY_ALIAS: ${{ secrets.DAMBOM_RELEASE_KEY_ALIAS }}
+          DAMBOM_RELEASE_KEY_PASSWORD: ${{ secrets.DAMBOM_RELEASE_KEY_PASSWORD }}
+        run: |
+          required=(
+            DAMBOM_KEYSTORE_BASE64
+            DAMBOM_RELEASE_STORE_PASSWORD
+            DAMBOM_RELEASE_KEY_ALIAS
+            DAMBOM_RELEASE_KEY_PASSWORD
+          )
+          missing=()
+          for variable in "${required[@]}"; do
+            if [[ -z "${!variable}" ]]; then
+              missing+=("$variable")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            printf '::error::Missing required GitHub Secrets: %s\n' "${missing[*]}"
+            exit 1
+          fi
+
+      - name: Decode release keystore
+        shell: bash
+        env:
+          DAMBOM_KEYSTORE_BASE64: ${{ secrets.DAMBOM_KEYSTORE_BASE64 }}
+        run: |
+          printf '%s' "$DAMBOM_KEYSTORE_BASE64" | base64 --decode > "$DAMBOM_RELEASE_STORE_FILE"
+          chmod 600 "$DAMBOM_RELEASE_STORE_FILE"
+
+      - name: Run release gate and build AAB
+        env:
+          DAMBOM_RELEASE_STORE_PASSWORD: ${{ secrets.DAMBOM_RELEASE_STORE_PASSWORD }}
+          DAMBOM_RELEASE_KEY_ALIAS: ${{ secrets.DAMBOM_RELEASE_KEY_ALIAS }}
+          DAMBOM_RELEASE_KEY_PASSWORD: ${{ secrets.DAMBOM_RELEASE_KEY_PASSWORD }}
+        run: >-
+          ./gradlew
+          ktlintCheck
+          detekt
+          testDebugUnitTest
+          lintRelease
+          :app:bundleRelease
+          --parallel
+          --stacktrace
+
+      - name: Verify signed AAB
+        shell: bash
+        run: |
+          test -s app/build/outputs/bundle/release/app-release.aab
+          unzip -Z1 app/build/outputs/bundle/release/app-release.aab | grep -Eq '^META-INF/[^/]+\.(RSA|DSA|EC)$'
+          jarsigner -verify -strict -certs app/build/outputs/bundle/release/app-release.aab | tee "$RUNNER_TEMP/jarsigner.log"
+          grep -q 'jar verified.' "$RUNNER_TEMP/jarsigner.log"
+          if grep -q 'jar is unsigned' "$RUNNER_TEMP/jarsigner.log"; then
+            echo '::error::Release AAB is unsigned.'
+            exit 1
+          fi
+
+      - name: Upload release AAB and R8 metadata
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dambom-release-${{ github.sha }}
+          path: |
+            app/build/outputs/bundle/release/app-release.aab
+            app/build/outputs/mapping/release/mapping.txt
+            app/build/outputs/mapping/release/seeds.txt
+            app/build/outputs/mapping/release/usage.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove release keystore
+        if: ${{ always() }}
+        shell: bash
+        run: rm -f "$DAMBOM_RELEASE_STORE_FILE"

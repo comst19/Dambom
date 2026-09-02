@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MaxLineLength:AdaptiveLayoutInfo.kt$fun</ID>
+    <ID>MaxLineLength:PersistentVideoThumbnail.kt$private fun videoThumbnailUnavailableFile(videoFile: File): File</ID>
+    <ID>ReturnCount:PersistentVideoThumbnail.kt$internal fun ensureVideoThumbnailFile( videoFile: File, writeThumbnail: (File) -&gt; Boolean, ): File?</ID>
+    <ID>ReturnCount:PersistentVideoThumbnail.kt$private suspend fun decodeVideoThumbnail( context: Context, videoFile: File, ): Bitmap?</ID>
+    <ID>SpreadOperator:UiText.kt$(id, *arguments.toTypedArray())</ID>
+  </CurrentIssues>
+</SmellBaseline>

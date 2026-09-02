@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:CandidatePreviewDialog.kt$@Composable internal fun CandidatePreviewDialog( candidate: MediaCandidate, onDismiss: () -&gt; Unit, )</ID>
+    <ID>LongMethod:DetectionCandidateContent.kt$@Composable internal fun DetectionCandidateContent( state: DetectionUiState.Content, networkAccess: NetworkAccessState, onToggleCandidate: (String) -&gt; Unit, onSelectVariant: (String, String) -&gt; Unit, onDownload: () -&gt; Unit, )</ID>
+    <ID>LongMethod:DetectionCandidateItem.kt$@Composable internal fun DetectionCandidateItem( candidate: MediaCandidate, selectedVariant: MediaVariant, index: Int, selected: Boolean, onClick: () -&gt; Unit, onSelectVariant: (String) -&gt; Unit, onPreview: () -&gt; Unit, )</ID>
+    <ID>LongMethod:DetectionQualitySheet.kt$@Composable @OptIn(ExperimentalMaterial3Api::class) internal fun DetectionQualitySheet( candidate: MediaCandidate, selectedVariant: MediaVariant, title: String, onDismiss: () -&gt; Unit, onSelect: (MediaVariant) -&gt; Unit, )</ID>
+    <ID>LongParameterList:DetectionCandidateItem.kt$( candidate: MediaCandidate, selectedVariant: MediaVariant, index: Int, selected: Boolean, onClick: () -&gt; Unit, onSelectVariant: (String) -&gt; Unit, onPreview: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:DetectionScreen.kt$( uiState: DetectionUiState, networkAccess: NetworkAccessState, onBack: () -&gt; Unit, onRetry: () -&gt; Unit, onOpenWeb: () -&gt; Unit, onToggleCandidate: (String) -&gt; Unit, onSelectVariant: (String, String) -&gt; Unit, onDownload: () -&gt; Unit, )</ID>
+    <ID>MaxLineLength:DetectionCandidateContent.kt$contentPadding = PaddingValues(start = SCREEN_HORIZONTAL_PADDING, end = SCREEN_HORIZONTAL_PADDING, bottom = 12.dp)</ID>
+    <ID>MaxLineLength:DetectionCandidateContent.kt$if (state.isSubmitting) R.string.detection_adding_to_queue else R.string.detection_download_selected</ID>
+    <ID>MaxLineLength:DetectionCandidateContentTest.kt$DetectionCandidateContentTest$val sourceLeft = composeRule.onNodeWithText("example.com", useUnmergedTree = true).getUnclippedBoundsInRoot().left</ID>
+    <ID>MaxLineLength:DetectionCandidateContentTest.kt$DetectionCandidateContentTest$val titleLeft = composeRule.onNodeWithText("Video title", useUnmergedTree = true).getUnclippedBoundsInRoot().left</ID>
+    <ID>ReturnCount:DetectionViewModel.kt$DetectionViewModel$fun downloadSelected()</ID>
+  </CurrentIssues>
+</SmellBaseline>

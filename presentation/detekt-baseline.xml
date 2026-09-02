@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:AppScaffold.kt$@Composable internal fun AppScaffold( state: NavigationState, navigator: Navigator, dispatcher: NavigationDispatcher, entries: List&lt;NavEntry&lt;NavKey&gt;&gt;, snackbarHostState: SnackbarHostState, networkAccess: NetworkAccessState, isLibraryDetailPaneVisible: Boolean, isVideoFullscreen: Boolean, )</ID>
+    <ID>LongParameterList:AppScaffold.kt$( state: NavigationState, navigator: Navigator, dispatcher: NavigationDispatcher, entries: List&lt;NavEntry&lt;NavKey&gt;&gt;, snackbarHostState: SnackbarHostState, networkAccess: NetworkAccessState, isLibraryDetailPaneVisible: Boolean, isVideoFullscreen: Boolean, )</ID>
+    <ID>LongParameterList:DambomApp.kt$( navigationConfig: NavigationConfig, dispatcher: NavigationDispatcher, appEventBus: AppEventBus, networkAccess: NetworkAccessState, onVideoFullscreenChange: (Boolean) -&gt; Unit, onVideoRotate: () -&gt; Unit, )</ID>
+    <ID>MaxLineLength:MainViewModelTest.kt$MainViewModelTest$previousStatuses = mapOf(first.id to DownloadStatus.DOWNLOADING, second.id to DownloadStatus.DOWNLOADING)</ID>
+    <ID>MaxLineLength:VideoOrientationCoordinator.kt$VideoFullscreenOrientationState$fun withPictureInPictureExited(): VideoFullscreenOrientationState</ID>
+  </CurrentIssues>
+</SmellBaseline>

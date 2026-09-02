@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:DownloadsScreen.kt$@Composable @OptIn(ExperimentalMaterial3Api::class) internal fun DownloadsScreen( uiState: DownloadsUiState, canDownload: Boolean, onBack: () -&gt; Unit, onPause: (String) -&gt; Unit, onResume: (String) -&gt; Unit, onCancel: (String) -&gt; Unit, onRetry: (String) -&gt; Unit, onPauseAll: () -&gt; Unit, onResumeAll: () -&gt; Unit, onViewModeChange: (DownloadsViewMode) -&gt; Unit, )</ID>
+    <ID>LongParameterList:DownloadTaskCards.kt$( task: DownloadTask, canDownload: Boolean, onPause: () -&gt; Unit, onResume: () -&gt; Unit, onCancel: () -&gt; Unit, onRetry: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:DownloadTaskUi.kt$( task: DownloadTask, canDownload: Boolean, onPause: () -&gt; Unit, onResume: () -&gt; Unit, onCancel: () -&gt; Unit, onRetry: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>LongParameterList:DownloadsContent.kt$( uiState: DownloadsUiState, canDownload: Boolean, onPause: (String) -&gt; Unit, onResume: (String) -&gt; Unit, onCancel: (String) -&gt; Unit, onRetry: (String) -&gt; Unit, onPauseAll: () -&gt; Unit, onResumeAll: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:DownloadsScreen.kt$( uiState: DownloadsUiState, canDownload: Boolean, onBack: () -&gt; Unit, onPause: (String) -&gt; Unit, onResume: (String) -&gt; Unit, onCancel: (String) -&gt; Unit, onRetry: (String) -&gt; Unit, onPauseAll: () -&gt; Unit, onResumeAll: () -&gt; Unit, onViewModeChange: (DownloadsViewMode) -&gt; Unit, )</ID>
+    <ID>MagicNumber:DownloadsScreen.kt$0.2f</ID>
+    <ID>MagicNumber:DownloadsScreen.kt$0.62f</ID>
+    <ID>MaxLineLength:DownloadsUiStateTest.kt$DownloadsUiStateTest$val restored = DownloadsViewModel(EmptyDownloadRepository, SpyNavigationDispatcher(), savedStateHandle, AppEventBus())</ID>
+    <ID>UnusedPrivateMember:DownloadsScreen.kt$@FormFactorPreviews @Composable private fun DownloadsScreenPreview()</ID>
+  </CurrentIssues>
+</SmellBaseline>

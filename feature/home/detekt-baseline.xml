@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:HomeScreen.kt$@Composable @OptIn(ExperimentalMaterial3Api::class) internal fun HomeScreen( uiState: HomeUiState, canUseInternet: Boolean, onUrlChange: (String) -&gt; Unit, onPaste: () -&gt; Unit, onAnalyze: () -&gt; Unit, onOpenWeb: () -&gt; Unit, onOpenDownloads: () -&gt; Unit, onOpenSettings: () -&gt; Unit, onClipboardConsent: (Boolean) -&gt; Unit, onUseClipboardSuggestion: () -&gt; Unit, onDismissClipboardSuggestion: () -&gt; Unit, onAnalyzeSharedUrl: () -&gt; Unit, onDismissSharedUrl: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:HomeContent.kt$( uiState: HomeUiState, canUseInternet: Boolean, onUrlChange: (String) -&gt; Unit, onPaste: () -&gt; Unit, onAnalyze: () -&gt; Unit, onUseClipboardSuggestion: () -&gt; Unit, onDismissClipboardSuggestion: () -&gt; Unit, compactHeight: Boolean, modifier: Modifier = Modifier, )</ID>
+    <ID>LongParameterList:HomeScreen.kt$( uiState: HomeUiState, canUseInternet: Boolean, onUrlChange: (String) -&gt; Unit, onPaste: () -&gt; Unit, onAnalyze: () -&gt; Unit, onOpenWeb: () -&gt; Unit, onOpenDownloads: () -&gt; Unit, onOpenSettings: () -&gt; Unit, onClipboardConsent: (Boolean) -&gt; Unit, onUseClipboardSuggestion: () -&gt; Unit, onDismissClipboardSuggestion: () -&gt; Unit, onAnalyzeSharedUrl: () -&gt; Unit, onDismissSharedUrl: () -&gt; Unit, )</ID>
+    <ID>MaxLineLength:HomeDialogs.kt$TextButton(onClick = onAnalyze, enabled = canUseInternet) { Text(stringResource(R.string.home_analyze_now)) }</ID>
+    <ID>MaxLineLength:HomeViewModel.kt$HomeViewModel$val active = downloads.filter { it.status == DownloadStatus.DOWNLOADING || it.status == DownloadStatus.QUEUED }</ID>
+    <ID>ReturnCount:HomeViewModel.kt$HomeViewModel$fun suggestClipboardText(text: String?)</ID>
+    <ID>TooManyFunctions:HomeViewModel.kt$HomeViewModel : ViewModel</ID>
+  </CurrentIssues>
+</SmellBaseline>

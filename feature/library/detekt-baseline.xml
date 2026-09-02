@@ -1,0 +1,78 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:PipPlaybackPolicy.kt$left !in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong() || top !in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong() || right !in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong() || bottom !in Int.MIN_VALUE.toLong()..Int.MAX_VALUE.toLong()</ID>
+    <ID>CyclomaticComplexMethod:FullscreenPlayerGestures.kt$internal fun Modifier.fullscreenPlayerGestures( toggleControlsLabel: String, onToggleControls: () -&gt; Unit, onContentModeChanged: (FullscreenContentMode) -&gt; Unit, ): Modifier</ID>
+    <ID>CyclomaticComplexMethod:LibraryFileActions.kt$@Composable internal fun rememberLibraryFileActions( viewModel: LibraryViewModel, onDelete: ((DownloadTask) -&gt; Unit)? = null, ): LibraryFileActions</ID>
+    <ID>CyclomaticComplexMethod:LibraryVideoItemStyle.kt$@Composable internal fun libraryVideoItemStyle( sourcePageUrl: String, selected: Boolean, ): LibraryVideoItemStyle</ID>
+    <ID>LongMethod:FullscreenVideoPlayer.kt$@Composable @androidx.annotation.OptIn(markerClass = [UnstableApi::class]) internal fun FullscreenVideoPlayer( task: DownloadTask, player: Player, fileActions: LibraryFileActions, onDismiss: () -&gt; Unit, onRotate: () -&gt; Unit, showRotationControl: Boolean, isPipContentOnly: Boolean, onVideoBoundsChanged: (IntRect?) -&gt; Unit, )</ID>
+    <ID>LongMethod:LibraryContent.kt$@Composable internal fun LibraryPane( uiState: LibraryUiState, fileActions: LibraryFileActions, onQueryChange: (String) -&gt; Unit, onSourceFilterChange: (LibrarySourceFilter) -&gt; Unit, onVideoClick: (DownloadTask) -&gt; Unit, onToggleSelection: (String) -&gt; Unit, showInlineEmptyState: Boolean, modifier: Modifier, )</ID>
+    <ID>LongMethod:LibraryFileActions.kt$@Composable internal fun rememberLibraryFileActions( viewModel: LibraryViewModel, onDelete: ((DownloadTask) -&gt; Unit)? = null, ): LibraryFileActions</ID>
+    <ID>LongMethod:LibraryHeader.kt$@Composable @OptIn(ExperimentalMaterial3Api::class) internal fun LibraryHeader( viewMode: LibraryViewMode, onViewModeChange: (LibraryViewMode) -&gt; Unit, showDetailPaneControl: Boolean, isDetailPaneVisible: Boolean, onDetailPaneVisibilityChange: (Boolean) -&gt; Unit, hasVideos: Boolean, isSelecting: Boolean, selectedCount: Int, onStartSelection: () -&gt; Unit, onSelectAll: () -&gt; Unit, onDeleteSelected: () -&gt; Unit, onClearSelection: () -&gt; Unit, )</ID>
+    <ID>LongMethod:PipPlatformEffect.kt$@Composable internal fun PipPlatformEffect( player: Player, task: DownloadTask?, isFullscreen: Boolean, onPictureInPictureModeChanged: (Boolean) -&gt; Unit, content: @Composable (isPipContentOnly: Boolean, onVideoBoundsChanged: (IntRect?) -&gt; Unit) -&gt; Unit, )</ID>
+    <ID>LongMethod:PlayerControls.kt$@Composable internal fun PlayerControls( player: Player, showPlay: Boolean, playEnabled: Boolean, onPlayPause: () -&gt; Unit, positionMillis: Long, durationMillis: Long, contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant, onInteraction: () -&gt; Unit = {}, onInteractionChanged: (Boolean) -&gt; Unit = {}, modifier: Modifier = Modifier, timelineModifier: Modifier = Modifier, )</ID>
+    <ID>LongMethod:VideoActions.kt$@Composable internal fun VideoActionsButton( task: DownloadTask, actions: LibraryFileActions, modifier: Modifier = Modifier, iconOffsetY: Dp = 0.dp, )</ID>
+    <ID>LongMethod:VideoPlaybackContent.kt$@Composable @androidx.annotation.OptIn(markerClass = [UnstableApi::class]) internal fun VideoPlayerPanel( task: DownloadTask, player: Player, onOpenOriginal: () -&gt; Unit, onCopyLink: () -&gt; Unit, onShareLink: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>LongMethod:VideoPlayerScreen.kt$@Composable @OptIn(ExperimentalMaterial3Api::class) internal fun VideoPlayerScreen( task: DownloadTask?, player: Player, fileActions: LibraryFileActions, onBack: () -&gt; Unit, showBack: Boolean, isVideoFullscreen: Boolean, onVideoFullscreenChange: (Boolean) -&gt; Unit, onVideoRotate: () -&gt; Unit, isPipContentOnly: Boolean = false, onVideoBoundsChanged: (androidx.compose.ui.unit.IntRect?) -&gt; Unit = {}, )</ID>
+    <ID>LongMethod:VideoPlayerScreen.kt$@Composable internal fun VideoPlayerRoute( id: String, isVideoFullscreen: Boolean, onVideoFullscreenChange: (Boolean) -&gt; Unit, onVideoRotate: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:DambomSeekBar.kt$( value: Float, enabled: Boolean, contentDescription: String, stateDescription: String, onValueChange: (Float) -&gt; Unit, onInteractionChanged: (Boolean) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>LongParameterList:FullscreenVideoPlayer.kt$( task: DownloadTask, player: Player, fileActions: LibraryFileActions, onDismiss: () -&gt; Unit, onRotate: () -&gt; Unit, showRotationControl: Boolean, contentMode: FullscreenContentMode, onContentModeToggle: () -&gt; Unit, showPlay: Boolean, playEnabled: Boolean, onPlayPause: () -&gt; Unit, progressPositionMillis: Long, progressDurationMillis: Long, onInteraction: () -&gt; Unit, onInteractionChanged: (Boolean) -&gt; Unit, )</ID>
+    <ID>LongParameterList:FullscreenVideoPlayer.kt$( task: DownloadTask, player: Player, fileActions: LibraryFileActions, onDismiss: () -&gt; Unit, onRotate: () -&gt; Unit, showRotationControl: Boolean, isPipContentOnly: Boolean, onVideoBoundsChanged: (IntRect?) -&gt; Unit, )</ID>
+    <ID>LongParameterList:LibraryContent.kt$( uiState: LibraryUiState, fileActions: LibraryFileActions, onQueryChange: (String) -&gt; Unit, onSourceFilterChange: (LibrarySourceFilter) -&gt; Unit, onVideoClick: (DownloadTask) -&gt; Unit, onToggleSelection: (String) -&gt; Unit, showInlineEmptyState: Boolean, modifier: Modifier, )</ID>
+    <ID>LongParameterList:LibraryHeader.kt$( viewMode: LibraryViewMode, onViewModeChange: (LibraryViewMode) -&gt; Unit, showDetailPaneControl: Boolean, isDetailPaneVisible: Boolean, onDetailPaneVisibilityChange: (Boolean) -&gt; Unit, hasVideos: Boolean, isSelecting: Boolean, selectedCount: Int, onStartSelection: () -&gt; Unit, onSelectAll: () -&gt; Unit, onDeleteSelected: () -&gt; Unit, onClearSelection: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:LibraryScreen.kt$( uiState: LibraryUiState, fileActions: LibraryFileActions, onQueryChange: (String) -&gt; Unit, onViewModeChange: (LibraryViewMode) -&gt; Unit, onSourceFilterChange: (LibrarySourceFilter) -&gt; Unit = {}, onVideoClick: (DownloadTask) -&gt; Unit, onStartSelection: () -&gt; Unit = {}, onToggleSelection: (String) -&gt; Unit = {}, onSelectAll: () -&gt; Unit = {}, onClearSelection: () -&gt; Unit = {}, onDeleteSelected: () -&gt; Unit = {}, showInlineEmptyState: Boolean = true, showDetailPaneControl: Boolean = false, isDetailPaneVisible: Boolean = true, onDetailPaneVisibilityChange: (Boolean) -&gt; Unit = {}, )</ID>
+    <ID>LongParameterList:LibraryUiStateMapper.kt$( tasks: List&lt;DownloadTask&gt;, selectedId: String?, query: String = "", viewMode: LibraryViewMode = LibraryViewMode.GRID, sourceFilter: LibrarySourceFilter = LibrarySourceFilter.ALL, selection: LibrarySelectionState = LibrarySelectionState(), )</ID>
+    <ID>LongParameterList:LibraryVideoItems.kt$( task: DownloadTask, fileActions: LibraryFileActions, selectionSelected: Boolean, isSelecting: Boolean, onToggleSelection: () -&gt; Unit, metadataColor: Color, sourceBadgeContainerColor: Color, sourceBadgeContentColor: Color, sourceLabel: String, sourceHost: String?, modifier: Modifier = Modifier, )</ID>
+    <ID>LongParameterList:LibraryVideoItems.kt$( task: DownloadTask, selected: Boolean, selectionSelected: Boolean, isSelecting: Boolean, fileActions: LibraryFileActions, onClick: () -&gt; Unit, onToggleSelection: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:PipPlatformController.kt$( isSystemPipSupported: Boolean, isFullscreen: Boolean, isPlaying: Boolean, task: DownloadTask?, aspectRatio: PipAspectRatio?, sourceBounds: IntRect?, )</ID>
+    <ID>LongParameterList:PlayerControls.kt$( player: Player, safeDuration: Long, progress: Float, positionText: String, durationText: String, seekDescription: String, onInteraction: () -&gt; Unit, onInteractionChanged: (Boolean) -&gt; Unit, )</ID>
+    <ID>LongParameterList:PlayerControls.kt$( player: Player, showPlay: Boolean, playEnabled: Boolean, onPlayPause: () -&gt; Unit, onInteraction: () -&gt; Unit, contentColor: Color, rewindInteractionSource: MutableInteractionSource, playPauseInteractionSource: MutableInteractionSource, forwardInteractionSource: MutableInteractionSource, )</ID>
+    <ID>LongParameterList:PlayerControls.kt$( player: Player, showPlay: Boolean, playEnabled: Boolean, onPlayPause: () -&gt; Unit, positionMillis: Long, durationMillis: Long, contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant, onInteraction: () -&gt; Unit = {}, onInteractionChanged: (Boolean) -&gt; Unit = {}, modifier: Modifier = Modifier, timelineModifier: Modifier = Modifier, )</ID>
+    <ID>LongParameterList:VideoPlaybackContent.kt$( player: Player, surfaceDescription: String, controlsVisible: Boolean, showPlay: Boolean, playEnabled: Boolean, onPlayPause: () -&gt; Unit, positionMillis: Long, durationMillis: Long, onToggleControls: () -&gt; Unit, onControlsInteraction: () -&gt; Unit, onControlsInteractionChanged: (Boolean) -&gt; Unit, )</ID>
+    <ID>LongParameterList:VideoPlaybackContent.kt$( task: DownloadTask, player: Player, onOpenOriginal: () -&gt; Unit, onCopyLink: () -&gt; Unit, onShareLink: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>LongParameterList:VideoPlayerScreen.kt$( task: DownloadTask?, player: Player, fileActions: LibraryFileActions, onBack: () -&gt; Unit, showBack: Boolean, isVideoFullscreen: Boolean, onVideoFullscreenChange: (Boolean) -&gt; Unit, onVideoRotate: () -&gt; Unit, isPipContentOnly: Boolean = false, onVideoBoundsChanged: (androidx.compose.ui.unit.IntRect?) -&gt; Unit = {}, )</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFF134A8E</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFF16181C</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFF17233A</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFF1E314A</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFF2C4B70</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFF34373C</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFF587AA6</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFF5C6068</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFF9AB9E6</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFFD4E4FF</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFFD6E8FF</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFFE6EEF9</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFFEAF2FF</ID>
+    <ID>MagicNumber:LibraryVideoItemStyle.kt$0xFFF2F2F2</ID>
+    <ID>MagicNumber:LibraryVideoItems.kt$50</ID>
+    <ID>MagicNumber:LocalVideoMetadata.kt$LocalVideoMetadataLoader$270</ID>
+    <ID>MagicNumber:LocalVideoMetadata.kt$LocalVideoMetadataLoader$90</ID>
+    <ID>MagicNumber:LocalVideoMetadata.kt$LocalVideoMetadataLoader.&lt;no name provided&gt;$1024</ID>
+    <ID>MagicNumber:PipPlatformController.kt$PipPlatformController$26</ID>
+    <ID>MagicNumber:PipPlatformController.kt$PipPlatformController$30</ID>
+    <ID>MagicNumber:PipPlatformEffect.kt$26</ID>
+    <ID>MagicNumber:PipPlatformEffect.kt$30</ID>
+    <ID>MagicNumber:VideoPlayerScreen.kt$1_000L</ID>
+    <ID>MagicNumber:VideoPlayerScreen.kt$3_600L</ID>
+    <ID>MagicNumber:VideoPlayerScreen.kt$60L</ID>
+    <ID>MaxLineLength:FullscreenPlayerGestures.kt$if ((change.position - initialPosition).getDistance() &gt; viewConfiguration.touchSlop) movedBeyondTouchSlop = true</ID>
+    <ID>MaxLineLength:FullscreenVideoPlayer.kt$FullscreenContentFrame(player, surfaceDescription, Modifier.fillMaxSize(), onVideoBoundsChanged, contentMode)</ID>
+    <ID>MaxLineLength:FullscreenVideoPlayer.kt$IconButton(onDismiss) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.player_exit_fullscreen)) }</ID>
+    <ID>MaxLineLength:FullscreenVideoPlayer.kt$WindowInsets.mandatorySystemGestures.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)</ID>
+    <ID>MaxLineLength:FullscreenVideoPlayer.kt$if (contentMode == FullscreenContentMode.Fit) Icons.Outlined.CropFree else Icons.Outlined.ZoomOutMap</ID>
+    <ID>MaxLineLength:FullscreenVideoPlayer.kt$if (showRotationControl) IconButton(onRotate) { Icon(Icons.Outlined.Rotate90DegreesCw, stringResource(R.string.player_rotate)) }</ID>
+    <ID>MaxLineLength:LibraryViewModel.kt$LibraryViewModel$sourceFilter = LibrarySourceFilter.entries.firstOrNull { it.name == sourceFilter } ?: LibrarySourceFilter.ALL</ID>
+    <ID>MaxLineLength:LocalVideoMetadata.kt$LocalVideoMetadataLoader$private fun MediaMetadataRetriever.intMetadata(key: Int): Int?</ID>
+    <ID>MaxLineLength:LocalVideoMetadata.kt$LocalVideoMetadataLoader$private fun MediaMetadataRetriever.longMetadata(key: Int): Long?</ID>
+    <ID>MaxLineLength:PipPlatformController.kt$hasCompletedLocalVideo = task?.status == DownloadStatus.COMPLETED &amp;&amp; !task.localFilePath.isNullOrBlank()</ID>
+    <ID>MaxLineLength:PipPlaybackPolicyTest.kt$PipPlaybackPolicyTest$assertNull(fittedVideoBounds(container = IntRect(Int.MIN_VALUE, 0, Int.MAX_VALUE, 100), videoWidth = 16, videoHeight = 9))</ID>
+    <ID>ReturnCount:PipPlaybackPolicy.kt$fun fittedVideoBounds( container: IntRect, videoWidth: Int, videoHeight: Int, ): IntRect?</ID>
+    <ID>ReturnCount:PipPlaybackPolicy.kt$fun pipAspectRatio( videoWidth: Int, videoHeight: Int, ): PipAspectRatio?</ID>
+    <ID>TooGenericExceptionCaught:LibraryFileManager.kt$LibraryFileManager$throwable: Throwable</ID>
+    <ID>TooManyFunctions:LibraryViewModel.kt$LibraryViewModel : ViewModel</ID>
+    <ID>TooManyFunctions:VideoPlayerViewModel.kt$VideoPlayerViewModel : ViewModel</ID>
+    <ID>UnusedPrivateMember:LibraryScreen.kt$@FormFactorPreviews @Composable private fun LibraryScreenPreview()</ID>
+  </CurrentIssues>
+</SmellBaseline>

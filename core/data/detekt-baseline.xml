@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:DownloadQueueWorker.kt$DownloadQueueWorker$private suspend fun download( task: DownloadTaskEntity, allowRestart: Boolean, )</ID>
+    <ID>LongMethod:DefaultMediaDetectionRepository.kt$DefaultMediaDetectionRepository$private fun detectResponse( requestUrl: String, response: okhttp3.Response, ): MediaDetectionResult</ID>
+    <ID>LongMethod:DownloadQueueWorker.kt$DownloadQueueWorker$private suspend fun download( task: DownloadTaskEntity, allowRestart: Boolean, )</ID>
+    <ID>LongParameterList:DownloadQueueWorker.kt$DownloadQueueWorker$( @Assisted appContext: Context, @Assisted params: WorkerParameters, private val dao: DownloadTaskDao, private val client: OkHttpClient, private val fileStore: DownloadFileStore, private val notifier: DownloadNotifier, @IoDispatcher private val ioDispatcher: CoroutineDispatcher, )</ID>
+    <ID>LoopWithTooManyJumpStatements:DownloadQueueWorker.kt$DownloadQueueWorker$while</ID>
+    <ID>MagicNumber:DownloadFileStore.kt$5</ID>
+    <ID>MaxLineLength:DefaultMediaDetectionRepository.kt$private val TITLE_REGEX = Regex("&lt;title[^&gt;]*&gt;(.*?)&lt;/title&gt;", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))</ID>
+    <ID>MaxLineLength:DefaultMediaDetectionRepositoryTest.kt$DefaultMediaDetectionRepositoryTest$"&lt;html&gt;&lt;title&gt;3,000+개의 최고의 샘플 동영상 · Pexels&lt;/title&gt;&lt;video src='/media/8b3917b0-21e5-41cb-b724-0bd24bc3b5d1.mp4'&gt;&lt;/video&gt;&lt;/html&gt;"</ID>
+    <ID>MaxLineLength:DefaultMediaDetectionRepositoryTest.kt$DefaultMediaDetectionRepositoryTest$.</ID>
+    <ID>MaxLineLength:DownloadNotifier.kt$DownloadNotifier$?.</ID>
+    <ID>MaxLineLength:DownloadNotifier.kt$private fun String.resultNotificationId(): Int</ID>
+    <ID>MaxLineLength:DownloadQueueWorker.kt$DownloadQueueWorker$HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -&gt; throw DownloadFailureException(DownloadFailureReason.ACCESS_RESTRICTED)</ID>
+    <ID>MaxLineLength:DownloadQueueWorker.kt$DownloadQueueWorker$if</ID>
+    <ID>MaxLineLength:DownloadQueueWorker.kt$DownloadQueueWorker$if (totalBytes != null &amp;&amp; downloadedBytes &lt; totalBytes) throw IOException("Download ended early")</ID>
+    <ID>MaxLineLength:FxTwitterNetworkMapper.kt$id = MessageDigest.getInstance("SHA-256").digest(sourceUrl.toByteArray()).joinToString("") { "%02x".format(it) }</ID>
+    <ID>NestedBlockDepth:DownloadQueueWorker.kt$DownloadQueueWorker$private suspend fun download( task: DownloadTaskEntity, allowRestart: Boolean, )</ID>
+    <ID>ReturnCount:DefaultMediaDetectionRepository.kt$DefaultMediaDetectionRepository$private fun detectResponse( requestUrl: String, response: okhttp3.Response, ): MediaDetectionResult</ID>
+    <ID>ReturnCount:DefaultMediaDetectionRepository.kt$private fun ResponseBody.readUtf8UpTo(limit: Long): String?</ID>
+    <ID>ReturnCount:DownloadQueueWorker.kt$DownloadQueueWorker$private suspend fun download( task: DownloadTaskEntity, allowRestart: Boolean, )</ID>
+    <ID>ReturnCount:DownloadQueueWorker.kt$DownloadQueueWorker$private suspend fun handleNetworkFailure(task: DownloadTaskEntity): DownloadOutcome</ID>
+    <ID>ThrowsCount:DownloadQueueWorker.kt$DownloadQueueWorker$private fun validateResponse( task: DownloadTaskEntity, response: Response, )</ID>
+    <ID>TooManyFunctions:DefaultMediaDetectionRepository.kt$com.comst19.dambom.core.data.repository.DefaultMediaDetectionRepository.kt</ID>
+    <ID>TooManyFunctions:DownloadQueueWorker.kt$DownloadQueueWorker : CoroutineWorker</ID>
+  </CurrentIssues>
+</SmellBaseline>

@@ -21,6 +21,7 @@ subprojects {
     extensions.configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension> {
         buildUponDefaultConfig = true
         config.setFrom(rootProject.files("config/detekt/detekt.yml"))
+        baseline = file("detekt-baseline.xml")
     }
     extensions.configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
         version.set("1.8.0")

@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongMethod:SettingsScreen.kt$@Composable @OptIn(ExperimentalMaterial3Api::class) internal fun SettingsScreen( state: SettingsContentState, actions: SettingsActions, )</ID>
+    <ID>LongMethod:SettingsScreen.kt$@Composable internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel())</ID>
+    <ID>LongParameterList:SettingsContent.kt$( state: SettingsContentState, actions: SettingsActions, onSaveMethodClick: () -&gt; Unit, onThemeClick: () -&gt; Unit, onLanguageClick: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>LongParameterList:SettingsPreferences.kt$( icon: ImageVector, title: String, subtitle: String, modifier: Modifier = Modifier, enabled: Boolean = true, onClick: (() -&gt; Unit)? = null, trailing: @Composable (() -&gt; Unit)? = null, )</ID>
+    <ID>LongParameterList:SettingsPreferences.kt$( title: String, entries: PersistentList&lt;T&gt;, selected: T, label: @Composable (T) -&gt; String, onDismiss: () -&gt; Unit, onSelect: (T) -&gt; Unit, )</ID>
+    <ID>MaxLineLength:SaveLocationMode.kt$SaveLocationMode.Companion$fun from(usesConfiguredFolder: Boolean): SaveLocationMode</ID>
+    <ID>ReturnCount:SettingsScreen.kt$internal fun downloadLocationLabel( treeUri: String?, defaultLabel: String, ): String</ID>
+    <ID>UnusedPrivateMember:SettingsScreen.kt$@FormFactorPreviews @Composable private fun SettingsScreenPreview()</ID>
+  </CurrentIssues>
+</SmellBaseline>

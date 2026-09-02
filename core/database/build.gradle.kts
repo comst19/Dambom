@@ -5,7 +5,18 @@ plugins {
     id("dambom.android.test")
 }
 
-android { namespace = "com.comst19.dambom.core.database" }
+android {
+    namespace = "com.comst19.dambom.core.database"
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.androidTest
+            ?.sources
+            ?.assets
+            ?.addStaticSourceDirectory("schemas")
+    }
+}
 
 dependencies {
     implementation(libs.kotlinx.coroutines.core)

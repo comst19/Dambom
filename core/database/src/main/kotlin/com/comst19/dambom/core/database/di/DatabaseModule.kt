@@ -18,7 +18,11 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(
         @ApplicationContext context: Context,
-    ): DambomDatabase = Room.databaseBuilder(context, DambomDatabase::class.java, DATABASE_NAME).build()
+    ): DambomDatabase =
+        Room
+            .databaseBuilder(context, DambomDatabase::class.java, DATABASE_NAME)
+            .addMigrations(DambomDatabase.MIGRATION_1_2)
+            .build()
 
     @Provides
     fun provideDownloadTaskDao(database: DambomDatabase): DownloadTaskDao = database.downloadTaskDao()

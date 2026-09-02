@@ -20,6 +20,8 @@ data class DownloadTaskEntity(
     val quality: String,
     val status: String,
     val failureReason: String?,
+    val retryCount: Int,
+    val deletePending: Boolean,
     val localFileName: String?,
     val createdAtMillis: Long,
     val updatedAtMillis: Long,

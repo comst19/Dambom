@@ -12,11 +12,13 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.net.URI
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -85,12 +87,26 @@ class DefaultDownloadRepository
         override suspend fun delete(id: String) =
             withContext(ioDispatcher) {
                 val task = dao.getById(id)
-                dao.delete(id)
-                fileStore.delete(id, task?.localFileName)
+                if (task == null || dao.claimForDeletion(id, System.currentTimeMillis()) == 0) return@withContext
+                var cleanupComplete = false
+                try {
+                    cleanupComplete = fileStore.delete(id, task.localFileName)
+                    if (!cleanupComplete) throw IOException("Unable to delete download files")
+                    if (dao.deleteClaimed(id) == 0) {
+                        cleanupComplete = false
+                        throw IOException("Unable to delete download record")
+                    }
+                } finally {
+                    if (!cleanupComplete) {
+                        withContext(NonCancellable) {
+                            dao.releaseDeletionClaim(id)
+                        }
+                    }
+                }
             }
 
         override suspend fun retry(id: String) {
-            dao.queueAgain(id, System.currentTimeMillis())
+            dao.retry(id, System.currentTimeMillis())
             scheduler.schedule()
         }
 
@@ -125,6 +141,8 @@ private fun DownloadRequest.toEntity(now: Long): DownloadTaskEntity =
         quality = quality,
         status = DownloadStatus.QUEUED.name,
         failureReason = null,
+        retryCount = 0,
+        deletePending = false,
         localFileName = null,
         createdAtMillis = now,
         updatedAtMillis = now,

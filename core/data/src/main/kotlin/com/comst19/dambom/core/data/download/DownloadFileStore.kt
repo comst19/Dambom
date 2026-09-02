@@ -39,15 +39,30 @@ internal class DownloadFileStore
         fun delete(
             id: String,
             localFileName: String?,
-        ) {
-            clearPartial(id)
-            localFileName?.let { fileName ->
-                val videoFile = videoDirectory.resolve(fileName)
-                videoFile.delete()
-                File(videoFile.absolutePath + VIDEO_THUMBNAIL_SUFFIX).delete()
-                File(videoFile.absolutePath + VIDEO_THUMBNAIL_SUFFIX + TEMPORARY_FILE_SUFFIX).delete()
-                File(videoFile.absolutePath + VIDEO_THUMBNAIL_UNAVAILABLE_SUFFIX).delete()
+        ): Boolean {
+            val files =
+                buildList {
+                    add(partialFile(id))
+                    add(partialValidatorFile(id))
+                    localFileName?.let { fileName ->
+                        val videoFile = videoDirectory.resolve(fileName)
+                        add(videoFile)
+                        add(File(videoFile.absolutePath + VIDEO_THUMBNAIL_SUFFIX))
+                        add(File(videoFile.absolutePath + VIDEO_THUMBNAIL_SUFFIX + TEMPORARY_FILE_SUFFIX))
+                        add(File(videoFile.absolutePath + VIDEO_THUMBNAIL_UNAVAILABLE_SUFFIX))
+                    }
+                }
+            var allDeleted = true
+            files.forEach { file ->
+                if (!deleteIfPresent(file)) allDeleted = false
             }
+            return allDeleted
+        }
+
+        private fun deleteIfPresent(file: File): Boolean {
+            if (!file.exists()) return true
+            file.delete()
+            return !file.exists()
         }
     }
 

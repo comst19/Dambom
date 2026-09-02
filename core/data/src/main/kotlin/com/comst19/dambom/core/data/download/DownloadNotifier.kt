@@ -24,6 +24,7 @@ internal class DownloadNotifier
         @ApplicationContext private val context: Context,
     ) {
         private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        private var channelsCreated = false
 
         fun foreground(
             title: String? = null,
@@ -43,7 +44,7 @@ internal class DownloadNotifier
                     .setOngoing(true)
                     .setOnlyAlertOnce(true)
                     .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-                    .setProgress(PROGRESS_MAX, progress(downloadedBytes, totalBytes), totalBytes == null)
+                    .setProgress(PROGRESS_MAX, downloadProgress(downloadedBytes, totalBytes), totalBytes == null)
                     .build()
             val serviceType =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -106,21 +107,24 @@ internal class DownloadNotifier
         }
 
         private fun ensureChannels() {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-            notificationManager.createNotificationChannels(
-                listOf(
-                    NotificationChannel(
-                        DOWNLOAD_PROGRESS_CHANNEL_ID,
-                        context.getString(R.string.download_notification_channel),
-                        NotificationManager.IMPORTANCE_LOW,
+            synchronized(this) {
+                if (channelsCreated) return
+                notificationManager.createNotificationChannels(
+                    listOf(
+                        NotificationChannel(
+                            DOWNLOAD_PROGRESS_CHANNEL_ID,
+                            context.getString(R.string.download_notification_channel),
+                            NotificationManager.IMPORTANCE_LOW,
+                        ),
+                        NotificationChannel(
+                            DOWNLOAD_RESULT_CHANNEL_ID,
+                            context.getString(R.string.download_result_notification_channel),
+                            NotificationManager.IMPORTANCE_DEFAULT,
+                        ),
                     ),
-                    NotificationChannel(
-                        DOWNLOAD_RESULT_CHANNEL_ID,
-                        context.getString(R.string.download_result_notification_channel),
-                        NotificationManager.IMPORTANCE_DEFAULT,
-                    ),
-                ),
-            )
+                )
+                channelsCreated = true
+            }
         }
 
         private fun contentIntent(): PendingIntent? =
@@ -139,11 +143,11 @@ internal class DownloadNotifier
         ): String =
             totalBytes
                 ?.takeIf { it > 0L }
-                ?.let { context.getString(R.string.download_notification_progress, progress(downloadedBytes, it)) }
+                ?.let { context.getString(R.string.download_notification_progress, downloadProgress(downloadedBytes, it)) }
                 ?: context.getString(R.string.download_notification_description)
     }
 
-private fun progress(
+internal fun downloadProgress(
     downloadedBytes: Long,
     totalBytes: Long?,
 ): Int =

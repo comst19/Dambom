@@ -23,6 +23,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.File
+import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -212,6 +213,15 @@ class DefaultDownloadRepositoryTest {
             val thumbnailFile = File(localFile.absolutePath + ".thumbnail.jpg").apply { writeText("thumbnail") }
             val unavailableFile = File(localFile.absolutePath + ".thumbnail.unavailable").apply { writeText("") }
             val temporaryFile = File(localFile.absolutePath + ".thumbnail.jpg.tmp").apply { writeText("temporary") }
+            val partialFile =
+                File(context.filesDir, "download-parts/$TEST_ID.part").apply {
+                    parentFile?.mkdirs()
+                    writeText("partial")
+                }
+            val validatorFile =
+                File(context.filesDir, "download-parts/$TEST_ID.part.validator").apply {
+                    writeText("validator")
+                }
             database.downloadTaskDao().insert(
                 entity(TEST_ID, "media.example").copy(
                     status = DownloadStatus.COMPLETED.name,
@@ -228,6 +238,72 @@ class DefaultDownloadRepositoryTest {
             assertTrue(!thumbnailFile.exists())
             assertTrue(!unavailableFile.exists())
             assertTrue(!temporaryFile.exists())
+            assertTrue(!partialFile.exists())
+            assertTrue(!validatorFile.exists())
+        }
+
+    @Test
+    fun `delete keeps the row when file cleanup is incomplete and succeeds on retry`() =
+        runTest {
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val localFile = File(context.filesDir, "videos/video-1.mp4").apply { mkdirs() }
+            val blockingChild = File(localFile, "blocked").apply { writeText("blocked") }
+            database.downloadTaskDao().insert(
+                entity(TEST_ID, "media.example").copy(
+                    status = DownloadStatus.COMPLETED.name,
+                    localFileName = localFile.name,
+                ),
+            )
+            repository = createRepository(testScheduler)
+
+            var failure: IOException? = null
+            try {
+                repository.delete(TEST_ID)
+            } catch (caught: IOException) {
+                failure = caught
+            }
+
+            assertTrue(failure != null)
+            assertEquals(DownloadStatus.COMPLETED.name, database.downloadTaskDao().getById(TEST_ID)?.status)
+            assertTrue(!database.downloadTaskDao().getById(TEST_ID)?.deletePending!!)
+            assertTrue(blockingChild.exists())
+
+            blockingChild.delete()
+            repository.delete(TEST_ID)
+
+            assertTrue(database.downloadTaskDao().getById(TEST_ID) == null)
+        }
+
+    @Test
+    fun `delete claims and removes an active download`() =
+        runTest {
+            database.downloadTaskDao().insert(
+                entity(TEST_ID, "media.example").copy(status = DownloadStatus.DOWNLOADING.name),
+            )
+            repository = createRepository(testScheduler)
+
+            repository.delete(TEST_ID)
+
+            assertTrue(database.downloadTaskDao().getById(TEST_ID) == null)
+        }
+
+    @Test
+    fun `explicit retry resets the persisted network retry count`() =
+        runTest {
+            database.downloadTaskDao().insert(
+                entity(TEST_ID, "media.example").copy(
+                    status = DownloadStatus.FAILED.name,
+                    failureReason = "NETWORK",
+                    retryCount = 3,
+                ),
+            )
+            repository = createRepository(testScheduler)
+
+            repository.retry(TEST_ID)
+
+            val task = database.downloadTaskDao().getById(TEST_ID)
+            assertEquals(DownloadStatus.QUEUED.name, task?.status)
+            assertEquals(0, task?.retryCount)
         }
 
     @Test
@@ -305,6 +381,8 @@ private fun entity(
     quality = "원본",
     status = DownloadStatus.QUEUED.name,
     failureReason = null,
+    retryCount = 0,
+    deletePending = false,
     localFileName = null,
     createdAtMillis = 1L,
     updatedAtMillis = 1L,

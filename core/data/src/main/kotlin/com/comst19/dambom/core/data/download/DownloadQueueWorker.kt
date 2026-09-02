@@ -21,6 +21,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.selects.select
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -41,6 +43,9 @@ internal class DownloadQueueWorker
         private val notifier: DownloadNotifier,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : CoroutineWorker(appContext, params) {
+        private var foregroundState: ForegroundNotificationState? = null
+        private val foregroundMutex = Mutex()
+
         override suspend fun doWork(): Result =
             withContext(ioDispatcher) {
                 setForeground(notifier.foreground())
@@ -123,12 +128,7 @@ internal class DownloadQueueWorker
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (_: IOException) {
-                if (runAttemptCount >= MAX_NETWORK_RETRIES) {
-                    markFailed(task, DownloadFailureReason.NETWORK)
-                    DownloadOutcome.PERMANENT_FAILURE
-                } else {
-                    DownloadOutcome.RETRYABLE_FAILURE
-                }
+                handleNetworkFailure(task)
             } catch (failure: DownloadFailureException) {
                 markFailed(task, failure.reason)
                 DownloadOutcome.PERMANENT_FAILURE
@@ -190,13 +190,13 @@ internal class DownloadQueueWorker
                             downloadedBytes += read
                             val nowMillis = SystemClock.elapsedRealtime()
                             if (shouldCheckpoint(downloadedBytes - lastCheckpointBytes, nowMillis - lastCheckpointAtMillis)) {
-                                checkpoint(task.id, downloadedBytes, totalBytes)
+                                checkpoint(task, downloadedBytes, totalBytes)
                                 lastCheckpointBytes = downloadedBytes
                                 lastCheckpointAtMillis = nowMillis
                             }
                         }
                         output.fd.sync()
-                        checkpoint(task.id, downloadedBytes, totalBytes)
+                        checkpoint(task, downloadedBytes, totalBytes)
                         if (totalBytes != null && downloadedBytes < totalBytes) throw IOException("Download ended early")
                         complete(task, partialFile, downloadedBytes)
                     }
@@ -220,13 +220,29 @@ internal class DownloadQueueWorker
         }
 
         private suspend fun checkpoint(
-            id: String,
+            task: DownloadTaskEntity,
             downloadedBytes: Long,
             totalBytes: Long?,
         ) {
-            dao.updateProgress(id, downloadedBytes, totalBytes, System.currentTimeMillis())
-            val current = requireActiveTask(id)
-            setForeground(notifier.foreground(current.title, downloadedBytes, totalBytes))
+            val updated = dao.updateProgress(task.id, downloadedBytes, totalBytes, System.currentTimeMillis())
+            if (updated == 0) {
+                requireActiveTask(task.id)
+                return
+            }
+            updateForeground(task.title, downloadedBytes, totalBytes)
+        }
+
+        private suspend fun updateForeground(
+            title: String,
+            downloadedBytes: Long,
+            totalBytes: Long?,
+        ) {
+            foregroundMutex.withLock {
+                val nextState = foregroundNotificationState(title, downloadedBytes, totalBytes)
+                if (nextState == foregroundState) return
+                setForeground(notifier.foreground(title, downloadedBytes, totalBytes))
+                foregroundState = nextState
+            }
         }
 
         private suspend fun complete(
@@ -255,11 +271,12 @@ internal class DownloadQueueWorker
 
         private suspend fun requireActiveTask(id: String): DownloadTaskEntity {
             val current = dao.getById(id)
-            if (current?.status == DownloadStatus.DOWNLOADING.name) return current
+            if (current?.status == DownloadStatus.DOWNLOADING.name && !current.deletePending) return current
             val reason =
-                when (current?.status) {
-                    DownloadStatus.PAUSED.name -> DownloadStopReason.PAUSED
-                    null -> DownloadStopReason.CANCELLED
+                when {
+                    current?.deletePending == true -> DownloadStopReason.CANCELLED
+                    current?.status == DownloadStatus.PAUSED.name -> DownloadStopReason.PAUSED
+                    current == null -> DownloadStopReason.CANCELLED
                     else -> DownloadStopReason.OWNERSHIP_LOST
                 }
             throw DownloadStoppedException(reason)
@@ -272,12 +289,47 @@ internal class DownloadQueueWorker
             val changed = dao.markFailed(task.id, reason.name, System.currentTimeMillis())
             if (changed == 1) notifier.failed(task.id, task.title, reason)
         }
+
+        private suspend fun handleNetworkFailure(task: DownloadTaskEntity): DownloadOutcome {
+            val now = System.currentTimeMillis()
+            if (dao.incrementNetworkRetry(task.id, MAX_NETWORK_RETRIES, now) == 1) {
+                return DownloadOutcome.RETRYABLE_FAILURE
+            }
+            val failed =
+                dao.markNetworkFailed(
+                    id = task.id,
+                    reason = DownloadFailureReason.NETWORK.name,
+                    maxRetries = MAX_NETWORK_RETRIES,
+                    updatedAtMillis = now,
+                )
+            if (failed == 1) {
+                notifier.failed(task.id, task.title, DownloadFailureReason.NETWORK)
+                return DownloadOutcome.PERMANENT_FAILURE
+            }
+            requireActiveTask(task.id)
+            return DownloadOutcome.OWNERSHIP_LOST
+        }
     }
 
 private data class RunningDownload(
     val host: String,
     val job: Deferred<DownloadOutcome>,
 )
+
+internal data class ForegroundNotificationState(
+    val title: String,
+    val progress: Int?,
+)
+
+internal fun foregroundNotificationState(
+    title: String,
+    downloadedBytes: Long,
+    totalBytes: Long?,
+): ForegroundNotificationState =
+    ForegroundNotificationState(
+        title = title,
+        progress = totalBytes?.takeIf { it > 0L }?.let { downloadProgress(downloadedBytes, it) },
+    )
 
 private enum class DownloadOutcome {
     COMPLETED,

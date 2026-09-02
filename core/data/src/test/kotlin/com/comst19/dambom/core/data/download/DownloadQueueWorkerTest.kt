@@ -83,6 +83,55 @@ class DownloadQueueWorkerTest {
         }
 
     @Test
+    fun `new task remains retryable when WorkManager attempt count is already two`() =
+        runTest {
+            failingServer.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START))
+            val task = entity("fresh", failingServer.url("/fresh.mp4").toString())
+            val dao = database.downloadTaskDao()
+            dao.insert(task)
+
+            val result = createWorker(runAttemptCount = 2).doWork()
+
+            assertEquals(ListenableWorker.Result.retry(), result)
+            assertEquals(DownloadStatus.QUEUED.name, dao.getById(task.id)?.status)
+            assertEquals(1, dao.getById(task.id)?.retryCount)
+        }
+
+    @Test
+    fun `network retry budgets are independent per task`() =
+        runTest {
+            repeat(6) {
+                failingServer.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START))
+            }
+            val dao = database.downloadTaskDao()
+            val first = entity("first", failingServer.url("/first.mp4").toString())
+            val second = entity("second", failingServer.url("/second.mp4").toString())
+            dao.insert(first)
+            dao.insert(second)
+
+            repeat(2) {
+                assertEquals(ListenableWorker.Result.retry(), createWorker().doWork())
+                assertEquals(1 + it, dao.getById(first.id)?.retryCount)
+                assertEquals(1 + it, dao.getById(second.id)?.retryCount)
+            }
+
+            assertEquals(ListenableWorker.Result.success(), createWorker().doWork())
+            assertEquals(DownloadStatus.FAILED.name, dao.getById(first.id)?.status)
+            assertEquals(DownloadStatus.FAILED.name, dao.getById(second.id)?.status)
+            assertEquals(3, dao.getById(first.id)?.retryCount)
+            assertEquals(3, dao.getById(second.id)?.retryCount)
+        }
+
+    @Test
+    fun `foreground state only changes for a displayed title or progress change`() {
+        val initial = foregroundNotificationState("title", 100L, 1_000L)
+
+        assertEquals(initial, foregroundNotificationState("title", 109L, 1_000L))
+        assertFalse(initial == foregroundNotificationState("renamed", 109L, 1_000L))
+        assertFalse(initial == foregroundNotificationState("title", 110L, 1_000L))
+    }
+
+    @Test
     fun `mismatched content range restarts instead of appending corrupt bytes`() =
         runTest {
             successfulServer.enqueue(
@@ -183,8 +232,8 @@ class DownloadQueueWorkerTest {
             assertFalse(fileStore.partialValidatorFile(task.id).exists())
         }
 
-    private fun createWorker(): DownloadQueueWorker =
-        TestListenableWorkerBuilder<DownloadQueueWorker>(context, runAttemptCount = 0)
+    private fun createWorker(runAttemptCount: Int = 0): DownloadQueueWorker =
+        TestListenableWorkerBuilder<DownloadQueueWorker>(context, runAttemptCount = runAttemptCount)
             .setWorkerFactory(
                 object : WorkerFactory() {
                     override fun createWorker(
@@ -229,6 +278,8 @@ private fun entity(
         quality = "original",
         status = DownloadStatus.QUEUED.name,
         failureReason = null,
+        retryCount = 0,
+        deletePending = false,
         localFileName = null,
         createdAtMillis = 1L,
         updatedAtMillis = 1L,

@@ -2,6 +2,7 @@ package com.comst19.dambom.feature.web
 
 import androidx.lifecycle.SavedStateHandle
 import com.comst19.dambom.core.domain.model.UnsupportedReason
+import com.comst19.dambom.feature.web.contract.MAX_WEB_TABS
 import com.comst19.dambom.feature.web.contract.RecentPage
 import com.comst19.dambom.feature.web.contract.WebDetectionState
 import com.comst19.dambom.feature.web.contract.WebTab
@@ -13,18 +14,24 @@ internal fun SavedStateHandle.restoreWebUiState(): WebUiState {
     val titles = get<ArrayList<String>>(TAB_TITLES_KEY).orEmpty()
     val urls = get<ArrayList<String>>(TAB_URLS_KEY).orEmpty()
     val detectionStates = get<ArrayList<String>>(TAB_DETECTION_STATES_KEY).orEmpty()
-    val tabs =
+    val restoredTabs =
         ids
             .mapIndexed { index, id ->
                 WebTab(
                     id = id,
-                    title = titles.getOrNull(index).orEmpty().ifBlank { "새 탭" },
+                    title =
+                        titles.getOrNull(index).orEmpty().let { title ->
+                            if (title == "새 탭" || title == "New tab") "" else title
+                        },
                     url = urls.getOrNull(index)?.takeIf(String::isNotBlank),
                     detectionState = detectionStates.getOrNull(index).toDetectionState(),
                 )
             }.ifEmpty { listOf(WebTab(id = 1L)) }
-            .toPersistentList()
-    val currentTabId = get<Long>(CURRENT_TAB_ID_KEY)?.takeIf { id -> tabs.any { it.id == id } } ?: tabs.first().id
+    val restoredCurrentTabId =
+        get<Long>(CURRENT_TAB_ID_KEY)?.takeIf { id -> restoredTabs.any { it.id == id } }
+            ?: restoredTabs.first().id
+    val tabs = restoredTabs.boundedTabs(restoredCurrentTabId).toPersistentList()
+    val currentTabId = restoredCurrentTabId.takeIf { id -> tabs.any { it.id == id } } ?: tabs.first().id
     val recentTitles = get<ArrayList<String>>(RECENT_TITLES_KEY).orEmpty()
     val recentUrls = get<ArrayList<String>>(RECENT_URLS_KEY).orEmpty()
     val recentPages =
@@ -36,6 +43,12 @@ internal fun SavedStateHandle.restoreWebUiState(): WebUiState {
                 )
             }.toPersistentList()
     return WebUiState(tabs = tabs, currentTabId = currentTabId, recentPages = recentPages)
+}
+
+private fun List<WebTab>.boundedTabs(currentTabId: Long): List<WebTab> {
+    if (size <= MAX_WEB_TABS) return this
+    if (take(MAX_WEB_TABS).any { it.id == currentTabId }) return take(MAX_WEB_TABS)
+    return take(MAX_WEB_TABS - 1) + first { it.id == currentTabId }
 }
 
 internal fun SavedStateHandle.persist(

@@ -13,12 +13,15 @@ internal data class WebUiState(
 ) {
     val currentTab: WebTab?
         get() = tabs.firstOrNull { it.id == currentTabId }
+
+    val canCreateTab: Boolean
+        get() = tabs.size < MAX_WEB_TABS
 }
 
 @Immutable
 internal data class WebTab(
     val id: Long,
-    val title: String = "새 탭",
+    val title: String = "",
     val url: String? = null,
     val detectionState: WebDetectionState = WebDetectionState.Idle,
 )
@@ -43,3 +46,5 @@ internal sealed interface WebDetectionState {
         val reason: UnsupportedReason,
     ) : WebDetectionState
 }
+
+internal const val MAX_WEB_TABS = 6

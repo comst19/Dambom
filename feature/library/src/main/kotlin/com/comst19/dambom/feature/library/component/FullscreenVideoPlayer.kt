@@ -50,6 +50,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.ContentFrame
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
@@ -59,6 +60,7 @@ import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 @Composable
+@androidx.annotation.OptIn(markerClass = [UnstableApi::class])
 internal fun FullscreenVideoPlayer(
     task: DownloadTask,
     player: Player,
@@ -215,6 +217,7 @@ private fun BoxScope.FullscreenOverlayControls(
 }
 
 @Composable
+@androidx.annotation.OptIn(markerClass = [UnstableApi::class])
 private fun FullscreenContentFrame(
     player: Player,
     surfaceDescription: String,

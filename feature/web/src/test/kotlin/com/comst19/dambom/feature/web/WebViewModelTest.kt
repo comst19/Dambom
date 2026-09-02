@@ -9,6 +9,7 @@ import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
+import com.comst19.dambom.feature.web.contract.MAX_WEB_TABS
 import com.comst19.dambom.feature.web.contract.RecentPage
 import com.comst19.dambom.feature.web.contract.WebDetectionState
 import kotlinx.coroutines.CompletableDeferred
@@ -62,6 +63,29 @@ class WebViewModelTest {
                 .currentTab
                 ?.url,
         )
+    }
+
+    @Test
+    fun `tab creation is bounded while preserving the current tab`() {
+        val viewModel = createViewModel()
+
+        repeat(MAX_WEB_TABS - 1) { viewModel.createTab("https://example.com/$it") }
+        val currentTabId = viewModel.uiState.value.currentTabId
+        viewModel.createTab("https://example.com/overflow")
+
+        assertEquals(MAX_WEB_TABS, viewModel.uiState.value.tabs.size)
+        assertEquals(currentTabId, viewModel.uiState.value.currentTabId)
+    }
+
+    @Test
+    fun `inactive web states retain only a small recent set`() {
+        val viewModel = createViewModel()
+
+        repeat(4) { tabId -> viewModel.saveWebState(tabId.toLong(), android.os.Bundle()) }
+
+        assertNull(viewModel.savedWebState(0L))
+        assertTrue(viewModel.savedWebState(1L) != null)
+        assertTrue(viewModel.savedWebState(1L) != null)
     }
 
     @Test
@@ -136,6 +160,21 @@ class WebViewModelTest {
         assertEquals(2, restored.tabs.size)
         assertEquals("https://media.w3.org", restored.currentTab?.url)
         assertEquals(RecentPage("Article", "https://example.com/article"), restored.recentPages.single())
+    }
+
+    @Test
+    fun `legacy localized empty tab title restores as display placeholder`() {
+        val savedStateHandle =
+            SavedStateHandle(
+                mapOf(
+                    "web-tab-ids" to longArrayOf(1L),
+                    "web-tab-titles" to arrayListOf("새 탭"),
+                ),
+            )
+
+        val restored = createViewModel(savedStateHandle).uiState.value
+
+        assertEquals("", restored.currentTab?.title)
     }
 
     @Test

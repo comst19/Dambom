@@ -91,6 +91,26 @@ class SettingsViewModelTest {
             )
         }
 
+    @Test
+    fun `replacement directory releases the old grant after the new location is saved`() =
+        runTest {
+            val repository =
+                RecordingSettingsRepository(
+                    initialSettings = AppSettings(downloadTreeUri = OLD_DOWNLOAD_TREE_URI),
+                )
+            val platform = FakeSettingsPlatformActions()
+            val viewModel = createViewModel(repository = repository, platformActions = platform)
+
+            viewModel.setDownloadDirectory(DOWNLOAD_TREE_URI)
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf("take:$DOWNLOAD_TREE_URI", "release:$OLD_DOWNLOAD_TREE_URI"),
+                platform.calls,
+            )
+            assertEquals(DOWNLOAD_TREE_URI, repository.downloadTreeUri)
+        }
+
     private fun createViewModel(
         repository: RecordingSettingsRepository = RecordingSettingsRepository(),
         platformActions: FakeSettingsPlatformActions = FakeSettingsPlatformActions(),
@@ -110,16 +130,26 @@ private class FakeSettingsPlatformActions(
     private val canPersistDirectory: Boolean = true,
 ) : SettingsPlatformActions {
     var appliedLanguageTag: String? = null
+    val calls = mutableListOf<String>()
 
     override fun applyLanguage(languageTag: String) {
         appliedLanguageTag = languageTag
     }
 
-    override fun persistDownloadDirectory(treeUri: String): Boolean = canPersistDirectory
+    override fun takePersistedDownloadDirectory(treeUri: String): Boolean {
+        calls += "take:$treeUri"
+        return canPersistDirectory
+    }
+
+    override fun releasePersistedDownloadDirectory(treeUri: String) {
+        calls += "release:$treeUri"
+    }
 }
 
-private class RecordingSettingsRepository : SettingsRepository {
-    override val settings: Flow<AppSettings> = flowOf(AppSettings())
+private class RecordingSettingsRepository(
+    initialSettings: AppSettings = AppSettings(),
+) : SettingsRepository {
+    override val settings: Flow<AppSettings> = flowOf(initialSettings)
     var useConfiguredDownloadLocation: Boolean? = null
     var downloadTreeUri: String? = null
 
@@ -177,3 +207,4 @@ private object EmptyDownloadRepository : DownloadRepository {
 }
 
 private const val DOWNLOAD_TREE_URI = "content://downloads/tree/videos"
+private const val OLD_DOWNLOAD_TREE_URI = "content://downloads/tree/old-videos"

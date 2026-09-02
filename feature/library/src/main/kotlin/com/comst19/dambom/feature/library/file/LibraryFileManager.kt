@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.domain.model.DownloadTask
@@ -41,9 +42,23 @@ internal class LibraryFileManager
             if (treeUri == null) {
                 source.copyToDefaultDownloads(task)
             } else {
+                check(hasPersistedTreePermission(treeUri)) { "Configured download folder permission is unavailable" }
                 source.copyToTree(task, treeUri)
             }
         }
+
+        fun hasPersistedTreePermission(treeUri: Uri): Boolean =
+            hasPersistedTreePermission(
+                treeUri = treeUri,
+                persistedPermissions =
+                    context.contentResolver.persistedUriPermissions.map {
+                        PersistedTreePermission(
+                            uri = it.uri,
+                            canRead = it.isReadPermission,
+                            canWrite = it.isWritePermission,
+                        )
+                    },
+            )
 
         fun createShareIntent(task: DownloadTask): Intent? =
             task.localFileOrNull()?.shareUriOrNull()?.let { uri ->
@@ -110,6 +125,7 @@ internal class LibraryFileManager
             }
         }
 
+        @RequiresApi(Build.VERSION_CODES.Q)
         private fun File.copyToMediaStore(task: DownloadTask) {
             val values =
                 ContentValues().apply {
@@ -185,7 +201,19 @@ private fun File.availableFile(fileName: String): File {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 internal fun defaultDownloadCollectionUri(): Uri = MediaStore.Downloads.EXTERNAL_CONTENT_URI
+
+internal data class PersistedTreePermission(
+    val uri: Uri,
+    val canRead: Boolean,
+    val canWrite: Boolean,
+)
+
+internal fun hasPersistedTreePermission(
+    treeUri: Uri,
+    persistedPermissions: Iterable<PersistedTreePermission>,
+): Boolean = persistedPermissions.any { it.uri == treeUri && it.canRead && it.canWrite }
 
 private val INVALID_FILE_NAME_CHARACTERS = Regex("[\\\\/:*?\"<>|\\p{Cntrl}]")
 private const val MAX_FILE_NAME_LENGTH = 80

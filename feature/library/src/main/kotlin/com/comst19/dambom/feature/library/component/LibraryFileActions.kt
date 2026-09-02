@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.domain.model.DownloadTask
@@ -41,6 +42,7 @@ internal fun rememberLibraryFileActions(
     onDelete: ((DownloadTask) -> Unit)? = null,
 ): LibraryFileActions {
     val context = LocalContext.current
+    val shareLinkChooserTitle = stringResource(R.string.library_share_link_chooser)
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val currentSettings = rememberUpdatedState(settings)
     var pendingExport by remember { mutableStateOf<DownloadTask?>(null) }
@@ -64,13 +66,19 @@ internal fun rememberLibraryFileActions(
             }
         }
     val currentOnDelete = rememberUpdatedState(onDelete)
-    return remember(viewModel, context, exportLauncher, legacyStoragePermissionLauncher) {
+    return remember(viewModel, context, shareLinkChooserTitle, exportLauncher, legacyStoragePermissionLauncher) {
         LibraryFileActions(
             onRename = viewModel::rename,
             onExport = { task ->
                 val downloadSettings = currentSettings.value
                 when {
                     !downloadSettings.useConfiguredDownloadLocation -> {
+                        pendingExport = task
+                        exportLauncher.launch(task.suggestedFileName())
+                    }
+
+                    !viewModel.hasValidConfiguredDownloadLocation(downloadSettings.downloadTreeUri) -> {
+                        viewModel.clearInvalidDownloadLocation()
                         pendingExport = task
                         exportLauncher.launch(task.suggestedFileName())
                     }
@@ -103,8 +111,7 @@ internal fun rememberLibraryFileActions(
                 }
             },
             onShareLink = { task ->
-                val chooserTitle = context.getString(R.string.library_share_link_chooser)
-                if (!shareOriginalLink(context, task.sourcePageUrl, chooserTitle)) {
+                if (!shareOriginalLink(context, task.sourcePageUrl, shareLinkChooserTitle)) {
                     viewModel.notifyShareLinkFailure()
                 }
             },

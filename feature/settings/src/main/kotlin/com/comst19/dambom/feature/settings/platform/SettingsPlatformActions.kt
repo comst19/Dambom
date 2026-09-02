@@ -19,7 +19,9 @@ internal interface SettingsPlatformActions {
 
     fun applyLanguage(languageTag: String)
 
-    fun persistDownloadDirectory(treeUri: String): Boolean
+    fun takePersistedDownloadDirectory(treeUri: String): Boolean
+
+    fun releasePersistedDownloadDirectory(treeUri: String)
 }
 
 @Singleton
@@ -42,7 +44,7 @@ internal class AndroidSettingsPlatformActions
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(languageTag))
         }
 
-        override fun persistDownloadDirectory(treeUri: String): Boolean =
+        override fun takePersistedDownloadDirectory(treeUri: String): Boolean =
             try {
                 context.contentResolver.takePersistableUriPermission(
                     Uri.parse(treeUri),
@@ -52,6 +54,16 @@ internal class AndroidSettingsPlatformActions
             } catch (_: SecurityException) {
                 false
             }
+
+        override fun releasePersistedDownloadDirectory(treeUri: String) {
+            try {
+                context.contentResolver.releasePersistableUriPermission(
+                    Uri.parse(treeUri),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                )
+            } catch (_: SecurityException) {
+            }
+        }
     }
 
 @Module

@@ -52,6 +52,7 @@
     <string name="library_delete_failure">Couldn’t delete the video.</string>
     <string name="library_export_success">Video saved to your device.</string>
     <string name="library_export_failure">Couldn’t save the video to your device.</string>
+    <string name="library_export_location_permission_expired">The selected folder permission expired. Choose a save location again.</string>
     <string name="library_share_failure">No app is available to share this video.</string>
     <string name="library_share_link_failure">No app is available to share this link.</string>
     <string name="library_copy_link_success">Original link copied.</string>

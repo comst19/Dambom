@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.ContentFrame
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
@@ -56,6 +57,7 @@ internal fun MissingVideo(modifier: Modifier = Modifier) {
 }
 
 @Composable
+@androidx.annotation.OptIn(markerClass = [UnstableApi::class])
 internal fun VideoPlayerPanel(
     task: DownloadTask,
     player: Player,
@@ -139,6 +141,7 @@ internal fun VideoPlayerPanel(
 }
 
 @Composable
+@androidx.annotation.OptIn(markerClass = [UnstableApi::class])
 private fun InlineVideoSurface(
     player: Player,
     surfaceDescription: String,

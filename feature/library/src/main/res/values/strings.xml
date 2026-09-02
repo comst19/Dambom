@@ -52,6 +52,7 @@
     <string name="library_delete_failure">영상을 삭제하지 못했어요.</string>
     <string name="library_export_success">영상을 기기에 저장했어요.</string>
     <string name="library_export_failure">영상을 기기에 저장하지 못했어요.</string>
+    <string name="library_export_location_permission_expired">선택한 폴더 권한이 만료되어 저장할 위치를 다시 선택해 주세요.</string>
     <string name="library_share_failure">영상을 공유할 앱을 찾지 못했어요.</string>
     <string name="library_share_link_failure">링크를 공유할 앱을 찾지 못했어요.</string>
     <string name="library_copy_link_success">원본 링크를 복사했어요.</string>

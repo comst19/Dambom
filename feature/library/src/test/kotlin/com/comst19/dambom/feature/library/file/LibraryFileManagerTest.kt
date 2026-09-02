@@ -22,6 +22,26 @@ class LibraryFileManagerTest {
     }
 
     @Test
+    fun `restored configured directory requires its persisted read and write grant`() {
+        val treeUri = android.net.Uri.parse("content://downloads/tree/dambom")
+
+        assertEquals(
+            true,
+            hasPersistedTreePermission(
+                treeUri,
+                listOf(PersistedTreePermission(treeUri, canRead = true, canWrite = true)),
+            ),
+        )
+    }
+
+    @Test
+    fun `revoked configured directory is rejected before export`() {
+        val treeUri = android.net.Uri.parse("content://downloads/tree/dambom")
+
+        assertEquals(false, hasPersistedTreePermission(treeUri, emptyList()))
+    }
+
+    @Test
     fun `missing local file returns no share intent instead of throwing`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val manager = LibraryFileManager(context, Dispatchers.IO)

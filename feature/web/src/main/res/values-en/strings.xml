@@ -18,9 +18,12 @@
     <string name="web_connection_error_description">The site closed the connection or is unavailable on the current network.</string>
     <string name="web_retry">Try again</string>
     <string name="web_external_download_notice">Dambom cannot detect or download videos from an external browser.</string>
-    <string name="web_tabs_title">%1$d open tabs</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d open tab</item>
+        <item quantity="other">%1$d open tabs</item>
+    </plurals>
     <string name="web_new_tab">New tab</string>
-    <string name="web_close_tab">Close tab</string>
+    <string name="web_close_tab">Close %1$s tab</string>
     <string name="web_empty_tab">Empty tab</string>
     <string name="web_tab_actions">Current tab actions</string>
     <string name="web_open_external">Open in default browser</string>

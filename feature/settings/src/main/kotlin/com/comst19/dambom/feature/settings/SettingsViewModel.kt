@@ -16,9 +16,11 @@ import com.comst19.dambom.feature.settings.contract.AppLanguage
 import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 import com.comst19.dambom.feature.settings.platform.SettingsPlatformActions
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -72,13 +74,28 @@ internal class SettingsViewModel
 
         fun setDownloadDirectory(treeUri: String) {
             viewModelScope.launch {
-                if (platformActions.persistDownloadDirectory(treeUri)) {
-                    repository.setDownloadLocation(enabled = true, treeUri = treeUri)
-                } else {
+                val previousTreeUri = repository.settings.first().downloadTreeUri
+                if (!platformActions.takePersistedDownloadDirectory(treeUri)) {
                     appEventBus.send(
                         AppEvent.ShowSnackbar(UiText.Resource(R.string.settings_download_location_failure)),
                     )
+                    return@launch
                 }
+                try {
+                    repository.setDownloadLocation(enabled = true, treeUri = treeUri)
+                } catch (cancellation: CancellationException) {
+                    platformActions.releasePersistedDownloadDirectory(treeUri)
+                    throw cancellation
+                } catch (_: Exception) {
+                    platformActions.releasePersistedDownloadDirectory(treeUri)
+                    appEventBus.send(
+                        AppEvent.ShowSnackbar(UiText.Resource(R.string.settings_download_location_failure)),
+                    )
+                    return@launch
+                }
+                previousTreeUri
+                    ?.takeIf { it != treeUri }
+                    ?.let(platformActions::releasePersistedDownloadDirectory)
             }
         }
 

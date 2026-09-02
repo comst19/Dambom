@@ -35,7 +35,7 @@ internal class WebViewModel
     ) : ViewModel() {
         private val mutableUiState = MutableStateFlow(savedStateHandle.restoreWebUiState())
         val uiState: StateFlow<WebUiState> = mutableUiState.asStateFlow()
-        private val savedWebStates = mutableMapOf<Long, Bundle>()
+        private val savedWebStates = LinkedHashMap<Long, Bundle>()
         private val detectedMediaKeys = mutableMapOf<Long, MutableSet<String>>()
         private val pageGenerations = mutableMapOf<Long, Long>()
         private val readyPageGenerations = mutableMapOf<Long, Long>()
@@ -52,6 +52,7 @@ internal class WebViewModel
         }
 
         fun createTab(url: String? = null) {
+            if (!uiState.value.canCreateTab) return
             val tab = WebTab(id = nextTabId++, url = url?.normalizeAddress())
             updateState { state ->
                 state.copy(
@@ -224,7 +225,11 @@ internal class WebViewModel
             tabId: Long,
             state: Bundle,
         ) {
+            savedWebStates.remove(tabId)
             savedWebStates[tabId] = state
+            while (savedWebStates.size > MAX_RETAINED_WEB_STATES) {
+                savedWebStates.remove(savedWebStates.keys.first())
+            }
         }
 
         fun savedWebState(tabId: Long): Bundle? = savedWebStates[tabId]
@@ -283,5 +288,6 @@ internal class WebViewModel
     }
 
 private const val MAX_RECENT_PAGES = 8
+private const val MAX_RETAINED_WEB_STATES = 3
 private const val NEXT_TAB_ID_KEY = "web-next-tab-id"
 private const val INITIAL_URL_APPLIED_KEY = "web-initial-url-applied"

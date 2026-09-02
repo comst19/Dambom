@@ -1,12 +1,12 @@
 package com.comst19.dambom.feature.web.component
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -22,7 +22,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.feature.web.R
@@ -44,23 +46,28 @@ internal fun WebTabsSheet(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                stringResource(R.string.web_tabs_title, state.tabs.size),
+                pluralStringResource(R.plurals.web_tabs_title, state.tabs.size, state.tabs.size),
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleLarge,
             )
-            IconButton(onClick = onCreateTab) {
+            IconButton(onClick = onCreateTab, enabled = state.canCreateTab) {
                 Icon(Icons.Outlined.Add, stringResource(R.string.web_new_tab))
             }
         }
         LazyColumn(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
             items(state.tabs, key = WebTab::id) { tab ->
                 val selected = tab.id == state.currentTabId
+                val title = tab.title.ifBlank { stringResource(R.string.web_new_tab) }
                 Card(
                     modifier =
                         Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 4.dp)
-                            .clickable { onSelectTab(tab.id) },
+                            .selectable(
+                                selected = selected,
+                                role = Role.Tab,
+                                onClick = { onSelectTab(tab.id) },
+                            ),
                     colors =
                         CardDefaults.cardColors(
                             containerColor =
@@ -77,7 +84,7 @@ internal fun WebTabsSheet(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(Modifier.weight(1f)) {
-                            Text(tab.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             Text(
                                 tab.url ?: stringResource(R.string.web_empty_tab),
                                 style = MaterialTheme.typography.bodySmall,
@@ -87,7 +94,7 @@ internal fun WebTabsSheet(
                             )
                         }
                         IconButton(onClick = { onCloseTab(tab.id) }) {
-                            Icon(Icons.Outlined.Close, stringResource(R.string.web_close_tab))
+                            Icon(Icons.Outlined.Close, stringResource(R.string.web_close_tab, title))
                         }
                     }
                 }

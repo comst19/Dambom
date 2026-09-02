@@ -35,7 +35,7 @@ internal class LibraryViewModel
     @Inject
     constructor(
         private val repository: DownloadRepository,
-        settingsRepository: SettingsRepository,
+        private val settingsRepository: SettingsRepository,
         private val navigation: NavigationDispatcher,
         private val savedStateHandle: SavedStateHandle,
         private val fileManager: LibraryFileManager,
@@ -175,9 +175,32 @@ internal class LibraryViewModel
 
         fun exportToConfiguredLocation(task: DownloadTask) {
             val treeUri = settings.value.downloadTreeUri?.let(Uri::parse)
+            if (treeUri != null && !fileManager.hasPersistedTreePermission(treeUri)) {
+                clearInvalidDownloadLocation()
+                return
+            }
             viewModelScope.launch {
                 suspendRunCatching { fileManager.exportToConfiguredLocation(task, treeUri) }
-                    .notifyResult(R.string.library_export_success, R.string.library_export_failure)
+                    .fold(
+                        onSuccess = { showMessage(R.string.library_export_success) },
+                        onFailure = {
+                            if (treeUri != null && !fileManager.hasPersistedTreePermission(treeUri)) {
+                                clearInvalidDownloadLocation()
+                            } else {
+                                showMessage(R.string.library_export_failure)
+                            }
+                        },
+                    )
+            }
+        }
+
+        fun hasValidConfiguredDownloadLocation(treeUri: String?): Boolean =
+            treeUri?.let(Uri::parse)?.let(fileManager::hasPersistedTreePermission) ?: true
+
+        fun clearInvalidDownloadLocation() {
+            viewModelScope.launch {
+                settingsRepository.setDownloadLocation(enabled = false, treeUri = null)
+                showMessage(R.string.library_export_location_permission_expired)
             }
         }
 

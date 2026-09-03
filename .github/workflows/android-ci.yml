@@ -61,9 +61,9 @@ jobs:
           - id: unit-tests
             name: Unit tests
             tasks: testDebugUnitTest
-          - id: lint-dependencies
-            name: Lint and dependency analysis
-            tasks: lintDebug lintQa lintRelease buildHealth
+          - id: android-lint
+            name: Android Lint
+            tasks: lintDebug lintRelease
           - id: debug-build
             name: Debug build
             tasks: :app:assembleDebug

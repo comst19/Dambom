@@ -1,0 +1,52 @@
+name: Dependency Health
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 17 * * 6"
+  pull_request:
+    branches:
+      - develop
+      - release
+      - main
+    paths:
+      - "**/*.gradle.kts"
+      - gradle/libs.versions.toml
+      - gradle.properties
+      - settings.gradle.kts
+      - "build-logic/**"
+      - "gradle/wrapper/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependency-health-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  analyze:
+    name: Analyze dependency usage
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Android environment
+        uses: ./.github/actions/setup-android
+        with:
+          cache-read-only: ${{ github.event_name == 'pull_request' }}
+
+      - name: Analyze dependency usage
+        run: ./gradlew buildHealth --parallel --stacktrace
+
+      - name: Upload dependency reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dependency-health-${{ github.run_id }}
+          path: "**/build/reports/dependency-analysis/**"
+          if-no-files-found: error
+          retention-days: 14

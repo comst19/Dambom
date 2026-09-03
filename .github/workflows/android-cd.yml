@@ -5,6 +5,11 @@ on:
     branches:
       - release
   workflow_dispatch:
+    inputs:
+      from_ref:
+        description: Previous tag or commit used as the release notes starting point
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -22,6 +27,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
 
       - name: Set up Android environment
         uses: ./.github/actions/setup-android
@@ -31,6 +38,12 @@ jobs:
       - name: Set release keystore path
         shell: bash
         run: echo "DAMBOM_RELEASE_STORE_FILE=$RUNNER_TEMP/dambom-release.jks" >> "$GITHUB_ENV"
+
+      - name: Generate release notes draft
+        env:
+          RELEASE_NOTES_FROM_REF: ${{ inputs.from_ref }}
+          RELEASE_EVENT_BEFORE: ${{ github.event.before }}
+        run: .github/scripts/generate-release-notes.sh "$RUNNER_TEMP/release-notes.txt"
 
       - name: Validate signing secrets
         shell: bash
@@ -120,6 +133,7 @@ jobs:
             app/build/outputs/mapping/release/mapping.txt
             app/build/outputs/mapping/release/seeds.txt
             app/build/outputs/mapping/release/usage.txt
+            ${{ runner.temp }}/release-notes.txt
           if-no-files-found: error
           retention-days: 30
 

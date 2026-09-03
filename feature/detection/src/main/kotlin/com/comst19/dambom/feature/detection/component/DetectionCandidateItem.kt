@@ -187,7 +187,7 @@ internal fun DetectionCandidateItem(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = stringResource(R.string.detection_preview),
+                        text = stringResource(R.string.detection_play),
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelLarge,
                     )

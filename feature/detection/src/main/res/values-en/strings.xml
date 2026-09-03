@@ -4,10 +4,11 @@
     <string name="detection_loading">Finding videos</string>
     <string name="detection_loading_description">Some pages may take a moment.</string>
     <string name="detection_found_count">Found %1$d videos you can save.</string>
-    <string name="detection_choose_videos">Check the thumbnails or previews, then select the videos to save.</string>
+    <string name="detection_choose_videos">Check a thumbnail or play the selected quality, then choose videos to save.</string>
     <string name="detection_video_number">Video %1$d</string>
     <string name="detection_thumbnail">Video %1$d thumbnail</string>
-    <string name="detection_preview">Preview</string>
+    <string name="detection_play">Play</string>
+    <string name="detection_play_selected_quality">Playing selected quality</string>
     <string name="detection_choose_quality">Choose download quality</string>
     <string name="detection_quality_selected">Selected</string>
     <string name="detection_close_preview">Close</string>

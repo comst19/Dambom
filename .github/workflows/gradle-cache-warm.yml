@@ -1,0 +1,31 @@
+name: Gradle Cache Warm
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gradle-cache-warm-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  warm-cache:
+    name: Warm Gradle cache
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Android environment
+        uses: ./.github/actions/setup-android
+        with:
+          cache-read-only: "false"
+
+      - name: Build Debug APK for the shared cache
+        run: ./gradlew :app:assembleDebug --parallel --stacktrace

@@ -2,9 +2,15 @@ name: Android CI
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - develop
+    inputs:
+      target_branch:
+        description: Branch gate to run
+        required: true
+        default: develop
+        type: choice
+        options:
+          - develop
+          - release
   pull_request:
     branches:
       - develop
@@ -14,13 +20,44 @@ permissions:
   contents: read
 
 concurrency:
-  group: android-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: android-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  branch-flow:
+    name: Branch flow
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Require the supported promotion path
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref || inputs.target_branch }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if [[ "$EVENT_NAME" != "pull_request" ]]; then
+            exit 0
+          fi
+
+          if [[ "$BASE_BRANCH" == "release" && "$HEAD_BRANCH" != "develop" ]]; then
+            echo "::error::Only develop can be promoted to release."
+            exit 1
+          fi
+
+          if [[ "$BASE_BRANCH" == "develop" && "$HEAD_BRANCH" == "release" ]]; then
+            echo "::error::release cannot be merged back into develop."
+            exit 1
+          fi
+
   version:
     name: Version code
-    if: ${{ github.event_name == 'pull_request' && github.base_ref == 'release' }}
+    if: >-
+      ${{
+        (github.event_name == 'pull_request' && github.base_ref == 'release') ||
+        (github.event_name == 'workflow_dispatch' && inputs.target_branch == 'release')
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -33,7 +70,7 @@ jobs:
       - name: Require a versionCode increase
         shell: bash
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: release
         run: |
           base_version_code=$(git show "origin/$BASE_REF:app/build.gradle.kts" | sed -nE 's/.*versionCode = ([0-9]+).*/\1/p' | head -1)
           current_version_code=$(sed -nE 's/.*versionCode = ([0-9]+).*/\1/p' app/build.gradle.kts | head -1)
@@ -46,8 +83,13 @@ jobs:
             exit 1
           fi
 
-  checks:
+  develop-checks:
     name: ${{ matrix.name }}
+    if: >-
+      ${{
+        (github.event_name == 'pull_request' && github.base_ref == 'develop') ||
+        (github.event_name == 'workflow_dispatch' && inputs.target_branch == 'develop')
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -63,9 +105,6 @@ jobs:
           - id: debug-lint
             name: Debug lint
             tasks: lintDebug
-          - id: release-lint
-            name: Release lint
-            tasks: lintRelease
           - id: debug-build
             name: Debug build
             tasks: :app:assembleDebug
@@ -77,7 +116,55 @@ jobs:
       - name: Set up Android environment
         uses: ./.github/actions/setup-android
         with:
-          cache-read-only: ${{ github.event_name != 'push' || github.ref != 'refs/heads/develop' || matrix.id != 'static-analysis' }}
+          cache-read-only: "true"
+
+      - name: Run ${{ matrix.name }}
+        env:
+          GRADLE_TASKS: ${{ matrix.tasks }}
+        run: ./gradlew $GRADLE_TASKS --parallel --stacktrace
+
+      - name: Upload failure reports
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ci-failure-reports-${{ matrix.id }}-${{ github.run_id }}
+          path: |
+            **/build/reports/**
+            **/build/test-results/**
+          if-no-files-found: ignore
+          retention-days: 14
+
+  release-checks:
+    name: ${{ matrix.name }}
+    if: >-
+      ${{
+        (github.event_name == 'pull_request' && github.base_ref == 'release') ||
+        (github.event_name == 'workflow_dispatch' && inputs.target_branch == 'release')
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: release-unit-tests
+            name: Release unit tests
+            tasks: testDebugUnitTest
+          - id: release-lint
+            name: Release lint
+            tasks: lintRelease
+          - id: release-build
+            name: Release APK and AAB build
+            tasks: :app:assembleRelease :app:bundleRelease
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Android environment
+        uses: ./.github/actions/setup-android
+        with:
+          cache-read-only: "true"
 
       - name: Run ${{ matrix.name }}
         env:
@@ -99,22 +186,38 @@ jobs:
     name: Quality gate
     if: ${{ always() }}
     needs:
+      - branch-flow
       - version
-      - checks
+      - develop-checks
+      - release-checks
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
       - name: Require every parallel check to pass
         env:
-          CHECKS_RESULT: ${{ needs.checks.result }}
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref || inputs.target_branch }}
+          FLOW_RESULT: ${{ needs.branch-flow.result }}
+          DEVELOP_RESULT: ${{ needs.develop-checks.result }}
+          RELEASE_RESULT: ${{ needs.release-checks.result }}
           VERSION_RESULT: ${{ needs.version.result }}
         run: |
-          if [[ "$CHECKS_RESULT" != "success" ]]; then
-            echo "::error::One or more parallel CI checks failed."
+          if [[ "$FLOW_RESULT" != "success" ]]; then
+            echo "::error::Unsupported branch promotion path."
             exit 1
           fi
-          if [[ "$VERSION_RESULT" != "success" && "$VERSION_RESULT" != "skipped" ]]; then
-            echo "::error::versionCode validation failed."
+
+          if [[ "$TARGET_BRANCH" == "develop" ]]; then
+            if [[ "$DEVELOP_RESULT" != "success" || "$RELEASE_RESULT" != "skipped" || "$VERSION_RESULT" != "skipped" ]]; then
+              echo "::error::Develop PR checks did not complete successfully."
+              exit 1
+            fi
+          elif [[ "$TARGET_BRANCH" == "release" ]]; then
+            if [[ "$DEVELOP_RESULT" != "skipped" || "$RELEASE_RESULT" != "success" || "$VERSION_RESULT" != "success" ]]; then
+              echo "::error::Release promotion checks did not complete successfully."
+              exit 1
+            fi
+          else
+            echo "::error::Unsupported target branch: $TARGET_BRANCH"
             exit 1
           fi

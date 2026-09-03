@@ -1,4 +1,4 @@
-package com.comst19.dambom.feature.library.component
+package com.comst19.dambom.core.common.ui.player
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

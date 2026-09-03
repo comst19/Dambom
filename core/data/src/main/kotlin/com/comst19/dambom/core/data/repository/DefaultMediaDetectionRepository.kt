@@ -121,11 +121,7 @@ internal class DefaultMediaDetectionRepository
         }
     }
 
-private fun normalizeUrl(value: String): String? =
-    runCatching {
-        val uri = URI(value.trim())
-        if (uri.scheme.equals("http", true) || uri.scheme.equals("https", true)) uri.toString() else null
-    }.getOrNull()
+private fun normalizeUrl(value: String): String? = runCatching { URI(value.trim()).toHttpUrlOrNull() }.getOrNull()
 
 private fun buildRequest(url: String): Request =
     Request
@@ -137,7 +133,9 @@ private fun buildRequest(url: String): Request =
 private fun resolveUrl(
     baseUrl: String,
     source: String,
-): String? = runCatching { URI(baseUrl).resolve(source.trim()).toString() }.getOrNull()
+): String? = runCatching { URI(baseUrl).resolve(source.trim()).toHttpUrlOrNull() }.getOrNull()
+
+private fun URI.toHttpUrlOrNull(): String? = if (scheme.equals("http", true) || scheme.equals("https", true)) toString() else null
 
 private fun String.hasVideoExtension(): Boolean =
     VIDEO_EXTENSIONS.any { extension -> substringBefore('?').endsWith(extension, ignoreCase = true) }

@@ -1,5 +1,6 @@
-package com.comst19.dambom.feature.library.component
+package com.comst19.dambom.core.common.ui.player
 
+import android.text.format.DateUtils
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -33,12 +33,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
-import com.comst19.dambom.feature.library.R
-import com.comst19.dambom.feature.library.toTimeText
+import com.comst19.dambom.core.common.ui.R
 import kotlin.math.roundToLong
 
 @Composable
-internal fun PlayerControls(
+fun DambomPlayerControls(
     player: Player,
     showPlay: Boolean,
     playEnabled: Boolean,
@@ -60,14 +59,13 @@ internal fun PlayerControls(
         }
     val positionText = positionMillis.toTimeText()
     val durationText = safeDuration.toTimeText()
-    val seekDescription = stringResource(R.string.player_seek_description)
+    val seekDescription = stringResource(R.string.playback_seek_description)
     val rewindInteractionSource = remember { MutableInteractionSource() }
     val playPauseInteractionSource = remember { MutableInteractionSource() }
     val forwardInteractionSource = remember { MutableInteractionSource() }
     val isRewindPressed by rewindInteractionSource.collectIsPressedAsState()
     val isPlayPausePressed by playPauseInteractionSource.collectIsPressedAsState()
     val isForwardPressed by forwardInteractionSource.collectIsPressedAsState()
-
     var isTimelineInteracting by remember { mutableStateOf(false) }
 
     LaunchedEffect(isTimelineInteracting, isRewindPressed, isPlayPausePressed, isForwardPressed) {
@@ -77,34 +75,29 @@ internal fun PlayerControls(
     }
 
     Box(modifier) {
-        Box(Modifier.align(Alignment.Center)) {
-            PlaybackButtons(
-                player = player,
-                showPlay = showPlay,
-                playEnabled = playEnabled,
-                onPlayPause = onPlayPause,
-                onInteraction = onInteraction,
-                contentColor = contentColor,
-                rewindInteractionSource = rewindInteractionSource,
-                playPauseInteractionSource = playPauseInteractionSource,
-                forwardInteractionSource = forwardInteractionSource,
-            )
-        }
-        Column(
-            modifier =
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .then(timelineModifier),
-        ) {
-            PlayerTimeline(
-                player = player,
-                safeDuration = safeDuration,
-                progress = progress,
-                positionText = positionText,
-                durationText = durationText,
-                seekDescription = seekDescription,
-                onInteraction = onInteraction,
-                onInteractionChanged = { isTimelineInteracting = it },
+        PlaybackButtons(
+            player = player,
+            showPlay = showPlay,
+            playEnabled = playEnabled,
+            onPlayPause = onPlayPause,
+            onInteraction = onInteraction,
+            contentColor = contentColor,
+            rewindInteractionSource = rewindInteractionSource,
+            playPauseInteractionSource = playPauseInteractionSource,
+            forwardInteractionSource = forwardInteractionSource,
+            modifier = Modifier.align(Alignment.Center),
+        )
+        Column(modifier = Modifier.align(Alignment.BottomCenter).then(timelineModifier)) {
+            DambomSeekBar(
+                value = progress,
+                enabled = isDambomSeekBarEnabled(safeDuration),
+                contentDescription = seekDescription,
+                stateDescription = "$positionText / $durationText",
+                onValueChange = { value -> player.seekTo((value * safeDuration).roundToLong()) },
+                onInteractionChanged = { interacting ->
+                    isTimelineInteracting = interacting
+                    if (interacting) onInteraction()
+                },
             )
             Text(
                 text = "$positionText / $durationText",
@@ -114,30 +107,6 @@ internal fun PlayerControls(
             )
         }
     }
-}
-
-@Composable
-private fun PlayerTimeline(
-    player: Player,
-    safeDuration: Long,
-    progress: Float,
-    positionText: String,
-    durationText: String,
-    seekDescription: String,
-    onInteraction: () -> Unit,
-    onInteractionChanged: (Boolean) -> Unit,
-) {
-    DambomSeekBar(
-        value = progress,
-        enabled = isDambomSeekBarEnabled(safeDuration),
-        contentDescription = seekDescription,
-        stateDescription = "$positionText / $durationText",
-        onValueChange = { value -> player.seekTo((value * safeDuration).roundToLong()) },
-        onInteractionChanged = { interacting ->
-            onInteractionChanged(interacting)
-            if (interacting) onInteraction()
-        },
-    )
 }
 
 @Composable
@@ -151,9 +120,10 @@ private fun PlaybackButtons(
     rewindInteractionSource: MutableInteractionSource,
     playPauseInteractionSource: MutableInteractionSource,
     forwardInteractionSource: MutableInteractionSource,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -168,7 +138,7 @@ private fun PlaybackButtons(
         ) {
             Icon(
                 imageVector = Icons.Outlined.Replay10,
-                contentDescription = stringResource(R.string.player_rewind),
+                contentDescription = stringResource(R.string.playback_rewind),
                 tint = contentColor,
             )
         }
@@ -184,10 +154,7 @@ private fun PlaybackButtons(
         ) {
             Icon(
                 imageVector = if (showPlay) Icons.Outlined.PlayArrow else Icons.Outlined.Pause,
-                contentDescription =
-                    stringResource(
-                        if (showPlay) R.string.player_play else R.string.player_pause,
-                    ),
+                contentDescription = stringResource(if (showPlay) R.string.playback_play else R.string.playback_pause),
                 modifier = Modifier.size(36.dp),
                 tint = contentColor,
             )
@@ -204,13 +171,14 @@ private fun PlaybackButtons(
         ) {
             Icon(
                 imageVector = Icons.Outlined.Forward10,
-                contentDescription = stringResource(R.string.player_forward),
+                contentDescription = stringResource(R.string.playback_forward),
                 tint = contentColor,
             )
         }
     }
 }
 
-internal const val PROGRESS_TICK_MILLIS = 500L
+private fun Long.toTimeText(): String = DateUtils.formatElapsedTime(coerceAtLeast(0L) / 1_000L)
+
 private val PLAYER_CONTROL_SIZE = 48.dp
 private val PLAYER_PRIMARY_CONTROL_SIZE = 64.dp

@@ -1,4 +1,4 @@
-package com.comst19.dambom.feature.library.component
+package com.comst19.dambom.core.common.ui.player
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture

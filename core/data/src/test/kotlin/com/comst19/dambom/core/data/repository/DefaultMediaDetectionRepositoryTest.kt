@@ -67,6 +67,24 @@ class DefaultMediaDetectionRepositoryTest {
         }
 
     @Test
+    fun `html video sources reject non http schemes`() =
+        runTest {
+            server.enqueue(
+                MockResponse()
+                    .setBody(
+                        "<html><video src='file:///data/local.mp4'></video>" +
+                            "<source src='content://media/external/video.mp4'>" +
+                            "<source src='data:video/mp4;base64,AAAA.mp4'>" +
+                            "<source src='udp://127.0.0.1/video.mp4'></html>",
+                    ).setHeader("Content-Type", "text/html"),
+            )
+
+            val result = repository.detect(server.url("/page").toString())
+
+            assertEquals(MediaDetectionResult.Unsupported(UnsupportedReason.NO_MEDIA), result)
+        }
+
+    @Test
     fun `html video poster is attached to its candidate`() =
         runTest {
             server.enqueue(

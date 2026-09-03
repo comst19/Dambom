@@ -96,10 +96,18 @@ jobs:
 
       - name: Verify signed AAB
         shell: bash
+        env:
+          DAMBOM_RELEASE_STORE_PASSWORD: ${{ secrets.DAMBOM_RELEASE_STORE_PASSWORD }}
+          DAMBOM_RELEASE_KEY_ALIAS: ${{ secrets.DAMBOM_RELEASE_KEY_ALIAS }}
         run: |
           test -s app/build/outputs/bundle/release/app-release.aab
           unzip -Z1 app/build/outputs/bundle/release/app-release.aab | grep -Eq '^META-INF/[^/]+\.(RSA|DSA|EC)$'
-          jarsigner -verify -strict -certs app/build/outputs/bundle/release/app-release.aab | tee "$RUNNER_TEMP/jarsigner.log"
+          jarsigner -verify -strict -certs \
+            -keystore "$DAMBOM_RELEASE_STORE_FILE" \
+            -storepass:env DAMBOM_RELEASE_STORE_PASSWORD \
+            app/build/outputs/bundle/release/app-release.aab \
+            "$DAMBOM_RELEASE_KEY_ALIAS" \
+            | tee "$RUNNER_TEMP/jarsigner.log"
           grep -q 'jar verified.' "$RUNNER_TEMP/jarsigner.log"
           if grep -q 'jar is unsigned' "$RUNNER_TEMP/jarsigner.log"; then
             echo '::error::Release AAB is unsigned.'

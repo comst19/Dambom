@@ -60,12 +60,12 @@ jobs:
           - id: unit-tests
             name: Unit tests
             tasks: testDebugUnitTest
-          - id: android-lint
-            name: Android Lint
-            tasks: lintDebug lintRelease
-          - id: debug-build
-            name: Debug build
-            tasks: :app:assembleDebug
+          - id: debug-validation
+            name: Debug lint and build
+            tasks: lintDebug :app:assembleDebug
+          - id: release-lint
+            name: Release lint
+            tasks: lintRelease
 
     steps:
       - name: Check out repository
@@ -74,7 +74,7 @@ jobs:
       - name: Set up Android environment
         uses: ./.github/actions/setup-android
         with:
-          cache-read-only: "true"
+          cache-read-only: ${{ github.event_name != 'push' || github.ref != 'refs/heads/develop' || matrix.id != 'debug-validation' }}
 
       - name: Run ${{ matrix.name }}
         env:

@@ -11,14 +11,23 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.video.VideoFrameDecoder
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 
-private val thumbnailGenerationLock = Mutex()
+private val thumbnailGenerationCoordinator = VideoThumbnailGenerationCoordinator()
 
 suspend fun loadOrCreateVideoThumbnailFile(
     context: Context,
@@ -26,28 +35,119 @@ suspend fun loadOrCreateVideoThumbnailFile(
 ): File? =
     withContext(Dispatchers.IO) {
         val videoFile = File(path)
-        thumbnailGenerationLock.withLock {
-            existingVideoThumbnailFile(videoFile)?.let { return@withLock it }
-            if (isVideoThumbnailUnavailable(videoFile)) return@withLock null
-            val bitmap = decodeVideoThumbnail(context.applicationContext, videoFile)
-            if (bitmap == null) {
-                rememberVideoThumbnailUnavailable(videoFile)
-                return@withLock null
-            }
-            try {
-                ensureVideoThumbnailFile(videoFile) { output -> writeVideoThumbnail(bitmap, output) }
-                    .also { thumbnail ->
-                        if (thumbnail == null) {
-                            rememberVideoThumbnailUnavailable(videoFile)
-                        } else {
-                            videoThumbnailUnavailableFile(videoFile).delete()
-                        }
-                    }
-            } finally {
-                if (!bitmap.isRecycled) bitmap.recycle()
-            }
+        thumbnailGenerationCoordinator.load(
+            videoFile = videoFile,
+            existingThumbnail = ::existingVideoThumbnailFile,
+            isUnavailable = ::isVideoThumbnailUnavailable,
+        ) { file ->
+            generateVideoThumbnailFile(context.applicationContext, file)
         }
     }
+
+internal class VideoThumbnailGenerationCoordinator(
+    maxConcurrentGenerations: Int = MAX_CONCURRENT_THUMBNAIL_GENERATIONS,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+) {
+    private val generationSemaphore = Semaphore(maxConcurrentGenerations)
+    private val inFlightLock = Mutex()
+    private val inFlight = mutableMapOf<String, CompletableDeferred<File?>>()
+
+    suspend fun load(
+        videoFile: File,
+        existingThumbnail: (File) -> File?,
+        isUnavailable: (File) -> Boolean,
+        generate: suspend (File) -> File?,
+    ): File? {
+        val existing = existingThumbnail(videoFile)
+        return if (existing != null || isUnavailable(videoFile)) {
+            existing
+        } else {
+            val pathKey =
+                videoFile
+                    .toPath()
+                    .toAbsolutePath()
+                    .normalize()
+                    .toString()
+            val deferred =
+                inFlightLock.withLock {
+                    inFlight[pathKey] ?: startGeneration(
+                        pathKey = pathKey,
+                        videoFile = videoFile,
+                        existingThumbnail = existingThumbnail,
+                        isUnavailable = isUnavailable,
+                        generate = generate,
+                    )
+                }
+            deferred.await()
+        }
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    private fun startGeneration(
+        pathKey: String,
+        videoFile: File,
+        existingThumbnail: (File) -> File?,
+        isUnavailable: (File) -> Boolean,
+        generate: suspend (File) -> File?,
+    ): CompletableDeferred<File?> {
+        val deferred = CompletableDeferred<File?>()
+        val ownerJob = SupervisorJob()
+        inFlight[pathKey] = deferred
+        CoroutineScope(ownerJob + dispatcher).launch {
+            try {
+                val result =
+                    generationSemaphore.withPermit {
+                        existingThumbnail(videoFile)
+                            ?: if (isUnavailable(videoFile)) null else generate(videoFile)
+                    }
+                removeInFlight(pathKey, deferred)
+                deferred.complete(result)
+            } catch (cancellation: CancellationException) {
+                removeInFlight(pathKey, deferred)
+                deferred.cancel(cancellation)
+                throw cancellation
+            } catch (throwable: Throwable) {
+                removeInFlight(pathKey, deferred)
+                deferred.completeExceptionally(throwable)
+            } finally {
+                ownerJob.cancel()
+            }
+        }
+        return deferred
+    }
+
+    private suspend fun removeInFlight(
+        pathKey: String,
+        deferred: CompletableDeferred<File?>,
+    ) = withContext(NonCancellable) {
+        inFlightLock.withLock {
+            if (inFlight[pathKey] === deferred) inFlight.remove(pathKey)
+        }
+    }
+}
+
+private suspend fun generateVideoThumbnailFile(
+    context: Context,
+    videoFile: File,
+): File? {
+    val bitmap = decodeVideoThumbnail(context, videoFile)
+    if (bitmap == null) {
+        rememberVideoThumbnailUnavailable(videoFile)
+        return null
+    }
+    return try {
+        ensureVideoThumbnailFile(videoFile) { output -> writeVideoThumbnail(bitmap, output) }
+            .also { thumbnail ->
+                if (thumbnail == null) {
+                    rememberVideoThumbnailUnavailable(videoFile)
+                } else {
+                    videoThumbnailUnavailableFile(videoFile).delete()
+                }
+            }
+    } finally {
+        if (!bitmap.isRecycled) bitmap.recycle()
+    }
+}
 
 internal fun ensureVideoThumbnailFile(
     videoFile: File,
@@ -149,3 +249,4 @@ private const val TEMPORARY_FILE_SUFFIX = ".tmp"
 private const val THUMBNAIL_WIDTH = 640
 private const val THUMBNAIL_HEIGHT = 360
 private const val JPEG_QUALITY = 85
+private const val MAX_CONCURRENT_THUMBNAIL_GENERATIONS = 2

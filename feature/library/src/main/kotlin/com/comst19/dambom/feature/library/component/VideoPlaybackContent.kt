@@ -100,7 +100,7 @@ internal fun VideoPlayerPanel(
         modifier =
             modifier
                 .verticalScroll(rememberScrollState())
-                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+                .padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         InlineVideoSurface(

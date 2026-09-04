@@ -50,7 +50,7 @@ internal fun VideoCard(
     onToggleSelection: () -> Unit,
 ) {
     val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
-    val style = libraryVideoItemStyle(task.sourcePageUrl, selected || selectionSelected)
+    val style = libraryVideoItemStyle(task.sourcePageUrl, selected && !isSelecting)
     Surface(
         onClick = onClick,
         modifier =
@@ -71,16 +71,16 @@ internal fun VideoCard(
             )
             VideoItemInfo(
                 task = task,
-                fileActions = fileActions,
-                selectionSelected = selectionSelected,
-                isSelecting = isSelecting,
-                onToggleSelection = onToggleSelection,
                 metadataColor = style.metadataColor,
-                sourceBadgeContainerColor = style.sourceBadgeContainerColor,
-                sourceBadgeContentColor = style.sourceBadgeContentColor,
-                sourceLabel = style.sourceLabel,
-                sourceHost = style.sourceHost,
+                source = style.sourceHost ?: style.sourceLabel,
                 modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 4.dp, bottom = 12.dp),
+                trailing = {
+                    if (isSelecting) {
+                        Checkbox(checked = selectionSelected, onCheckedChange = { onToggleSelection() })
+                    } else {
+                        VideoActionsButton(task = task, actions = fileActions, iconOffsetY = (-8).dp)
+                    }
+                },
             )
         }
     }
@@ -97,7 +97,7 @@ internal fun VideoListItem(
     onToggleSelection: () -> Unit,
 ) {
     val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
-    val style = libraryVideoItemStyle(task.sourcePageUrl, selected || selectionSelected)
+    val style = libraryVideoItemStyle(task.sourcePageUrl, selected && !isSelecting)
     Surface(
         onClick = onClick,
         modifier =
@@ -110,7 +110,8 @@ internal fun VideoListItem(
         border = style.border,
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(vertical = 8.dp),
+            verticalAlignment = Alignment.Top,
         ) {
             LibraryVideoThumbnail(
                 metadata = metadata,
@@ -118,16 +119,16 @@ internal fun VideoListItem(
             )
             VideoItemInfo(
                 task = task,
-                fileActions = fileActions,
-                selectionSelected = selectionSelected,
-                isSelecting = isSelecting,
-                onToggleSelection = onToggleSelection,
                 metadataColor = style.metadataColor,
-                sourceBadgeContainerColor = style.sourceBadgeContainerColor,
-                sourceBadgeContentColor = style.sourceBadgeContentColor,
-                sourceLabel = style.sourceLabel,
-                sourceHost = style.sourceHost,
-                modifier = Modifier.weight(1f).padding(start = 12.dp, top = 8.dp, end = 4.dp, bottom = 8.dp),
+                source = style.sourceHost ?: style.sourceLabel,
+                modifier = Modifier.weight(1f).padding(start = 12.dp, end = 4.dp),
+                trailing = {
+                    if (isSelecting) {
+                        Checkbox(checked = selectionSelected, onCheckedChange = { onToggleSelection() })
+                    } else {
+                        VideoActionsButton(task = task, actions = fileActions, iconOffsetY = (-8).dp)
+                    }
+                },
             )
         }
     }
@@ -136,49 +137,16 @@ internal fun VideoListItem(
 @Composable
 private fun VideoItemInfo(
     task: DownloadTask,
-    fileActions: LibraryFileActions,
-    selectionSelected: Boolean,
-    isSelecting: Boolean,
-    onToggleSelection: () -> Unit,
     metadataColor: Color,
-    sourceBadgeContainerColor: Color,
-    sourceBadgeContentColor: Color,
-    sourceLabel: String,
-    sourceHost: String?,
+    source: String,
     modifier: Modifier = Modifier,
+    trailing: @Composable () -> Unit,
 ) {
     Row(modifier = modifier) {
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = sourceBadgeContainerColor,
-                    contentColor = sourceBadgeContentColor,
-                ) {
-                    Text(
-                        text = sourceLabel,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-                sourceHost?.let { host ->
-                    Text(
-                        text = host,
-                        color = metadataColor,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
             Text(
                 text = task.title,
                 style = MaterialTheme.typography.titleSmall,
@@ -190,19 +158,15 @@ private fun VideoItemInfo(
                 color = metadataColor,
                 style = MaterialTheme.typography.bodySmall,
             )
-        }
-        if (isSelecting) {
-            Checkbox(
-                checked = selectionSelected,
-                onCheckedChange = { onToggleSelection() },
-            )
-        } else {
-            VideoActionsButton(
-                task = task,
-                actions = fileActions,
-                iconOffsetY = (-8).dp,
+            Text(
+                text = source,
+                color = metadataColor,
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
+        trailing()
     }
 }
 

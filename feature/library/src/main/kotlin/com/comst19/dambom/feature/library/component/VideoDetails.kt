@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
@@ -27,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.common.ui.format.formatFileSize
+import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.ORIGINAL_QUALITY
 import com.comst19.dambom.feature.library.R
@@ -103,12 +103,12 @@ private fun VideoInformationCard(
     Surface(
         onClick = onToggle,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        shape = DambomShapes.Card,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
         Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -128,6 +128,11 @@ private fun VideoInformationCard(
                         ),
                 )
             }
+            Text(
+                text = "${information.duration} · ${information.fileSize} · ${information.videoQuality}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             if (expanded) {
                 VideoMetadataItem(stringResource(R.string.player_info_duration), information.duration)
                 VideoMetadataItem(stringResource(R.string.player_info_size), information.fileSize)
@@ -156,7 +161,7 @@ private fun VideoMetadataItem(
     label: String,
     value: String,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = label,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

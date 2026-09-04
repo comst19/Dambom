@@ -107,6 +107,7 @@ internal fun DetectionCandidateContent(
                     candidate.downloadVariants.firstOrNull {
                         it.url == state.selectedVariantUrls[candidate.id]
                     } ?: candidate.downloadVariants.first()
+                val previewTitle = candidate.displayTitle(index + 1)
                 DetectionCandidateItem(
                     candidate = candidate,
                     selectedVariant = selectedVariant,
@@ -114,7 +115,13 @@ internal fun DetectionCandidateContent(
                     selected = candidate.id in state.selectedIds,
                     onClick = { onToggleCandidate(candidate.id) },
                     onSelectVariant = { onSelectVariant(candidate.id, it) },
-                    onPreview = { previewCandidate = candidate.copy(url = selectedVariant.url) },
+                    onPreview = {
+                        previewCandidate =
+                            candidate.copy(
+                                url = selectedVariant.url,
+                                title = previewTitle,
+                            )
+                    },
                 )
             }
         }

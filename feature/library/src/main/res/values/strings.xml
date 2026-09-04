@@ -70,11 +70,6 @@
     <string name="player_surface_description">%1$s 영상</string>
     <string name="player_toggle_controls">재생 조작부 표시 또는 숨기기</string>
     <string name="player_error">영상을 재생하지 못했어요.</string>
-    <string name="player_seek_description">재생 위치</string>
-    <string name="player_rewind">10초 뒤로</string>
-    <string name="player_play">재생</string>
-    <string name="player_pause">일시정지</string>
-    <string name="player_forward">10초 앞으로</string>
     <string name="player_info_title">영상 정보</string>
     <string name="player_info_expand">영상 정보 펼치기</string>
     <string name="player_info_collapse">영상 정보 접기</string>

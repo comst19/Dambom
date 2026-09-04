@@ -70,11 +70,6 @@
     <string name="player_surface_description">%1$s video</string>
     <string name="player_toggle_controls">Show or hide playback controls</string>
     <string name="player_error">Couldn’t play this video.</string>
-    <string name="player_seek_description">Playback position</string>
-    <string name="player_rewind">Back 10 seconds</string>
-    <string name="player_play">Play</string>
-    <string name="player_pause">Pause</string>
-    <string name="player_forward">Forward 10 seconds</string>
     <string name="player_info_title">Video information</string>
     <string name="player_info_expand">Expand video information</string>
     <string name="player_info_collapse">Collapse video information</string>

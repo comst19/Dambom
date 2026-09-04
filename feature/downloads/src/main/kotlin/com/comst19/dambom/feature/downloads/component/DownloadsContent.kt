@@ -150,7 +150,7 @@ private fun DownloadGrid(
             Spacer(Modifier.height(12.dp))
         }
         DOWNLOAD_GROUPS.forEach { status ->
-            val tasks = uiState.tasks.filter { it.status == status }
+            val tasks = uiState.tasksByStatus[status].orEmpty()
             if (tasks.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     DownloadGroupTitle(status, tasks.size)
@@ -195,7 +195,7 @@ private fun DownloadList(
             Spacer(Modifier.height(12.dp))
         }
         DOWNLOAD_GROUPS.forEach { status ->
-            val tasks = uiState.tasks.filter { it.status == status }
+            val tasks = uiState.tasksByStatus[status].orEmpty()
             if (tasks.isNotEmpty()) {
                 item { DownloadGroupTitle(status, tasks.size) }
                 listItems(
@@ -282,8 +282,8 @@ private fun DownloadSummary(
 private fun DownloadsUiState.summaryTitle(): String =
     when {
         activeCount > 0 -> stringResource(R.string.downloads_summary, activeCount)
-        tasks.any { it.status == DownloadStatus.QUEUED } -> stringResource(R.string.downloads_summary_waiting)
-        tasks.any { it.status == DownloadStatus.PAUSED } -> stringResource(R.string.downloads_summary_paused)
+        !tasksByStatus[DownloadStatus.QUEUED].isNullOrEmpty() -> stringResource(R.string.downloads_summary_waiting)
+        canResumeAll -> stringResource(R.string.downloads_summary_paused)
         else -> stringResource(R.string.downloads_summary_attention)
     }
 

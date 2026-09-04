@@ -19,6 +19,7 @@
     <string name="home_clipboard_consent_description">When Dambom opens, it can check the clipboard for a web address and suggest filling it in. It never analyzes or downloads automatically.</string>
     <string name="home_clipboard_consent_allow">Allow suggestions</string>
     <string name="home_clipboard_consent_deny">Paste manually</string>
+    <string name="home_clipboard_save_failed">Could not save your preference. Please try again.</string>
     <string name="home_shared_url_title">Shared link received</string>
     <string name="home_shared_url_description">Review the link, then start finding videos.</string>
     <string name="home_analyze_now">Find videos</string>

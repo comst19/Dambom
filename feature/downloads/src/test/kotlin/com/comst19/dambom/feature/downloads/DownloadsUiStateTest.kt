@@ -65,6 +65,24 @@ class DownloadsUiStateTest {
     }
 
     @Test
+    fun `snapshot groups preserve task order and update when copied`() {
+        val first = task("first", DownloadStatus.QUEUED, 25L, 100L)
+        val second = task("second", DownloadStatus.QUEUED, 0L, null)
+        val failed = task("failed", DownloadStatus.FAILED, 100L, 100L)
+        val state = DownloadsUiState(tasks = persistentListOf(first, failed, second))
+
+        assertEquals(listOf(first, second), state.tasksByStatus[DownloadStatus.QUEUED])
+        assertEquals(listOf(failed), state.tasksByStatus[DownloadStatus.FAILED])
+        assertEquals(0.25f, state.progress)
+
+        val paused = state.copy(tasks = persistentListOf(first.copy(status = DownloadStatus.PAUSED)))
+        assertEquals(false, paused.canPauseAll)
+        assertTrue(paused.canResumeAll)
+        assertNull(paused.tasksByStatus[DownloadStatus.QUEUED])
+        assertEquals(1, paused.tasksByStatus[DownloadStatus.PAUSED]?.size)
+    }
+
+    @Test
     fun `completed downloads disappear from the downloads screen`() {
         val downloading = task("downloading", DownloadStatus.DOWNLOADING, 50L, 100L)
         val paused = task("paused", DownloadStatus.PAUSED, 25L, 100L)

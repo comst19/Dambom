@@ -42,7 +42,7 @@ internal fun LoadingDetectionContent() {
         CircularProgressIndicator()
         Spacer(Modifier.height(20.dp))
         Text(stringResource(R.string.detection_loading), style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(8.dp))
         Text(
             stringResource(R.string.detection_loading_description),
             color = MaterialTheme.colorScheme.onSurfaceVariant,

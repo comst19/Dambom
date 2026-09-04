@@ -1,10 +1,15 @@
 <resources>
+    <string name="downloads_summary_waiting">다운로드 대기 중</string>
+    <string name="downloads_summary_paused">다운로드 일시정지</string>
+    <string name="downloads_summary_attention">확인이 필요한 다운로드</string>
+    <string name="downloads_quality_original">원본</string>
     <string name="downloads_title">다운로드</string>
     <string name="downloads_back">뒤로</string>
     <string name="downloads_view_as_list">목록으로 보기</string>
     <string name="downloads_view_as_grid">그리드로 보기</string>
     <string name="downloads_empty_title">진행 중인 다운로드가 없어요</string>
-    <string name="downloads_empty_description">영상 찾기에서 선택한 항목이 여기에 표시돼요.</string>
+    <string name="downloads_empty_description">저장이 끝난 영상은 보관함에서 볼 수 있어요.</string>
+    <string name="downloads_open_library">보관함 보기</string>
     <string name="downloads_summary">%1$d개 다운로드 중</string>
     <string name="downloads_summary_remaining">남은 작업 %1$d개</string>
     <string name="downloads_pause_all">전체 일시정지</string>

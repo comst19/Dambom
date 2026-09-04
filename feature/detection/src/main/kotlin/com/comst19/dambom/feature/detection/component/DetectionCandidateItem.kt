@@ -1,9 +1,9 @@
 package com.comst19.dambom.feature.detection.component
 
 import android.net.Uri
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,6 +45,7 @@ import com.comst19.dambom.core.common.ui.format.formatFileSize
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaVariant
+import com.comst19.dambom.core.domain.model.ORIGINAL_QUALITY
 import com.comst19.dambom.feature.detection.R
 
 @Composable
@@ -69,16 +71,6 @@ internal fun DetectionCandidateItem(
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-            ),
-        border =
-            BorderStroke(
-                width = 1.dp,
-                color =
-                    if (selected) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.outlineVariant
-                    },
             ),
         shape = DambomShapes.Card,
     ) {
@@ -106,10 +98,10 @@ internal fun DetectionCandidateItem(
                 }
             }
             Column(
-                modifier = Modifier.padding(start = 16.dp, end = 12.dp, top = 10.dp, bottom = 8.dp),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
@@ -122,17 +114,33 @@ internal fun DetectionCandidateItem(
                     )
                     Checkbox(
                         checked = selected,
-                        onCheckedChange = { onClick() },
-                        modifier = Modifier.testTag("detection-selection-checkbox"),
+                        onCheckedChange = null,
+                        // Align the visible box after Material's internal 2dp padding.
+                        modifier = Modifier.size(24.dp).offset(x = 2.dp).testTag("detection-selection-checkbox"),
                     )
                 }
-                Text(
-                    candidate.sourceLabel(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        candidate.sourceLabel(),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    selectedVariant.contentLength?.let {
+                        Text(
+                            it.formatFileSize(),
+                            modifier = Modifier.testTag("detection-candidate-size"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -140,6 +148,7 @@ internal fun DetectionCandidateItem(
                     Row(
                         modifier =
                             Modifier
+                                .weight(1f)
                                 .heightIn(min = 48.dp)
                                 .clickable(
                                     role = Role.Button,
@@ -148,7 +157,12 @@ internal fun DetectionCandidateItem(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = selectedVariant.quality,
+                            text =
+                                if (selectedVariant.quality == ORIGINAL_QUALITY) {
+                                    stringResource(R.string.detection_quality_original)
+                                } else {
+                                    selectedVariant.quality
+                                },
                             color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.labelLarge,
                         )
@@ -160,37 +174,28 @@ internal fun DetectionCandidateItem(
                             tint = MaterialTheme.colorScheme.primary,
                         )
                     }
-                    Spacer(Modifier.weight(1f))
-                    selectedVariant.contentLength?.let {
-                        Text(
-                            it.formatFileSize(),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-                Row(
-                    modifier =
-                        Modifier
-                            .heightIn(min = 48.dp)
-                            .clickable(
+                    Row(
+                        modifier =
+                            Modifier.weight(1f).heightIn(min = 48.dp).clickable(
                                 role = Role.Button,
                                 onClick = onPreview,
                             ),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.PlayArrow,
-                        contentDescription = null,
-                        modifier = Modifier.size(22.dp),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = stringResource(R.string.detection_play),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelLarge,
-                    )
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.PlayArrow,
+                            contentDescription = null,
+                            modifier = Modifier.size(22.dp),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.detection_play),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
                 }
             }
         }

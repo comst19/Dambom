@@ -12,6 +12,7 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
+import com.comst19.dambom.core.navigation.contract.LibraryGraph
 import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
 import com.comst19.dambom.feature.downloads.contract.DownloadsViewMode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -68,6 +69,10 @@ internal class DownloadsViewModel
 
         fun goBack() {
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Back) }
+        }
+
+        fun openLibrary() {
+            viewModelScope.launch { navigation.dispatch(NavigationEvent.NavigateTopLevel(LibraryGraph.LibraryKey)) }
         }
 
         private fun launchCommand(block: suspend () -> Unit) {

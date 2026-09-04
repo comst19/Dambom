@@ -3,26 +3,33 @@ package com.comst19.dambom.feature.detection.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -95,6 +102,7 @@ internal fun DetectionCandidateContent(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyMedium,
                         )
+                        DetectionSelectAll(state, onToggleCandidate)
                     }
                 }
             }
@@ -164,6 +172,37 @@ internal fun DetectionCandidateContent(
 }
 
 @Composable
+private fun DetectionSelectAll(
+    state: DetectionUiState.Content,
+    onToggleCandidate: (String) -> Unit,
+) {
+    val selection =
+        when (state.selectedIds.size) {
+            0 -> ToggleableState.Off
+            state.candidates.size -> ToggleableState.On
+            else -> ToggleableState.Indeterminate
+        }
+    Row(
+        modifier =
+            Modifier.fillMaxWidth().heightIn(min = 48.dp).triStateToggleable(
+                state = selection,
+                role = Role.Checkbox,
+                onClick = {
+                    val deselect = selection == ToggleableState.On
+                    state.candidates
+                        .filter { (it.id in state.selectedIds) == deselect }
+                        .forEach { onToggleCandidate(it.id) }
+                },
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        TriStateCheckbox(state = selection, onClick = null)
+        Text(stringResource(R.string.detection_select_all), style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
 private fun DetectionActions(
     state: DetectionUiState.Content,
     networkAccess: NetworkAccessState,
@@ -178,7 +217,7 @@ private fun DetectionActions(
                     state.selectedIds.size,
                 ),
             onClick = onDownload,
-            modifier = Modifier.fillMaxWidth().height(56.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
             enabled = state.selectedIds.isNotEmpty() && !state.isSubmitting && networkAccess.canDownload,
         )
         if (state.enqueueFailed) {

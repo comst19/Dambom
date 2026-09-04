@@ -2,8 +2,13 @@ package com.comst19.dambom.feature.detection.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertIsToggleable
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -18,6 +23,7 @@ import com.comst19.dambom.feature.detection.contract.DetectionUiState
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toPersistentSet
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -31,7 +37,69 @@ class DetectionCandidateContentTest {
     @get:Rule val composeRule = createComposeRule()
 
     @Test
-    fun `candidate text follows one horizontal grid`() {
+    fun `card exposes its title and selection once while play stays independent`() {
+        val candidate = candidate("video-1", "Video title", "High", "Low")
+        var toggles = 0
+        var previews = 0
+        composeRule.setContent {
+            DambomTheme {
+                DetectionCandidateItem(
+                    candidate = candidate,
+                    selectedVariant = candidate.downloadVariants.first(),
+                    index = 1,
+                    selected = true,
+                    onClick = { toggles++ },
+                    onSelectVariant = {},
+                    onPreview = { previews++ },
+                )
+            }
+        }
+        composeRule.onAllNodes(isToggleable()).assertCountEquals(1)
+        composeRule.onNodeWithText("Video title").assertIsToggleable().assertIsOn()
+        composeRule.onNodeWithText("Play").performClick()
+        composeRule.runOnIdle {
+            assertEquals(1, previews)
+            assertEquals(0, toggles)
+        }
+    }
+
+    @Test
+    fun `select all preserves existing selection then clears all on next tap`() {
+        val first = candidate("video-1", "First", "High", "Low")
+        val second = candidate("video-2", "Second", "High", "Low")
+        val state =
+            mutableStateOf(
+                DetectionUiState.Content(
+                    pageTitle = "Videos",
+                    candidates = persistentListOf(first, second),
+                    selectedIds = persistentSetOf(first.id),
+                ),
+            )
+        composeRule.setContent {
+            DambomTheme {
+                DetectionCandidateContent(
+                    state = state.value,
+                    networkAccess = NetworkAccessState(NetworkConnection.UNMETERED),
+                    onToggleCandidate = { id ->
+                        val current = state.value
+                        val selected = current.selectedIds.toMutableSet()
+                        if (!selected.add(id)) selected.remove(id)
+                        state.value = current.copy(selectedIds = selected.toPersistentSet())
+                    },
+                    onSelectVariant = { _, _ -> },
+                    onDownload = {},
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Select all").performClick()
+        composeRule.runOnIdle { assertEquals(setOf(first.id, second.id), state.value.selectedIds) }
+        composeRule.onNodeWithText("Select all").performClick()
+        composeRule.runOnIdle { assertEquals(emptySet<String>(), state.value.selectedIds) }
+    }
+
+    @Test
+    fun `candidate text follows the grid and visible checkbox aligns with file size`() {
         val candidate = candidate("video-1", "Video title", "High", "Low")
 
         composeRule.setContent {
@@ -54,8 +122,20 @@ class DetectionCandidateContentTest {
         val sourceLeft = composeRule.onNodeWithText("example.com", useUnmergedTree = true).getUnclippedBoundsInRoot().left
         val qualityLeft = composeRule.onNodeWithText("High", useUnmergedTree = true).getUnclippedBoundsInRoot().left
 
+        val checkboxBounds =
+            composeRule.onNodeWithTag(SELECTION_CHECKBOX_TAG, useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val fileSizeRight =
+            composeRule
+                .onNodeWithTag("detection-candidate-size", useUnmergedTree = true)
+                .getUnclippedBoundsInRoot()
+                .right
         assertEquals(titleLeft, sourceLeft)
-        assertEquals(titleLeft, qualityLeft)
+        assertEquals(sourceLeft, qualityLeft)
+        assertEquals(fileSizeRight, checkboxBounds.right - 2.dp)
+        val qualityBounds = composeRule.onNodeWithText("High", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val playBounds = composeRule.onNodeWithText("Play", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        assertEquals(qualityBounds.bottom, playBounds.bottom)
+        assertEquals(fileSizeRight, playBounds.right)
     }
 
     @Test
@@ -106,7 +186,8 @@ class DetectionCandidateContentTest {
             }
         }
 
-        val checkboxBounds = composeRule.onNodeWithTag(SELECTION_CHECKBOX_TAG).getUnclippedBoundsInRoot()
+        val checkboxBounds =
+            composeRule.onNodeWithTag(SELECTION_CHECKBOX_TAG, useUnmergedTree = true).getUnclippedBoundsInRoot()
         val titleBounds =
             composeRule.onNodeWithText("Video title", useUnmergedTree = true).getUnclippedBoundsInRoot()
 

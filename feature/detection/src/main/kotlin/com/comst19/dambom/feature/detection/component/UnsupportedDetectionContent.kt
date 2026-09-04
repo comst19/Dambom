@@ -38,7 +38,7 @@ internal fun UnsupportedDetectionContent(
     ) {
         Spacer(Modifier.weight(1f))
         Text(stringResource(R.string.detection_not_found), style = MaterialTheme.typography.headlineSmall)
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(12.dp))
         Text(
             reason.description(),
             modifier = Modifier.fillMaxWidth(),

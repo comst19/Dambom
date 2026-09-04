@@ -1,14 +1,21 @@
 package com.comst19.dambom.feature.downloads.component
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.domain.model.DownloadFailureReason
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
@@ -26,29 +33,62 @@ internal fun DownloadActions(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    FlowRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         when {
             task.status == DownloadStatus.DOWNLOADING || task.status == DownloadStatus.QUEUED -> {
-                TextButton(onClick = onPause) { Text(stringResource(R.string.downloads_pause)) }
-                TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_cancel)) }
+                DownloadActionButton(R.string.downloads_cancel, onCancel, secondary = true)
+                DownloadActionButton(R.string.downloads_pause, onPause)
             }
 
             task.status == DownloadStatus.PAUSED -> {
-                TextButton(onClick = onResume, enabled = canDownload) {
-                    Text(stringResource(R.string.downloads_resume))
-                }
-                TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_cancel)) }
+                DownloadActionButton(R.string.downloads_cancel, onCancel, secondary = true)
+                DownloadActionButton(R.string.downloads_resume, onResume, enabled = canDownload)
             }
 
             task.status == DownloadStatus.FAILED -> {
-                TextButton(onClick = onRetry, enabled = canDownload) {
-                    Text(stringResource(R.string.downloads_retry))
-                }
-                TextButton(onClick = onCancel) { Text(stringResource(R.string.downloads_remove)) }
+                DownloadActionButton(R.string.downloads_remove, onCancel, secondary = true)
+                DownloadActionButton(R.string.downloads_retry, onRetry, enabled = canDownload)
             }
 
             else -> {}
         }
+    }
+}
+
+@Composable
+private fun DownloadActionButton(
+    labelRes: Int,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    secondary: Boolean = false,
+) {
+    FilledTonalButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.widthIn(min = 96.dp).heightIn(min = 48.dp),
+        shape = DambomShapes.Control,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        colors =
+            ButtonDefaults.filledTonalButtonColors(
+                containerColor =
+                    if (secondary) {
+                        MaterialTheme.colorScheme.surfaceContainerHighest
+                    } else {
+                        MaterialTheme.colorScheme.primaryContainer
+                    },
+                contentColor =
+                    if (secondary) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    },
+            ),
+    ) {
+        Text(stringResource(labelRes))
     }
 }
 

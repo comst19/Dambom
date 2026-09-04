@@ -135,7 +135,12 @@ private fun resolveUrl(
     source: String,
 ): String? = runCatching { URI(baseUrl).resolve(source.trim()).toHttpUrlOrNull() }.getOrNull()
 
-private fun URI.toHttpUrlOrNull(): String? = if (scheme.equals("http", true) || scheme.equals("https", true)) toString() else null
+private fun URI.toHttpUrlOrNull(): String? =
+    if (scheme.equals("http", true) || scheme.equals("https", true)) {
+        toString()
+    } else {
+        null
+    }
 
 private fun String.hasVideoExtension(): Boolean =
     VIDEO_EXTENSIONS.any { extension -> substringBefore('?').endsWith(extension, ignoreCase = true) }

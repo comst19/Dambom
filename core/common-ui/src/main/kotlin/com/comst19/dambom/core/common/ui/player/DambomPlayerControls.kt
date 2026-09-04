@@ -2,7 +2,6 @@ package com.comst19.dambom.core.common.ui.player
 
 import android.text.format.DateUtils
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -178,7 +177,7 @@ private fun PlaybackButtons(
     }
 }
 
-private fun Long.toTimeText(): String = DateUtils.formatElapsedTime(coerceAtLeast(0L) / 1_000L)
+private fun Long.toTimeText(): String = DateUtils.formatElapsedTime(coerceAtLeast(0L) / DateUtils.SECOND_IN_MILLIS)
 
 private val PLAYER_CONTROL_SIZE = 48.dp
 private val PLAYER_PRIMARY_CONTROL_SIZE = 64.dp

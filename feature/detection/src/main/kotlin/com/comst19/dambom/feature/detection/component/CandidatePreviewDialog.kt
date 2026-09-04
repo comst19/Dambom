@@ -181,6 +181,7 @@ internal fun CandidatePreviewDialog(
 }
 
 @Composable
+@androidx.annotation.OptIn(markerClass = [UnstableApi::class])
 private fun CandidatePreviewControlOverlay(
     player: Player,
     visible: Boolean,

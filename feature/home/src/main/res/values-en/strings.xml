@@ -1,18 +1,19 @@
 <resources>
     <string name="home_brand">Dambom</string>
-    <string name="home_title">What would you like to save?</string>
-    <string name="home_description">Enter a page address to find videos you can save.</string>
+    <string name="home_title">Worth watching again?\nSave it with a link.</string>
+    <string name="home_description">Find videos to save from a page link.</string>
     <string name="home_url_label">Web address</string>
+    <string name="home_invalid_url">Enter a link starting with http:// or https://.</string>
     <string name="home_url_placeholder">https://example.com/video</string>
     <string name="home_paste">Paste</string>
     <string name="home_analyze">Find videos</string>
     <string name="home_open_settings">Settings</string>
     <string name="home_web_prompt_title">Don’t have a link yet?</string>
-    <string name="home_web_prompt_description">Open multiple web tabs and browse to the page you want.</string>
+    <string name="home_web_prompt_description">Find a page, even without a link.</string>
     <string name="home_browse_web">Browse the web</string>
     <string name="home_current_activity">Current activity</string>
     <string name="home_clipboard_found">A copied link is available</string>
-    <string name="home_use_link">Use link</string>
+    <string name="home_use_link">Paste</string>
     <string name="home_dismiss">Dismiss</string>
     <string name="home_clipboard_consent_title">Suggest copied links?</string>
     <string name="home_clipboard_consent_description">When Dambom opens, it can check the clipboard for a web address and suggest filling it in. It never analyzes or downloads automatically.</string>
@@ -25,5 +26,5 @@
     <string name="home_download_active">%1$d downloading</string>
     <string name="home_download_paused">%1$d paused</string>
     <string name="home_download_failed">%1$d downloads need attention</string>
-    <string name="home_download_open">Tap to manage download status and the queue.</string>
+    <string name="home_download_open">View download status</string>
 </resources>

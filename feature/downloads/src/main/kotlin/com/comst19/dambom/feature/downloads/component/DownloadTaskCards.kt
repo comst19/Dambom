@@ -29,6 +29,7 @@ import com.comst19.dambom.core.common.ui.format.formatFileSize
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.core.domain.model.ORIGINAL_QUALITY
 import com.comst19.dambom.feature.downloads.R
 
 @Composable
@@ -46,7 +47,7 @@ internal fun DownloadGridCard(
         shape = DambomShapes.Card,
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             DownloadTaskHeader(task)
@@ -71,15 +72,15 @@ internal fun DownloadListCard(
         shape = DambomShapes.Card,
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 DownloadStatusIcon()
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     DownloadTaskDetails(task, maxLines = 2)
                 }
             }
@@ -142,7 +143,11 @@ private fun DownloadTaskDetails(
             R.string.downloads_bytes,
             task.downloadedBytes.formatFileSize(),
             task.expectedBytes?.formatFileSize() ?: stringResource(R.string.downloads_unknown_size),
-            task.quality,
+            if (task.quality == ORIGINAL_QUALITY) {
+                stringResource(R.string.downloads_quality_original)
+            } else {
+                task.quality
+            },
         ),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodySmall,

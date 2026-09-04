@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.WifiFind
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ShortNavigationBarItemDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -127,6 +128,11 @@ internal fun AppScaffold(
                 }
                 NavigationSuiteItem(
                     selected = isSelected,
+                    colors =
+                        ShortNavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                        ),
                     onClick = {
                         coroutineScope.launch {
                             dispatcher.dispatch(NavigationEvent.NavigateTopLevel(destination.key))

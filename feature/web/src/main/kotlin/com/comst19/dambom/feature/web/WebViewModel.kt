@@ -40,7 +40,13 @@ internal class WebViewModel
         private val pageGenerations = mutableMapOf<Long, Long>()
         private val readyPageGenerations = mutableMapOf<Long, Long>()
         private val scanJobs = mutableMapOf<Long, Job>()
-        private var nextTabId = savedStateHandle[NEXT_TAB_ID_KEY] ?: (uiState.value.tabs.maxOfOrNull(WebTab::id) ?: 0L) + 1L
+        private var nextTabId =
+            savedStateHandle[NEXT_TAB_ID_KEY] ?: (
+                (
+                    uiState.value.tabs.maxOfOrNull(WebTab::id)
+                        ?: 0L
+                ) + 1L
+            )
         private var initialUrlApplied = savedStateHandle[INITIAL_URL_APPLIED_KEY] ?: false
 
         fun applyInitialUrl(url: String?) {

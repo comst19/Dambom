@@ -23,7 +23,7 @@
     <string name="library_select_video_title">Select a video</string>
     <string name="library_select_video_description">Choose a video from the library to play and manage it here.</string>
     <string name="library_more_actions">More actions for %1$s</string>
-    <string name="library_storage_summary">%1$d videos · %2$s used</string>
+    <string name="library_storage_summary">Saved: %1$d · %2$s used</string>
     <string name="library_source_x_accessibility">Video saved from X</string>
     <string name="library_source_website_accessibility">Video saved from %1$s</string>
     <string name="library_source_x_label">X post</string>
@@ -42,7 +42,7 @@
     <string name="library_delete_title">Delete this video?</string>
     <string name="library_delete_description">%1$s will be removed from this device.</string>
     <string name="library_delete_selected_title">Delete selected videos?</string>
-    <string name="library_delete_selected_description">%1$d selected videos and their thumbnails will be removed from this device.</string>
+    <string name="library_delete_selected_description">The selected videos (%1$d) will be removed from this device.</string>
     <string name="library_delete_confirm">Delete</string>
     <string name="library_cancel">Cancel</string>
     <string name="library_rename_success">Video renamed.</string>

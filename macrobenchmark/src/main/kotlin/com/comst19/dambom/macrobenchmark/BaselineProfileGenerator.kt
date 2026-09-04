@@ -65,6 +65,6 @@ class BaselineProfileGenerator {
 internal const val TARGET_PACKAGE = "com.comst19.dambom"
 internal const val UI_TIMEOUT_MILLIS = 5_000L
 internal val CLIPBOARD_CONSENT_DENY_PATTERN = Pattern.compile("직접 붙여넣기|Paste manually")
-internal val HOME_READY_PATTERN = Pattern.compile("어떤 영상을 담아볼까요\\?|What would you like to save\\?")
+internal val HOME_READY_PATTERN = Pattern.compile("웹 주소|Web address")
 internal val LIBRARY_TAB_PATTERN = Pattern.compile("보관함|Library")
 internal val LIBRARY_SEARCH_PATTERN = Pattern.compile("저장한 영상 검색|Search saved videos")

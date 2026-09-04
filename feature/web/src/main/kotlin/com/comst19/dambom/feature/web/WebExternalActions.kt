@@ -7,13 +7,14 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.core.net.toUri
 
 internal fun Context.openExternal(
     url: String,
     failureMessage: String,
 ) {
     try {
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
     } catch (_: ActivityNotFoundException) {
         Toast.makeText(this, failureMessage, Toast.LENGTH_SHORT).show()
     }

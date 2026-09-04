@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -18,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.comst19.dambom.feature.web.component.WebNavigationErrorContent
@@ -41,6 +43,7 @@ internal fun ColumnScope.WebContent(
     onOpenDetectedMedia: () -> Unit,
     onOpenExternal: (String) -> Unit,
 ) {
+    val backgroundColor = MaterialTheme.colorScheme.background.toArgb()
     var webView by remember(tab.id) { mutableStateOf<WebView?>(null) }
     var loadingProgress by remember(tab.id) { mutableStateOf(0) }
     var navigationFailure by remember(tab.id) { mutableStateOf<WebNavigationFailure?>(null) }
@@ -75,12 +78,14 @@ internal fun ColumnScope.WebContent(
                             webViewGeneration += 1
                         },
                     ).also {
+                        it.setBackgroundColor(backgroundColor)
                         webView = it
                         onWebViewReady(it)
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
                 update = { view ->
+                    view.setBackgroundColor(backgroundColor)
                     val targetUrl = tab.url
                     if (targetUrl != null && view.url != targetUrl) view.loadUrl(targetUrl)
                 },

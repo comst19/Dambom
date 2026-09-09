@@ -12,6 +12,7 @@ import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
+import com.comst19.dambom.core.domain.repository.MediaDetectionSnapshots
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,6 +40,7 @@ internal class DetectionViewModel
         private val downloadRepository: DownloadRepository,
         private val navigation: NavigationDispatcher,
         private val appEventBus: AppEventBus,
+        private val snapshots: MediaDetectionSnapshots = MediaDetectionSnapshots(),
     ) : ViewModel() {
         private val mutableUiState = MutableStateFlow<DetectionUiState>(DetectionUiState.Loading)
         val uiState: StateFlow<DetectionUiState> = mutableUiState.asStateFlow()
@@ -45,7 +48,10 @@ internal class DetectionViewModel
         private var detectionJob: Job? = null
         private var requestGeneration = 0L
 
-        fun detect(url: String) {
+        fun detect(
+            url: String,
+            snapshotId: String? = null,
+        ) {
             if (loadedUrl == url &&
                 (mutableUiState.value is DetectionUiState.Loading || mutableUiState.value is DetectionUiState.Content)
             ) {
@@ -57,7 +63,7 @@ internal class DetectionViewModel
             mutableUiState.value = DetectionUiState.Loading
             detectionJob =
                 viewModelScope.launch {
-                    suspendRunCatching { repository.detect(url) }
+                    suspendRunCatching { snapshotId?.let { snapshots.get(it, url) } ?: repository.detect(url) }
                         .onSuccess { result ->
                             if (generation == requestGeneration) applyDetectionResult(url, result)
                         }.onFailure {
@@ -160,7 +166,7 @@ internal class DetectionViewModel
                                 candidate.downloadVariants.firstOrNull { it.url == selectedUrl }
                                     ?: candidate.downloadVariants.first()
                             DownloadRequest(
-                                id = candidate.id,
+                                id = UUID.randomUUID().toString(),
                                 url = variant.url,
                                 sourcePageUrl = sourcePageUrl,
                                 title = candidate.title,

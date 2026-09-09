@@ -7,5 +7,5 @@ import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
 import com.comst19.dambom.feature.detection.DetectionRoute
 
 fun EntryProviderScope<NavKey>.detectionEntries(networkAccess: () -> NetworkAccessState) {
-    entry<DetectionResultKey> { key -> DetectionRoute(key.url, networkAccess()) }
+    entry<DetectionResultKey> { key -> DetectionRoute(key.url, networkAccess(), snapshotId = key.snapshotId) }
 }

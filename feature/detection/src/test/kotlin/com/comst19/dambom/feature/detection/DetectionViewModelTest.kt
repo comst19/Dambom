@@ -11,6 +11,7 @@ import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.MediaVariant
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
+import com.comst19.dambom.core.domain.repository.MediaDetectionSnapshots
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
@@ -40,6 +41,48 @@ class DetectionViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
     @Test
+    fun `web snapshot is displayed without fetching its page again`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val snapshots = MediaDetectionSnapshots()
+            val result = SuccessfulDetectionRepository.detect(SOURCE_URL) as MediaDetectionResult.Success
+            val snapshotId = snapshots.save(SOURCE_URL, result)
+            val viewModel =
+                DetectionViewModel(
+                    object : MediaDetectionRepository {
+                        override suspend fun detect(url: String): MediaDetectionResult {
+                            error("Page must not be fetched")
+                        }
+                    },
+                    RecordingDownloadRepository(),
+                    SpyNavigationDispatcher(),
+                    AppEventBus(),
+                    snapshots,
+                )
+            viewModel.detect(SOURCE_URL, snapshotId)
+            advanceUntilIdle()
+            assertEquals(result.candidates, (viewModel.uiState.value as DetectionUiState.Content).candidates)
+        }
+
+    @Test
+    fun `an evicted or process lost snapshot falls back to page detection`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel =
+                DetectionViewModel(
+                    SuccessfulDetectionRepository,
+                    RecordingDownloadRepository(),
+                    SpyNavigationDispatcher(),
+                    AppEventBus(),
+                    MediaDetectionSnapshots(),
+                )
+            viewModel.detect(SOURCE_URL, "snapshot-before-process-death")
+            advanceUntilIdle()
+            assertEquals(
+                MEDIA_URL,
+                (viewModel.uiState.value as DetectionUiState.Content).candidates.single().url,
+            )
+        }
+
+    @Test
     fun `selected candidates are queued and downloads screen replaces detection`() =
         runTest(mainDispatcherRule.dispatcher) {
             val downloads = RecordingDownloadRepository()
@@ -53,7 +96,36 @@ class DetectionViewModelTest {
 
             assertEquals(listOf(MEDIA_URL), downloads.enqueued.single().map(DownloadRequest::url))
             assertEquals(listOf(MEDIA_QUALITY), downloads.enqueued.single().map(DownloadRequest::quality))
+            assertTrue(
+                downloads.enqueued
+                    .single()
+                    .single()
+                    .id != "video-1",
+            )
             assertEquals(NavigationEvent.Replace(DownloadsKey), navigation.dispatched.last())
+        }
+
+    @Test
+    fun `different qualities of the same candidate use different task ids`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val downloads = RecordingDownloadRepository()
+            for (url in listOf(MEDIA_URL, LOW_MEDIA_URL)) {
+                val viewModel =
+                    DetectionViewModel(
+                        SuccessfulDetectionRepository,
+                        downloads,
+                        SpyNavigationDispatcher(),
+                        AppEventBus(),
+                    )
+                viewModel.detect(SOURCE_URL)
+                advanceUntilIdle()
+                viewModel.selectVariant("video-1", url)
+                viewModel.downloadSelected()
+                advanceUntilIdle()
+            }
+            val requests = downloads.enqueued.flatten()
+            assertEquals(2, requests.map(DownloadRequest::id).distinct().size)
+            assertEquals(listOf(MEDIA_URL, LOW_MEDIA_URL), requests.map(DownloadRequest::url))
         }
 
     @Test

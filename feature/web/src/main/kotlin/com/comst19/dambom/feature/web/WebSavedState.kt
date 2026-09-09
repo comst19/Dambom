@@ -79,8 +79,7 @@ private fun String?.toDetectionState(): WebDetectionState =
         }
 
         startsWith(DETECTION_FOUND_PREFIX) -> {
-            val count = removePrefix(DETECTION_FOUND_PREFIX).toIntOrNull() ?: return WebDetectionState.Idle
-            WebDetectionState.Found(count)
+            WebDetectionState.Idle
         }
 
         startsWith(DETECTION_NOT_FOUND_PREFIX) -> {

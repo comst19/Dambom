@@ -14,6 +14,7 @@ sealed interface HomeGraph : AppNavKey {
     @Serializable
     data class DetectionResultKey(
         val url: String,
+        val snapshotId: String? = null,
     ) : HomeGraph
 
     @Serializable

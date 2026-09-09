@@ -45,6 +45,7 @@ class DefaultDownloadRepository
         override val completedDownloads: Flow<List<DownloadTask>> =
             dao
                 .observeCompleted()
+                .distinctUntilChanged()
                 .map { entities ->
                     entities.map { entity ->
                         entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
@@ -90,7 +91,8 @@ class DefaultDownloadRepository
                 if (task == null || dao.claimForDeletion(id, System.currentTimeMillis()) == 0) return@withContext
                 var cleanupComplete = false
                 try {
-                    cleanupComplete = fileStore.delete(id, task.localFileName)
+                    val localFileName = task.localFileName ?: fileStore.completedFile(id, task.url, task.mimeType).name
+                    cleanupComplete = fileStore.delete(id, localFileName)
                     if (!cleanupComplete) throw IOException("Unable to delete download files")
                     if (dao.deleteClaimed(id) == 0) {
                         cleanupComplete = false

@@ -25,7 +25,7 @@ android {
     }
 }
 
-val useConnectedDevices =
+val useConnectedBenchmarkDevices =
     providers
         .gradleProperty("dambom.baselineProfile.useConnectedDevices")
         .map(String::toBooleanStrict)
@@ -33,7 +33,7 @@ val useConnectedDevices =
 
 baselineProfile {
     managedDevices.clear()
-    if (useConnectedDevices) {
+    if (useConnectedBenchmarkDevices) {
         useConnectedDevices = true
     } else {
         managedDevices += "pixel6Api35"

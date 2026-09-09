@@ -48,6 +48,7 @@ internal fun DetectionRoute(
     url: String,
     networkAccess: NetworkAccessState,
     viewModel: DetectionViewModel = hiltViewModel(),
+    snapshotId: String? = null,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -55,8 +56,8 @@ internal fun DetectionRoute(
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
             viewModel.downloadSelected()
         }
-    LaunchedEffect(url, networkAccess.canUseInternet) {
-        if (networkAccess.canUseInternet) viewModel.detect(url) else viewModel.setNetworkUnavailable()
+    LaunchedEffect(url, snapshotId, networkAccess.canUseInternet) {
+        if (networkAccess.canUseInternet) viewModel.detect(url, snapshotId) else viewModel.setNetworkUnavailable()
     }
     DetectionScreen(
         uiState = uiState,

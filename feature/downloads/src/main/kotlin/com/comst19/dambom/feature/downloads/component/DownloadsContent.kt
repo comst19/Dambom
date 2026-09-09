@@ -19,7 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -28,9 +27,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.semantics.progressBarRangeInfo
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.domain.model.DownloadStatus
@@ -256,12 +252,14 @@ private fun DownloadSummary(
                 }
             }
             if (state.activeCount > 0) {
-                LinearProgressIndicator(
-                    progress = { state.progress },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .semantics { progressBarRangeInfo = ProgressBarRangeInfo(state.progress, 0f..1f) },
+                Text(
+                    stringResource(R.string.downloads_remaining_progress),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                DownloadProgress(
+                    progress = state.progress.takeUnless { state.hasUnknownSize },
+                    running = true,
                 )
             }
             androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

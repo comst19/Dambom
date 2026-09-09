@@ -14,9 +14,11 @@ class DownloadWorkSchedulerTest {
     }
 
     @Test
-    fun `checkpoint requires enough bytes and elapsed time`() {
+    fun `checkpoint rate is bounded by time without starving slow downloads`() {
         assertFalse(shouldCheckpoint(bytesSinceLastCheckpoint = 1024L * 1024L, millisSinceLastCheckpoint = 499L))
-        assertFalse(shouldCheckpoint(bytesSinceLastCheckpoint = 512L * 1024L, millisSinceLastCheckpoint = 1_000L))
+        assertTrue(shouldCheckpoint(bytesSinceLastCheckpoint = 512L * 1024L, millisSinceLastCheckpoint = 1_000L))
+        assertTrue(shouldCheckpoint(bytesSinceLastCheckpoint = 32L * 1024L, millisSinceLastCheckpoint = 500L))
+        assertFalse(shouldCheckpoint(bytesSinceLastCheckpoint = 0L, millisSinceLastCheckpoint = 1_000L))
         assertTrue(shouldCheckpoint(bytesSinceLastCheckpoint = 1024L * 1024L, millisSinceLastCheckpoint = 500L))
     }
 }

@@ -12,7 +12,6 @@ import androidx.compose.material.icons.outlined.Downloading
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -20,9 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.semantics.progressBarRangeInfo
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.common.ui.format.formatFileSize
@@ -153,13 +149,10 @@ private fun DownloadTaskDetails(
         style = MaterialTheme.typography.bodySmall,
         maxLines = maxLines,
     )
-    if (task.status == DownloadStatus.DOWNLOADING) {
-        LinearProgressIndicator(
-            progress = { task.progress },
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .semantics { progressBarRangeInfo = ProgressBarRangeInfo(task.progress, 0f..1f) },
+    if (task.status != DownloadStatus.FAILED && task.status != DownloadStatus.COMPLETED) {
+        DownloadProgress(
+            progress = task.expectedBytes?.takeIf { it > 0L }?.let { task.progress },
+            running = task.status == DownloadStatus.DOWNLOADING,
         )
     }
     task.failureReason?.let {

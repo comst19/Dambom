@@ -8,6 +8,7 @@ import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import androidx.work.testing.TestListenableWorkerBuilder
 import com.comst19.dambom.core.database.DambomDatabase
+import com.comst19.dambom.core.database.download.DownloadTaskDao
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import kotlinx.coroutines.Dispatchers
@@ -61,6 +62,85 @@ class DownloadQueueWorkerTest {
         context.filesDir.resolve("download-parts").deleteRecursively()
         context.filesDir.resolve("videos").deleteRecursively()
     }
+
+    @Test
+    fun `pause between rename and completion preserves the finished file for resume`() =
+        runTest {
+            successfulServer.enqueue(MockResponse().setHeader("Content-Type", "video/mp4").setBody("video"))
+            val task = entity("finish-pause", successfulServer.url("/finish.mp4").toString())
+            val dao = database.downloadTaskDao()
+            dao.insert(task)
+            val pausingDao =
+                object : DownloadTaskDao by dao {
+                    override suspend fun markCompleted(
+                        id: String,
+                        downloadedBytes: Long,
+                        localFileName: String,
+                        updatedAtMillis: Long,
+                    ): Int {
+                        dao.pause(id, updatedAtMillis)
+                        return dao.markCompleted(id, downloadedBytes, localFileName, updatedAtMillis)
+                    }
+                }
+            createWorker(dao = pausingDao).doWork()
+            assertEquals(DownloadStatus.PAUSED.name, dao.getById(task.id)?.status)
+            assertEquals("video", fileStore.completedFile(task.id, task.url, task.mimeType).readText())
+            dao.queueAgain(task.id, 3L)
+            withContext(Dispatchers.IO) { withTimeout(2_000L) { createWorker().doWork() } }
+            assertEquals(DownloadStatus.COMPLETED.name, dao.getById(task.id)?.status)
+            assertEquals(1, successfulServer.requestCount)
+        }
+
+    @Test
+    fun `recovery finalizes a renamed file without downloading it again`() =
+        runTest {
+            val task =
+                entity("renamed", successfulServer.url("/renamed.mp4").toString())
+                    .copy(status = DownloadStatus.DOWNLOADING.name)
+            database.downloadTaskDao().insert(task)
+            fileStore.completedFile(task.id, task.url, task.mimeType).writeText("complete video")
+            successfulServer.enqueue(MockResponse().setHeader("Content-Type", "video/mp4").setBody("replacement"))
+            createWorker().doWork()
+            assertEquals("complete video", fileStore.completedFile(task.id, task.url, task.mimeType).readText())
+            assertEquals(0, successfulServer.requestCount)
+        }
+
+    @Test
+    fun `pause interrupts stalled headers without counting a network failure`() =
+        runTest {
+            successfulServer.enqueue(MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE))
+            val task = entity("stalled", successfulServer.url("/stalled.mp4").toString())
+            val dao = database.downloadTaskDao()
+            dao.insert(task)
+            val work = async(Dispatchers.IO) { createWorker().doWork() }
+            assertNotNull(successfulServer.takeRequest(2L, TimeUnit.SECONDS))
+            dao.pause(task.id, 2L)
+            withContext(Dispatchers.IO) { withTimeout(2_000L) { work.await() } }
+            assertEquals(DownloadStatus.PAUSED.name, dao.getById(task.id)?.status)
+            assertEquals(0, dao.getById(task.id)?.retryCount)
+        }
+
+    @Test
+    fun `pause interrupts a stalled body and preserves its partial data`() =
+        runTest {
+            successfulServer.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "video/mp4")
+                    .setHeader("ETag", "\"v1\"")
+                    .setBody("v".repeat(32 * 1024))
+                    .throttleBody(8192, 3L, TimeUnit.SECONDS),
+            )
+            val task = entity("stalled-body", successfulServer.url("/stalled-body.mp4").toString())
+            val dao = database.downloadTaskDao()
+            dao.insert(task)
+            val work = async(Dispatchers.IO) { createWorker().doWork() }
+            awaitCondition { fileStore.partialFile(task.id).length() >= 8192L }
+            dao.pause(task.id, 2L)
+            withContext(Dispatchers.IO) { withTimeout(2_000L) { work.await() } }
+            assertEquals(8192L, fileStore.partialFile(task.id).length())
+            assertEquals(DownloadStatus.PAUSED.name, dao.getById(task.id)?.status)
+            assertEquals(0, dao.getById(task.id)?.retryCount)
+        }
 
     @Test
     fun `retryable failure does not cancel an unrelated download`() =
@@ -232,7 +312,10 @@ class DownloadQueueWorkerTest {
             assertFalse(fileStore.partialValidatorFile(task.id).exists())
         }
 
-    private fun createWorker(runAttemptCount: Int = 0): DownloadQueueWorker =
+    private fun createWorker(
+        runAttemptCount: Int = 0,
+        dao: DownloadTaskDao = database.downloadTaskDao(),
+    ): DownloadQueueWorker =
         TestListenableWorkerBuilder<DownloadQueueWorker>(context, runAttemptCount = runAttemptCount)
             .setWorkerFactory(
                 object : WorkerFactory() {
@@ -244,7 +327,7 @@ class DownloadQueueWorkerTest {
                         DownloadQueueWorker(
                             appContext = appContext,
                             params = workerParameters,
-                            dao = database.downloadTaskDao(),
+                            dao = dao,
                             client = OkHttpClient(),
                             fileStore = fileStore,
                             notifier = DownloadNotifier(appContext),

@@ -77,6 +77,23 @@ class DefaultDownloadRepositoryTest {
         }
 
     @Test
+    fun `different quality jobs coexist while the same source quality stays duplicate`() =
+        runTest {
+            repository =
+                DefaultDownloadRepository(
+                    database.downloadTaskDao(),
+                    scheduler,
+                    DownloadFileStore(ApplicationProvider.getApplicationContext()),
+                    StandardTestDispatcher(testScheduler),
+                )
+            val first = testRequest().copy(id = "quality-720", quality = "720p")
+            val second = first.copy(id = "quality-1080", url = first.url + "?quality=1080", quality = "1080p")
+            assertEquals(2, repository.enqueue(listOf(first, second)).addedCount)
+            assertEquals(1, repository.enqueue(listOf(first.copy(id = "duplicate-request"))).duplicateCount)
+            assertEquals(2, repository.downloads.first().size)
+        }
+
+    @Test
     fun `pause and resume persist state and reschedule work`() =
         runTest {
             repository =

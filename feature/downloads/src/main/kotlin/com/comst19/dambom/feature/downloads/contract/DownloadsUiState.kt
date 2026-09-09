@@ -30,6 +30,9 @@ internal data class DownloadsUiState(
         get() = !tasksByStatus[DownloadStatus.PAUSED].isNullOrEmpty()
 
     val progress: Float = downloadProgress(tasks)
+
+    val hasUnknownSize: Boolean =
+        tasks.any { it.status != DownloadStatus.FAILED && (it.expectedBytes ?: 0L) <= 0L }
 }
 
 private fun downloadProgress(tasks: List<DownloadTask>): Float {

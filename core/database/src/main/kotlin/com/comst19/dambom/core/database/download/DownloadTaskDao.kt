@@ -17,6 +17,9 @@ interface DownloadTaskDao {
     @Query("SELECT * FROM download_tasks WHERE id = :id")
     suspend fun getById(id: String): DownloadTaskEntity?
 
+    @Query("SELECT CASE WHEN deletePending = 0 THEN status ELSE NULL END FROM download_tasks WHERE id = :id")
+    fun observeTransferStatus(id: String): Flow<String?>
+
     @Query("SELECT * FROM download_tasks WHERE status = 'QUEUED' AND deletePending = 0 ORDER BY createdAtMillis ASC")
     suspend fun getQueued(): List<DownloadTaskEntity>
 

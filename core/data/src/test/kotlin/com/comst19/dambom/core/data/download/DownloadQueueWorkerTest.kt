@@ -414,6 +414,25 @@ class DownloadQueueWorkerTest {
         }
 
     @Test
+    fun `binary prefix is not JSON solely because its first byte is a bracket`() =
+        runTest {
+            for (first in listOf('{', '[')) {
+                val payload = "$first\u0000\u0000\u0018mdat\u0000\u0001\u0002\u0003"
+                successfulServer.enqueue(
+                    MockResponse().setHeader("Content-Type", "application/octet-stream").setBody(payload),
+                )
+                val task =
+                    entity("binary-${first.code}", successfulServer.url("/binary.mp4?first=${first.code}").toString())
+                database.downloadTaskDao().insert(task)
+
+                createWorker().doWork()
+
+                assertEquals(DownloadStatus.COMPLETED.name, database.downloadTaskDao().getById(task.id)?.status)
+                assertEquals(payload, fileStore.completedFile(task.id, task.url, task.mimeType).readText())
+            }
+        }
+
+    @Test
     fun `mislabelled error documents are rejected and octet stream video is preserved`() =
         runTest {
             val payloads = listOf(" \n<!DOCTYPE html><html>login</html>", "{\"error\":\"denied\"}")

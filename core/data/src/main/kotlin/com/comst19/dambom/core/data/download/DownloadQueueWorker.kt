@@ -275,7 +275,8 @@ internal class DownloadQueueWorker
                         .string()
                         .trimStart('\uFEFF', ' ', '\t', '\r', '\n')
                         .lowercase()
-                if (ERROR_DOCUMENT_PREFIXES.any(prefix::startsWith)) {
+                val isTextPrefix = prefix.none { it < ' ' && it !in "\t\r\n" }
+                if (isTextPrefix && ERROR_DOCUMENT_PREFIXES.any(prefix::startsWith)) {
                     throw DownloadFailureException(DownloadFailureReason.UNSUPPORTED_FORMAT)
                 }
             }

@@ -205,18 +205,41 @@ class DetectionViewModelTest {
     fun `unsupported page automatically continues in web with the same URL`() =
         runTest(mainDispatcherRule.dispatcher) {
             val navigation = SpyNavigationDispatcher()
+            val events = AppEventBus()
             val viewModel =
                 DetectionViewModel(
                     UnsupportedDetectionRepository,
                     RecordingDownloadRepository(),
                     navigation,
-                    AppEventBus(),
+                    events,
                 )
 
             viewModel.detect(SOURCE_URL)
             advanceUntilIdle()
 
             assertEquals(NavigationEvent.Replace(WebKey(SOURCE_URL)), navigation.dispatched.last())
+            assertEquals(
+                AppEvent.ShowSnackbar(UiText.Resource(R.string.detection_no_media)),
+                events.events.first(),
+            )
+        }
+
+    @Test
+    fun `unexpected detection failure explains fallback without claiming a network error`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val events = AppEventBus()
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String): MediaDetectionResult = error("Parser failure")
+                }
+            val viewModel = DetectionViewModel(repository, RecordingDownloadRepository(), navigation, events)
+
+            viewModel.detect(SOURCE_URL)
+            advanceUntilIdle()
+
+            assertEquals(NavigationEvent.Replace(WebKey(SOURCE_URL)), navigation.dispatched.last())
+            assertEquals(AppEvent.ShowSnackbar(UiText.Resource(R.string.detection_failed)), events.events.first())
         }
 
     @Test

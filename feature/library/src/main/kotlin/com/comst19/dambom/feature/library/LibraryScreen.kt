@@ -126,6 +126,7 @@ internal fun LibraryScreen(
     if (deleteSelectedOpen) {
         DeleteSelectedVideosDialog(
             count = uiState.selectedIds.size,
+            hiddenCount = uiState.hiddenSelectedCount,
             onDismiss = { deleteSelectedOpen = false },
             onConfirm = {
                 deleteSelectedOpen = false

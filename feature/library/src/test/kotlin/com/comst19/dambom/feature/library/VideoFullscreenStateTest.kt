@@ -2,10 +2,13 @@ package com.comst19.dambom.feature.library
 
 import android.content.Context
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.test.core.app.ApplicationProvider
@@ -47,6 +50,40 @@ class VideoFullscreenStateTest {
         player.release()
         File("${videoFile.path}.thumbnail.unavailable").delete()
         videoFile.delete()
+    }
+
+    @Test
+    fun `loading error and missing detail messages are distinct`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val detailState = mutableStateOf<VideoDetailState>(VideoDetailState.Loading)
+        val loading = context.getString(R.string.player_loading)
+        val error = context.getString(R.string.player_load_error)
+        val missing = context.getString(R.string.player_missing_file)
+        composeRule.setContent {
+            MaterialTheme {
+                VideoPlayerScreen(
+                    task = null,
+                    player = player,
+                    fileActions = fileActions(),
+                    onBack = {},
+                    showBack = true,
+                    isVideoFullscreen = false,
+                    onVideoFullscreenChange = {},
+                    onVideoRotate = {},
+                    detailState = detailState.value,
+                )
+            }
+        }
+
+        composeRule.onNodeWithText(loading).assertIsDisplayed()
+        composeRule.onNodeWithText(missing).assertDoesNotExist()
+        composeRule.runOnIdle { detailState.value = VideoDetailState.Error }
+        composeRule.onNodeWithText(error).assertIsDisplayed()
+        composeRule.onNodeWithText(loading).assertDoesNotExist()
+        composeRule.onNodeWithText(missing).assertDoesNotExist()
+        composeRule.runOnIdle { detailState.value = VideoDetailState.NotFound }
+        composeRule.onNodeWithText(missing).assertIsDisplayed()
+        composeRule.onNodeWithText(error).assertDoesNotExist()
     }
 
     @Test

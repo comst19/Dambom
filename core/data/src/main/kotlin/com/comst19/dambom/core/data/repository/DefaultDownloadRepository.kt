@@ -24,6 +24,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+@Suppress("TooManyFunctions")
 class DefaultDownloadRepository
     @Inject
     internal constructor(
@@ -41,6 +42,14 @@ class DefaultDownloadRepository
                     }
                 }.distinctUntilChanged()
                 .flowOn(ioDispatcher)
+
+        override fun observeDownload(id: String): Flow<DownloadTask?> =
+            dao
+                .observeById(id)
+                .distinctUntilChanged()
+                .map { entity ->
+                    entity?.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
+                }.flowOn(ioDispatcher)
 
         override val completedDownloads: Flow<List<DownloadTask>> =
             dao
@@ -121,9 +130,15 @@ class DefaultDownloadRepository
             scheduler.schedule()
         }
 
-        override suspend fun recoverPendingDownloads() {
-            if (dao.countSchedulable() > 0) scheduler.ensureScheduled()
-        }
+        override suspend fun recoverPendingDownloads() =
+            withContext(ioDispatcher) {
+                dao.getPendingDeletions().forEach { task ->
+                    val localFileName =
+                        task.localFileName ?: fileStore.completedFile(task.id, task.url, task.mimeType).name
+                    if (fileStore.delete(task.id, localFileName)) dao.deleteClaimed(task.id)
+                }
+                if (dao.countSchedulable() > 0) scheduler.ensureScheduled()
+            }
 
         override suspend fun refreshNetworkPolicy() {
             if (dao.countSchedulable() > 0) scheduler.reschedule()

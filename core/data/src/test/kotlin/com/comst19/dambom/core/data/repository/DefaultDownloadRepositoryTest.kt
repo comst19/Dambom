@@ -11,6 +11,7 @@ import com.comst19.dambom.core.database.DambomDatabase
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadStatus
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -25,6 +26,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -170,6 +172,43 @@ class DefaultDownloadRepositoryTest {
 
             assertEquals(1, result.duplicateCount)
             assertEquals(1, scheduler.successfulEnsureCount)
+        }
+
+    @Test
+    fun `unrelated row invalidates SQL without emitting duplicate detail data`() =
+        runTest {
+            database.close()
+            val queryCount = AtomicInteger()
+            val requery = CompletableDeferred<Unit>()
+            database =
+                Room
+                    .inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), DambomDatabase::class.java)
+                    .allowMainThreadQueries()
+                    .setQueryCallback(
+                        { sql, _ ->
+                            if (
+                                sql.startsWith("SELECT * FROM download_tasks WHERE id") &&
+                                queryCount.incrementAndGet() > 1
+                            ) {
+                                requery.complete(Unit)
+                            }
+                        },
+                        { it.run() },
+                    ).build()
+            repository = createRepository(testScheduler)
+            val dao = database.downloadTaskDao()
+            dao.insert(entity(TEST_ID, "media.example"))
+            dao.insert(entity("other", "media.example"))
+
+            repository.observeDownload(TEST_ID).test {
+                assertEquals(TEST_ID, awaitItem()?.id)
+                dao.updateTitle("other", "unrelated", 2L)
+                requery.await()
+                dao.updateTitle(TEST_ID, "renamed", 3L)
+                assertEquals("renamed", awaitItem()?.title)
+                assertTrue(queryCount.get() >= 2)
+                cancelAndIgnoreRemainingEvents()
+            }
         }
 
     @Test

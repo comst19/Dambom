@@ -3,6 +3,7 @@ package com.comst19.dambom.core.data.repository
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.comst19.dambom.core.data.download.DownloadFileStore
 import com.comst19.dambom.core.data.download.DownloadWorkScheduler
 import com.comst19.dambom.core.data.download.selectNextDownload
@@ -169,6 +170,27 @@ class DefaultDownloadRepositoryTest {
 
             assertEquals(1, result.duplicateCount)
             assertEquals(1, scheduler.successfulEnsureCount)
+        }
+
+    @Test
+    fun `single download subscription observes rename and deletion without unrelated rows`() =
+        runTest {
+            repository = createRepository(testScheduler)
+            val dao = database.downloadTaskDao()
+            dao.insert(entity(TEST_ID, "media.example"))
+            dao.insert(entity("other", "media.example"))
+
+            repository.observeDownload(TEST_ID).test {
+                assertEquals(TEST_ID, awaitItem()?.id)
+                dao.updateTitle("other", "unrelated", 2L)
+                dao.updateTitle(TEST_ID, "renamed", 3L)
+                val renamed = awaitItem()
+                assertEquals(TEST_ID, renamed?.id)
+                assertEquals("renamed", renamed?.title)
+                dao.delete(TEST_ID)
+                assertEquals(null, awaitItem())
+                cancelAndIgnoreRemainingEvents()
+            }
         }
 
     @Test

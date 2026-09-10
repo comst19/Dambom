@@ -214,10 +214,10 @@ internal class DownloadQueueWorker
             val initialBytes = if (append) rangeStart else 0L
             val totalBytes = response.totalBytes(initialBytes)
             val body = response.body
-            requireSpaceFor(BUFFER_SIZE)
             if (!append) validatorFile.delete()
             val output = storageOperation { FileOutputStream(partialFile, append) }
             Closeable { storageOperation(output::close) }.use {
+                requireSpaceFor(BUFFER_SIZE)
                 storageOperation { response.downloadValidator()?.let(validatorFile::writeText) }
                 checkpoint(task, initialBytes, totalBytes)
                 val input = body.byteStream()

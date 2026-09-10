@@ -66,6 +66,25 @@ class DownloadQueueWorkerTest {
     }
 
     @Test
+    fun `replacement truncates stale partial before checking remaining space`() =
+        runTest {
+            successfulServer.enqueue(
+                MockResponse().setHeader("Content-Type", "video/mp4").setHeader("ETag", "\"v2\"").setBody("new"),
+            )
+            val task = entity("reclaim-space", successfulServer.url("/video.mp4").toString())
+            database.downloadTaskDao().insert(task)
+            fileStore.partialFile(task.id).writeText("old-generation")
+            fileStore.partialValidatorFile(task.id).writeText("\"v1\"")
+            ShadowStatFs.registerStats(context.filesDir.resolve("download-parts").path, 1, 0, 0)
+
+            createWorker().doWork()
+
+            assertEquals(0L, fileStore.partialFile(task.id).length())
+            assertFalse(fileStore.partialValidatorFile(task.id).exists())
+            assertEquals("INSUFFICIENT_STORAGE", database.downloadTaskDao().getById(task.id)?.failureReason)
+        }
+
+    @Test
     fun `unknown length transfer stops when storage drops after opening`() =
         runTest {
             successfulServer.enqueue(

@@ -1,4 +1,5 @@
 <resources>
+    <string name="download_notification_insufficient_storage">Not enough storage. Free up space and retry: %1$s</string>
     <string name="download_notification_channel">Downloads</string>
     <string name="download_notification_title">Dambom is downloading videos</string>
     <string name="download_notification_description">Downloads resume from the saved point after reconnecting.</string>

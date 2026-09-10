@@ -123,6 +123,7 @@ internal fun DownloadFailureReason.failureText(): String =
             DownloadFailureReason.UNSUPPORTED_FORMAT -> R.string.downloads_error_format
             DownloadFailureReason.NETWORK -> R.string.downloads_error_network
             DownloadFailureReason.STORAGE -> R.string.downloads_error_storage
+            DownloadFailureReason.INSUFFICIENT_STORAGE -> R.string.downloads_error_insufficient_storage
             DownloadFailureReason.SERVER -> R.string.downloads_error_server
             DownloadFailureReason.UNKNOWN -> R.string.downloads_error_unknown
         },

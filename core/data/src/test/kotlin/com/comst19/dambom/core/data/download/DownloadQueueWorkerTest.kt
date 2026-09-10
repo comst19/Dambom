@@ -30,6 +30,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowStatFs
 import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
@@ -50,6 +51,7 @@ class DownloadQueueWorkerTest {
                 .allowMainThreadQueries()
                 .build()
         fileStore = DownloadFileStore(context)
+        ShadowStatFs.registerStats(context.filesDir.resolve("download-parts").path, 1_000_000, 1_000_000, 1_000_000)
         failingServer = MockWebServer().apply(MockWebServer::start)
         successfulServer = MockWebServer().apply(MockWebServer::start)
     }
@@ -62,6 +64,90 @@ class DownloadQueueWorkerTest {
         context.filesDir.resolve("download-parts").deleteRecursively()
         context.filesDir.resolve("videos").deleteRecursively()
     }
+
+    @Test
+    fun `unknown length transfer stops when storage drops after opening`() =
+        runTest {
+            successfulServer.enqueue(
+                MockResponse().setHeader("Content-Type", "video/mp4").setChunkedBody("video", 2),
+            )
+            val task = entity("space-drops", successfulServer.url("/video.mp4").toString())
+            val dao = database.downloadTaskDao()
+            dao.insert(task)
+            val lowSpaceDao =
+                object : DownloadTaskDao by dao {
+                    override suspend fun updateProgress(
+                        id: String,
+                        downloadedBytes: Long,
+                        expectedBytes: Long?,
+                        updatedAtMillis: Long,
+                    ): Int {
+                        ShadowStatFs.registerStats(context.filesDir.resolve("download-parts").path, 1, 0, 0)
+                        return dao.updateProgress(id, downloadedBytes, expectedBytes, updatedAtMillis)
+                    }
+                }
+
+            createWorker(dao = lowSpaceDao).doWork()
+
+            val saved = dao.getById(task.id)
+            assertEquals("INSUFFICIENT_STORAGE", saved?.failureReason)
+            assertEquals(DownloadStatus.FAILED.name, saved?.status)
+            assertEquals(0, saved?.retryCount)
+            assertEquals(0L, fileStore.partialFile(task.id).length())
+        }
+
+    @Test
+    fun `replacement response clears old bytes before publishing new validator`() =
+        runTest {
+            successfulServer.enqueue(
+                MockResponse().setHeader("Content-Type", "video/mp4").setHeader("ETag", "\"v2\"").setBody("new"),
+            )
+            val task = entity("replacement-order", successfulServer.url("/video.mp4").toString())
+            val dao = database.downloadTaskDao()
+            dao.insert(task)
+            fileStore.partialFile(task.id).writeText("old-generation")
+            fileStore.partialValidatorFile(task.id).writeText("\"v1\"")
+            var checked = false
+            val checkpointDao =
+                object : DownloadTaskDao by dao {
+                    override suspend fun updateProgress(
+                        id: String,
+                        downloadedBytes: Long,
+                        expectedBytes: Long?,
+                        updatedAtMillis: Long,
+                    ): Int {
+                        assertEquals(0L, fileStore.partialFile(id).length())
+                        assertEquals("\"v2\"", fileStore.partialValidatorFile(id).readText())
+                        checked = true
+                        dao.pause(id, updatedAtMillis)
+                        return 0
+                    }
+                }
+
+            createWorker(dao = checkpointDao).doWork()
+
+            assertEquals(true, checked)
+            assertEquals(DownloadStatus.PAUSED.name, dao.getById(task.id)?.status)
+            assertEquals("\"v1\"", successfulServer.takeRequest().getHeader("If-Range"))
+        }
+
+    @Test
+    fun `file open failure is storage failure without network retry`() =
+        runTest {
+            successfulServer.enqueue(MockResponse().setHeader("Content-Type", "video/mp4").setBody("video"))
+            val task = entity("storage-error", successfulServer.url("/video.mp4").toString())
+            database.downloadTaskDao().insert(task)
+            fileStore.partialFile(task.id).mkdirs()
+            fileStore.partialValidatorFile(task.id).writeText("\"v1\"")
+
+            val result = createWorker().doWork()
+
+            val saved = database.downloadTaskDao().getById(task.id)
+            assertEquals(ListenableWorker.Result.success(), result)
+            assertEquals(DownloadStatus.FAILED.name, saved?.status)
+            assertEquals("STORAGE", saved?.failureReason)
+            assertEquals(0, saved?.retryCount)
+        }
 
     @Test
     fun `pause between rename and completion preserves the finished file for resume`() =
@@ -254,6 +340,83 @@ class DownloadQueueWorkerTest {
 
             assertEquals("\"v1\"", successfulServer.takeRequest().getHeader("If-Range"))
             assertEquals("new", fileStore.completedFile(task.id, task.url, task.mimeType).readText())
+        }
+
+    @Test
+    fun `weak saved validator restarts without if range`() =
+        runTest {
+            successfulServer.enqueue(MockResponse().setHeader("Content-Type", "video/mp4").setBody("new"))
+            val task = entity("weak-validator", successfulServer.url("/weak.mp4").toString())
+            database.downloadTaskDao().insert(task)
+            fileStore.partialFile(task.id).writeText("old")
+            fileStore.partialValidatorFile(task.id).writeText("W/\"v1\"")
+            createWorker().doWork()
+            val request = successfulServer.takeRequest()
+            assertEquals(null, request.getHeader("If-Range"))
+            assertEquals(null, request.getHeader("Range"))
+            assertEquals("new", fileStore.completedFile(task.id, task.url, task.mimeType).readText())
+        }
+
+    @Test
+    fun `interrupted weak etag response restarts without combining file generations`() =
+        runTest {
+            successfulServer.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "video/mp4")
+                    .setHeader("ETag", "W/\"v1\"")
+                    .setHeader("Last-Modified", "Wed, 21 Oct 2015 07:28:00 GMT")
+                    .setBody("abcdef")
+                    .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY),
+            )
+            successfulServer.enqueue(MockResponse().setHeader("Content-Type", "video/mp4").setBody("replacement"))
+            val task = entity("weak-interrupted", successfulServer.url("/weak.mp4").toString())
+            database.downloadTaskDao().insert(task)
+            assertEquals(ListenableWorker.Result.retry(), createWorker().doWork())
+            assertFalse(fileStore.partialValidatorFile(task.id).exists())
+            createWorker().doWork()
+            successfulServer.takeRequest()
+            val request = successfulServer.takeRequest()
+            assertEquals(null, request.getHeader("If-Range"))
+            assertEquals(null, request.getHeader("Range"))
+            assertEquals("replacement", fileStore.completedFile(task.id, task.url, task.mimeType).readText())
+        }
+
+    @Test
+    fun `html at a video url is never completed`() =
+        runTest {
+            successfulServer.enqueue(
+                MockResponse().setHeader("Content-Type", "text/html").setBody("<html>login</html>"),
+            )
+            val task = entity("html-video", successfulServer.url("/login.mp4").toString())
+            database.downloadTaskDao().insert(task)
+            createWorker().doWork()
+            assertEquals(DownloadStatus.FAILED.name, database.downloadTaskDao().getById(task.id)?.status)
+            assertFalse(fileStore.completedFile(task.id, task.url, task.mimeType).exists())
+        }
+
+    @Test
+    fun `mislabelled error documents are rejected and octet stream video is preserved`() =
+        runTest {
+            val payloads = listOf(" \n<!DOCTYPE html><html>login</html>", "{\"error\":\"denied\"}")
+            payloads.forEachIndexed { index, payload ->
+                successfulServer.enqueue(
+                    MockResponse().setHeader("Content-Type", "application/octet-stream").setBody(payload),
+                )
+                val task = entity("error-$index", successfulServer.url("/error-$index.mp4").toString())
+                database.downloadTaskDao().insert(task)
+                createWorker().doWork()
+                assertEquals(DownloadStatus.FAILED.name, database.downloadTaskDao().getById(task.id)?.status)
+                assertFalse(fileStore.completedFile(task.id, task.url, task.mimeType).exists())
+            }
+            val payload = "\u0000\u0000\u0000\u0018ftypisom\u0000\u0000\u0000\u0000isomiso2"
+            successfulServer.enqueue(
+                MockResponse().setHeader("Content-Type", "application/octet-stream").setBody(payload),
+            )
+            val task = entity("octet-video", successfulServer.url("/video.mp4").toString())
+            database.downloadTaskDao().insert(task)
+            createWorker().doWork()
+            assertEquals(DownloadStatus.COMPLETED.name, database.downloadTaskDao().getById(task.id)?.status)
+            assertEquals(payload, fileStore.completedFile(task.id, task.url, task.mimeType).readText())
         }
 
     @Test

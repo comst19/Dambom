@@ -1,4 +1,5 @@
 <resources>
+    <string name="downloads_error_insufficient_storage">Not enough storage. Free up space and retry.</string>
     <string name="downloads_summary_waiting">Waiting to download</string>
     <string name="downloads_summary_paused">Downloads paused</string>
     <string name="downloads_summary_attention">Downloads need attention</string>

@@ -66,6 +66,46 @@ class DownloadQueueWorkerTest {
     }
 
     @Test
+    fun `space failure preserves partial and validator for a later retry`() =
+        runTest {
+            repeat(2) {
+                successfulServer.enqueue(
+                    MockResponse()
+                        .setResponseCode(206)
+                        .setHeader("Content-Type", "video/mp4")
+                        .setHeader("Content-Range", "bytes 3-5/6")
+                        .setHeader("ETag", "\"v1\"")
+                        .setBody("new"),
+                )
+            }
+            val task = entity("space-retry", successfulServer.url("/video.mp4").toString())
+            val dao = database.downloadTaskDao()
+            dao.insert(task)
+            fileStore.partialFile(task.id).writeText("old")
+            fileStore.partialValidatorFile(task.id).writeText("\"v1\"")
+            val path = context.filesDir.resolve("download-parts").path
+            ShadowStatFs.registerStats(path, 1, 0, 0)
+
+            createWorker().doWork()
+
+            assertEquals("old", fileStore.partialFile(task.id).readText())
+            assertEquals("\"v1\"", fileStore.partialValidatorFile(task.id).readText())
+            assertEquals("INSUFFICIENT_STORAGE", dao.getById(task.id)?.failureReason)
+            ShadowStatFs.registerStats(path, 1_000_000, 1_000_000, 1_000_000)
+            dao.retry(task.id, 2L)
+
+            createWorker().doWork()
+
+            assertEquals(DownloadStatus.COMPLETED.name, dao.getById(task.id)?.status)
+            assertEquals("oldnew", fileStore.completedFile(task.id, task.url, task.mimeType).readText())
+            repeat(2) {
+                val request = successfulServer.takeRequest()
+                assertEquals("bytes=3-", request.getHeader("Range"))
+                assertEquals("\"v1\"", request.getHeader("If-Range"))
+            }
+        }
+
+    @Test
     fun `replacement truncates stale partial before checking remaining space`() =
         runTest {
             successfulServer.enqueue(

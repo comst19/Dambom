@@ -1,6 +1,9 @@
 package com.comst19.dambom.feature.library
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.view.inspector.WindowInspector
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertCountEquals
@@ -29,6 +32,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
 import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
@@ -53,6 +57,8 @@ class VideoFullscreenStateTest {
     }
 
     @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Config(qualifiers = "ko-rKR")
     fun `loading error and missing detail messages are distinct`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val detailState = mutableStateOf<VideoDetailState>(VideoDetailState.Loading)
@@ -77,13 +83,44 @@ class VideoFullscreenStateTest {
 
         composeRule.onNodeWithText(loading).assertIsDisplayed()
         composeRule.onNodeWithText(missing).assertDoesNotExist()
+        captureDetailState("loading")
         composeRule.runOnIdle { detailState.value = VideoDetailState.Error }
         composeRule.onNodeWithText(error).assertIsDisplayed()
         composeRule.onNodeWithText(loading).assertDoesNotExist()
         composeRule.onNodeWithText(missing).assertDoesNotExist()
+        captureDetailState("error")
         composeRule.runOnIdle { detailState.value = VideoDetailState.NotFound }
         composeRule.onNodeWithText(missing).assertIsDisplayed()
         composeRule.onNodeWithText(error).assertDoesNotExist()
+        captureDetailState("missing")
+    }
+
+    @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Config(qualifiers = "en-rUS")
+    fun `english loading error and missing detail messages are distinct`() {
+        `loading error and missing detail messages are distinct`()
+    }
+
+    private fun captureDetailState(name: String) {
+        val directory = System.getenv("DAMBOM_VISUAL_QA_DIR")?.let(::File) ?: return
+        directory.mkdirs()
+        val bitmap =
+            composeRule.runOnIdle {
+                val view = WindowInspector.getGlobalWindowViews().first()
+                Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888).also {
+                    view.draw(Canvas(it))
+                }
+            }
+        val language =
+            ApplicationProvider
+                .getApplicationContext<Context>()
+                .resources.configuration.locales[0]
+                .language
+        File(directory, "$language-$name.png").outputStream().use { output ->
+            check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
+        }
+        bitmap.recycle()
     }
 
     @Test

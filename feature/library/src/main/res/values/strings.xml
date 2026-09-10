@@ -63,7 +63,7 @@
     <string name="library_share_link_chooser">원본 링크 공유</string>
     <string name="player_title">영상 재생</string>
     <string name="player_loading">영상을 불러오는 중이에요.</string>
-    <string name="player_load_error">영상을 불러오지 못했어요. 뒤로 갔다가 다시 열어 주세요.</string>
+    <string name="player_load_error">영상을 불러오지 못했어요.\n뒤로 돌아가 다시 열어 주세요.</string>
     <string name="player_back">보관함으로 돌아가기</string>
     <string name="player_fullscreen">전체 화면</string>
     <string name="player_expand_crop">화면 채우기</string>

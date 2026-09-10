@@ -14,6 +14,10 @@ import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
+import com.comst19.dambom.core.navigation.NavigationEvent
+import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
+import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
+import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import kotlinx.coroutines.CancellationException
@@ -25,6 +29,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
@@ -32,6 +37,44 @@ import java.io.IOException
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
+
+    @Test
+    fun `repeated analysis clears the old result and creates a fresh request for the same URL`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val viewModel = createViewModel(navigation = navigation)
+            viewModel.uiState.test {
+                awaitItem()
+                awaitItem()
+                viewModel.updateUrl(FIRST_URL)
+                awaitItem()
+                viewModel.analyzeUrl()
+                runCurrent()
+                viewModel.analyzeUrl()
+                runCurrent()
+
+                assertEquals(NavigationEvent.PopTo(HomeKey), navigation.dispatched[0])
+                assertEquals(NavigationEvent.PopTo(HomeKey), navigation.dispatched[2])
+                val first = (navigation.dispatched[1] as NavigationEvent.Navigate).key as DetectionResultKey
+                val second = (navigation.dispatched[3] as NavigationEvent.Navigate).key as DetectionResultKey
+                assertEquals(FIRST_URL, first.url)
+                assertEquals(FIRST_URL, second.url)
+                assertNotEquals(first.requestId, second.requestId)
+            }
+        }
+
+    @Test
+    fun `opening settings from the input pane removes the active result first`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val viewModel = createViewModel(navigation = navigation)
+            viewModel.openSettings()
+            runCurrent()
+            assertEquals(
+                listOf(NavigationEvent.PopTo(HomeKey), NavigationEvent.Navigate(SettingsKey)),
+                navigation.dispatched,
+            )
+        }
 
     @Test
     fun `dismissed clipboard URL is suggested only once`() =
@@ -192,8 +235,9 @@ private fun createViewModel(
     downloadRepository: DownloadRepository = EmptyDownloadRepository,
     settingsRepository: SettingsRepository = EnabledClipboardSettingsRepository,
     appEventBus: AppEventBus = AppEventBus(),
+    navigation: SpyNavigationDispatcher = SpyNavigationDispatcher(),
 ) = HomeViewModel(
-    navigation = SpyNavigationDispatcher(),
+    navigation = navigation,
     settingsRepository = settingsRepository,
     downloadRepository = downloadRepository,
     sharedUrlBus = SharedUrlBus(),

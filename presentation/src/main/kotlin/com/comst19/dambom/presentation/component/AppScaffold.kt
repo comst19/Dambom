@@ -66,6 +66,7 @@ import kotlinx.coroutines.launch
  * destination 내부 UI는 [entries]를 표시하는 AppNavDisplay에 위임합니다.
  */
 @Composable
+@Suppress("LongParameterList", "LongMethod")
 internal fun AppScaffold(
     state: NavigationState,
     navigator: Navigator,
@@ -74,6 +75,7 @@ internal fun AppScaffold(
     snackbarHostState: SnackbarHostState,
     networkAccess: NetworkAccessState,
     isLibraryDetailPaneVisible: Boolean,
+    isHomeResultPaneVisible: Boolean,
     isVideoFullscreen: Boolean,
 ) {
     val supportsMultiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
@@ -85,6 +87,7 @@ internal fun AppScaffold(
                     currentKey = state.currentKey,
                     defaultVisible = defaultChrome.showNavigation,
                     supportsMultiplePanes = supportsMultiplePanes,
+                    isHomeDetectionScene = usesHomeDetectionScene(state.currentStack),
                 ),
         )
     val policy = appScaffoldPolicy(chrome, state.isAtRoot, isVideoFullscreen)
@@ -169,6 +172,7 @@ internal fun AppScaffold(
                     entries = entries,
                     navigator = navigator,
                     isLibraryDetailPaneVisible = isLibraryDetailPaneVisible,
+                    isHomeResultPaneVisible = isHomeResultPaneVisible,
                     isVideoFullscreen = isVideoFullscreen,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -191,7 +195,8 @@ internal fun shouldShowNavigation(
     currentKey: NavKey,
     defaultVisible: Boolean,
     supportsMultiplePanes: Boolean,
-): Boolean = defaultVisible || (supportsMultiplePanes && currentKey is VideoDetailKey)
+    isHomeDetectionScene: Boolean = false,
+): Boolean = defaultVisible || (supportsMultiplePanes && (currentKey is VideoDetailKey || isHomeDetectionScene))
 
 internal fun navigationSuiteType(
     showNavigation: Boolean,

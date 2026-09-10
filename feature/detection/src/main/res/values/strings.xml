@@ -1,6 +1,9 @@
 <resources>
     <string name="detection_select_all">전체 선택</string>
     <string name="detection_title">영상 찾기</string>
+    <string name="detection_results_title">탐지 결과</string>
+    <string name="detection_placeholder_title">찾은 영상을 여기서 확인하세요</string>
+    <string name="detection_placeholder_description">링크를 입력하고 영상 찾기를 누르면\n영상과 화질을 선택할 수 있어요.</string>
     <string name="detection_back">뒤로</string>
     <string name="detection_loading">영상을 찾고 있어요</string>
     <string name="detection_loading_description">페이지에 따라 잠시 걸릴 수 있어요.</string>

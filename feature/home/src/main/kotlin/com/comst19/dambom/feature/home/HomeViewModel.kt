@@ -12,8 +12,10 @@ import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
+import com.comst19.dambom.core.navigation.contract.AppNavKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
+import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
 import com.comst19.dambom.feature.home.contract.HomeUiState
@@ -27,6 +29,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.net.URI
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -102,10 +105,9 @@ internal class HomeViewModel
 
         fun analyzeSharedUrl() {
             val sharedUrl = uiState.value.sharedUrl ?: return
-            viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Navigate(DetectionResultKey(sharedUrl)))
-                sharedUrlBus.clear()
-            }
+            savedStateHandle[URL_KEY] = sharedUrl
+            navigateFromHome(DetectionResultKey(sharedUrl, requestId = UUID.randomUUID().toString()))
+            sharedUrlBus.clear()
         }
 
         fun dismissSharedUrl() {
@@ -114,30 +116,27 @@ internal class HomeViewModel
 
         fun analyzeUrl() {
             val currentUrl = uiState.value.url.trim()
-            if (currentUrl.isValidHttpUrl()) navigateToDetection(currentUrl)
+            if (currentUrl.isValidHttpUrl()) {
+                navigateFromHome(DetectionResultKey(currentUrl, requestId = UUID.randomUUID().toString()))
+            }
         }
 
         fun openSettings() {
-            viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Navigate(SettingsKey))
-            }
+            navigateFromHome(SettingsKey)
         }
 
         fun openWeb(url: String? = null) {
-            viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Navigate(WebKey(url)))
-            }
+            navigateFromHome(WebKey(url))
         }
 
         fun openDownloads() {
-            viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Navigate(DownloadsKey))
-            }
+            navigateFromHome(DownloadsKey)
         }
 
-        private fun navigateToDetection(url: String) {
+        private fun navigateFromHome(key: AppNavKey) {
             viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Navigate(DetectionResultKey(url)))
+                navigation.dispatch(NavigationEvent.PopTo(HomeKey))
+                navigation.dispatch(NavigationEvent.Navigate(key))
             }
         }
     }

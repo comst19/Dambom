@@ -11,8 +11,8 @@
     <string name="library_filter_empty_description">Try another source filter.</string>
     <string name="library_view_as_list">View as list</string>
     <string name="library_view_as_grid">View as grid</string>
-    <string name="library_show_details">Show details</string>
-    <string name="library_hide_details">Hide details</string>
+    <string name="library_show_details">Show video details alongside library</string>
+    <string name="library_hide_details">Hide video details</string>
     <string name="library_start_selection">Select videos</string>
     <string name="library_selected_count">%1$d selected</string>
     <string name="library_select_all">Select all</string>

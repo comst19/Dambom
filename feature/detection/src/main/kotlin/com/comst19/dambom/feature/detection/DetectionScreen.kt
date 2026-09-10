@@ -6,6 +6,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -24,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -49,6 +52,7 @@ internal fun DetectionRoute(
     networkAccess: NetworkAccessState,
     viewModel: DetectionViewModel = hiltViewModel(),
     snapshotId: String? = null,
+    isSupportingPane: Boolean = false,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -77,11 +81,14 @@ internal fun DetectionRoute(
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         },
+        isSupportingPane = isSupportingPane,
+        sourceUrl = url,
     )
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("LongParameterList")
 internal fun DetectionScreen(
     uiState: DetectionUiState,
     networkAccess: NetworkAccessState,
@@ -91,20 +98,12 @@ internal fun DetectionScreen(
     onToggleCandidate: (String) -> Unit,
     onSelectVariant: (String, String) -> Unit,
     onDownload: () -> Unit,
+    isSupportingPane: Boolean = false,
+    sourceUrl: String = "",
 ) {
     AppScreen(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.detection_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = stringResource(R.string.detection_back),
-                        )
-                    }
-                },
-            )
+            DetectionTopBar(isSupportingPane, sourceUrl, onBack)
         },
     ) { innerPadding ->
         Box(
@@ -140,6 +139,42 @@ internal fun DetectionScreen(
             }
         }
     }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun DetectionTopBar(
+    isSupportingPane: Boolean,
+    sourceUrl: String,
+    onBack: () -> Unit,
+) {
+    TopAppBar(
+        title = {
+            Column {
+                val title = if (isSupportingPane) R.string.detection_results_title else R.string.detection_title
+                Text(stringResource(title))
+                if (isSupportingPane) {
+                    Text(
+                        text = sourceUrl,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        },
+        navigationIcon = {
+            if (!isSupportingPane) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = stringResource(R.string.detection_back),
+                    )
+                }
+            }
+        },
+    )
 }
 
 @Preview

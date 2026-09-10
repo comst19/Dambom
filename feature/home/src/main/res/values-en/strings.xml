@@ -8,8 +8,10 @@
     <string name="home_paste">Paste</string>
     <string name="home_analyze">Find videos</string>
     <string name="home_open_settings">Settings</string>
+    <string name="home_hide_results">Hide results</string>
+    <string name="home_show_results">Show results alongside input</string>
     <string name="home_web_prompt_title">Don’t have a link yet?</string>
-    <string name="home_web_prompt_description">Find a page, even without a link.</string>
+    <string name="home_web_prompt_description">Find a page without a link.</string>
     <string name="home_browse_web">Browse the web</string>
     <string name="home_current_activity">Current activity</string>
     <string name="home_clipboard_found">A copied link is available</string>

@@ -1,8 +1,22 @@
 name: Baseline Profile Maintenance
 
 on:
-  schedule:
-    - cron: "0 17 * * 0"
+  push:
+    branches:
+      - develop
+    paths:
+      - "**/src/**"
+      - "**/*.gradle.kts"
+      - "**/proguard*.pro"
+      - "**/consumer-rules.pro"
+      - "gradle/**"
+      - gradle.properties
+      - gradlew
+      - "build-logic/**"
+      - .github/actions/setup-android/action.yml
+      - .github/workflows/baseline-profile.yml
+      - "!app/src/release/generated/baselineProfiles/**"
+      - "!**/*.md"
   workflow_dispatch:
 
 permissions:
@@ -10,7 +24,7 @@ permissions:
 
 concurrency:
   group: baseline-profile-develop
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   generate:
@@ -18,6 +32,8 @@ jobs:
     if: ${{ github.repository == 'comst19/Dambom' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    outputs:
+      source-sha: ${{ steps.source.outputs.sha }}
 
     steps:
       - name: Enable KVM
@@ -30,8 +46,12 @@ jobs:
       - name: Check out develop
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
-          ref: develop
+          ref: ${{ github.event_name == 'push' && github.sha || 'develop' }}
           fetch-depth: 0
+
+      - name: Record generation source
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Android environment
         uses: ./.github/actions/setup-android
@@ -57,13 +77,15 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  commit:
-    name: Commit Baseline Profile
+  publish:
+    name: Open Baseline Profile PR
     needs: generate
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: write
+      pull-requests: write
+      actions: write
 
     steps:
       - name: Check out develop
@@ -72,22 +94,54 @@ jobs:
           ref: develop
           fetch-depth: 0
 
+      - name: Check whether generation inputs are still current
+        id: current
+        env:
+          SOURCE_SHA: ${{ needs.generate.outputs.source-sha }}
+        run: |
+          if git diff --quiet "$SOURCE_SHA" HEAD -- \
+            ':(glob)**/src/**' ':(glob)**/*.gradle.kts' \
+            ':(glob)**/proguard*.pro' ':(glob)**/consumer-rules.pro' \
+            ':(glob)gradle/**' gradle.properties gradlew \
+            ':(glob)build-logic/**' .github/actions/setup-android/action.yml \
+            .github/workflows/baseline-profile.yml \
+            ':(exclude)app/src/release/generated/baselineProfiles/**' \
+            ':(exclude,glob)**/*.md'; then
+            echo 'matches=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'matches=false' >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Download generated profiles
+        if: ${{ steps.current.outputs.matches == 'true' }}
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: baseline-profile-${{ github.run_id }}
           path: ${{ runner.temp }}/generated-profiles
 
-      - name: Commit changed profiles without retriggering CI
-        shell: bash
-        run: |
-          rsync -a --delete "$RUNNER_TEMP/generated-profiles/" app/src/release/generated/baselineProfiles/
-          git add app/src/release/generated/baselineProfiles/
-          if git diff --staged --quiet; then
-            echo "Baseline Profile is unchanged."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: Baseline Profile 자동 갱신 [skip ci]"
-          git push origin HEAD:develop
+      - name: Apply generated profiles
+        if: ${{ steps.current.outputs.matches == 'true' }}
+        run: rsync -a --delete "$RUNNER_TEMP/generated-profiles/" app/src/release/generated/baselineProfiles/
+
+      - name: Create or update the maintenance PR
+        if: ${{ steps.current.outputs.matches == 'true' }}
+        id: pull-request
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        with:
+          base: develop
+          branch: chore/baseline-profile
+          add-paths: app/src/release/generated/baselineProfiles/
+          commit-message: "chore: Baseline Profile 자동 갱신 [skip ci]"
+          title: "chore: Baseline Profile 자동 갱신 [skip ci]"
+          body: |
+            develop의 핵심 사용자 경로를 관리형 기기에서 실행해 Baseline Profile과 Startup Profile을 갱신합니다.
+
+            생성 기준: ${{ needs.generate.outputs.source-sha }}
+            자동 이벤트는 [skip ci]로 생략하고 Android CI만 별도로 실행합니다.
+            Quality gate 통과 후 Squash merge합니다. 병합 커밋에도 [skip ci]를 유지합니다.
+
+      - name: Run the required PR checks explicitly
+        if: ${{ steps.pull-request.outputs.pull-request-number != '' && steps.pull-request.outputs.pull-request-operation != 'closed' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run android-ci.yml --ref chore/baseline-profile -f target_branch=develop

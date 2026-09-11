@@ -2,6 +2,9 @@
     <string name="detection_failed">Couldn’t analyze the video. Opening the page in the browser.</string>
     <string name="detection_select_all">Select all</string>
     <string name="detection_title">Find videos</string>
+    <string name="detection_results_title">Results</string>
+    <string name="detection_placeholder_title">Your videos will appear here</string>
+    <string name="detection_placeholder_description">Enter a link and tap Find videos\nto choose videos and quality.</string>
     <string name="detection_back">Back</string>
     <string name="detection_loading">Finding videos</string>
     <string name="detection_loading_description">Some pages may take a moment.</string>

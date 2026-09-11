@@ -8,8 +8,10 @@
     <string name="home_paste">붙여넣기</string>
     <string name="home_analyze">영상 찾기</string>
     <string name="home_open_settings">설정</string>
+    <string name="home_hide_results">탐지 결과 숨기기</string>
+    <string name="home_show_results">입력과 탐지 결과 함께 보기</string>
     <string name="home_web_prompt_title">링크가 아직 없나요?</string>
-    <string name="home_web_prompt_description">링크가 없어도 페이지를 찾아볼 수 있어요.</string>
+    <string name="home_web_prompt_description">링크 없이도 페이지를 찾아보세요.</string>
     <string name="home_browse_web">웹에서 찾아보기</string>
     <string name="home_current_activity">현재 작업</string>
     <string name="home_clipboard_found">복사한 링크가 있어요</string>

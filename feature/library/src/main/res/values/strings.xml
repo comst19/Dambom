@@ -11,8 +11,8 @@
     <string name="library_filter_empty_description">다른 출처 필터를 선택해 보세요.</string>
     <string name="library_view_as_list">목록으로 보기</string>
     <string name="library_view_as_grid">앨범으로 보기</string>
-    <string name="library_show_details">상세 영역 열기</string>
-    <string name="library_hide_details">상세 영역 닫기</string>
+    <string name="library_show_details">목록과 영상 상세 함께 보기</string>
+    <string name="library_hide_details">영상 상세 숨기기</string>
     <string name="library_start_selection">영상 선택</string>
     <string name="library_selected_count">%1$d개 선택</string>
     <string name="library_select_all">전체 선택</string>

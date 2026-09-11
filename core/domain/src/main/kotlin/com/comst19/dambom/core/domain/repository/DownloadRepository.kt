@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.map
 interface DownloadRepository {
     val downloads: Flow<List<DownloadTask>>
 
+    fun observeDownload(id: String): Flow<DownloadTask?> =
+        downloads.map { tasks -> tasks.firstOrNull { it.id == id } }.distinctUntilChanged()
+
     val completedDownloads: Flow<List<DownloadTask>>
         get() =
             downloads

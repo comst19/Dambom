@@ -43,12 +43,14 @@
     <string name="library_delete_description">%1$s will be removed from this device.</string>
     <string name="library_delete_selected_title">Delete selected videos?</string>
     <string name="library_delete_selected_description">The selected videos (%1$d) will be removed from this device.</string>
+    <string name="library_delete_selected_hidden_description">All %1$d selected videos will be deleted, including %2$d hidden by the current search or filter.</string>
     <string name="library_delete_confirm">Delete</string>
     <string name="library_cancel">Cancel</string>
     <string name="library_rename_success">Video renamed.</string>
     <string name="library_rename_failure">Couldn’t rename the video.</string>
     <string name="library_delete_success">Video deleted.</string>
     <string name="library_delete_selected_success">Deleted %1$d videos.</string>
+    <string name="library_delete_selected_partial">Deleted %1$d; failed to delete %2$d. Failed videos remain selected.</string>
     <string name="library_delete_failure">Couldn’t delete the video.</string>
     <string name="library_export_success">Video saved to your device.</string>
     <string name="library_export_failure">Couldn’t save the video to your device.</string>
@@ -60,6 +62,8 @@
     <string name="library_share_chooser">Share video</string>
     <string name="library_share_link_chooser">Share original link</string>
     <string name="player_title">Video player</string>
+    <string name="player_loading">Loading video.</string>
+    <string name="player_load_error">Couldn’t load the video.\nGo back and open it again.</string>
     <string name="player_back">Back to Library</string>
     <string name="player_fullscreen">Enter full screen</string>
     <string name="player_expand_crop">Fill screen</string>

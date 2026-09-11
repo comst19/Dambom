@@ -3,6 +3,7 @@ package com.comst19.dambom.core.data.repository
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.comst19.dambom.core.data.download.DownloadFileStore
 import com.comst19.dambom.core.data.download.DownloadWorkScheduler
 import com.comst19.dambom.core.data.download.selectNextDownload
@@ -10,6 +11,7 @@ import com.comst19.dambom.core.database.DambomDatabase
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadStatus
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -24,6 +26,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -172,6 +175,82 @@ class DefaultDownloadRepositoryTest {
         }
 
     @Test
+    fun `unrelated row invalidates SQL without emitting duplicate detail data`() =
+        runTest {
+            database.close()
+            val queryCount = AtomicInteger()
+            val requery = CompletableDeferred<Unit>()
+            database =
+                Room
+                    .inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), DambomDatabase::class.java)
+                    .allowMainThreadQueries()
+                    .setQueryCallback(
+                        { sql, _ ->
+                            if (
+                                sql.startsWith("SELECT * FROM download_tasks WHERE id") &&
+                                queryCount.incrementAndGet() > 1
+                            ) {
+                                requery.complete(Unit)
+                            }
+                        },
+                        { it.run() },
+                    ).build()
+            repository = createRepository(testScheduler)
+            val dao = database.downloadTaskDao()
+            dao.insert(entity(TEST_ID, "media.example"))
+            dao.insert(entity("other", "media.example"))
+
+            repository.observeDownload(TEST_ID).test {
+                assertEquals(TEST_ID, awaitItem()?.id)
+                dao.updateTitle("other", "unrelated", 2L)
+                requery.await()
+                dao.updateTitle(TEST_ID, "renamed", 3L)
+                assertEquals("renamed", awaitItem()?.title)
+                assertTrue(queryCount.get() >= 2)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `single download subscription observes rename and deletion without unrelated rows`() =
+        runTest {
+            repository = createRepository(testScheduler)
+            val dao = database.downloadTaskDao()
+            dao.insert(entity(TEST_ID, "media.example"))
+            dao.insert(entity("other", "media.example"))
+
+            repository.observeDownload(TEST_ID).test {
+                assertEquals(TEST_ID, awaitItem()?.id)
+                dao.updateTitle("other", "unrelated", 2L)
+                dao.updateTitle(TEST_ID, "renamed", 3L)
+                val renamed = awaitItem()
+                assertEquals(TEST_ID, renamed?.id)
+                assertEquals("renamed", renamed?.title)
+                dao.delete(TEST_ID)
+                assertEquals(null, awaitItem())
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `single download observation returns only requested row and tracks deletion`() =
+        runTest {
+            repository = createRepository(testScheduler)
+            val dao = database.downloadTaskDao()
+            assertEquals(null, repository.observeDownload(TEST_ID).first())
+            dao.insert(entity(TEST_ID, "media.example"))
+            dao.insert(entity("other", "media.example"))
+
+            assertEquals(TEST_ID, repository.observeDownload(TEST_ID).first()?.id)
+            dao.updateTitle(TEST_ID, "renamed", 2L)
+            assertEquals("renamed", repository.observeDownload(TEST_ID).first()?.title)
+            dao.delete(TEST_ID)
+
+            assertEquals(null, repository.observeDownload(TEST_ID).first())
+            assertEquals("other", repository.observeDownload("other").first()?.id)
+        }
+
+    @Test
     fun `startup scheduling check restores queued work`() =
         runTest {
             repository = createRepository(testScheduler)
@@ -180,6 +259,64 @@ class DefaultDownloadRepositoryTest {
             repository.recoverPendingDownloads()
 
             assertEquals(1, scheduler.successfulEnsureCount)
+        }
+
+    @Test
+    fun `startup finishes interrupted deletion with or without remaining files`() =
+        runTest {
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val dao = database.downloadTaskDao()
+            for (hasFile in listOf(true, false)) {
+                val localFile = File(context.filesDir, "videos/recovery.mp4")
+                if (hasFile) {
+                    localFile.parentFile?.mkdirs()
+                    localFile.writeText("video")
+                }
+                dao.insert(
+                    entity(TEST_ID, "media.example").copy(
+                        status = DownloadStatus.COMPLETED.name,
+                        localFileName = localFile.name,
+                        deletePending = true,
+                    ),
+                )
+                repository = createRepository(testScheduler)
+
+                repository.recoverPendingDownloads()
+                repository.recoverPendingDownloads()
+
+                assertTrue(dao.getById(TEST_ID) == null)
+                assertTrue(!localFile.exists())
+            }
+        }
+
+    @Test
+    fun `startup retains failed deletion and still schedules other downloads`() =
+        runTest {
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val localFile = File(context.filesDir, "videos/recovery.mp4").apply { mkdirs() }
+            val child = File(localFile, "blocked").apply { writeText("video") }
+            val dao = database.downloadTaskDao()
+            dao.insert(entity("other", "media.example"))
+            dao.insert(
+                entity(TEST_ID, "media.example").copy(
+                    status = DownloadStatus.COMPLETED.name,
+                    localFileName = localFile.name,
+                    deletePending = true,
+                ),
+            )
+            repository = createRepository(testScheduler)
+
+            repository.recoverPendingDownloads()
+
+            assertEquals(true, dao.getById(TEST_ID)?.deletePending)
+            assertTrue(child.exists())
+            assertEquals(1, scheduler.successfulEnsureCount)
+            child.delete()
+
+            repository.recoverPendingDownloads()
+
+            assertTrue(dao.getById(TEST_ID) == null)
+            assertTrue(dao.getById("other") != null)
         }
 
     @Test

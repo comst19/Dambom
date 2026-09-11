@@ -84,11 +84,20 @@ internal fun DeleteSelectedVideosDialog(
     count: Int,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
+    hiddenCount: Int = 0,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.library_delete_selected_title)) },
-        text = { Text(stringResource(R.string.library_delete_selected_description, count)) },
+        text = {
+            Text(
+                if (hiddenCount > 0) {
+                    stringResource(R.string.library_delete_selected_hidden_description, count, hiddenCount)
+                } else {
+                    stringResource(R.string.library_delete_selected_description, count)
+                },
+            )
+        },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(stringResource(R.string.library_delete_confirm), color = MaterialTheme.colorScheme.error)

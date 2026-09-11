@@ -45,14 +45,15 @@ import com.comst19.dambom.feature.library.file.rememberLocalVideoAvailable
 import com.comst19.dambom.feature.library.pip.PipPlatformEffect
 
 @Composable
+@Suppress("LongParameterList", "LongMethod")
 internal fun VideoPlayerRoute(
     id: String,
     isVideoFullscreen: Boolean,
     onVideoFullscreenChange: (Boolean) -> Unit,
     onVideoRotate: () -> Unit,
+    libraryViewModel: LibraryViewModel = hiltViewModel(),
+    playerViewModel: VideoPlayerViewModel = hiltViewModel(),
 ) {
-    val libraryViewModel: LibraryViewModel = hiltViewModel()
-    val playerViewModel: VideoPlayerViewModel = hiltViewModel()
     val detailState by remember(libraryViewModel, id) {
         libraryViewModel.observeVideo(id)
     }.collectAsStateWithLifecycle(initialValue = VideoDetailState.Loading)
@@ -88,14 +89,16 @@ internal fun VideoPlayerRoute(
     LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) { playerViewModel.onUiPaused() }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { playerViewModel.onUiStopped() }
     VideoPlayerMediaSessionEffect(playerViewModel.player)
-    LaunchedEffect(task?.id, task?.localFilePath, isLocalVideoAvailable) {
+    LaunchedEffect(detailState, task?.id, task?.localFilePath, isLocalVideoAvailable) {
+        if (detailState == VideoDetailState.Loading) return@LaunchedEffect
         if (isLocalVideoAvailable) {
             task?.let(playerViewModel::play)
         } else {
             playerViewModel.stopUnavailableVideo()
         }
     }
-    LaunchedEffect(isVideoFullscreen, task, isLocalVideoAvailable) {
+    LaunchedEffect(detailState, isVideoFullscreen, task, isLocalVideoAvailable) {
+        if (detailState == VideoDetailState.Loading) return@LaunchedEffect
         refreshLocalVideoAvailability()
         if (shouldClearVideoFullscreen(isVideoFullscreen, isLocalVideoAvailable)) {
             onVideoFullscreenChange(false)

@@ -54,9 +54,10 @@ internal fun VideoPlayerRoute(
     libraryViewModel: LibraryViewModel = hiltViewModel(),
     playerViewModel: VideoPlayerViewModel = hiltViewModel(),
 ) {
-    val detailState by remember(libraryViewModel, id) {
-        libraryViewModel.observeVideo(id)
-    }.collectAsStateWithLifecycle(initialValue = VideoDetailState.Loading)
+    val detailState =
+        remember(libraryViewModel, id) {
+            libraryViewModel.observeVideo(id)
+        }.collectAsStateWithLifecycle(initialValue = VideoDetailState.Loading).value
     val task = (detailState as? VideoDetailState.Ready)?.task
     var isLocalVideoAvailable by rememberLocalVideoAvailable(task)
 

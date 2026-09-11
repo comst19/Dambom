@@ -47,6 +47,7 @@ enum class DownloadFailureReason {
     UNSUPPORTED_FORMAT,
     NETWORK,
     STORAGE,
+    INSUFFICIENT_STORAGE,
     SERVER,
     UNKNOWN,
 }

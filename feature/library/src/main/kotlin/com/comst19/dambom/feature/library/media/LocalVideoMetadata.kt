@@ -11,6 +11,8 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.LocalContext
 import com.comst19.dambom.core.common.ui.loadOrCreateVideoThumbnailFile
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 internal data class LocalVideoMetadata(
@@ -37,7 +39,8 @@ internal fun rememberLocalVideoMetadata(
         }
     }
 
-private object LocalVideoMetadataLoader {
+internal object LocalVideoMetadataLoader {
+    private val readMutex = Mutex()
     private val cache =
         object : LruCache<LocalVideoCacheKey, LocalVideoMetadata>(THUMBNAIL_CACHE_KB) {
             override fun sizeOf(
@@ -55,12 +58,16 @@ private object LocalVideoMetadataLoader {
         context: Context,
         key: LocalVideoCacheKey,
     ): LocalVideoMetadata =
-        cache[key] ?: withContext(Dispatchers.IO) {
-            readMetadata(
-                key.path,
-                loadOrCreateVideoThumbnailFile(context, key.path)?.let { BitmapFactory.decodeFile(it.absolutePath) },
-            )
-        }.also { cache.put(key, it) }
+        cache[key] ?: readMutex.withLock {
+            cache[key] ?: withContext(Dispatchers.IO) {
+                readMetadata(
+                    key.path,
+                    loadOrCreateVideoThumbnailFile(context, key.path)?.let {
+                        BitmapFactory.decodeFile(it.absolutePath)
+                    },
+                ).also { cache.put(key, it) }
+            }
+        }
 
     private fun readMetadata(
         path: String,

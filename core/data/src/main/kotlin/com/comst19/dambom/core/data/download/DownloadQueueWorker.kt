@@ -31,6 +31,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import java.io.Closeable
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -154,7 +155,9 @@ internal class DownloadQueueWorker
                 val partialFile = fileStore.partialFile(task.id)
                 val rangeStart = partialFile.length().coerceAtLeast(0L)
                 val validatorFile = fileStore.partialValidatorFile(task.id)
-                val validator = validatorFile.takeIf(File::isFile)?.readText()?.takeIf(String::isNotBlank)
+                val validator =
+                    storageOperation { validatorFile.takeIf(File::isFile)?.readText() }
+                        ?.takeIf { it.isNotBlank() && !it.startsWith("W/") }
                 if (rangeStart > 0L && validator == null) {
                     fileStore.clearPartial(task.id)
                     return@coroutineScope download(task, allowRestart = false)
@@ -212,8 +215,10 @@ internal class DownloadQueueWorker
             val totalBytes = response.totalBytes(initialBytes)
             val body = response.body
             if (!append) validatorFile.delete()
-            FileOutputStream(partialFile, append).use { output ->
-                response.downloadValidator()?.let(validatorFile::writeText)
+            val output = storageOperation { FileOutputStream(partialFile, append) }
+            Closeable { storageOperation(output::close) }.use {
+                requireSpaceFor(BUFFER_SIZE)
+                storageOperation { response.downloadValidator()?.let(validatorFile::writeText) }
                 checkpoint(task, initialBytes, totalBytes)
                 val input = body.byteStream()
                 val buffer = ByteArray(BUFFER_SIZE)
@@ -224,7 +229,8 @@ internal class DownloadQueueWorker
                     currentCoroutineContext().ensureActive()
                     val read = input.read(buffer)
                     if (read < 0) break
-                    output.write(buffer, 0, read)
+                    requireSpaceFor(read)
+                    storageOperation { output.write(buffer, 0, read) }
                     downloadedBytes += read
                     val nowMillis = SystemClock.elapsedRealtime()
                     if (shouldCheckpoint(downloadedBytes - lastCheckpointBytes, nowMillis - lastCheckpointAtMillis)) {
@@ -233,10 +239,16 @@ internal class DownloadQueueWorker
                         lastCheckpointAtMillis = nowMillis
                     }
                 }
-                output.fd.sync()
+                storageOperation { output.fd.sync() }
                 checkpoint(task, downloadedBytes, totalBytes)
                 if (totalBytes != null && downloadedBytes < totalBytes) throw IOException("Download ended early")
                 complete(task, partialFile, downloadedBytes)
+            }
+        }
+
+        private fun requireSpaceFor(byteCount: Int) {
+            if (!fileStore.hasSpaceFor(byteCount)) {
+                throw DownloadFailureException(DownloadFailureReason.INSUFFICIENT_STORAGE)
             }
         }
 
@@ -250,8 +262,23 @@ internal class DownloadQueueWorker
             }
             if (!response.isSuccessful) throw DownloadFailureException(DownloadFailureReason.SERVER)
             val contentType = response.body.contentType()?.toString()
+            if (contentType?.startsWith("text/") == true || contentType?.contains("json") == true) {
+                throw DownloadFailureException(DownloadFailureReason.UNSUPPORTED_FORMAT)
+            }
             if (contentType?.startsWith("video/") != true && !task.url.hasVideoExtension()) {
                 throw DownloadFailureException(DownloadFailureReason.UNSUPPORTED_FORMAT)
+            }
+            if (response.code != HTTP_PARTIAL_CONTENT) {
+                val prefix =
+                    response
+                        .peekBody(ERROR_DOCUMENT_PREFIX_BYTES)
+                        .string()
+                        .trimStart('\uFEFF', ' ', '\t', '\r', '\n')
+                        .lowercase()
+                val isTextPrefix = prefix.none { it < ' ' && it !in "\t\r\n" }
+                if (isTextPrefix && ERROR_DOCUMENT_PREFIXES.any(prefix::startsWith)) {
+                    throw DownloadFailureException(DownloadFailureReason.UNSUPPORTED_FORMAT)
+                }
             }
         }
 
@@ -379,7 +406,8 @@ private enum class DownloadOutcome {
 
 private class DownloadFailureException(
     val reason: DownloadFailureReason,
-) : Exception()
+    cause: Throwable? = null,
+) : Exception(cause)
 
 private class DownloadStoppedException(
     val reason: DownloadStopReason,
@@ -418,7 +446,21 @@ private fun Response.contentRangeStart(): Long? =
         ?.substringBefore('-')
         ?.toLongOrNull()
 
-private fun Response.downloadValidator(): String? = header("ETag") ?: header("Last-Modified")
+private const val ERROR_DOCUMENT_PREFIX_BYTES = 512L
+
+private inline fun <T> storageOperation(block: () -> T): T =
+    try {
+        block()
+    } catch (failure: IOException) {
+        throw DownloadFailureException(failure.storageFailureReason(), failure)
+    }
+
+private val ERROR_DOCUMENT_PREFIXES = listOf("<!doctype html", "<html", "{", "[")
+
+private fun Response.downloadValidator(): String? =
+    (header("ETag") ?: header("Last-Modified"))?.takeUnless {
+        it.startsWith("W/")
+    }
 
 internal fun shouldCheckpoint(
     bytesSinceLastCheckpoint: Long,

@@ -1,6 +1,7 @@
 package com.comst19.dambom.core.data.download
 
 import android.content.Context
+import android.os.StatFs
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
@@ -16,6 +17,11 @@ internal class DownloadFileStore
         private val videoDirectory = context.filesDir.resolve("videos").apply(File::mkdirs)
 
         fun partialFile(id: String): File = partialDirectory.resolve("$id.part")
+
+        fun hasSpaceFor(byteCount: Int): Boolean {
+            val availableBytes = StatFs(partialDirectory.path).availableBytes
+            return availableBytes - MIN_FREE_BYTES >= byteCount
+        }
 
         fun partialValidatorFile(id: String): File = partialDirectory.resolve("$id.part.validator")
 
@@ -88,3 +94,4 @@ private fun fileExtension(
 private const val VIDEO_THUMBNAIL_SUFFIX = ".thumbnail.jpg"
 private const val VIDEO_THUMBNAIL_UNAVAILABLE_SUFFIX = ".thumbnail.unavailable"
 private const val TEMPORARY_FILE_SUFFIX = ".tmp"
+private const val MIN_FREE_BYTES = 16L * 1024 * 1024

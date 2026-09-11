@@ -68,6 +68,7 @@ internal class DetectionViewModel
                             if (generation == requestGeneration) applyDetectionResult(url, result)
                         }.onFailure {
                             if (generation == requestGeneration) {
+                                appEventBus.send(AppEvent.ShowSnackbar(UiText.Resource(R.string.detection_failed)))
                                 navigation.dispatch(NavigationEvent.Replace(WebKey(url)))
                             }
                         }
@@ -122,6 +123,7 @@ internal class DetectionViewModel
                     if (result.reason == UnsupportedReason.INVALID_URL) {
                         mutableUiState.value = DetectionUiState.Unsupported(result.reason)
                     } else {
+                        appEventBus.send(AppEvent.ShowSnackbar(UiText.Resource(result.reason.messageRes())))
                         navigation.dispatch(NavigationEvent.Replace(WebKey(url)))
                     }
                 }

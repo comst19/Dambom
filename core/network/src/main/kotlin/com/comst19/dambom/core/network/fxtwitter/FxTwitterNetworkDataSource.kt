@@ -46,7 +46,15 @@ class FxTwitterNetworkDataSource
                     }
 
                     else -> {
-                        json.decodeFromString<FxTwitterResponse>(response.body.string()).toNetworkResult()
+                        val body = response.body
+                        if (
+                            body.contentLength() > MAX_METADATA_BYTES ||
+                            body.source().request(MAX_METADATA_BYTES + 1)
+                        ) {
+                            unsupported(FxTwitterNetworkFailure.UNSUPPORTED_FORMAT)
+                        } else {
+                            json.decodeFromString<FxTwitterResponse>(body.string()).toNetworkResult()
+                        }
                     }
                 }
             }
@@ -172,6 +180,7 @@ private const val FXTWITTER_USER_AGENT = "Dambom/1.0 (public-video-metadata)"
 private const val FX_PRIVATE_TWEET = "PRIVATE_TWEET"
 private const val FX_NOT_FOUND = "NOT_FOUND"
 private const val MAX_X_TITLE_LENGTH = 80
+private const val MAX_METADATA_BYTES = 1024L * 1024
 private const val HTTP_UNAUTHORIZED = 401
 private const val HTTP_FORBIDDEN = 403
 private const val HTTP_NOT_FOUND = 404

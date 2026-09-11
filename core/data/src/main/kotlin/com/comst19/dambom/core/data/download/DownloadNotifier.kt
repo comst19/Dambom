@@ -163,6 +163,7 @@ private val DownloadFailureReason.notificationDescription: Int
         when (this) {
             DownloadFailureReason.NETWORK -> R.string.download_notification_failed_network
             DownloadFailureReason.STORAGE -> R.string.download_notification_failed_storage
+            DownloadFailureReason.INSUFFICIENT_STORAGE -> R.string.download_notification_insufficient_storage
             else -> R.string.download_notification_failed_description
         }
 

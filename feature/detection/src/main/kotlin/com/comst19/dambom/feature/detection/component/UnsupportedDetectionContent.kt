@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.feature.detection.R
+import com.comst19.dambom.feature.detection.messageRes
 
 @Composable
 internal fun UnsupportedDetectionContent(
@@ -70,16 +71,7 @@ internal fun UnsupportedDetectionContent(
 }
 
 @Composable
-private fun UnsupportedReason.description(): String =
-    stringResource(
-        when (this) {
-            UnsupportedReason.INVALID_URL -> R.string.detection_invalid_url
-            UnsupportedReason.ACCESS_RESTRICTED -> R.string.detection_access_restricted
-            UnsupportedReason.NO_MEDIA -> R.string.detection_no_media
-            UnsupportedReason.NETWORK_ERROR -> R.string.detection_network_error
-            UnsupportedReason.UNSUPPORTED_FORMAT -> R.string.detection_unsupported_format
-        },
-    )
+private fun UnsupportedReason.description(): String = stringResource(messageRes())
 
 private fun UnsupportedReason.canContinueInWeb(): Boolean =
     this == UnsupportedReason.NO_MEDIA || this == UnsupportedReason.UNSUPPORTED_FORMAT

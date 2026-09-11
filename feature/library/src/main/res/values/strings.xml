@@ -43,12 +43,14 @@
     <string name="library_delete_description">%1$s 파일이 기기에서 삭제돼요.</string>
     <string name="library_delete_selected_title">선택한 영상을 삭제할까요?</string>
     <string name="library_delete_selected_description">선택한 영상 %1$d개가 기기에서 삭제돼요.</string>
+    <string name="library_delete_selected_hidden_description">선택한 영상 %1$d개가 삭제돼요. 현재 검색·필터에서 보이지 않는 %2$d개도 포함돼요.</string>
     <string name="library_delete_confirm">삭제</string>
     <string name="library_cancel">취소</string>
     <string name="library_rename_success">이름을 변경했어요.</string>
     <string name="library_rename_failure">이름을 변경하지 못했어요.</string>
     <string name="library_delete_success">영상을 삭제했어요.</string>
     <string name="library_delete_selected_success">영상 %1$d개를 삭제했어요.</string>
+    <string name="library_delete_selected_partial">%1$d개 삭제, %2$d개 실패. 실패한 영상은 선택 상태로 남아 있어요.</string>
     <string name="library_delete_failure">영상을 삭제하지 못했어요.</string>
     <string name="library_export_success">영상을 기기에 저장했어요.</string>
     <string name="library_export_failure">영상을 기기에 저장하지 못했어요.</string>
@@ -60,6 +62,8 @@
     <string name="library_share_chooser">영상 공유</string>
     <string name="library_share_link_chooser">원본 링크 공유</string>
     <string name="player_title">영상 재생</string>
+    <string name="player_loading">영상을 불러오는 중이에요.</string>
+    <string name="player_load_error">영상을 불러오지 못했어요.\n뒤로 돌아가 다시 열어 주세요.</string>
     <string name="player_back">보관함으로 돌아가기</string>
     <string name="player_fullscreen">전체 화면</string>
     <string name="player_expand_crop">화면 채우기</string>

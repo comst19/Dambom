@@ -1,4 +1,5 @@
 <resources>
+    <string name="downloads_error_insufficient_storage">저장 공간이 부족해요. 공간을 확보한 뒤 다시 시도해 주세요.</string>
     <string name="downloads_summary_waiting">다운로드 대기 중</string>
     <string name="downloads_summary_paused">다운로드 일시정지</string>
     <string name="downloads_summary_attention">확인이 필요한 다운로드</string>

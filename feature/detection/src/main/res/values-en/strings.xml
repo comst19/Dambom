@@ -1,4 +1,5 @@
 <resources>
+    <string name="detection_failed">Couldn’t analyze the video. Opening the page in the browser.</string>
     <string name="detection_select_all">Select all</string>
     <string name="detection_title">Find videos</string>
     <string name="detection_results_title">Results</string>

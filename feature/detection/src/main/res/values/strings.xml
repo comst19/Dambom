@@ -1,4 +1,5 @@
 <resources>
+    <string name="detection_failed">영상을 분석하지 못했어요. 웹에서 페이지를 열어요.</string>
     <string name="detection_select_all">전체 선택</string>
     <string name="detection_title">영상 찾기</string>
     <string name="detection_results_title">탐지 결과</string>

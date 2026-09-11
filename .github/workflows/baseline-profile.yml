@@ -78,21 +78,29 @@ jobs:
           retention-days: 14
 
   publish:
-    name: Open Baseline Profile PR
+    name: Commit Baseline Profile
+    if: ${{ github.ref == 'refs/heads/develop' }}
     needs: generate
     runs-on: ubuntu-latest
+    environment: baseline-profile
     timeout-minutes: 10
-    permissions:
-      contents: write
-      pull-requests: write
-      actions: write
 
     steps:
+      - name: Require the dedicated profile deploy key
+        env:
+          PROFILE_DEPLOY_KEY: ${{ secrets.BASELINE_PROFILE_DEPLOY_KEY }}
+        run: |
+          if [[ -z "$PROFILE_DEPLOY_KEY" ]]; then
+            echo '::error::Configure BASELINE_PROFILE_DEPLOY_KEY in the baseline-profile environment.'
+            exit 1
+          fi
+
       - name: Check out develop
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           ref: develop
           fetch-depth: 0
+          ssh-key: ${{ secrets.BASELINE_PROFILE_DEPLOY_KEY }}
 
       - name: Check whether generation inputs are still current
         id: current
@@ -119,29 +127,20 @@ jobs:
           name: baseline-profile-${{ github.run_id }}
           path: ${{ runner.temp }}/generated-profiles
 
-      - name: Apply generated profiles
+      - name: Commit generated profiles to develop
         if: ${{ steps.current.outputs.matches == 'true' }}
-        run: rsync -a --delete "$RUNNER_TEMP/generated-profiles/" app/src/release/generated/baselineProfiles/
-
-      - name: Create or update the maintenance PR
-        if: ${{ steps.current.outputs.matches == 'true' }}
-        id: pull-request
-        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
-        with:
-          base: develop
-          branch: chore/baseline-profile
-          add-paths: app/src/release/generated/baselineProfiles/
-          commit-message: "chore: Baseline Profile 자동 갱신 [skip ci]"
-          title: "chore: Baseline Profile 자동 갱신 [skip ci]"
-          body: |
-            develop의 핵심 사용자 경로를 관리형 기기에서 실행해 Baseline Profile과 Startup Profile을 갱신합니다.
-
-            생성 기준: ${{ needs.generate.outputs.source-sha }}
-            자동 이벤트는 [skip ci]로 생략하고 Android CI만 별도로 실행합니다.
-            Quality gate 통과 후 Squash merge합니다. 병합 커밋에도 [skip ci]를 유지합니다.
-
-      - name: Run the required PR checks explicitly
-        if: ${{ steps.pull-request.outputs.pull-request-number != '' && steps.pull-request.outputs.pull-request-operation != 'closed' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh workflow run android-ci.yml --ref chore/baseline-profile -f target_branch=develop
+        run: |
+          for profile in baseline-prof.txt startup-prof.txt; do
+            test -s "$RUNNER_TEMP/generated-profiles/$profile"
+            cp "$RUNNER_TEMP/generated-profiles/$profile" "app/src/release/generated/baselineProfiles/$profile"
+          done
+          git add -- app/src/release/generated/baselineProfiles/baseline-prof.txt \
+            app/src/release/generated/baselineProfiles/startup-prof.txt
+          if git diff --cached --quiet; then
+            echo 'Baseline Profile is unchanged.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: Baseline Profile 자동 갱신 [skip ci]'
+          git push origin HEAD:develop

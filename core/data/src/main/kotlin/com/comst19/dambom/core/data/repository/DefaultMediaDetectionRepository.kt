@@ -1,5 +1,6 @@
 package com.comst19.dambom.core.data.repository
 
+import com.comst19.dambom.core.common.net.hasVideoFileExtension
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.data.mapper.toDomain
 import com.comst19.dambom.core.domain.model.MediaCandidate
@@ -7,6 +8,7 @@ import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.network.fxtwitter.FxTwitterNetworkDataSource
+import com.comst19.dambom.core.network.okhttp.executeCancellable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -32,10 +34,10 @@ internal class DefaultMediaDetectionRepository
                     fxTwitterNetworkDataSource.detect(normalizedUrl)?.let { result ->
                         return@withContext result.toDomain()
                     }
-                    client.newCall(buildRequest(normalizedUrl)).execute().use { response ->
+                    client.newCall(buildRequest(normalizedUrl)).executeCancellable { response ->
                         when (response.code) {
                             HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> unsupported(UnsupportedReason.ACCESS_RESTRICTED)
-                            else -> detectResponse(normalizedUrl, response)
+                            else -> detectResponse(response)
                         }
                     }
                 } catch (_: IOException) {
@@ -45,30 +47,42 @@ internal class DefaultMediaDetectionRepository
                 }
             }
 
-        private fun detectResponse(
-            requestUrl: String,
-            response: okhttp3.Response,
-        ): MediaDetectionResult {
+        private fun detectResponse(response: okhttp3.Response): MediaDetectionResult {
             if (!response.isSuccessful) return unsupported(UnsupportedReason.NETWORK_ERROR)
+            val requestUrl = response.request.url.toString()
             val body = response.body
             val contentType = body.contentType()?.toString()
-            if (contentType?.startsWith("video/") == true || requestUrl.hasVideoExtension()) {
-                return MediaDetectionResult.Success(
-                    pageTitle = requestUrl.fileTitle(),
-                    candidates =
-                        listOf(
-                            requestUrl.toCandidate(
-                                title = requestUrl.fileTitle(),
-                                mimeType = contentType,
-                                contentLength = body.contentLength().takeIf { it >= 0L },
+            return when {
+                contentType?.startsWith("video/") == true || requestUrl.hasVideoFileExtension() -> {
+                    MediaDetectionResult.Success(
+                        pageTitle = requestUrl.fileTitle(),
+                        candidates =
+                            listOf(
+                                requestUrl.toCandidate(
+                                    title = requestUrl.fileTitle(),
+                                    mimeType = contentType,
+                                    contentLength = body.contentLength().takeIf { it >= 0L },
+                                ),
                             ),
-                        ),
-                )
+                    )
+                }
+
+                contentType?.contains("html") == true -> {
+                    detectHtmlResponse(requestUrl, body)
+                }
+
+                else -> {
+                    unsupported(UnsupportedReason.UNSUPPORTED_FORMAT)
+                }
             }
-            if (contentType?.contains("html") != true) {
-                return unsupported(UnsupportedReason.UNSUPPORTED_FORMAT)
-            }
+        }
+
+        private fun detectHtmlResponse(
+            requestUrl: String,
+            body: ResponseBody,
+        ): MediaDetectionResult {
             val html = body.readUtf8UpTo(MAX_HTML_BYTES) ?: return unsupported(UnsupportedReason.UNSUPPORTED_FORMAT)
+            val documentBaseUrl = html.documentBaseUrl(requestUrl)
             val pageTitle =
                 TITLE_REGEX
                     .find(html)
@@ -81,14 +95,14 @@ internal class DefaultMediaDetectionRepository
             VIDEO_ELEMENT_REGEX.findAll(html).forEach { match ->
                 val attributes = match.groupValues[1]
                 val body = match.groupValues[2]
-                val thumbnailUrl = attributes.attribute("poster")?.let { resolveUrl(requestUrl, it) }
+                val thumbnailUrl = attributes.attribute("poster")?.let { resolveUrl(documentBaseUrl, it) }
                 val sources =
                     sequenceOf(attributes.attribute("src")) +
                         SOURCE_TAG_REGEX.findAll(body).map { it.groupValues[1] }
                 sources
                     .filterNotNull()
-                    .mapNotNull { resolveUrl(requestUrl, it) }
-                    .filter(String::hasVideoExtension)
+                    .mapNotNull { resolveUrl(documentBaseUrl, it) }
+                    .filter(String::hasVideoFileExtension)
                     .forEach { mediaUrl ->
                         candidates.putIfAbsent(
                             mediaUrl,
@@ -99,8 +113,8 @@ internal class DefaultMediaDetectionRepository
             (
                 MEDIA_TAG_REGEX.findAll(html).map { it.groupValues[1] } +
                     DIRECT_VIDEO_REGEX.findAll(html).map { it.value }
-            ).mapNotNull { source -> resolveUrl(requestUrl, source) }
-                .filter(String::hasVideoExtension)
+            ).mapNotNull { source -> resolveUrl(documentBaseUrl, source) }
+                .filter(String::hasVideoFileExtension)
                 .forEach { mediaUrl ->
                     candidates.putIfAbsent(mediaUrl, mediaUrl.toCandidate(mediaUrl.fileTitle(), null, null))
                 }
@@ -133,7 +147,7 @@ private fun buildRequest(url: String): Request =
 private fun resolveUrl(
     baseUrl: String,
     source: String,
-): String? = runCatching { URI(baseUrl).resolve(source.trim()).toHttpUrlOrNull() }.getOrNull()
+): String? = runCatching { URI(baseUrl).resolve(source.decodeHtmlAttribute().trim()).toHttpUrlOrNull() }.getOrNull()
 
 private fun URI.toHttpUrlOrNull(): String? =
     if (scheme.equals("http", true) || scheme.equals("https", true)) {
@@ -142,8 +156,44 @@ private fun URI.toHttpUrlOrNull(): String? =
         null
     }
 
-private fun String.hasVideoExtension(): Boolean =
-    VIDEO_EXTENSIONS.any { extension -> substringBefore('?').endsWith(extension, ignoreCase = true) }
+private fun String.documentBaseUrl(responseUrl: String): String =
+    BASE_TAG_REGEX
+        .findAll(this)
+        .mapNotNull { match -> match.groupValues[1].attribute("href") }
+        .mapNotNull { href -> resolveUrl(responseUrl, href) }
+        .firstOrNull()
+        ?: responseUrl
+
+private fun String.decodeHtmlAttribute(): String =
+    HTML_ENTITY_REGEX.replace(this) { match ->
+        when (val entity = match.groupValues[1]) {
+            "#39" -> {
+                "'"
+            }
+
+            else -> {
+                val namedEntity =
+                    when (entity.lowercase()) {
+                        "amp" -> "&"
+                        "quot" -> "\""
+                        "apos" -> "'"
+                        "lt" -> "<"
+                        "gt" -> ">"
+                        else -> null
+                    }
+                namedEntity ?: run {
+                    val codePoint =
+                        if (entity.startsWith("#x", ignoreCase = true)) {
+                            entity.drop(2).toIntOrNull(HTML_HEX_RADIX)
+                        } else {
+                            entity.removePrefix("#").toIntOrNull()
+                        }
+                    codePoint?.takeIf(Character::isValidCodePoint)?.let(Character::toChars)?.concatToString()
+                        ?: match.value
+                }
+            }
+        }
+    }
 
 private fun String.fileTitle(): String =
     runCatching {
@@ -199,6 +249,8 @@ private fun ResponseBody.readUtf8UpTo(limit: Long): String? {
 }
 
 private val TITLE_REGEX = Regex("<title[^>]*>(.*?)</title>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+private val BASE_TAG_REGEX = Regex("<base\\b([^>]*)>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+private val HTML_ENTITY_REGEX = Regex("&(#(?:[xX][0-9a-fA-F]+|[0-9]+)|amp|quot|apos|lt|gt);", RegexOption.IGNORE_CASE)
 private val MEDIA_TAG_REGEX =
     Regex(
         "<(?:video|source)[^>]+src\\s*=\\s*[\"']([^\"']+)[\"']",
@@ -215,9 +267,8 @@ private val SOURCE_TAG_REGEX =
         setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
     )
 private val DIRECT_VIDEO_REGEX =
-    Regex("https?://[^\\s\"'<>]+\\.(?:mp4|webm|mov|m4v)(?:\\?[^\\s\"'<>]*)?", RegexOption.IGNORE_CASE)
+    Regex("https?://[^\\s\"'<>]+\\.(?:mp4|webm|mov|m4v)(?:[?#][^\\s\"'<>]*)?", RegexOption.IGNORE_CASE)
 private val HTML_TAG_REGEX = Regex("<[^>]+>")
-private val VIDEO_EXTENSIONS = setOf(".mp4", ".webm", ".mov", ".m4v")
 private val OPAQUE_MEDIA_TITLE_REGEX = Regex("[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}")
 private val LEADING_RESULT_COUNT_REGEX = Regex("^[\\d,+]+개의\\s+(?:최고의\\s+)?")
 private const val HTTP_UNAUTHORIZED = 401
@@ -225,3 +276,4 @@ private const val HTTP_FORBIDDEN = 403
 private const val MAX_CANDIDATE_PAGE_TITLE_LENGTH = 48
 private const val MAX_HTML_BYTES = 2L * 1024L * 1024L
 private const val HTML_READ_BUFFER_BYTES = 8L * 1024L
+private const val HTML_HEX_RADIX = 16

@@ -4,11 +4,15 @@ import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.downloads.component.DownloadGridCard
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,6 +34,47 @@ class DownloadProgressTest {
     fun `paused download keeps the received fraction visible`() {
         showTask(expectedBytes = 100L, status = DownloadStatus.PAUSED)
         assertProgress(ProgressBarRangeInfo(0.25f, 0f..1f))
+    }
+
+    @Test
+    fun `pending deletion exposes only cleanup retry`() {
+        val task =
+            DownloadTask(
+                id = "pending",
+                url = "https://example.com/video.mp4",
+                sourcePageUrl = "https://example.com",
+                title = "Pending",
+                mimeType = "video/mp4",
+                expectedBytes = 100L,
+                downloadedBytes = 25L,
+                quality = "720p",
+                status = DownloadStatus.DOWNLOADING,
+                failureReason = null,
+                localFileName = null,
+                createdAtMillis = 1L,
+                updatedAtMillis = 1L,
+                deletePending = true,
+            )
+        val calls = mutableListOf<String>()
+        composeRule.setContent {
+            DambomTheme {
+                DownloadGridCard(
+                    task = task,
+                    canDownload = true,
+                    onPause = { calls += "pause" },
+                    onResume = { calls += "resume" },
+                    onCancel = { calls += "delete" },
+                    onRetry = { calls += "retry" },
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Deletion cleanup needed").assertIsDisplayed()
+        composeRule.onNodeWithText("Pause").assertDoesNotExist()
+        composeRule.onNodeWithText("Cancel").assertDoesNotExist()
+        composeRule.onNodeWithText("Retry deletion").performClick()
+
+        assertEquals(listOf("delete"), calls)
     }
 
     private fun assertProgress(info: ProgressBarRangeInfo) {

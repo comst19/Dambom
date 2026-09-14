@@ -8,6 +8,8 @@
     <string name="settings_default_download_location">기본 폴더</string>
     <string name="settings_download_location_value">Download/Dambom</string>
     <string name="settings_download_location_failure">이 폴더를 계속 사용할 권한을 얻지 못했어요.</string>
+    <string name="settings_update_failure">설정을 저장하지 못했어요.</string>
+    <string name="settings_wifi_policy_apply_failure">Wi-Fi 다운로드 설정은 저장했지만 현재 다운로드에 적용하지 못했어요.</string>
     <string name="settings_section_download">다운로드</string>
     <string name="settings_wifi_only">Wi-Fi에서만 다운로드</string>
     <string name="settings_wifi_only_description">모바일 데이터에서는 다운로드를 기다려요.</string>

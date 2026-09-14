@@ -11,6 +11,7 @@ internal fun toHomeDownloadSummary(tasks: List<DownloadTask>): HomeDownloadSumma
     var downloadedBytes = 0L
     var totalBytes = 0L
     for (task in tasks) {
+        if (task.deletePending) continue
         when (task.status) {
             DownloadStatus.DOWNLOADING, DownloadStatus.QUEUED -> {
                 activeCount++

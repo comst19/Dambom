@@ -38,4 +38,7 @@
     <string name="downloads_error_server">The server couldn’t process the download.</string>
     <string name="downloads_error_unknown">Something went wrong while downloading.</string>
     <string name="downloads_command_failed">Couldn’t update the download. Try again.</string>
+    <string name="downloads_delete_pending">Deletion cleanup needed</string>
+    <string name="downloads_delete_retry">Retry deletion</string>
+    <string name="downloads_delete_group_count">Deletion cleanup %1$d</string>
 </resources>

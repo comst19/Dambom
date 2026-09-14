@@ -40,10 +40,12 @@ import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.feature.web.R
 import com.comst19.dambom.feature.web.contract.WebDetectionState
+import com.comst19.dambom.feature.web.webview.WebNavigationFailure
 
 @Composable
 internal fun WebToolbar(
     webView: WebView?,
+    canRefresh: Boolean,
     detectionState: WebDetectionState,
     onOpenDetectedMedia: () -> Unit,
 ) {
@@ -57,7 +59,7 @@ internal fun WebToolbar(
         IconButton(onClick = { webView?.goForward() }, enabled = webView?.canGoForward() == true) {
             Icon(Icons.AutoMirrored.Outlined.ArrowForward, stringResource(R.string.web_go_forward))
         }
-        IconButton(onClick = { webView?.reload() }) {
+        IconButton(onClick = { webView?.reload() }, enabled = canRefresh) {
             Icon(Icons.Outlined.Refresh, stringResource(R.string.web_refresh))
         }
         Spacer(Modifier.weight(1f))
@@ -96,6 +98,7 @@ internal fun WebRescanButton(
 
 @Composable
 internal fun WebNavigationErrorContent(
+    failure: WebNavigationFailure,
     onRetry: () -> Unit,
     onOpenExternal: () -> Unit,
 ) {
@@ -112,26 +115,30 @@ internal fun WebNavigationErrorContent(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(16.dp))
-            Text(stringResource(R.string.web_connection_error_title), style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(failure.titleRes), style = MaterialTheme.typography.headlineSmall)
             Spacer(Modifier.height(8.dp))
             Text(
-                text = stringResource(R.string.web_connection_error_description),
+                text = stringResource(failure.descriptionRes),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(20.dp))
-            Button(onClick = onRetry) {
-                Icon(Icons.Outlined.Refresh, contentDescription = null)
-                Text(text = stringResource(R.string.web_retry), modifier = Modifier.padding(start = 8.dp))
+            if (failure.retryable) {
+                Spacer(Modifier.height(20.dp))
+                Button(onClick = onRetry) {
+                    Icon(Icons.Outlined.Refresh, contentDescription = null)
+                    Text(text = stringResource(R.string.web_retry), modifier = Modifier.padding(start = 8.dp))
+                }
             }
-            TextButton(onClick = onOpenExternal) { Text(stringResource(R.string.web_open_external)) }
-            Text(
-                text = stringResource(R.string.web_external_download_notice),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center,
-            )
+            if (failure.canOpenExternal) {
+                TextButton(onClick = onOpenExternal) { Text(stringResource(R.string.web_open_external)) }
+                Text(
+                    text = stringResource(R.string.web_external_download_notice),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
     }
 }

@@ -167,6 +167,26 @@ private fun DownloadGrid(
                 }
             }
         }
+        val pendingDeletions = uiState.pendingDeletionTasks
+        if (pendingDeletions.isNotEmpty()) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                PendingDeletionGroupTitle(pendingDeletions.size)
+            }
+            gridItems(
+                items = pendingDeletions,
+                key = DownloadTask::id,
+                contentType = { DOWNLOAD_ITEM_CONTENT_TYPE },
+            ) { task ->
+                DownloadGridCard(
+                    task = task,
+                    canDownload = canDownload,
+                    onPause = { onPause(task.id) },
+                    onResume = { onResume(task.id) },
+                    onCancel = { onCancel(task.id) },
+                    onRetry = { onRetry(task.id) },
+                )
+            }
+        }
     }
 }
 
@@ -208,6 +228,24 @@ private fun DownloadList(
                         onRetry = { onRetry(task.id) },
                     )
                 }
+            }
+        }
+        val pendingDeletions = uiState.pendingDeletionTasks
+        if (pendingDeletions.isNotEmpty()) {
+            item { PendingDeletionGroupTitle(pendingDeletions.size) }
+            listItems(
+                items = pendingDeletions,
+                key = DownloadTask::id,
+                contentType = { DOWNLOAD_ITEM_CONTENT_TYPE },
+            ) { task ->
+                DownloadListCard(
+                    task = task,
+                    canDownload = canDownload,
+                    onPause = { onPause(task.id) },
+                    onResume = { onResume(task.id) },
+                    onCancel = { onCancel(task.id) },
+                    onRetry = { onRetry(task.id) },
+                )
             }
         }
     }
@@ -292,6 +330,15 @@ private fun DownloadGroupTitle(
 ) {
     Text(
         text = stringResource(R.string.downloads_group_count, status.groupTitle(), count),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+}
+
+@Composable
+private fun PendingDeletionGroupTitle(count: Int) {
+    Text(
+        text = stringResource(R.string.downloads_delete_group_count, count),
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.onSurface,
     )

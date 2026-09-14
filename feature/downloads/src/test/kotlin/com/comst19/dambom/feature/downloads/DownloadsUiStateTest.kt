@@ -1,6 +1,7 @@
 package com.comst19.dambom.feature.downloads
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
@@ -101,6 +102,55 @@ class DownloadsUiStateTest {
         assertEquals(listOf(downloading, paused), state.tasks)
         assertEquals(2, state.totalCount)
     }
+
+    @Test
+    fun `only non completed pending deletion uses the retry cleanup section`() {
+        val normal = task("normal", DownloadStatus.DOWNLOADING, 50L, 100L)
+        val completedPending =
+            task("completed-pending", DownloadStatus.COMPLETED, 100L, 100L).copy(deletePending = true)
+        val activePending =
+            task("active-pending", DownloadStatus.DOWNLOADING, 50L, 100L).copy(deletePending = true)
+
+        val state =
+            toDownloadsUiState(
+                tasks = listOf(normal, completedPending, activePending),
+                viewMode = DownloadsViewMode.GRID,
+            )
+
+        assertEquals(listOf(normal), state.tasksByStatus[DownloadStatus.DOWNLOADING])
+        assertEquals(listOf(activePending), state.pendingDeletionTasks)
+        assertEquals(1, state.activeCount)
+        assertEquals(1, state.totalCount)
+        assertTrue(state.canPauseAll)
+    }
+
+    @Test
+    fun `overlapping repository flows show a pending deletion once`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val normal = task("normal", DownloadStatus.DOWNLOADING, 50L, 100L)
+            val pending =
+                task("pending", DownloadStatus.DOWNLOADING, 50L, 100L).copy(deletePending = true)
+            val repository =
+                object : DownloadRepository by EmptyDownloadRepository {
+                    override val downloads = flowOf(listOf(normal, pending))
+                    override val deletionPendingDownloads = flowOf(listOf(pending))
+                }
+            val viewModel =
+                DownloadsViewModel(
+                    repository,
+                    SpyNavigationDispatcher(),
+                    SavedStateHandle(),
+                    AppEventBus(),
+                )
+
+            viewModel.uiState.test {
+                awaitItem()
+                val state = awaitItem()
+
+                assertEquals(listOf(normal), state.tasksByStatus[DownloadStatus.DOWNLOADING])
+                assertEquals(listOf(pending), state.pendingDeletionTasks)
+            }
+        }
 
     @Test
     fun `view mode restores from saved state`() {

@@ -52,6 +52,8 @@
     <string name="library_delete_selected_success">Deleted %1$d videos.</string>
     <string name="library_delete_selected_partial">Deleted %1$d; failed to delete %2$d. Failed videos remain selected.</string>
     <string name="library_delete_failure">Couldn’t delete the video.</string>
+    <string name="library_delete_pending">Deletion cleanup needed</string>
+    <string name="library_delete_retry">Retry deletion</string>
     <string name="library_export_success">Video saved to your device.</string>
     <string name="library_export_failure">Couldn’t save the video to your device.</string>
     <string name="library_export_location_permission_expired">The selected folder permission expired. Choose a save location again.</string>

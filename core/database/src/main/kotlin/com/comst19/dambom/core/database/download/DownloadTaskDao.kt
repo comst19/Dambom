@@ -8,11 +8,17 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DownloadTaskDao {
-    @Query("SELECT * FROM download_tasks ORDER BY createdAtMillis ASC")
+    @Query("SELECT * FROM download_tasks WHERE deletePending = 0 ORDER BY createdAtMillis ASC")
     fun observeAll(): Flow<List<DownloadTaskEntity>>
 
-    @Query("SELECT * FROM download_tasks WHERE status = 'COMPLETED' ORDER BY updatedAtMillis DESC")
+    @Query(
+        "SELECT * FROM download_tasks " +
+            "WHERE status = 'COMPLETED' AND deletePending = 0 ORDER BY updatedAtMillis DESC",
+    )
     fun observeCompleted(): Flow<List<DownloadTaskEntity>>
+
+    @Query("SELECT * FROM download_tasks WHERE deletePending = 1 ORDER BY updatedAtMillis DESC")
+    fun observePendingDeletions(): Flow<List<DownloadTaskEntity>>
 
     @Query("SELECT * FROM download_tasks WHERE id = :id")
     suspend fun getById(id: String): DownloadTaskEntity?
@@ -25,6 +31,12 @@ interface DownloadTaskDao {
 
     @Query("SELECT * FROM download_tasks WHERE status = 'QUEUED' AND deletePending = 0 ORDER BY createdAtMillis ASC")
     suspend fun getQueued(): List<DownloadTaskEntity>
+
+    @Query(
+        "SELECT id, host FROM download_tasks " +
+            "WHERE status = 'QUEUED' AND deletePending = 0 ORDER BY createdAtMillis ASC",
+    )
+    fun observeQueuedCandidates(): Flow<List<QueuedDownloadCandidate>>
 
     @Query("SELECT COUNT(*) FROM download_tasks WHERE url = :url AND quality = :quality")
     suspend fun countBySource(
@@ -167,7 +179,7 @@ interface DownloadTaskDao {
         """
         UPDATE download_tasks
         SET title = :title, updatedAtMillis = :updatedAtMillis
-        WHERE id = :id
+        WHERE id = :id AND deletePending = 0
         """,
     )
     suspend fun updateTitle(
@@ -198,7 +210,7 @@ interface DownloadTaskDao {
         """
         UPDATE download_tasks
         SET status = 'QUEUED', updatedAtMillis = :updatedAtMillis
-        WHERE status = 'DOWNLOADING'
+        WHERE status = 'DOWNLOADING' AND deletePending = 0
         """,
     )
     suspend fun resetInterrupted(updatedAtMillis: Long)
@@ -207,7 +219,7 @@ interface DownloadTaskDao {
         """
         UPDATE download_tasks
         SET deletePending = 1, updatedAtMillis = :updatedAtMillis
-        WHERE id = :id
+        WHERE id = :id AND deletePending = 0
         """,
     )
     suspend fun claimForDeletion(
@@ -218,12 +230,14 @@ interface DownloadTaskDao {
     @Query("SELECT * FROM download_tasks WHERE deletePending = 1")
     suspend fun getPendingDeletions(): List<DownloadTaskEntity>
 
-    @Query("UPDATE download_tasks SET deletePending = 0 WHERE id = :id AND deletePending = 1")
-    suspend fun releaseDeletionClaim(id: String)
-
     @Query("DELETE FROM download_tasks WHERE id = :id AND deletePending = 1")
     suspend fun deleteClaimed(id: String): Int
 
     @Query("DELETE FROM download_tasks WHERE id = :id")
     suspend fun delete(id: String)
 }
+
+data class QueuedDownloadCandidate(
+    val id: String,
+    val host: String,
+)

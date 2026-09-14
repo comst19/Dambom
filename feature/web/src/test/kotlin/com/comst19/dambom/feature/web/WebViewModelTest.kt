@@ -31,6 +31,19 @@ class WebViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
     @Test
+    fun `web accepts uppercase explicit schemes and still supplies a missing scheme`() {
+        assertEquals("HTTP://example.com/video.mp4", "HTTP://example.com/video.mp4".normalizeAddress())
+        assertEquals("https://example.com/video.mp4", "example.com/video.mp4".normalizeAddress())
+    }
+
+    @Test
+    fun `video extension is read from the uri path only`() {
+        assertTrue("https://example.com/video.mp4#player".hasVideoExtension())
+        assertTrue("https://example.com/video.mp4?token=x#player".hasVideoExtension())
+        assertEquals(false, "https://example.com/video.jpg#fake.mp4".hasVideoExtension())
+    }
+
+    @Test
     fun `tabs can be created selected and closed without leaving an empty list`() {
         val viewModel = createViewModel()
 

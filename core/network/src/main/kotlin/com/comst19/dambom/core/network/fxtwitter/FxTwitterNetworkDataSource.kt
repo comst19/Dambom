@@ -4,6 +4,7 @@ import com.comst19.dambom.core.network.fxtwitter.model.FxAuthor
 import com.comst19.dambom.core.network.fxtwitter.model.FxTweet
 import com.comst19.dambom.core.network.fxtwitter.model.FxTwitterResponse
 import com.comst19.dambom.core.network.fxtwitter.model.FxVideoFormat
+import com.comst19.dambom.core.network.okhttp.executeCancellable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -19,7 +20,7 @@ class FxTwitterNetworkDataSource
         private val client: OkHttpClient,
         private val json: Json,
     ) {
-        fun detect(url: String): FxTwitterNetworkResult? {
+        suspend fun detect(url: String): FxTwitterNetworkResult? {
             val statusId = url.xStatusId() ?: return null
             return try {
                 fetch(statusId)
@@ -30,8 +31,8 @@ class FxTwitterNetworkDataSource
             }
         }
 
-        private fun fetch(statusId: String): FxTwitterNetworkResult =
-            client.newCall(buildRequest(statusId)).execute().use { response ->
+        private suspend fun fetch(statusId: String): FxTwitterNetworkResult =
+            client.newCall(buildRequest(statusId)).executeCancellable { response ->
                 when {
                     response.code == HTTP_UNAUTHORIZED || response.code == HTTP_FORBIDDEN -> {
                         unsupported(FxTwitterNetworkFailure.ACCESS_RESTRICTED)

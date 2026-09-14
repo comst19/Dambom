@@ -1,5 +1,7 @@
 package com.comst19.dambom.core.common.ui
 
+import com.comst19.dambom.core.common.io.videoThumbnailFile
+import com.comst19.dambom.core.common.io.videoThumbnailUnavailableFile
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -53,6 +55,52 @@ class PersistentVideoThumbnailTest {
 
         assertFalse(isVideoThumbnailUnavailable(videoFile))
     }
+
+    @Test
+    fun `marker write failure is best effort`() {
+        val videoFile = temporaryFolder.newFile("marker-write.mp4").apply { writeBytes(byteArrayOf(1)) }
+        val markerDirectory = videoFile.videoThumbnailUnavailableFile()
+        assertTrue(markerDirectory.mkdir())
+
+        rememberVideoThumbnailUnavailable(videoFile)
+
+        assertFalse(isVideoThumbnailUnavailable(videoFile))
+    }
+
+    @Test
+    fun `thumbnail write failure is retried without unavailable marker`() =
+        runTest {
+            val coordinator = coordinator()
+            val videoFile = temporaryFolder.newFile("transient-store.mp4").apply { writeBytes(byteArrayOf(1)) }
+            var writeCount = 0
+
+            suspend fun load() =
+                coordinator.load(
+                    videoFile = videoFile,
+                    existingThumbnail = { candidate ->
+                        candidate.videoThumbnailFile().takeIf { it.isFile && it.length() > 0L }
+                    },
+                    isUnavailable = ::isVideoThumbnailUnavailable,
+                ) {
+                    storeDecodedVideoThumbnail(videoFile) { output ->
+                        writeCount++
+                        if (writeCount == 1) {
+                            false
+                        } else {
+                            output.writeBytes(byteArrayOf(2))
+                            true
+                        }
+                    }
+                }
+
+            assertNull(load())
+            assertFalse(isVideoThumbnailUnavailable(videoFile))
+
+            val retried = load()
+
+            assertTrue(retried?.isFile == true)
+            assertEquals(2, writeCount)
+        }
 
     @Test
     fun `concurrent requests for the same path share one generation`() =

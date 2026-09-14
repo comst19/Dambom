@@ -23,6 +23,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.produceIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.Mutex
@@ -71,43 +72,52 @@ internal class DownloadQueueWorker
             coroutineScope {
                 val running = linkedMapOf<String, RunningDownload>()
                 var retryRequired = false
-                while (true) {
-                    val queued = dao.getQueued().toMutableList()
-                    while (running.size < MAX_CONCURRENT_DOWNLOADS) {
-                        val activeHosts = running.values.groupingBy { it.host }.eachCount()
-                        val next =
-                            selectNextDownload(
-                                queued = queued,
-                                runningIds = running.keys,
-                                activeHosts = activeHosts,
-                            ) ?: break
-                        queued.remove(next)
-                        val claimed =
-                            dao.compareAndSetStatus(
-                                id = next.id,
-                                expectedStatus = DownloadStatus.QUEUED.name,
-                                nextStatus = DownloadStatus.DOWNLOADING.name,
-                                updatedAtMillis = System.currentTimeMillis(),
-                            )
-                        if (claimed == 0) continue
-                        running[next.id] =
-                            RunningDownload(
-                                host = next.host,
-                                job = async { downloadSafely(next) },
-                            )
-                    }
-                    if (running.isEmpty()) {
-                        if (retryRequired) throw RetryQueueException()
-                        return@coroutineScope
-                    }
-                    val (completedId, outcome) =
-                        select {
-                            running.forEach { (id, download) ->
-                                download.job.onAwait { id to it }
-                            }
+                val queueUpdates = dao.observeQueuedCandidates().distinctUntilChanged().produceIn(this)
+                queueUpdates.receive()
+                try {
+                    while (true) {
+                        val queued = dao.getQueued().toMutableList()
+                        while (running.size < MAX_CONCURRENT_DOWNLOADS) {
+                            val activeHosts = running.values.groupingBy { it.host }.eachCount()
+                            val next =
+                                selectNextDownload(
+                                    queued = queued,
+                                    runningIds = running.keys,
+                                    activeHosts = activeHosts,
+                                ) ?: break
+                            queued.remove(next)
+                            val claimed =
+                                dao.compareAndSetStatus(
+                                    id = next.id,
+                                    expectedStatus = DownloadStatus.QUEUED.name,
+                                    nextStatus = DownloadStatus.DOWNLOADING.name,
+                                    updatedAtMillis = System.currentTimeMillis(),
+                                )
+                            if (claimed == 0) continue
+                            running[next.id] =
+                                RunningDownload(
+                                    host = next.host,
+                                    job = async { downloadSafely(next) },
+                                )
                         }
-                    running.remove(completedId)
-                    if (outcome == DownloadOutcome.RETRYABLE_FAILURE) retryRequired = true
+                        if (running.isEmpty()) {
+                            if (retryRequired) throw RetryQueueException()
+                            return@coroutineScope
+                        }
+                        val completed =
+                            select<Pair<String, DownloadOutcome>?> {
+                                queueUpdates.onReceive { null }
+                                running.forEach { (id, download) ->
+                                    download.job.onAwait { id to it }
+                                }
+                            }
+                        if (completed == null) continue
+                        val (completedId, outcome) = completed
+                        running.remove(completedId)
+                        if (outcome == DownloadOutcome.RETRYABLE_FAILURE) retryRequired = true
+                    }
+                } finally {
+                    queueUpdates.cancel()
                 }
             }
 
@@ -126,7 +136,6 @@ internal class DownloadQueueWorker
                     }
 
                     DownloadStopReason.CANCELLED -> {
-                        fileStore.delete(task.id, fileStore.completedFile(task.id, task.url, task.mimeType).name)
                         DownloadOutcome.CANCELLED
                     }
                 }

@@ -17,7 +17,13 @@ interface DownloadRepository {
     val completedDownloads: Flow<List<DownloadTask>>
         get() =
             downloads
-                .map { tasks -> tasks.filter { it.status == DownloadStatus.COMPLETED } }
+                .map { tasks -> tasks.filter { it.status == DownloadStatus.COMPLETED && !it.deletePending } }
+                .distinctUntilChanged()
+
+    val deletionPendingDownloads: Flow<List<DownloadTask>>
+        get() =
+            downloads
+                .map { tasks -> tasks.filter(DownloadTask::deletePending) }
                 .distinctUntilChanged()
 
     suspend fun enqueue(requests: List<DownloadRequest>): EnqueueDownloadsResult

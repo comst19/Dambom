@@ -8,8 +8,9 @@ internal class LibrarySnapshot(
 ) {
     val videos =
         tasks
-            .filter { it.status == DownloadStatus.COMPLETED && it.localFilePath != null }
+            .filter { it.deletePending || (it.status == DownloadStatus.COMPLETED && it.localFilePath != null) }
             .sortedByDescending(DownloadTask::updatedAtMillis)
     val ids = videos.mapTo(hashSetOf(), DownloadTask::id)
-    val totalBytes = videos.sumOf(DownloadTask::downloadedBytes)
+    val totalBytes = videos.filterNot(DownloadTask::deletePending).sumOf(DownloadTask::downloadedBytes)
+    val totalVideoCount = videos.count { !it.deletePending }
 }

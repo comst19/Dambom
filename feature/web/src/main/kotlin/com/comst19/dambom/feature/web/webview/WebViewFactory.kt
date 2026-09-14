@@ -33,7 +33,7 @@ internal fun createWebView(
     onMediaRequest: (Long, Long, String) -> Unit,
     onProgress: (Int) -> Unit,
     onNavigationFailure: (WebNavigationFailure?) -> Unit,
-    onRendererGone: () -> Unit,
+    onRendererGone: (WebView) -> Unit,
 ): WebView =
     WebView(context).apply {
         val pageGeneration = AtomicLong()
@@ -142,7 +142,9 @@ internal fun createWebView(
                     view: WebView?,
                     detail: RenderProcessGoneDetail?,
                 ): Boolean {
-                    view?.post(onRendererGone)
+                    view?.let { failedWebView ->
+                        failedWebView.post { onRendererGone(failedWebView) }
+                    }
                     return true
                 }
             }

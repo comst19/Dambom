@@ -139,7 +139,7 @@ class WebNavigationErrorContentTest {
                 onMediaRequest = { _, _, _ -> },
                 onProgress = {},
                 onNavigationFailure = { failure = it },
-                onRendererGone = {},
+                onRendererGone = { _ -> },
             )
         val url = Uri.parse("https://example.com/status/500")
 

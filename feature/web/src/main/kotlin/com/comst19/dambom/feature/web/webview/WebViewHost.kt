@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -73,10 +72,13 @@ internal fun ColumnScope.WebContent(
                         onMediaRequest = onMediaRequest,
                         onProgress = { loadingProgress = it },
                         onNavigationFailure = { navigationFailureState.value = it },
-                        onRendererGone = {
+                        onRendererGone = { failedWebView ->
                             rendererGone.set(true)
-                            onWebViewReady(null)
-                            webViewGeneration += 1
+                            if (webView === failedWebView) {
+                                webView = null
+                                onWebViewReady(null)
+                                webViewGeneration += 1
+                            }
                         },
                     ).also {
                         it.setBackgroundColor(backgroundColor)
@@ -85,6 +87,19 @@ internal fun ColumnScope.WebContent(
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
+                onRelease = { releasedWebView ->
+                    if (!rendererGone.get()) {
+                        val state = Bundle()
+                        releasedWebView.saveState(state)
+                        onSaveWebState(tab.id, state)
+                    }
+                    if (webView === releasedWebView) {
+                        webView = null
+                        onWebViewReady(null)
+                    }
+                    releasedWebView.stopLoading()
+                    releasedWebView.destroy()
+                },
                 update = { view ->
                     view.setBackgroundColor(backgroundColor)
                     val targetUrl = tab.url
@@ -105,21 +120,6 @@ internal fun ColumnScope.WebContent(
                 Box(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
                     WebRescanButton(detectionState = tab.detectionState, onScan = onScan)
                 }
-            }
-        }
-
-        DisposableEffect(tab.id, webViewGeneration) {
-            onDispose {
-                webView?.let { view ->
-                    if (!rendererGone.get()) {
-                        val state = Bundle()
-                        view.saveState(state)
-                        onSaveWebState(tab.id, state)
-                    }
-                    view.stopLoading()
-                    view.destroy()
-                }
-                onWebViewReady(null)
             }
         }
     }

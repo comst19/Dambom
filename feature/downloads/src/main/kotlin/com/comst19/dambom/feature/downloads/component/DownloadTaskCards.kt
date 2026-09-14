@@ -77,7 +77,7 @@ internal fun DownloadListCard(
             ) {
                 DownloadStatusIcon()
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    DownloadTaskDetails(task, maxLines = 2)
+                    DownloadTaskDetails(task, maxLines = 2, showStatus = true)
                 }
             }
             DownloadActions(task, canDownload, onPause, onResume, onCancel, onRetry)
@@ -93,7 +93,11 @@ private fun DownloadTaskHeader(task: DownloadTask) {
     ) {
         DownloadStatusIcon()
         Text(
-            task.status.statusText(),
+            if (task.deletePending) {
+                stringResource(R.string.downloads_delete_pending)
+            } else {
+                task.status.statusText()
+            },
             color = task.status.statusColor(),
             style = MaterialTheme.typography.labelLarge,
         )
@@ -120,6 +124,7 @@ private fun DownloadStatusIcon() {
 private fun DownloadTaskDetails(
     task: DownloadTask,
     maxLines: Int = Int.MAX_VALUE,
+    showStatus: Boolean = false,
 ) {
     Text(
         task.title,
@@ -127,9 +132,13 @@ private fun DownloadTaskDetails(
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
     )
-    if (maxLines != Int.MAX_VALUE) {
+    if (showStatus) {
         Text(
-            task.status.statusText(),
+            if (task.deletePending) {
+                stringResource(R.string.downloads_delete_pending)
+            } else {
+                task.status.statusText()
+            },
             color = task.status.statusColor(),
             style = MaterialTheme.typography.labelLarge,
         )
@@ -149,13 +158,13 @@ private fun DownloadTaskDetails(
         style = MaterialTheme.typography.bodySmall,
         maxLines = maxLines,
     )
-    if (task.status != DownloadStatus.FAILED && task.status != DownloadStatus.COMPLETED) {
+    if (!task.deletePending && task.status != DownloadStatus.FAILED && task.status != DownloadStatus.COMPLETED) {
         DownloadProgress(
             progress = task.expectedBytes?.takeIf { it > 0L }?.let { task.progress },
             running = task.status == DownloadStatus.DOWNLOADING,
         )
     }
-    task.failureReason?.let {
+    task.failureReason?.takeUnless { task.deletePending }?.let {
         Text(
             it.failureText(),
             color = MaterialTheme.colorScheme.error,

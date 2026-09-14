@@ -14,14 +14,19 @@ internal data class DownloadsUiState(
     val tasks: PersistentList<DownloadTask> = persistentListOf(),
     val viewMode: DownloadsViewMode = DownloadsViewMode.GRID,
 ) {
+    private val normalTasks = tasks.filterNot(DownloadTask::deletePending)
+
     val tasksByStatus: PersistentMap<DownloadStatus, PersistentList<DownloadTask>> =
-        tasks.groupBy(DownloadTask::status).mapValues { (_, group) -> group.toPersistentList() }.toPersistentMap()
+        normalTasks.groupBy(DownloadTask::status).mapValues { (_, group) -> group.toPersistentList() }.toPersistentMap()
+
+    val pendingDeletionTasks: PersistentList<DownloadTask> =
+        tasks.filter(DownloadTask::deletePending).toPersistentList()
 
     val activeCount: Int
         get() = tasksByStatus[DownloadStatus.DOWNLOADING]?.size ?: 0
 
     val totalCount: Int
-        get() = tasks.size
+        get() = normalTasks.size
 
     val canPauseAll: Boolean
         get() = activeCount > 0 || !tasksByStatus[DownloadStatus.QUEUED].isNullOrEmpty()
@@ -29,10 +34,10 @@ internal data class DownloadsUiState(
     val canResumeAll: Boolean
         get() = !tasksByStatus[DownloadStatus.PAUSED].isNullOrEmpty()
 
-    val progress: Float = downloadProgress(tasks)
+    val progress: Float = downloadProgress(normalTasks)
 
     val hasUnknownSize: Boolean =
-        tasks.any { it.status != DownloadStatus.FAILED && (it.expectedBytes ?: 0L) <= 0L }
+        normalTasks.any { it.status != DownloadStatus.FAILED && (it.expectedBytes ?: 0L) <= 0L }
 }
 
 private fun downloadProgress(tasks: List<DownloadTask>): Float {

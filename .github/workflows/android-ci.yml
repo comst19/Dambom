@@ -148,7 +148,7 @@ jobs:
       matrix:
         include:
           - id: release-unit-tests
-            name: Release unit tests
+            name: Debug unit tests for release promotion
             tasks: testDebugUnitTest
           - id: release-lint
             name: Release lint

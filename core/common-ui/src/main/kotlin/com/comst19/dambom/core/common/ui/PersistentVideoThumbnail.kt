@@ -11,6 +11,9 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.video.VideoFrameDecoder
+import com.comst19.dambom.core.common.io.videoThumbnailFile
+import com.comst19.dambom.core.common.io.videoThumbnailTemporaryFile
+import com.comst19.dambom.core.common.io.videoThumbnailUnavailableFile
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
@@ -136,27 +139,31 @@ private suspend fun generateVideoThumbnailFile(
         return null
     }
     return try {
-        ensureVideoThumbnailFile(videoFile) { output -> writeVideoThumbnail(bitmap, output) }
-            .also { thumbnail ->
-                if (thumbnail == null) {
-                    rememberVideoThumbnailUnavailable(videoFile)
-                } else {
-                    videoThumbnailUnavailableFile(videoFile).delete()
-                }
-            }
+        storeDecodedVideoThumbnail(videoFile) { output -> writeVideoThumbnail(bitmap, output) }
     } finally {
         if (!bitmap.isRecycled) bitmap.recycle()
     }
 }
+
+internal fun storeDecodedVideoThumbnail(
+    videoFile: File,
+    writeThumbnail: (File) -> Boolean,
+): File? =
+    ensureVideoThumbnailFile(videoFile, writeThumbnail)
+        .also { thumbnail ->
+            if (thumbnail != null) {
+                videoFile.videoThumbnailUnavailableFile().delete()
+            }
+        }
 
 internal fun ensureVideoThumbnailFile(
     videoFile: File,
     writeThumbnail: (File) -> Boolean,
 ): File? {
     if (!videoFile.isFile) return null
-    val thumbnailFile = File(videoFile.absolutePath + VIDEO_THUMBNAIL_SUFFIX)
+    val thumbnailFile = videoFile.videoThumbnailFile()
     existingVideoThumbnailFile(videoFile)?.let { return it }
-    val temporaryFile = File(thumbnailFile.absolutePath + TEMPORARY_FILE_SUFFIX)
+    val temporaryFile = videoFile.videoThumbnailTemporaryFile()
     temporaryFile.delete()
     if (!writeThumbnail(temporaryFile)) {
         temporaryFile.delete()
@@ -171,25 +178,27 @@ internal fun ensureVideoThumbnailFile(
 }
 
 private fun existingVideoThumbnailFile(videoFile: File): File? {
-    val thumbnailFile = File(videoFile.absolutePath + VIDEO_THUMBNAIL_SUFFIX)
+    val thumbnailFile = videoFile.videoThumbnailFile()
     return thumbnailFile.takeIf {
         it.isFile && it.length() > 0L && it.lastModified() >= videoFile.lastModified()
     }
 }
 
 internal fun isVideoThumbnailUnavailable(videoFile: File): Boolean =
-    videoThumbnailUnavailableFile(videoFile).let { marker ->
+    videoFile.videoThumbnailUnavailableFile().let { marker ->
         marker.isFile && marker.lastModified() >= videoFile.lastModified()
     }
 
 internal fun rememberVideoThumbnailUnavailable(videoFile: File) {
-    videoThumbnailUnavailableFile(videoFile).apply {
-        writeBytes(byteArrayOf())
-        setLastModified(maxOf(System.currentTimeMillis(), videoFile.lastModified()))
+    try {
+        videoFile.videoThumbnailUnavailableFile().apply {
+            writeBytes(byteArrayOf())
+            setLastModified(maxOf(System.currentTimeMillis(), videoFile.lastModified()))
+        }
+    } catch (_: IOException) {
+    } catch (_: RuntimeException) {
     }
 }
-
-private fun videoThumbnailUnavailableFile(videoFile: File): File = File(videoFile.absolutePath + VIDEO_THUMBNAIL_UNAVAILABLE_SUFFIX)
 
 private suspend fun decodeVideoThumbnail(
     context: Context,
@@ -243,9 +252,6 @@ private fun writeVideoThumbnail(
         false
     }
 
-private const val VIDEO_THUMBNAIL_SUFFIX = ".thumbnail.jpg"
-private const val VIDEO_THUMBNAIL_UNAVAILABLE_SUFFIX = ".thumbnail.unavailable"
-private const val TEMPORARY_FILE_SUFFIX = ".tmp"
 private const val THUMBNAIL_WIDTH = 640
 private const val THUMBNAIL_HEIGHT = 360
 private const val JPEG_QUALITY = 85

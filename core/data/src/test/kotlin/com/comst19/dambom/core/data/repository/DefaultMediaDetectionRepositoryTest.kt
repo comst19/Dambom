@@ -4,11 +4,16 @@ import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.network.fxtwitter.FxTwitterNetworkDataSource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -97,6 +102,123 @@ class DefaultMediaDetectionRepositoryTest {
             val result = repository.detect(server.url("/page").toString()) as MediaDetectionResult.Success
 
             assertEquals(server.url("/images/trip.jpg").toString(), result.candidates.single().thumbnailUrl)
+        }
+
+    @Test
+    fun `redirected html resolves base media and entities against the final document url`() =
+        runTest {
+            val redirectedServer = MockWebServer().apply { start() }
+            try {
+                server.enqueue(
+                    MockResponse()
+                        .setResponseCode(302)
+                        .setHeader("Location", redirectedServer.url("/pages/watch/index.html")),
+                )
+                redirectedServer.enqueue(
+                    MockResponse()
+                        .setHeader("Content-Type", "text/html")
+                        .setBody(
+                            "<html><base href='../assets/'><video poster='poster.jpg?size=&#49;&amp;fit=cover'>" +
+                                "<source src='clip.mp4?token=a&amp;b=&#99;#player'></video></html>",
+                        ),
+                )
+
+                val result = repository.detect(server.url("/start").toString()) as MediaDetectionResult.Success
+
+                assertEquals(
+                    redirectedServer.url("/pages/assets/clip.mp4?token=a&b=c#player").toString(),
+                    result.candidates.single().url,
+                )
+                assertEquals(
+                    redirectedServer.url("/pages/assets/poster.jpg?size=1&fit=cover").toString(),
+                    result.candidates.single().thumbnailUrl,
+                )
+            } finally {
+                redirectedServer.shutdown()
+            }
+        }
+
+    @Test
+    fun `redirected direct video uses the final response url without changing its signed query`() =
+        runTest {
+            val finalUrl = server.url("/media/final.mp4?token=a%2Bb&expires=1#player")
+            server.enqueue(MockResponse().setResponseCode(302).setHeader("Location", finalUrl))
+            server.enqueue(MockResponse().setHeader("Content-Type", "video/mp4").setBody("video"))
+
+            val result = repository.detect(server.url("/old/video").toString()) as MediaDetectionResult.Success
+
+            assertEquals(finalUrl.toString(), result.candidates.single().url)
+        }
+
+    @Test
+    fun `invalid base scheme cannot turn a relative source into a local candidate`() =
+        runTest {
+            server.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "text/html")
+                    .setBody("<html><base href='file:///private/'><video src='file:///private/video.mp4'></video></html>"),
+            )
+
+            assertEquals(
+                MediaDetectionResult.Unsupported(UnsupportedReason.NO_MEDIA),
+                repository.detect(server.url("/page").toString()),
+            )
+        }
+
+    @Test
+    fun `cancelling while waiting for headers cancels detection`() =
+        runTest {
+            server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE))
+            val detection = launch(Dispatchers.IO) { repository.detect(server.url("/slow").toString()) }
+            server.takeRequest()
+
+            detection.cancelAndJoin()
+
+            assertTrue(detection.isCancelled)
+        }
+
+    @Test
+    fun `cancelling while reading body is not mapped to network error`() =
+        runTest {
+            server.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "text/html")
+                    .setBody("x".repeat(512 * 1024))
+                    .throttleBody(1024, 100, java.util.concurrent.TimeUnit.MILLISECONDS),
+            )
+            val detection = async(Dispatchers.IO) { repository.detect(server.url("/slow-body").toString()) }
+            server.takeRequest()
+            delay(100)
+
+            detection.cancelAndJoin()
+
+            assertTrue(detection.isCancelled)
+        }
+
+    @Test
+    fun `video extension checks only the uri path and preserves query and fragment`() =
+        runTest {
+            val signedVideo = server.url("/video.MP4?token=a%2Bb#player").toString()
+            server.enqueue(MockResponse().setHeader("Content-Type", "application/octet-stream").setBody("video"))
+
+            val result = repository.detect(signedVideo) as MediaDetectionResult.Success
+
+            assertEquals(signedVideo, result.candidates.single().url)
+        }
+
+    @Test
+    fun `direct html video url preserves a fragment after the extension`() =
+        runTest {
+            val videoUrl = "https://example.com/video.mp4#player"
+            server.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "text/html")
+                    .setBody("<html><body>$videoUrl</body></html>"),
+            )
+
+            val result = repository.detect(server.url("/page").toString()) as MediaDetectionResult.Success
+
+            assertEquals(videoUrl, result.candidates.single().url)
         }
 
     @Test

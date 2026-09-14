@@ -3,6 +3,7 @@ plugins { id("dambom.android.feature") }
 android { namespace = "com.comst19.dambom.feature.settings" }
 
 dependencies {
+    implementation(projects.core.common)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.material.icons.extended)

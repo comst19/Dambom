@@ -42,8 +42,19 @@ internal class DownloadsViewModel
                     ?: DownloadsViewMode.GRID,
             )
         val uiState: StateFlow<DownloadsUiState> =
-            combine(repository.downloads, viewMode) { tasks, currentViewMode ->
-                toDownloadsUiState(tasks, currentViewMode)
+            combine(
+                repository.downloads,
+                repository.deletionPendingDownloads,
+                viewMode,
+            ) { tasks, pending, currentViewMode ->
+                toDownloadsUiState(
+                    tasks =
+                        (
+                            tasks.filterNot(DownloadTask::deletePending) +
+                                pending.filter { it.status != DownloadStatus.COMPLETED }
+                        ).distinctBy(DownloadTask::id),
+                    viewMode = currentViewMode,
+                )
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),

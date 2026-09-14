@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -28,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
@@ -49,10 +51,11 @@ internal fun VideoCard(
     onClick: () -> Unit,
     onToggleSelection: () -> Unit,
 ) {
-    val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
+    val metadata by rememberLocalVideoMetadata(task.localFilePath)
     val style = libraryVideoItemStyle(task.sourcePageUrl, selected && !isSelecting)
     Surface(
         onClick = onClick,
+        enabled = !task.deletePending || isSelecting,
         modifier =
             Modifier
                 .fillMaxWidth()
@@ -67,6 +70,7 @@ internal fun VideoCard(
         Column {
             LibraryVideoThumbnail(
                 metadata = metadata,
+                deletePending = task.deletePending,
                 modifier = Modifier.fillMaxWidth().aspectRatio(VIDEO_ASPECT_RATIO),
             )
             VideoItemInfo(
@@ -96,10 +100,11 @@ internal fun VideoListItem(
     onClick: () -> Unit,
     onToggleSelection: () -> Unit,
 ) {
-    val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
+    val metadata by rememberLocalVideoMetadata(task.localFilePath)
     val style = libraryVideoItemStyle(task.sourcePageUrl, selected && !isSelecting)
     Surface(
         onClick = onClick,
+        enabled = !task.deletePending || isSelecting,
         modifier =
             Modifier.semantics {
                 stateDescription = style.sourceDescription
@@ -115,6 +120,7 @@ internal fun VideoListItem(
         ) {
             LibraryVideoThumbnail(
                 metadata = metadata,
+                deletePending = task.deletePending,
                 modifier = Modifier.width(LIST_THUMBNAIL_WIDTH).aspectRatio(VIDEO_ASPECT_RATIO),
             )
             VideoItemInfo(
@@ -154,7 +160,12 @@ private fun VideoItemInfo(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = task.downloadedBytes.formatFileSize(),
+                text =
+                    if (task.deletePending) {
+                        stringResource(com.comst19.dambom.feature.library.R.string.library_delete_pending)
+                    } else {
+                        task.downloadedBytes.formatFileSize()
+                    },
                 color = metadataColor,
                 style = MaterialTheme.typography.bodySmall,
             )
@@ -173,6 +184,7 @@ private fun VideoItemInfo(
 @Composable
 private fun LibraryVideoThumbnail(
     metadata: LocalVideoMetadata?,
+    deletePending: Boolean,
     modifier: Modifier,
 ) {
     Box(
@@ -182,7 +194,7 @@ private fun LibraryVideoThumbnail(
         val thumbnail = metadata?.thumbnail
         if (thumbnail == null) {
             Icon(
-                imageVector = Icons.Outlined.PlayArrow,
+                imageVector = if (deletePending) Icons.Outlined.DeleteOutline else Icons.Outlined.PlayArrow,
                 contentDescription = null,
                 modifier = Modifier.size(44.dp),
                 tint = Color.White,

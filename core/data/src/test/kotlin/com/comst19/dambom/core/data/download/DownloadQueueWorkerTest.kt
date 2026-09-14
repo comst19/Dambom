@@ -25,6 +25,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,6 +33,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.shadows.ShadowStatFs
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -308,6 +310,84 @@ class DownloadQueueWorkerTest {
         }
 
     @Test
+    fun `task inserted while another download is running fills the free slot`() =
+        runTest {
+            successfulServer.enqueue(MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE))
+            failingServer.enqueue(MockResponse().setHeader("Content-Type", "video/mp4").setBody("video"))
+            val dao = database.downloadTaskDao()
+            val first = entity("first-running", successfulServer.url("/first.mp4").toString())
+            val second = entity("second-late", failingServer.url("/second.mp4").toString())
+            dao.insert(first)
+            val work = async(Dispatchers.IO) { createWorker().doWork() }
+            assertNotNull(successfulServer.takeRequest(2L, TimeUnit.SECONDS))
+
+            dao.insert(second)
+
+            assertNotNull(failingServer.takeRequest(2L, TimeUnit.SECONDS))
+            assertEquals(DownloadStatus.DOWNLOADING.name, dao.getById(first.id)?.status)
+            dao.pause(first.id, 2L)
+            withContext(Dispatchers.IO) { withTimeout(2_000L) { work.await() } }
+            assertEquals(DownloadStatus.COMPLETED.name, dao.getById(second.id)?.status)
+        }
+
+    @Test
+    fun `progress updates do not wake the queue or restart the running download`() =
+        runTest {
+            successfulServer.enqueue(MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE))
+            val delegate = database.downloadTaskDao()
+            val task = entity("progress-only", successfulServer.url("/progress.mp4").toString())
+            delegate.insert(task)
+            var queuedReadCount = 0
+            val countingDao =
+                object : DownloadTaskDao by delegate {
+                    override suspend fun getQueued(): List<DownloadTaskEntity> {
+                        queuedReadCount++
+                        return delegate.getQueued()
+                    }
+                }
+            val work = async(Dispatchers.IO) { createWorker(dao = countingDao).doWork() }
+            assertNotNull(successfulServer.takeRequest(2L, TimeUnit.SECONDS))
+            awaitCondition { delegate.getById(task.id)?.status == DownloadStatus.DOWNLOADING.name }
+            delay(200L)
+            val queuedReadsAfterStart = queuedReadCount
+
+            repeat(3) { index -> delegate.updateProgress(task.id, index.toLong(), null, index.toLong() + 2L) }
+            delay(200L)
+
+            assertEquals(1, successfulServer.requestCount)
+            assertEquals(queuedReadsAfterStart, queuedReadCount)
+            assertNull(successfulServer.takeRequest(100L, TimeUnit.MILLISECONDS))
+            delegate.pause(task.id, 10L)
+            withContext(Dispatchers.IO) { withTimeout(2_000L) { work.await() } }
+        }
+
+    @Test
+    fun `live queue keeps two per host and three global download limits`() =
+        runTest {
+            repeat(3) { successfulServer.enqueue(MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE)) }
+            failingServer.enqueue(MockResponse().setHeader("Content-Type", "video/mp4").setBody("other"))
+            val dao = database.downloadTaskDao()
+            val first = entity("same-1", successfulServer.url("/same-1.mp4").toString())
+            val second = entity("same-2", successfulServer.url("/same-2.mp4").toString())
+            dao.insert(first)
+            dao.insert(second)
+            val work = async(Dispatchers.IO) { createWorker().doWork() }
+            assertNotNull(successfulServer.takeRequest(2L, TimeUnit.SECONDS))
+            assertNotNull(successfulServer.takeRequest(2L, TimeUnit.SECONDS))
+
+            val third = entity("same-3", successfulServer.url("/same-3.mp4").toString())
+            val other = entity("other-host", failingServer.url("/other.mp4").toString()).copy(host = "other.example")
+            dao.insert(third)
+            dao.insert(other)
+
+            assertNotNull(failingServer.takeRequest(2L, TimeUnit.SECONDS))
+            assertNull(successfulServer.takeRequest(200L, TimeUnit.MILLISECONDS))
+            assertEquals(DownloadStatus.QUEUED.name, dao.getById(third.id)?.status)
+            dao.pauseAll(2L)
+            withContext(Dispatchers.IO) { withTimeout(2_000L) { work.await() } }
+        }
+
+    @Test
     fun `new task remains retryable when WorkManager attempt count is already two`() =
         runTest {
             failingServer.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START))
@@ -553,9 +633,30 @@ class DownloadQueueWorkerTest {
             assertFalse(fileStore.partialValidatorFile(task.id).exists())
         }
 
+    @Test
+    fun `pending deletion stops transfer without competing for file cleanup`() =
+        runTest {
+            successfulServer.enqueue(MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE))
+            val task = entity("delete-owner", successfulServer.url("/delete-owner.mp4").toString())
+            val dao = database.downloadTaskDao()
+            val trackingFileStore = TrackingDownloadFileStore(context)
+            dao.insert(task)
+            val work = async(Dispatchers.IO) { createWorker(fileStore = trackingFileStore).doWork() }
+            assertNotNull(successfulServer.takeRequest(2L, TimeUnit.SECONDS))
+
+            assertEquals(1, dao.claimForDeletion(task.id, 2L))
+            trackingFileStore.delete(task.id, trackingFileStore.completedFile(task.id, task.url, task.mimeType).name)
+            withContext(Dispatchers.IO) { withTimeout(2_000L) { work.await() } }
+
+            assertEquals(1, trackingFileStore.deleteCount.get())
+            assertEquals(true, dao.getById(task.id)?.deletePending)
+            assertEquals(DownloadStatus.DOWNLOADING.name, dao.getById(task.id)?.status)
+        }
+
     private fun createWorker(
         runAttemptCount: Int = 0,
         dao: DownloadTaskDao = database.downloadTaskDao(),
+        fileStore: DownloadFileStore = this.fileStore,
     ): DownloadQueueWorker =
         TestListenableWorkerBuilder<DownloadQueueWorker>(context, runAttemptCount = runAttemptCount)
             .setWorkerFactory(
@@ -576,6 +677,20 @@ class DownloadQueueWorkerTest {
                         )
                 },
             ).build()
+}
+
+private class TrackingDownloadFileStore(
+    context: Context,
+) : DownloadFileStore(context) {
+    val deleteCount = AtomicInteger()
+
+    override fun delete(
+        id: String,
+        localFileName: String?,
+    ): Boolean {
+        deleteCount.incrementAndGet()
+        return super.delete(id, localFileName)
+    }
 }
 
 private suspend fun awaitCondition(condition: suspend () -> Boolean) {

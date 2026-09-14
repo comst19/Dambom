@@ -19,6 +19,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
 import javax.inject.Inject
 
 internal class LibraryFileManager
@@ -87,8 +89,10 @@ internal class LibraryFileManager
             }
 
         private fun File.copyTo(destination: Uri) {
-            val output = checkNotNull(context.contentResolver.openOutputStream(destination))
-            inputStream().use { input -> output.use(input::copyTo) }
+            copyStreams(
+                openInput = ::inputStream,
+                openOutput = { checkNotNull(context.contentResolver.openOutputStream(destination)) },
+            )
         }
 
         private fun File.copyToTree(
@@ -166,6 +170,15 @@ internal class LibraryFileManager
             )
         }
     }
+
+internal fun copyStreams(
+    openInput: () -> InputStream,
+    openOutput: () -> OutputStream,
+) {
+    openInput().use { input ->
+        openOutput().use(input::copyTo)
+    }
+}
 
 internal fun DownloadTask.suggestedFileName(): String {
     val extension =

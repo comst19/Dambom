@@ -3,12 +3,19 @@ package com.comst19.dambom.core.network
 import com.comst19.dambom.core.network.fxtwitter.FxTwitterNetworkDataSource
 import com.comst19.dambom.core.network.fxtwitter.FxTwitterNetworkFailure
 import com.comst19.dambom.core.network.fxtwitter.FxTwitterNetworkResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.SocketPolicy
 import okio.Buffer
 import okio.ForwardingSource
 import okio.buffer
@@ -18,26 +25,61 @@ import org.junit.Test
 
 class FxTwitterNetworkDataSourceTest {
     @Test
-    fun `metadata at limit remains readable`() {
-        val body = TrackingBody(VALID_JSON.padEnd(LIMIT), LIMIT.toLong())
+    fun `cancelling metadata detection cancels the http call`() =
+        runTest {
+            val server = MockWebServer().apply { start() }
+            try {
+                server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE))
+                val client =
+                    OkHttpClient
+                        .Builder()
+                        .addInterceptor { chain ->
+                            chain.proceed(
+                                chain
+                                    .request()
+                                    .newBuilder()
+                                    .url(server.url("/i/status/123"))
+                                    .build(),
+                            )
+                        }.build()
+                val dataSource = FxTwitterNetworkDataSource(client, Json)
+                val detection = launch(Dispatchers.IO) { dataSource.detect("https://x.com/test/status/123") }
+                server.takeRequest()
 
-        assertEquals(FxTwitterNetworkResult.Unsupported(FxTwitterNetworkFailure.NO_MEDIA), detect(body))
-        assertTrue(body.closed)
-    }
+                detection.cancelAndJoin()
+
+                assertTrue(detection.isCancelled)
+            } finally {
+                server.shutdown()
+            }
+        }
 
     @Test
-    fun `oversized metadata is rejected regardless of declared length`() {
-        for (declaredLength in listOf(-1L, 1L, LIMIT.toLong() + 1)) {
-            val body = TrackingBody(VALID_JSON.padEnd(LIMIT * 2), declaredLength)
+    fun `metadata at limit remains readable`() =
+        runTest {
+            val body = TrackingBody(VALID_JSON.padEnd(LIMIT), LIMIT.toLong())
 
-            assertEquals(FxTwitterNetworkResult.Unsupported(FxTwitterNetworkFailure.UNSUPPORTED_FORMAT), detect(body))
+            assertEquals(FxTwitterNetworkResult.Unsupported(FxTwitterNetworkFailure.NO_MEDIA), detect(body))
             assertTrue(body.closed)
-            assertTrue(body.bytesRead < LIMIT * 2)
-            if (declaredLength > LIMIT) assertEquals(0L, body.bytesRead)
         }
-    }
 
-    private fun detect(body: ResponseBody): FxTwitterNetworkResult? {
+    @Test
+    fun `oversized metadata is rejected regardless of declared length`() =
+        runTest {
+            for (declaredLength in listOf(-1L, 1L, LIMIT.toLong() + 1)) {
+                val body = TrackingBody(VALID_JSON.padEnd(LIMIT * 2), declaredLength)
+
+                assertEquals(
+                    FxTwitterNetworkResult.Unsupported(FxTwitterNetworkFailure.UNSUPPORTED_FORMAT),
+                    detect(body),
+                )
+                assertTrue(body.closed)
+                assertTrue(body.bytesRead < LIMIT * 2)
+                if (declaredLength > LIMIT) assertEquals(0L, body.bytesRead)
+            }
+        }
+
+    private suspend fun detect(body: ResponseBody): FxTwitterNetworkResult? {
         val client =
             OkHttpClient
                 .Builder()

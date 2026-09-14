@@ -52,6 +52,8 @@
     <string name="library_delete_selected_success">영상 %1$d개를 삭제했어요.</string>
     <string name="library_delete_selected_partial">%1$d개 삭제, %2$d개 실패. 실패한 영상은 선택 상태로 남아 있어요.</string>
     <string name="library_delete_failure">영상을 삭제하지 못했어요.</string>
+    <string name="library_delete_pending">삭제 정리 필요</string>
+    <string name="library_delete_retry">삭제 다시 시도</string>
     <string name="library_export_success">영상을 기기에 저장했어요.</string>
     <string name="library_export_failure">영상을 기기에 저장하지 못했어요.</string>
     <string name="library_export_location_permission_expired">선택한 폴더 권한이 만료되어 저장할 위치를 다시 선택해 주세요.</string>

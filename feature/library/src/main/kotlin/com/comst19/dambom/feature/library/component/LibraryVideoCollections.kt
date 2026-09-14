@@ -47,7 +47,13 @@ internal fun VideoGrid(
                 selectionSelected = task.id in uiState.selectedIds,
                 isSelecting = isSelecting,
                 fileActions = fileActions,
-                onClick = { if (isSelecting) onToggleSelection(task.id) else onVideoClick(task) },
+                onClick = {
+                    if (isSelecting) {
+                        onToggleSelection(task.id)
+                    } else if (!task.deletePending) {
+                        onVideoClick(task)
+                    }
+                },
                 onToggleSelection = { onToggleSelection(task.id) },
             )
         }
@@ -83,7 +89,13 @@ internal fun VideoList(
                 selectionSelected = task.id in uiState.selectedIds,
                 isSelecting = isSelecting,
                 fileActions = fileActions,
-                onClick = { if (isSelecting) onToggleSelection(task.id) else onVideoClick(task) },
+                onClick = {
+                    if (isSelecting) {
+                        onToggleSelection(task.id)
+                    } else if (!task.deletePending) {
+                        onVideoClick(task)
+                    }
+                },
                 onToggleSelection = { onToggleSelection(task.id) },
             )
         }

@@ -11,6 +11,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 @Composable
 internal fun ColumnScope.WebContent(
     tab: WebTab,
+    navigationFailureState: MutableState<WebNavigationFailure?>,
     savedState: Bundle?,
     onWebViewReady: (WebView?) -> Unit,
     onPageStarted: (Long, String?, String?, Long) -> Unit,
@@ -46,7 +48,6 @@ internal fun ColumnScope.WebContent(
     val backgroundColor = MaterialTheme.colorScheme.background.toArgb()
     var webView by remember(tab.id) { mutableStateOf<WebView?>(null) }
     var loadingProgress by remember(tab.id) { mutableStateOf(0) }
-    var navigationFailure by remember(tab.id) { mutableStateOf<WebNavigationFailure?>(null) }
     var webViewGeneration by remember(tab.id) { androidx.compose.runtime.mutableIntStateOf(0) }
 
     if (loadingProgress in 1..99) {
@@ -71,7 +72,7 @@ internal fun ColumnScope.WebContent(
                         onPageChanged = onPageChanged,
                         onMediaRequest = onMediaRequest,
                         onProgress = { loadingProgress = it },
-                        onNavigationFailure = { navigationFailure = it },
+                        onNavigationFailure = { navigationFailureState.value = it },
                         onRendererGone = {
                             rendererGone.set(true)
                             onWebViewReady(null)
@@ -90,16 +91,17 @@ internal fun ColumnScope.WebContent(
                     if (targetUrl != null && view.url != targetUrl) view.loadUrl(targetUrl)
                 },
             )
-            navigationFailure?.let {
+            navigationFailureState.value?.let {
                 WebNavigationErrorContent(
+                    failure = it,
                     onRetry = {
-                        navigationFailure = null
+                        navigationFailureState.value = null
                         webView?.reload()
                     },
                     onOpenExternal = { tab.url?.let(onOpenExternal) },
                 )
             }
-            if (navigationFailure == null && tab.detectionState !is WebDetectionState.Scanning) {
+            if (navigationFailureState.value == null && tab.detectionState !is WebDetectionState.Scanning) {
                 Box(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
                     WebRescanButton(detectionState = tab.detectionState, onScan = onScan)
                 }
@@ -123,6 +125,7 @@ internal fun ColumnScope.WebContent(
     }
     WebToolbar(
         webView = webView,
+        canRefresh = navigationFailureState.value?.retryable != false,
         detectionState = tab.detectionState,
         onOpenDetectedMedia = onOpenDetectedMedia,
     )

@@ -1,6 +1,7 @@
 package com.comst19.dambom.feature.web.webview
 
 import android.webkit.WebResourceResponse
+import com.comst19.dambom.core.common.net.hasVideoFileExtension
 import java.io.ByteArrayInputStream
 
 internal fun shouldBlockWebVideo(
@@ -8,7 +9,7 @@ internal fun shouldBlockWebVideo(
     mediaGuardInstalled: Boolean,
 ): Boolean =
     !mediaGuardInstalled &&
-        WEB_VIDEO_EXTENSIONS.any { extension -> url.substringBefore('?').endsWith(extension, ignoreCase = true) }
+        url.hasVideoFileExtension()
 
 internal fun blockedVideoResponse() =
     WebResourceResponse(
@@ -19,8 +20,6 @@ internal fun blockedVideoResponse() =
         emptyMap(),
         ByteArrayInputStream(ByteArray(0)),
     )
-
-private val WEB_VIDEO_EXTENSIONS = setOf(".mp4", ".webm", ".mov", ".m4v")
 
 internal const val WEB_MEDIA_GUARD_SCRIPT =
     """

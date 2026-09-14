@@ -7,6 +7,7 @@ plugins {
 android { namespace = "com.comst19.dambom.core.data" }
 
 dependencies {
+    implementation(projects.core.common)
     implementation(projects.core.domain)
     implementation(projects.core.coroutine)
     implementation(projects.core.database)

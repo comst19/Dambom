@@ -10,6 +10,7 @@ import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.domain.model.AppSettings
+import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
@@ -55,6 +56,13 @@ internal class LibraryViewModel
                     sourceFilter = LibrarySourceFilter.entries.firstOrNull { it.name == sourceFilter } ?: LibrarySourceFilter.ALL,
                 )
             }
+        private val libraryDownloads =
+            combine(repository.completedDownloads, repository.deletionPendingDownloads) { completed, pending ->
+                (
+                    completed.filterNot(DownloadTask::deletePending) +
+                        pending.filter { it.status == DownloadStatus.COMPLETED }
+                ).distinctBy(DownloadTask::id)
+            }.map(::LibrarySnapshot)
 
         val settings: StateFlow<AppSettings> =
             settingsRepository.settings.stateIn(
@@ -65,7 +73,7 @@ internal class LibraryViewModel
 
         val uiState: StateFlow<LibraryUiState> =
             combine(
-                repository.completedDownloads.map(::LibrarySnapshot),
+                libraryDownloads,
                 selectedId,
                 query,
                 displayPreferences,
@@ -88,6 +96,8 @@ internal class LibraryViewModel
         fun observeVideo(id: String) = repository.observeDownload(id).asVideoDetailState()
 
         fun openVideo(id: String) {
+            val task = uiState.value.videos.firstOrNull { it.id == id }
+            if (task?.deletePending != false || task.localFilePath == null) return
             savedStateHandle[SELECTED_ID_KEY] = id
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoDetailKey(id))) }
         }
@@ -156,6 +166,7 @@ internal class LibraryViewModel
             task: DownloadTask,
             title: String,
         ) {
+            if (task.deletePending || task.localFilePath == null) return
             val trimmedTitle = title.trim()
             if (trimmedTitle.isEmpty() || trimmedTitle == task.title) return
             viewModelScope.launch {
@@ -184,6 +195,7 @@ internal class LibraryViewModel
             task: DownloadTask,
             destination: Uri,
         ) {
+            if (task.deletePending || task.localFilePath == null) return
             viewModelScope.launch {
                 suspendRunCatching { fileManager.export(task, destination) }
                     .notifyResult(R.string.library_export_success, R.string.library_export_failure)
@@ -191,6 +203,7 @@ internal class LibraryViewModel
         }
 
         fun exportToConfiguredLocation(task: DownloadTask) {
+            if (task.deletePending || task.localFilePath == null) return
             val treeUri = settings.value.downloadTreeUri?.let(Uri::parse)
             if (treeUri != null && !fileManager.hasPersistedTreePermission(treeUri)) {
                 clearInvalidDownloadLocation()
@@ -221,7 +234,8 @@ internal class LibraryViewModel
             }
         }
 
-        fun createShareIntent(task: DownloadTask): Intent? = fileManager.createShareIntent(task)
+        fun createShareIntent(task: DownloadTask): Intent? =
+            task.takeIf { !it.deletePending && it.localFilePath != null }?.let(fileManager::createShareIntent)
 
         fun notifyShareFailure() {
             viewModelScope.launch { showMessage(R.string.library_share_failure) }

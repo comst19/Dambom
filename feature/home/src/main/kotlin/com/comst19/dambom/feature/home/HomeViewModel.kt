@@ -3,6 +3,7 @@ package com.comst19.dambom.feature.home
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.comst19.dambom.core.common.net.isHttpUrl
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
@@ -28,7 +29,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.net.URI
 import java.util.UUID
 import javax.inject.Inject
 
@@ -141,11 +141,7 @@ internal class HomeViewModel
         }
     }
 
-private fun String.isValidHttpUrl(): Boolean =
-    runCatching {
-        val uri = URI(trim())
-        (uri.scheme.equals("http", true) || uri.scheme.equals("https", true)) && !uri.host.isNullOrBlank()
-    }.getOrDefault(false)
+private fun String.isValidHttpUrl(): Boolean = isHttpUrl()
 
 private fun String.extractHttpUrl(): String? =
     HTTP_URL_REGEX

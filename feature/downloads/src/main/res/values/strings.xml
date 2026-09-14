@@ -38,4 +38,7 @@
     <string name="downloads_error_server">서버가 다운로드 요청을 처리하지 못했어요.</string>
     <string name="downloads_error_unknown">다운로드 중 문제가 발생했어요.</string>
     <string name="downloads_command_failed">다운로드 상태를 변경하지 못했어요. 다시 시도해 주세요.</string>
+    <string name="downloads_delete_pending">삭제 정리 필요</string>
+    <string name="downloads_delete_retry">삭제 다시 시도</string>
+    <string name="downloads_delete_group_count">삭제 정리 %1$d개</string>
 </resources>

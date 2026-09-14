@@ -25,6 +25,7 @@ data class DownloadTask(
     val localFilePath: String? = null,
     val createdAtMillis: Long,
     val updatedAtMillis: Long,
+    val deletePending: Boolean = false,
 ) {
     val progress: Float
         get() =

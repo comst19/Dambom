@@ -69,7 +69,7 @@ internal fun VideoPlayerPanel(
 ) {
     val playPauseState = rememberPlayPauseButtonState(player)
     val progressState = rememberProgressStateWithTickInterval(player, PROGRESS_TICK_MILLIS)
-    val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
+    val metadata by rememberLocalVideoMetadata(task.localFilePath)
     var playbackError by remember(player) { mutableStateOf<PlaybackException?>(player.playerError) }
     var controlsVisible by remember(task.id) { mutableStateOf(true) }
     var controlsInteracting by remember(task.id) { mutableStateOf(false) }

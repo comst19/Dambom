@@ -39,6 +39,22 @@ class HomeViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
     @Test
+    fun `home requires an explicit http scheme and accepts scheme case variants`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = createViewModel()
+            viewModel.uiState.test {
+                awaitItem()
+                awaitItem()
+
+                viewModel.updateUrl("example.com/video.mp4")
+                assertEquals(false, awaitItem().isUrlValid)
+
+                viewModel.updateUrl("HTTP://example.com/video.mp4")
+                assertEquals(true, awaitItem().isUrlValid)
+            }
+        }
+
+    @Test
     fun `repeated analysis clears the old result and creates a fresh request for the same URL`() =
         runTest(mainDispatcherRule.dispatcher) {
             val navigation = SpyNavigationDispatcher()
@@ -127,6 +143,27 @@ class HomeViewModelTest {
                 assertEquals(0.25f, awaitItem().downloadSummary.progress, 0f)
             }
         }
+
+    @Test
+    fun `download summary excludes pending deletions`() {
+        val normal = activeDownload("normal", expectedBytes = 100L, downloadedBytes = 25L)
+        val pending =
+            listOf(
+                activeDownload("queued-pending", expectedBytes = 100L, downloadedBytes = 50L)
+                    .copy(status = DownloadStatus.QUEUED, deletePending = true),
+                activeDownload("paused-pending", expectedBytes = 100L, downloadedBytes = 50L)
+                    .copy(status = DownloadStatus.PAUSED, deletePending = true),
+                activeDownload("failed-pending", expectedBytes = 100L, downloadedBytes = 50L)
+                    .copy(status = DownloadStatus.FAILED, deletePending = true),
+            )
+
+        val summary = toHomeDownloadSummary(listOf(normal) + pending)
+
+        assertEquals(1, summary.activeCount)
+        assertEquals(0, summary.pausedCount)
+        assertEquals(0, summary.failedCount)
+        assertEquals(0.25f, summary.progress)
+    }
 
     @Test
     fun `editing URL does not rescan unchanged download history`() =

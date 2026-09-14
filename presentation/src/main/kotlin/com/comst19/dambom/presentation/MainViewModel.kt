@@ -147,7 +147,9 @@ internal fun downloadFailureFeedback(
 ): DownloadFailureFeedback? {
     val failures =
         tasks.filter { task ->
-            task.status == DownloadStatus.FAILED && previousStatuses[task.id] != DownloadStatus.FAILED
+            !task.deletePending &&
+                task.status == DownloadStatus.FAILED &&
+                previousStatuses[task.id] != DownloadStatus.FAILED
         }
     if (failures.isEmpty()) return null
     return DownloadFailureFeedback(

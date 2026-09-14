@@ -22,7 +22,7 @@ internal sealed interface VideoDetailState {
 
 internal fun Flow<DownloadTask?>.asVideoDetailState(): Flow<VideoDetailState> =
     map<DownloadTask?, VideoDetailState> { task ->
-        if (task?.status == DownloadStatus.COMPLETED && task.localFilePath != null) {
+        if (task?.status == DownloadStatus.COMPLETED && task.localFilePath != null && !task.deletePending) {
             VideoDetailState.Ready(task)
         } else {
             VideoDetailState.NotFound

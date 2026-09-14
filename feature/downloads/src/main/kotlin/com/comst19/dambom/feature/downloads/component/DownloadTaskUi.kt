@@ -39,6 +39,10 @@ internal fun DownloadActions(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         when {
+            task.deletePending -> {
+                DownloadActionButton(R.string.downloads_delete_retry, onCancel)
+            }
+
             task.status == DownloadStatus.DOWNLOADING || task.status == DownloadStatus.QUEUED -> {
                 DownloadActionButton(R.string.downloads_cancel, onCancel, secondary = true)
                 DownloadActionButton(R.string.downloads_pause, onPause)

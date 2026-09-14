@@ -40,7 +40,7 @@ internal fun toLibraryUiState(
         isSelecting = selection.isActive,
         selectedIds = selection.selectedIds.filterTo(linkedSetOf()) { it in tasks.ids }.toPersistentSet(),
         totalBytes = tasks.totalBytes,
-        totalVideoCount = savedVideos.size,
+        totalVideoCount = tasks.totalVideoCount,
         sourceFilter = sourceFilter,
     )
 }

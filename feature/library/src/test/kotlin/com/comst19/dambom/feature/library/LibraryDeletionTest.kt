@@ -1,6 +1,7 @@
 package com.comst19.dambom.feature.library
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.common.ui.AppEvent
@@ -27,6 +28,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -87,12 +90,96 @@ class LibraryDeletionTest {
                 events.events.first(),
             )
         }
+
+    @Test
+    fun `pending deletion stays visible and blocks playback and file actions`() =
+        runTest(dispatcherRule.dispatcher) {
+            val pending = savedVideo("pending").copy(localFilePath = null, deletePending = true)
+            val activePending =
+                savedVideo("active-pending").copy(
+                    status = DownloadStatus.DOWNLOADING,
+                    localFilePath = null,
+                    deletePending = true,
+                )
+            val repository = DeletionRepository().apply { downloads.value = listOf(pending, activePending) }
+            val navigation = SpyNavigationDispatcher()
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val viewModel =
+                LibraryViewModel(
+                    repository,
+                    DeletionSettings,
+                    navigation,
+                    SavedStateHandle(),
+                    LibraryFileManager(context, dispatcherRule.dispatcher),
+                    AppEventBus(),
+                )
+            backgroundScope.launch { viewModel.uiState.collect() }
+            runCurrent()
+
+            assertEquals(
+                listOf("pending"),
+                viewModel.uiState.value.videos
+                    .map(DownloadTask::id),
+            )
+            assertEquals(
+                true,
+                viewModel.uiState.value.videos
+                    .single()
+                    .deletePending,
+            )
+            viewModel.openVideo(pending.id)
+            viewModel.rename(pending, "renamed")
+            viewModel.export(pending, Uri.EMPTY)
+            viewModel.exportToConfiguredLocation(pending)
+            runCurrent()
+
+            assertTrue(navigation.dispatched.isEmpty())
+            assertEquals(0, repository.renameCount)
+            assertNull(viewModel.createShareIntent(pending))
+
+            repository.gate.complete(Unit)
+            viewModel.delete(pending)
+            runCurrent()
+
+            assertEquals(listOf("pending"), repository.calls)
+        }
+
+    @Test
+    fun `overlapping repository flows show a completed pending deletion once`() =
+        runTest(dispatcherRule.dispatcher) {
+            val normal = savedVideo("normal")
+            val pending = savedVideo("pending").copy(localFilePath = null, deletePending = true)
+            val baseRepository = DeletionRepository()
+            val repository =
+                object : DownloadRepository by baseRepository {
+                    override val completedDownloads = flowOf(listOf(normal, pending))
+                    override val deletionPendingDownloads = flowOf(listOf(pending))
+                }
+            val viewModel =
+                LibraryViewModel(
+                    repository,
+                    DeletionSettings,
+                    SpyNavigationDispatcher(),
+                    SavedStateHandle(),
+                    LibraryFileManager(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
+                    AppEventBus(),
+                )
+            backgroundScope.launch { viewModel.uiState.collect() }
+            runCurrent()
+
+            assertEquals(
+                listOf("normal", "pending"),
+                viewModel.uiState.value.videos
+                    .map(DownloadTask::id),
+            )
+        }
 }
 
 private class DeletionRepository : DownloadRepository {
     val calls = mutableListOf<String>()
     val gate = CompletableDeferred<Unit>()
     var fail = true
+    var renameCount = 0
     override val downloads = MutableStateFlow(listOf("first", "failed", "last").map(::savedVideo))
 
     override suspend fun delete(id: String) {
@@ -111,7 +198,9 @@ private class DeletionRepository : DownloadRepository {
     override suspend fun rename(
         id: String,
         title: String,
-    ) = Unit
+    ) {
+        renameCount++
+    }
 
     override suspend fun retry(id: String) = Unit
 

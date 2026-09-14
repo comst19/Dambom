@@ -24,6 +24,7 @@ import com.comst19.dambom.feature.web.component.WebStartPage
 import com.comst19.dambom.feature.web.component.WebTabsSheet
 import com.comst19.dambom.feature.web.contract.WebUiState
 import com.comst19.dambom.feature.web.webview.WebContent
+import com.comst19.dambom.feature.web.webview.WebNavigationFailure
 
 @Composable
 internal fun WebRoute(
@@ -79,6 +80,7 @@ internal fun WebScreen(
     val currentTab = uiState.currentTab ?: return
     var showTabs by rememberSaveable { mutableStateOf(false) }
     var currentWebView by remember { mutableStateOf<WebView?>(null) }
+    val navigationFailureState = remember(currentTab.id) { mutableStateOf<WebNavigationFailure?>(null) }
     var address by rememberSaveable(currentTab.id) { mutableStateOf(currentTab.url.orEmpty()) }
     val focusManager = LocalFocusManager.current
 
@@ -100,11 +102,12 @@ internal fun WebScreen(
             onAddressChange = { address = it },
             onSubmit = {
                 focusManager.clearFocus()
+                navigationFailureState.value = null
                 onNavigate(address)
             },
             onBack = onBack,
             onOpenTabs = { showTabs = true },
-            currentUrl = currentTab.url,
+            currentUrl = currentTab.url.takeIf { navigationFailureState.value?.canOpenExternal != false },
             onOpenExternal = onOpenExternal,
             onCopyLink = onCopyLink,
             onShareLink = onShareLink,
@@ -119,6 +122,7 @@ internal fun WebScreen(
             androidx.compose.runtime.key(currentTab.id) {
                 WebContent(
                     tab = currentTab,
+                    navigationFailureState = navigationFailureState,
                     savedState = savedWebState(currentTab.id),
                     onWebViewReady = { currentWebView = it },
                     onPageStarted = onPageStarted,

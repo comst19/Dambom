@@ -15,12 +15,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-aab-${{ github.ref }}
+  group: release-stores-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   build-release:
-    name: Build signed release APK and AAB
+    name: Build signed Google Play and ONE store releases
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -45,19 +45,23 @@ jobs:
           RELEASE_EVENT_BEFORE: ${{ github.event.before }}
         run: .github/scripts/generate-release-notes.sh "$RUNNER_TEMP/release-notes.txt"
 
-      - name: Validate signing secrets
+      - name: Validate signing and Firebase secrets
         shell: bash
         env:
           DAMBOM_KEYSTORE_BASE64: ${{ secrets.DAMBOM_KEYSTORE_BASE64 }}
           DAMBOM_RELEASE_STORE_PASSWORD: ${{ secrets.DAMBOM_RELEASE_STORE_PASSWORD }}
           DAMBOM_RELEASE_KEY_ALIAS: ${{ secrets.DAMBOM_RELEASE_KEY_ALIAS }}
           DAMBOM_RELEASE_KEY_PASSWORD: ${{ secrets.DAMBOM_RELEASE_KEY_PASSWORD }}
+          FIREBASE_GOOGLE_PLAY_CONFIG_BASE64: ${{ secrets.FIREBASE_GOOGLE_PLAY_CONFIG_BASE64 }}
+          FIREBASE_ONESTORE_CONFIG_BASE64: ${{ secrets.FIREBASE_ONESTORE_CONFIG_BASE64 }}
         run: |
           required=(
             DAMBOM_KEYSTORE_BASE64
             DAMBOM_RELEASE_STORE_PASSWORD
             DAMBOM_RELEASE_KEY_ALIAS
             DAMBOM_RELEASE_KEY_PASSWORD
+            FIREBASE_GOOGLE_PLAY_CONFIG_BASE64
+            FIREBASE_ONESTORE_CONFIG_BASE64
           )
           missing=()
           for variable in "${required[@]}"; do
@@ -78,6 +82,17 @@ jobs:
           printf '%s' "$DAMBOM_KEYSTORE_BASE64" | base64 --decode > "$DAMBOM_RELEASE_STORE_FILE"
           chmod 600 "$DAMBOM_RELEASE_STORE_FILE"
 
+      - name: Restore Firebase configuration
+        shell: bash
+        env:
+          FIREBASE_GOOGLE_PLAY_CONFIG_BASE64: ${{ secrets.FIREBASE_GOOGLE_PLAY_CONFIG_BASE64 }}
+          FIREBASE_ONESTORE_CONFIG_BASE64: ${{ secrets.FIREBASE_ONESTORE_CONFIG_BASE64 }}
+        run: |
+          umask 077
+          mkdir -p app/src/googlePlayRelease app/src/onestoreRelease
+          printf '%s' "$FIREBASE_GOOGLE_PLAY_CONFIG_BASE64" | base64 --decode > app/src/googlePlayRelease/google-services.json
+          printf '%s' "$FIREBASE_ONESTORE_CONFIG_BASE64" | base64 --decode > app/src/onestoreRelease/google-services.json
+
       - name: Run release gate and build APK and AAB
         env:
           DAMBOM_RELEASE_STORE_PASSWORD: ${{ secrets.DAMBOM_RELEASE_STORE_PASSWORD }}
@@ -89,8 +104,11 @@ jobs:
           detekt
           testDebugUnitTest
           lintRelease
-          :app:assembleRelease
-          :app:bundleRelease
+          :app:assembleGooglePlayRelease
+          :app:bundleGooglePlayRelease
+          :app:assembleOnestoreRelease
+          :app:bundleOnestoreRelease
+          -Pdambom.crashlytics.enabled=true
           --parallel
           --stacktrace
 
@@ -100,25 +118,26 @@ jobs:
           DAMBOM_RELEASE_STORE_PASSWORD: ${{ secrets.DAMBOM_RELEASE_STORE_PASSWORD }}
           DAMBOM_RELEASE_KEY_ALIAS: ${{ secrets.DAMBOM_RELEASE_KEY_ALIAS }}
         run: |
-          test -s app/build/outputs/bundle/release/app-release.aab
-          unzip -Z1 app/build/outputs/bundle/release/app-release.aab | grep -Eq '^META-INF/[^/]+\.(RSA|DSA|EC)$'
-          jarsigner -verify -strict -certs \
-            -keystore "$DAMBOM_RELEASE_STORE_FILE" \
-            -storepass:env DAMBOM_RELEASE_STORE_PASSWORD \
-            app/build/outputs/bundle/release/app-release.aab \
-            "$DAMBOM_RELEASE_KEY_ALIAS" \
-            | tee "$RUNNER_TEMP/jarsigner.log"
-          grep -q 'jar verified.' "$RUNNER_TEMP/jarsigner.log"
-          if grep -q 'jar is unsigned' "$RUNNER_TEMP/jarsigner.log"; then
-            echo '::error::Release AAB is unsigned.'
-            exit 1
-          fi
+          for store in googlePlay onestore; do
+            aab_path="app/build/outputs/bundle/${store}Release/app-${store}-release.aab"
+            test -s "$aab_path"
+            unzip -Z1 "$aab_path" | grep -E '^META-INF/[^/]+\.(RSA|DSA|EC)$' > /dev/null
+            jarsigner -verify -strict -certs \
+              -keystore "$DAMBOM_RELEASE_STORE_FILE" \
+              -storepass:env DAMBOM_RELEASE_STORE_PASSWORD \
+              "$aab_path" \
+              "$DAMBOM_RELEASE_KEY_ALIAS" \
+              | tee "$RUNNER_TEMP/jarsigner.log"
+            grep -q 'jar verified.' "$RUNNER_TEMP/jarsigner.log"
+            if grep -q 'jar is unsigned' "$RUNNER_TEMP/jarsigner.log"; then
+              echo '::error::Release AAB is unsigned.'
+              exit 1
+            fi
+          done
 
       - name: Verify signed APK
         shell: bash
         run: |
-          apk_path="app/build/outputs/apk/release/app-release.apk"
-          test -s "$apk_path"
           android_sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
           if [[ -z "$android_sdk_root" ]]; then
             echo '::error::Android SDK path is unavailable.'
@@ -129,23 +148,55 @@ jobs:
             echo '::error::apksigner is unavailable.'
             exit 1
           fi
-          "$apksigner_path" verify --verbose --print-certs "$apk_path"
+          aapt_path="$(dirname "$apksigner_path")/aapt"
+          for store in googlePlay onestore; do
+            apk_path="app/build/outputs/apk/$store/release/app-$store-release.apk"
+            expected_package="com.comst19.dambom"
+            if [[ "$store" == "onestore" ]]; then
+              expected_package+=".onestore"
+            fi
+            test -s "$apk_path"
+            "$apksigner_path" verify --verbose --print-certs "$apk_path"
+            actual_package=$("$aapt_path" dump badging "$apk_path" | sed -n "s/^package: name='\([^']*\)'.*/\1/p")
+            if [[ "$actual_package" != "$expected_package" ]]; then
+              echo "::error::Unexpected package for $store: $actual_package"
+              exit 1
+            fi
+            unzip -Z1 "$apk_path" | grep -x 'assets/dexopt/baseline.prof' > /dev/null
+          done
 
-      - name: Upload release APK, AAB, and R8 metadata
+      - name: Upload googlePlay release APK, AAB, and R8 metadata
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: dambom-release-${{ github.sha }}
+          name: dambom-googlePlay-release-${{ github.sha }}
           path: |
-            app/build/outputs/apk/release/app-release.apk
-            app/build/outputs/bundle/release/app-release.aab
-            app/build/outputs/mapping/release/mapping.txt
-            app/build/outputs/mapping/release/seeds.txt
-            app/build/outputs/mapping/release/usage.txt
+            app/build/outputs/apk/googlePlay/release/app-googlePlay-release.apk
+            app/build/outputs/bundle/googlePlayRelease/app-googlePlay-release.aab
+            app/build/outputs/mapping/googlePlayRelease/mapping.txt
+            app/build/outputs/mapping/googlePlayRelease/seeds.txt
+            app/build/outputs/mapping/googlePlayRelease/usage.txt
             ${{ runner.temp }}/release-notes.txt
           if-no-files-found: error
           retention-days: 30
 
-      - name: Remove release keystore
+      - name: Upload onestore release APK, AAB, and R8 metadata
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dambom-onestore-release-${{ github.sha }}
+          path: |
+            app/build/outputs/apk/onestore/release/app-onestore-release.apk
+            app/build/outputs/bundle/onestoreRelease/app-onestore-release.aab
+            app/build/outputs/mapping/onestoreRelease/mapping.txt
+            app/build/outputs/mapping/onestoreRelease/seeds.txt
+            app/build/outputs/mapping/onestoreRelease/usage.txt
+            ${{ runner.temp }}/release-notes.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove release configuration
         if: ${{ always() }}
         shell: bash
-        run: rm -f "$DAMBOM_RELEASE_STORE_FILE"
+        run: |
+          rm -f "$DAMBOM_RELEASE_STORE_FILE" \
+            app/src/googlePlayRelease/google-services.json \
+            app/src/onestoreRelease/google-services.json

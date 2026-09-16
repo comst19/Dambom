@@ -27,3 +27,4 @@ obfuscated-stacktrace.txt
 /.codex/
 .omo/
 *.jks
+google-services.json

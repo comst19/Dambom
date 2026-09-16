@@ -154,8 +154,10 @@ jobs:
             name: Release lint
             tasks: lintRelease
           - id: release-build
-            name: Release APK and AAB build
-            tasks: :app:assembleRelease :app:bundleRelease
+            name: Google Play and ONE store release build
+            tasks: >-
+              :app:assembleGooglePlayRelease :app:bundleGooglePlayRelease
+              :app:assembleOnestoreRelease :app:bundleOnestoreRelease
 
     steps:
       - name: Check out repository

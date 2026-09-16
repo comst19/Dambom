@@ -40,6 +40,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.ContentFrame
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
+import com.comst19.dambom.core.common.ui.player.DambomPlayerControls
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.media.rememberLocalVideoMetadata
@@ -68,7 +69,7 @@ internal fun VideoPlayerPanel(
 ) {
     val playPauseState = rememberPlayPauseButtonState(player)
     val progressState = rememberProgressStateWithTickInterval(player, PROGRESS_TICK_MILLIS)
-    val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
+    val metadata by rememberLocalVideoMetadata(task.localFilePath)
     var playbackError by remember(player) { mutableStateOf<PlaybackException?>(player.playerError) }
     var controlsVisible by remember(task.id) { mutableStateOf(true) }
     var controlsInteracting by remember(task.id) { mutableStateOf(false) }
@@ -99,7 +100,7 @@ internal fun VideoPlayerPanel(
         modifier =
             modifier
                 .verticalScroll(rememberScrollState())
-                .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
+                .padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         InlineVideoSurface(
@@ -187,7 +188,7 @@ private fun InlineVideoSurface(
             modifier = Modifier.matchParentSize(),
         ) {
             Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = INLINE_CONTROLS_SCRIM_ALPHA))) {
-                PlayerControls(
+                DambomPlayerControls(
                     player = player,
                     showPlay = showPlay,
                     playEnabled = playEnabled,
@@ -209,3 +210,4 @@ private const val VIDEO_ASPECT_RATIO = 16f / 9f
 private const val INLINE_CONTROLS_AUTO_HIDE_MILLIS = 3_000L
 private const val INLINE_CONTROLS_FADE_MILLIS = 180
 private const val INLINE_CONTROLS_SCRIM_ALPHA = 0.48f
+internal const val PROGRESS_TICK_MILLIS = 500L

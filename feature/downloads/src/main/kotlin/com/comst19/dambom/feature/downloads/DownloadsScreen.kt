@@ -28,7 +28,11 @@ import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.model.NetworkConnection
+import com.comst19.dambom.feature.downloads.component.DownloadQueueActions
+import com.comst19.dambom.feature.downloads.component.DownloadTaskActions
+import com.comst19.dambom.feature.downloads.component.DownloadsActions
 import com.comst19.dambom.feature.downloads.component.DownloadsContent
+import com.comst19.dambom.feature.downloads.component.DownloadsNavigationActions
 import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
 import com.comst19.dambom.feature.downloads.contract.DownloadsViewMode
 import kotlinx.collections.immutable.persistentListOf
@@ -42,76 +46,39 @@ internal fun DownloadsRoute(
     DownloadsScreen(
         uiState = uiState,
         canDownload = networkAccess.canDownload,
-        onBack = viewModel::goBack,
-        onPause = viewModel::pause,
-        onResume = viewModel::resume,
-        onCancel = viewModel::cancel,
-        onRetry = viewModel::retry,
-        onPauseAll = viewModel::pauseAll,
-        onResumeAll = viewModel::resumeAll,
-        onViewModeChange = viewModel::setViewMode,
+        actions =
+            DownloadsActions(
+                navigation =
+                    DownloadsNavigationActions(
+                        onBack = viewModel::goBack,
+                        onOpenLibrary = viewModel::openLibrary,
+                        onViewModeChange = viewModel::setViewMode,
+                    ),
+                task =
+                    DownloadTaskActions(
+                        onPause = viewModel::pause,
+                        onResume = viewModel::resume,
+                        onCancel = viewModel::cancel,
+                        onRetry = viewModel::retry,
+                    ),
+                queue =
+                    DownloadQueueActions(
+                        onPauseAll = viewModel::pauseAll,
+                        onResumeAll = viewModel::resumeAll,
+                    ),
+            ),
     )
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 internal fun DownloadsScreen(
     uiState: DownloadsUiState,
     canDownload: Boolean,
-    onBack: () -> Unit,
-    onPause: (String) -> Unit,
-    onResume: (String) -> Unit,
-    onCancel: (String) -> Unit,
-    onRetry: (String) -> Unit,
-    onPauseAll: () -> Unit,
-    onResumeAll: () -> Unit,
-    onViewModeChange: (DownloadsViewMode) -> Unit,
+    actions: DownloadsActions,
 ) {
     AppScreen(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.downloads_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = stringResource(R.string.downloads_back),
-                        )
-                    }
-                },
-                actions = {
-                    if (uiState.tasks.isNotEmpty()) {
-                        IconButton(
-                            onClick = {
-                                onViewModeChange(
-                                    if (uiState.viewMode == DownloadsViewMode.GRID) {
-                                        DownloadsViewMode.LIST
-                                    } else {
-                                        DownloadsViewMode.GRID
-                                    },
-                                )
-                            },
-                        ) {
-                            Icon(
-                                imageVector =
-                                    if (uiState.viewMode == DownloadsViewMode.GRID) {
-                                        Icons.AutoMirrored.Outlined.ViewList
-                                    } else {
-                                        Icons.Outlined.GridView
-                                    },
-                                contentDescription =
-                                    stringResource(
-                                        if (uiState.viewMode == DownloadsViewMode.GRID) {
-                                            R.string.downloads_view_as_list
-                                        } else {
-                                            R.string.downloads_view_as_grid
-                                        },
-                                    ),
-                            )
-                        }
-                    }
-                },
-            )
+            DownloadsTopBar(uiState, actions)
         },
     ) { innerPadding ->
         Box(
@@ -125,12 +92,7 @@ internal fun DownloadsScreen(
             DownloadsContent(
                 uiState = uiState,
                 canDownload = canDownload,
-                onPause = onPause,
-                onResume = onResume,
-                onCancel = onCancel,
-                onRetry = onRetry,
-                onPauseAll = onPauseAll,
-                onResumeAll = onResumeAll,
+                actions = actions,
             )
         }
     }
@@ -151,16 +113,80 @@ private fun DownloadsScreenPreview() {
                         ),
                 ),
             canDownload = NetworkAccessState(NetworkConnection.UNMETERED).canDownload,
-            onBack = ::previewNoOp,
-            onPause = ::previewNoOp,
-            onResume = ::previewNoOp,
-            onCancel = ::previewNoOp,
-            onRetry = ::previewNoOp,
-            onPauseAll = ::previewNoOp,
-            onResumeAll = ::previewNoOp,
-            onViewModeChange = ::previewNoOp,
+            actions =
+                DownloadsActions(
+                    navigation =
+                        DownloadsNavigationActions(
+                            onBack = ::previewNoOp,
+                            onOpenLibrary = ::previewNoOp,
+                            onViewModeChange = ::previewNoOp,
+                        ),
+                    task =
+                        DownloadTaskActions(
+                            onPause = ::previewNoOp,
+                            onResume = ::previewNoOp,
+                            onCancel = ::previewNoOp,
+                            onRetry = ::previewNoOp,
+                        ),
+                    queue =
+                        DownloadQueueActions(
+                            onPauseAll = ::previewNoOp,
+                            onResumeAll = ::previewNoOp,
+                        ),
+                ),
         )
     }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun DownloadsTopBar(
+    uiState: DownloadsUiState,
+    actions: DownloadsActions,
+) {
+    TopAppBar(
+        title = { Text(stringResource(R.string.downloads_title)) },
+        navigationIcon = {
+            IconButton(onClick = actions.navigation.onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                    contentDescription = stringResource(R.string.downloads_back),
+                )
+            }
+        },
+        actions = {
+            if (uiState.tasks.isNotEmpty()) {
+                IconButton(
+                    onClick = {
+                        actions.navigation.onViewModeChange(
+                            if (uiState.viewMode == DownloadsViewMode.GRID) {
+                                DownloadsViewMode.LIST
+                            } else {
+                                DownloadsViewMode.GRID
+                            },
+                        )
+                    },
+                ) {
+                    Icon(
+                        imageVector =
+                            if (uiState.viewMode == DownloadsViewMode.GRID) {
+                                Icons.AutoMirrored.Outlined.ViewList
+                            } else {
+                                Icons.Outlined.GridView
+                            },
+                        contentDescription =
+                            stringResource(
+                                if (uiState.viewMode == DownloadsViewMode.GRID) {
+                                    R.string.downloads_view_as_list
+                                } else {
+                                    R.string.downloads_view_as_grid
+                                },
+                            ),
+                    )
+                }
+            }
+        },
+    )
 }
 
 private fun previewTask(

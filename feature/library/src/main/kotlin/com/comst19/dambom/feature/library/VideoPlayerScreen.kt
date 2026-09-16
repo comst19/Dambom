@@ -1,6 +1,7 @@
 package com.comst19.dambom.feature.library
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,10 +17,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -41,18 +45,20 @@ import com.comst19.dambom.feature.library.file.rememberLocalVideoAvailable
 import com.comst19.dambom.feature.library.pip.PipPlatformEffect
 
 @Composable
+@Suppress("LongParameterList", "LongMethod")
 internal fun VideoPlayerRoute(
     id: String,
     isVideoFullscreen: Boolean,
     onVideoFullscreenChange: (Boolean) -> Unit,
     onVideoRotate: () -> Unit,
+    libraryViewModel: LibraryViewModel = hiltViewModel(),
+    playerViewModel: VideoPlayerViewModel = hiltViewModel(),
 ) {
-    val libraryViewModel: LibraryViewModel = hiltViewModel()
-    val playerViewModel: VideoPlayerViewModel = hiltViewModel()
-    val uiState by libraryViewModel.uiState.collectAsStateWithLifecycle()
-    val task =
-        uiState.selectedVideo?.takeIf { it.id == id }
-            ?: uiState.videos.firstOrNull { it.id == id }
+    val detailState =
+        remember(libraryViewModel, id) {
+            libraryViewModel.observeVideo(id)
+        }.collectAsStateWithLifecycle(initialValue = VideoDetailState.Loading).value
+    val task = (detailState as? VideoDetailState.Ready)?.task
     var isLocalVideoAvailable by rememberLocalVideoAvailable(task)
 
     fun refreshLocalVideoAvailability() {
@@ -84,14 +90,16 @@ internal fun VideoPlayerRoute(
     LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) { playerViewModel.onUiPaused() }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { playerViewModel.onUiStopped() }
     VideoPlayerMediaSessionEffect(playerViewModel.player)
-    LaunchedEffect(task?.id, task?.localFilePath, isLocalVideoAvailable) {
+    LaunchedEffect(detailState, task?.id, task?.localFilePath, isLocalVideoAvailable) {
+        if (detailState == VideoDetailState.Loading) return@LaunchedEffect
         if (isLocalVideoAvailable) {
             task?.let(playerViewModel::play)
         } else {
             playerViewModel.stopUnavailableVideo()
         }
     }
-    LaunchedEffect(isVideoFullscreen, task, isLocalVideoAvailable) {
+    LaunchedEffect(detailState, isVideoFullscreen, task, isLocalVideoAvailable) {
+        if (detailState == VideoDetailState.Loading) return@LaunchedEffect
         refreshLocalVideoAvailability()
         if (shouldClearVideoFullscreen(isVideoFullscreen, isLocalVideoAvailable)) {
             onVideoFullscreenChange(false)
@@ -115,6 +123,7 @@ internal fun VideoPlayerRoute(
         VideoPlayerScreen(
             task = playableTask,
             player = playerViewModel.player,
+            detailState = detailState,
             fileActions = fileActions,
             onBack = libraryViewModel::goBack,
             showBack = !multiplePanes,
@@ -129,6 +138,7 @@ internal fun VideoPlayerRoute(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("LongParameterList", "LongMethod")
 internal fun VideoPlayerScreen(
     task: DownloadTask?,
     player: Player,
@@ -140,6 +150,7 @@ internal fun VideoPlayerScreen(
     onVideoRotate: () -> Unit,
     isPipContentOnly: Boolean = false,
     onVideoBoundsChanged: (androidx.compose.ui.unit.IntRect?) -> Unit = {},
+    detailState: VideoDetailState = VideoDetailState.NotFound,
 ) {
     BackHandler(enabled = isVideoFullscreen) { onVideoFullscreenChange(false) }
     val showRotationControl = shouldShowFullscreenRotationControl(LocalConfiguration.current.smallestScreenWidthDp)
@@ -198,7 +209,24 @@ internal fun VideoPlayerScreen(
             },
         ) { innerPadding ->
             if (task == null) {
-                MissingVideo(Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding))
+                val modifier = Modifier.fillMaxSize().padding(innerPadding).consumeWindowInsets(innerPadding)
+                if (detailState == VideoDetailState.Loading || detailState == VideoDetailState.Error) {
+                    Box(modifier, contentAlignment = Alignment.Center) {
+                        Text(
+                            stringResource(
+                                if (detailState == VideoDetailState.Loading) {
+                                    R.string.player_loading
+                                } else {
+                                    R.string.player_load_error
+                                },
+                            ),
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                } else {
+                    MissingVideo(modifier)
+                }
             } else {
                 VideoPlayerPanel(
                     task = task,

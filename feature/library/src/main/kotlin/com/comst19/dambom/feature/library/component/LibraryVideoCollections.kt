@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.contract.LibraryUiState
@@ -24,7 +25,7 @@ internal fun VideoGrid(
     onToggleSelection: (String) -> Unit,
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(MIN_VIDEO_CARD_WIDTH),
+        columns = GridCells.Adaptive(MIN_VIDEO_CARD_WIDTH * LocalDensity.current.fontScale.coerceAtLeast(1f)),
         modifier = Modifier.fillMaxSize(),
         contentPadding =
             PaddingValues(
@@ -46,7 +47,13 @@ internal fun VideoGrid(
                 selectionSelected = task.id in uiState.selectedIds,
                 isSelecting = isSelecting,
                 fileActions = fileActions,
-                onClick = { if (isSelecting) onToggleSelection(task.id) else onVideoClick(task) },
+                onClick = {
+                    if (isSelecting) {
+                        onToggleSelection(task.id)
+                    } else if (!task.deletePending) {
+                        onVideoClick(task)
+                    }
+                },
                 onToggleSelection = { onToggleSelection(task.id) },
             )
         }
@@ -69,7 +76,7 @@ internal fun VideoList(
                 end = LibraryHorizontalPadding,
                 bottom = 24.dp,
             ),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         listItems(
             items = uiState.videos,
@@ -82,11 +89,17 @@ internal fun VideoList(
                 selectionSelected = task.id in uiState.selectedIds,
                 isSelecting = isSelecting,
                 fileActions = fileActions,
-                onClick = { if (isSelecting) onToggleSelection(task.id) else onVideoClick(task) },
+                onClick = {
+                    if (isSelecting) {
+                        onToggleSelection(task.id)
+                    } else if (!task.deletePending) {
+                        onVideoClick(task)
+                    }
+                },
                 onToggleSelection = { onToggleSelection(task.id) },
             )
         }
     }
 }
 
-private val MIN_VIDEO_CARD_WIDTH = 240.dp
+private val MIN_VIDEO_CARD_WIDTH = 148.dp

@@ -18,6 +18,7 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.Navigator
 import com.comst19.dambom.core.navigation.rememberNavigationState
 import com.comst19.dambom.core.navigation.toEntries
+import com.comst19.dambom.feature.detection.DetectionPlaceholder
 import com.comst19.dambom.feature.detection.navigation.detectionEntries
 import com.comst19.dambom.feature.downloads.navigation.downloadEntries
 import com.comst19.dambom.feature.home.navigation.homeEntries
@@ -45,6 +46,7 @@ internal fun DambomApp(
     val snackbarHostState = remember { SnackbarHostState() }
     val currentNetworkAccess = rememberUpdatedState(networkAccess)
     var isLibraryDetailPaneVisible by rememberSaveable { mutableStateOf(true) }
+    var isHomeResultPaneVisible by rememberSaveable { mutableStateOf(true) }
     var isVideoFullscreen by rememberSaveable { mutableStateOf(false) }
     val updateVideoFullscreen: (Boolean) -> Unit = { fullscreen ->
         isVideoFullscreen = fullscreen
@@ -62,7 +64,11 @@ internal fun DambomApp(
             entryProvider<NavKey> {
                 detectionEntries { currentNetworkAccess.value }
                 downloadEntries { currentNetworkAccess.value }
-                homeEntries { currentNetworkAccess.value }
+                homeEntries(
+                    resultPlaceholder = { DetectionPlaceholder() },
+                    isResultPaneVisible = { isHomeResultPaneVisible },
+                    onResultPaneVisibilityChange = { isHomeResultPaneVisible = it },
+                ) { currentNetworkAccess.value }
                 libraryEntries(
                     isDetailPaneVisible = { isLibraryDetailPaneVisible },
                     onDetailPaneVisibilityChange = { isLibraryDetailPaneVisible = it },
@@ -83,6 +89,7 @@ internal fun DambomApp(
         snackbarHostState = snackbarHostState,
         networkAccess = networkAccess,
         isLibraryDetailPaneVisible = isLibraryDetailPaneVisible,
+        isHomeResultPaneVisible = isHomeResultPaneVisible,
         isVideoFullscreen = isVideoFullscreen,
     )
 }

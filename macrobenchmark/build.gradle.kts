@@ -11,14 +11,35 @@ android {
         minSdk = 28
         targetSdk = 36
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        missingDimensionStrategy("store", "googlePlay")
     }
 
     targetProjectPath = ":app"
     experimentalProperties["android.experimental.self-instrumenting"] = true
+
+    testOptions.managedDevices.localDevices {
+        create("pixel6Api35") {
+            device = "Pixel 6"
+            apiLevel = 35
+            systemImageSource = "aosp"
+        }
+    }
 }
 
+val useConnectedBenchmarkDevices =
+    providers
+        .gradleProperty("dambom.baselineProfile.useConnectedDevices")
+        .map(String::toBooleanStrict)
+        .getOrElse(false)
+
 baselineProfile {
-    useConnectedDevices = true
+    managedDevices.clear()
+    if (useConnectedBenchmarkDevices) {
+        useConnectedDevices = true
+    } else {
+        managedDevices += "pixel6Api35"
+        useConnectedDevices = false
+    }
 }
 
 dependencies {

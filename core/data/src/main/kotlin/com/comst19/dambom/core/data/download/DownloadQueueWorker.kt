@@ -14,12 +14,17 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.produceIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -27,6 +32,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import java.io.Closeable
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -66,43 +72,52 @@ internal class DownloadQueueWorker
             coroutineScope {
                 val running = linkedMapOf<String, RunningDownload>()
                 var retryRequired = false
-                while (true) {
-                    val queued = dao.getQueued().toMutableList()
-                    while (running.size < MAX_CONCURRENT_DOWNLOADS) {
-                        val activeHosts = running.values.groupingBy { it.host }.eachCount()
-                        val next =
-                            selectNextDownload(
-                                queued = queued,
-                                runningIds = running.keys,
-                                activeHosts = activeHosts,
-                            ) ?: break
-                        queued.remove(next)
-                        val claimed =
-                            dao.compareAndSetStatus(
-                                id = next.id,
-                                expectedStatus = DownloadStatus.QUEUED.name,
-                                nextStatus = DownloadStatus.DOWNLOADING.name,
-                                updatedAtMillis = System.currentTimeMillis(),
-                            )
-                        if (claimed == 0) continue
-                        running[next.id] =
-                            RunningDownload(
-                                host = next.host,
-                                job = async { downloadSafely(next) },
-                            )
-                    }
-                    if (running.isEmpty()) {
-                        if (retryRequired) throw RetryQueueException()
-                        return@coroutineScope
-                    }
-                    val (completedId, outcome) =
-                        select {
-                            running.forEach { (id, download) ->
-                                download.job.onAwait { id to it }
-                            }
+                val queueUpdates = dao.observeQueuedCandidates().distinctUntilChanged().produceIn(this)
+                queueUpdates.receive()
+                try {
+                    while (true) {
+                        val queued = dao.getQueued().toMutableList()
+                        while (running.size < MAX_CONCURRENT_DOWNLOADS) {
+                            val activeHosts = running.values.groupingBy { it.host }.eachCount()
+                            val next =
+                                selectNextDownload(
+                                    queued = queued,
+                                    runningIds = running.keys,
+                                    activeHosts = activeHosts,
+                                ) ?: break
+                            queued.remove(next)
+                            val claimed =
+                                dao.compareAndSetStatus(
+                                    id = next.id,
+                                    expectedStatus = DownloadStatus.QUEUED.name,
+                                    nextStatus = DownloadStatus.DOWNLOADING.name,
+                                    updatedAtMillis = System.currentTimeMillis(),
+                                )
+                            if (claimed == 0) continue
+                            running[next.id] =
+                                RunningDownload(
+                                    host = next.host,
+                                    job = async { downloadSafely(next) },
+                                )
                         }
-                    running.remove(completedId)
-                    if (outcome == DownloadOutcome.RETRYABLE_FAILURE) retryRequired = true
+                        if (running.isEmpty()) {
+                            if (retryRequired) throw RetryQueueException()
+                            return@coroutineScope
+                        }
+                        val completed =
+                            select<Pair<String, DownloadOutcome>?> {
+                                queueUpdates.onReceive { null }
+                                running.forEach { (id, download) ->
+                                    download.job.onAwait { id to it }
+                                }
+                            }
+                        if (completed == null) continue
+                        val (completedId, outcome) = completed
+                        running.remove(completedId)
+                        if (outcome == DownloadOutcome.RETRYABLE_FAILURE) retryRequired = true
+                    }
+                } finally {
+                    queueUpdates.cancel()
                 }
             }
 
@@ -121,7 +136,6 @@ internal class DownloadQueueWorker
                     }
 
                     DownloadStopReason.CANCELLED -> {
-                        fileStore.clearPartial(task.id)
                         DownloadOutcome.CANCELLED
                     }
                 }
@@ -140,67 +154,110 @@ internal class DownloadQueueWorker
         private suspend fun download(
             task: DownloadTaskEntity,
             allowRestart: Boolean,
+        ): Unit =
+            coroutineScope {
+                val recoveredFile = fileStore.completedFile(task.id, task.url, task.mimeType)
+                if (recoveredFile.isFile) {
+                    complete(task, recoveredFile, recoveredFile.length())
+                    return@coroutineScope
+                }
+                val partialFile = fileStore.partialFile(task.id)
+                val rangeStart = partialFile.length().coerceAtLeast(0L)
+                val validatorFile = fileStore.partialValidatorFile(task.id)
+                val validator =
+                    storageOperation { validatorFile.takeIf(File::isFile)?.readText() }
+                        ?.takeIf { it.isNotBlank() && !it.startsWith("W/") }
+                if (rangeStart > 0L && validator == null) {
+                    fileStore.clearPartial(task.id)
+                    return@coroutineScope download(task, allowRestart = false)
+                }
+                val request =
+                    Request
+                        .Builder()
+                        .url(task.url)
+                        .apply {
+                            if (rangeStart > 0L) {
+                                header("Range", "bytes=$rangeStart-")
+                                header("If-Range", checkNotNull(validator))
+                            }
+                        }.build()
+                val call = client.newCall(request)
+                val stopWatcher =
+                    launch(start = CoroutineStart.UNDISPATCHED) {
+                        try {
+                            dao
+                                .observeTransferStatus(task.id)
+                                .distinctUntilChanged()
+                                .first { it != DownloadStatus.DOWNLOADING.name }
+                        } finally {
+                            call.cancel()
+                        }
+                    }
+                try {
+                    requireActiveTask(task.id)
+                    call.execute().use { response ->
+                        if (rangeStart > 0L && response.requiresRestart(rangeStart)) {
+                            fileStore.clearPartial(task.id)
+                            if (allowRestart) return@coroutineScope download(task, allowRestart = false)
+                            throw DownloadFailureException(DownloadFailureReason.SERVER)
+                        }
+                        validateResponse(task, response)
+                        saveResponse(task, response, rangeStart)
+                    }
+                } catch (failure: IOException) {
+                    requireActiveTask(task.id)
+                    throw failure
+                } finally {
+                    stopWatcher.cancel()
+                }
+            }
+
+        private suspend fun saveResponse(
+            task: DownloadTaskEntity,
+            response: Response,
+            rangeStart: Long,
         ) {
             val partialFile = fileStore.partialFile(task.id)
-            val rangeStart = partialFile.length().coerceAtLeast(0L)
             val validatorFile = fileStore.partialValidatorFile(task.id)
-            val validator = validatorFile.takeIf(File::isFile)?.readText()?.takeIf(String::isNotBlank)
-            if (rangeStart > 0L && validator == null) {
-                fileStore.clearPartial(task.id)
-                return download(task, allowRestart = false)
-            }
-            val request =
-                Request
-                    .Builder()
-                    .url(task.url)
-                    .apply {
-                        if (rangeStart > 0L) {
-                            header("Range", "bytes=$rangeStart-")
-                            header("If-Range", checkNotNull(validator))
-                        }
-                    }.build()
-            client.newCall(request).execute().use { response ->
-                if (response.code == HTTP_RANGE_NOT_SATISFIABLE && rangeStart > 0L && allowRestart) {
-                    fileStore.clearPartial(task.id)
-                    return download(task, allowRestart = false)
-                }
-                validateResponse(task, response)
-                if (rangeStart > 0L && response.code == HTTP_PARTIAL_CONTENT && response.contentRangeStart() != rangeStart) {
-                    fileStore.clearPartial(task.id)
-                    if (allowRestart) return download(task, allowRestart = false)
-                    throw DownloadFailureException(DownloadFailureReason.SERVER)
-                }
-                response.downloadValidator()?.let(validatorFile::writeText)
-                    ?: if (response.code != HTTP_PARTIAL_CONTENT) validatorFile.delete() else Unit
-                val append = rangeStart > 0L && response.code == HTTP_PARTIAL_CONTENT
-                val initialBytes = if (append) rangeStart else 0L
-                val totalBytes = response.totalBytes(initialBytes) ?: task.expectedBytes
-                val body = response.body
-                FileOutputStream(partialFile, append).use { output ->
-                    body.byteStream().use { input ->
-                        val buffer = ByteArray(BUFFER_SIZE)
-                        var downloadedBytes = initialBytes
-                        var lastCheckpointBytes = initialBytes
-                        var lastCheckpointAtMillis = SystemClock.elapsedRealtime()
-                        while (true) {
-                            currentCoroutineContext().ensureActive()
-                            val read = input.read(buffer)
-                            if (read < 0) break
-                            output.write(buffer, 0, read)
-                            downloadedBytes += read
-                            val nowMillis = SystemClock.elapsedRealtime()
-                            if (shouldCheckpoint(downloadedBytes - lastCheckpointBytes, nowMillis - lastCheckpointAtMillis)) {
-                                checkpoint(task, downloadedBytes, totalBytes)
-                                lastCheckpointBytes = downloadedBytes
-                                lastCheckpointAtMillis = nowMillis
-                            }
-                        }
-                        output.fd.sync()
+            val append = rangeStart > 0L && response.code == HTTP_PARTIAL_CONTENT
+            val initialBytes = if (append) rangeStart else 0L
+            val totalBytes = response.totalBytes(initialBytes)
+            val body = response.body
+            if (!append) validatorFile.delete()
+            val output = storageOperation { FileOutputStream(partialFile, append) }
+            Closeable { storageOperation(output::close) }.use {
+                requireSpaceFor(BUFFER_SIZE)
+                storageOperation { response.downloadValidator()?.let(validatorFile::writeText) }
+                checkpoint(task, initialBytes, totalBytes)
+                val input = body.byteStream()
+                val buffer = ByteArray(BUFFER_SIZE)
+                var downloadedBytes = initialBytes
+                var lastCheckpointBytes = initialBytes
+                var lastCheckpointAtMillis = SystemClock.elapsedRealtime()
+                while (true) {
+                    currentCoroutineContext().ensureActive()
+                    val read = input.read(buffer)
+                    if (read < 0) break
+                    requireSpaceFor(read)
+                    storageOperation { output.write(buffer, 0, read) }
+                    downloadedBytes += read
+                    val nowMillis = SystemClock.elapsedRealtime()
+                    if (shouldCheckpoint(downloadedBytes - lastCheckpointBytes, nowMillis - lastCheckpointAtMillis)) {
                         checkpoint(task, downloadedBytes, totalBytes)
-                        if (totalBytes != null && downloadedBytes < totalBytes) throw IOException("Download ended early")
-                        complete(task, partialFile, downloadedBytes)
+                        lastCheckpointBytes = downloadedBytes
+                        lastCheckpointAtMillis = nowMillis
                     }
                 }
+                storageOperation { output.fd.sync() }
+                checkpoint(task, downloadedBytes, totalBytes)
+                if (totalBytes != null && downloadedBytes < totalBytes) throw IOException("Download ended early")
+                complete(task, partialFile, downloadedBytes)
+            }
+        }
+
+        private fun requireSpaceFor(byteCount: Int) {
+            if (!fileStore.hasSpaceFor(byteCount)) {
+                throw DownloadFailureException(DownloadFailureReason.INSUFFICIENT_STORAGE)
             }
         }
 
@@ -214,8 +271,23 @@ internal class DownloadQueueWorker
             }
             if (!response.isSuccessful) throw DownloadFailureException(DownloadFailureReason.SERVER)
             val contentType = response.body.contentType()?.toString()
+            if (contentType?.startsWith("text/") == true || contentType?.contains("json") == true) {
+                throw DownloadFailureException(DownloadFailureReason.UNSUPPORTED_FORMAT)
+            }
             if (contentType?.startsWith("video/") != true && !task.url.hasVideoExtension()) {
                 throw DownloadFailureException(DownloadFailureReason.UNSUPPORTED_FORMAT)
+            }
+            if (response.code != HTTP_PARTIAL_CONTENT) {
+                val prefix =
+                    response
+                        .peekBody(ERROR_DOCUMENT_PREFIX_BYTES)
+                        .string()
+                        .trimStart('\uFEFF', ' ', '\t', '\r', '\n')
+                        .lowercase()
+                val isTextPrefix = prefix.none { it < ' ' && it !in "\t\r\n" }
+                if (isTextPrefix && ERROR_DOCUMENT_PREFIXES.any(prefix::startsWith)) {
+                    throw DownloadFailureException(DownloadFailureReason.UNSUPPORTED_FORMAT)
+                }
             }
         }
 
@@ -252,8 +324,9 @@ internal class DownloadQueueWorker
         ) {
             requireActiveTask(task.id)
             val completedFile = fileStore.completedFile(task.id, task.url, task.mimeType)
-            completedFile.delete()
-            if (!partialFile.renameTo(completedFile)) throw DownloadFailureException(DownloadFailureReason.STORAGE)
+            if (partialFile != completedFile && !partialFile.renameTo(completedFile)) {
+                throw DownloadFailureException(DownloadFailureReason.STORAGE)
+            }
             val completed =
                 dao.markCompleted(
                     id = task.id,
@@ -262,8 +335,8 @@ internal class DownloadQueueWorker
                     updatedAtMillis = System.currentTimeMillis(),
                 )
             if (completed == 0) {
-                completedFile.delete()
-                throw DownloadStoppedException(DownloadStopReason.CANCELLED)
+                requireActiveTask(task.id)
+                throw DownloadStoppedException(DownloadStopReason.OWNERSHIP_LOST)
             }
             fileStore.partialValidatorFile(task.id).delete()
             notifier.completed(task.id, task.title)
@@ -342,7 +415,8 @@ private enum class DownloadOutcome {
 
 private class DownloadFailureException(
     val reason: DownloadFailureReason,
-) : Exception()
+    cause: Throwable? = null,
+) : Exception(cause)
 
 private class DownloadStoppedException(
     val reason: DownloadStopReason,
@@ -381,13 +455,27 @@ private fun Response.contentRangeStart(): Long? =
         ?.substringBefore('-')
         ?.toLongOrNull()
 
-private fun Response.downloadValidator(): String? = header("ETag") ?: header("Last-Modified")
+private const val ERROR_DOCUMENT_PREFIX_BYTES = 512L
+
+private inline fun <T> storageOperation(block: () -> T): T =
+    try {
+        block()
+    } catch (failure: IOException) {
+        throw DownloadFailureException(failure.storageFailureReason(), failure)
+    }
+
+private val ERROR_DOCUMENT_PREFIXES = listOf("<!doctype html", "<html", "{", "[")
+
+private fun Response.downloadValidator(): String? =
+    (header("ETag") ?: header("Last-Modified"))?.takeUnless {
+        it.startsWith("W/")
+    }
 
 internal fun shouldCheckpoint(
     bytesSinceLastCheckpoint: Long,
     millisSinceLastCheckpoint: Long,
 ): Boolean =
-    bytesSinceLastCheckpoint >= CHECKPOINT_BYTES &&
+    bytesSinceLastCheckpoint > 0L &&
         millisSinceLastCheckpoint >= CHECKPOINT_INTERVAL_MILLIS
 
 private fun String.hasVideoExtension(): Boolean =
@@ -398,9 +486,11 @@ private const val MAX_CONCURRENT_DOWNLOADS = 3
 private const val MAX_CONCURRENT_PER_HOST = 2
 private const val MAX_NETWORK_RETRIES = 2
 private const val BUFFER_SIZE = 64 * 1024
-private const val CHECKPOINT_BYTES = 1024 * 1024L
 private const val CHECKPOINT_INTERVAL_MILLIS = 500L
 private const val HTTP_PARTIAL_CONTENT = 206
 private const val HTTP_UNAUTHORIZED = 401
 private const val HTTP_FORBIDDEN = 403
 private const val HTTP_RANGE_NOT_SATISFIABLE = 416
+
+private fun Response.requiresRestart(rangeStart: Long): Boolean =
+    code == HTTP_RANGE_NOT_SATISFIABLE || (code == HTTP_PARTIAL_CONTENT && contentRangeStart() != rangeStart)

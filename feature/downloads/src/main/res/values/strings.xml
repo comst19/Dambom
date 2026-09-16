@@ -1,10 +1,16 @@
 <resources>
+    <string name="downloads_error_insufficient_storage">저장 공간이 부족해요. 공간을 확보한 뒤 다시 시도해 주세요.</string>
+    <string name="downloads_summary_waiting">다운로드 대기 중</string>
+    <string name="downloads_summary_paused">다운로드 일시정지</string>
+    <string name="downloads_summary_attention">확인이 필요한 다운로드</string>
+    <string name="downloads_quality_original">원본</string>
     <string name="downloads_title">다운로드</string>
     <string name="downloads_back">뒤로</string>
     <string name="downloads_view_as_list">목록으로 보기</string>
     <string name="downloads_view_as_grid">그리드로 보기</string>
     <string name="downloads_empty_title">진행 중인 다운로드가 없어요</string>
-    <string name="downloads_empty_description">영상 찾기에서 선택한 항목이 여기에 표시돼요.</string>
+    <string name="downloads_empty_description">저장이 끝난 영상은 보관함에서 볼 수 있어요.</string>
+    <string name="downloads_open_library">보관함 보기</string>
     <string name="downloads_summary">%1$d개 다운로드 중</string>
     <string name="downloads_summary_remaining">남은 작업 %1$d개</string>
     <string name="downloads_pause_all">전체 일시정지</string>
@@ -17,7 +23,9 @@
     <string name="downloads_group_count">%1$s %2$d개</string>
     <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
     <string name="downloads_thumbnail">%1$s 썸네일</string>
-    <string name="downloads_unknown_size">크기 확인 중</string>
+    <string name="downloads_unknown_size">전체 크기 알 수 없음</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">남은 작업 기준 진행률</string>
     <string name="downloads_pause">일시정지</string>
     <string name="downloads_resume">재개</string>
     <string name="downloads_cancel">취소</string>
@@ -30,4 +38,7 @@
     <string name="downloads_error_server">서버가 다운로드 요청을 처리하지 못했어요.</string>
     <string name="downloads_error_unknown">다운로드 중 문제가 발생했어요.</string>
     <string name="downloads_command_failed">다운로드 상태를 변경하지 못했어요. 다시 시도해 주세요.</string>
+    <string name="downloads_delete_pending">삭제 정리 필요</string>
+    <string name="downloads_delete_retry">삭제 다시 시도</string>
+    <string name="downloads_delete_group_count">삭제 정리 %1$d개</string>
 </resources>

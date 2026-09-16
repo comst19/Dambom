@@ -3,26 +3,33 @@ package com.comst19.dambom.feature.home
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.comst19.dambom.core.common.net.isHttpUrl
+import com.comst19.dambom.core.common.ui.AppEvent
+import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.url.SharedUrlBus
-import com.comst19.dambom.core.domain.model.DownloadStatus
+import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
+import com.comst19.dambom.core.navigation.contract.AppNavKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
+import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
-import com.comst19.dambom.feature.home.contract.HomeDownloadSummary
 import com.comst19.dambom.feature.home.contract.HomeUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.net.URI
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,10 +41,12 @@ internal class HomeViewModel
         downloadRepository: DownloadRepository,
         private val sharedUrlBus: SharedUrlBus,
         private val savedStateHandle: SavedStateHandle,
+        private val appEventBus: AppEventBus,
     ) : ViewModel() {
         private val url = savedStateHandle.getStateFlow(URL_KEY, "")
         private val clipboardUrl = MutableStateFlow<String?>(null)
         private var lastSuggestedClipboardUrl: String? = null
+        private val downloadSummary = downloadRepository.downloads.map(::toHomeDownloadSummary).distinctUntilChanged()
 
         val uiState: StateFlow<HomeUiState> =
             combine(
@@ -45,14 +54,8 @@ internal class HomeViewModel
                 settingsRepository.settings,
                 sharedUrlBus.pendingUrl,
                 clipboardUrl,
-                downloadRepository.downloads,
-            ) { url, settings, sharedUrl, clipboardUrl, downloads ->
-                val active = downloads.filter { it.status == DownloadStatus.DOWNLOADING || it.status == DownloadStatus.QUEUED }
-                val pausedCount = downloads.count { it.status == DownloadStatus.PAUSED }
-                val failedCount = downloads.count { it.status == DownloadStatus.FAILED }
-                val measurable = active.filter { (it.expectedBytes ?: 0L) > 0L }
-                val totalBytes = measurable.sumOf { it.expectedBytes ?: 0L }
-                val downloadedBytes = measurable.sumOf { it.downloadedBytes }
+                downloadSummary,
+            ) { url, settings, sharedUrl, clipboardUrl, summary ->
                 HomeUiState(
                     url = url,
                     isUrlValid = url.isValidHttpUrl(),
@@ -60,18 +63,7 @@ internal class HomeViewModel
                     clipboardSuggestionEnabled = settings.clipboardSuggestionEnabled,
                     clipboardUrl = clipboardUrl,
                     sharedUrl = sharedUrl,
-                    downloadSummary =
-                        HomeDownloadSummary(
-                            activeCount = active.size,
-                            pausedCount = pausedCount,
-                            failedCount = failedCount,
-                            progress =
-                                if (totalBytes > 0L) {
-                                    (downloadedBytes.toFloat() / totalBytes).coerceIn(0f, 1f)
-                                } else {
-                                    0f
-                                },
-                        ),
+                    downloadSummary = summary,
                 )
             }.stateIn(
                 scope = viewModelScope,
@@ -103,16 +95,19 @@ internal class HomeViewModel
 
         fun setClipboardSuggestionEnabled(enabled: Boolean) {
             viewModelScope.launch {
-                settingsRepository.setClipboardSuggestion(promptShown = true, enabled = enabled)
+                suspendRunCatching {
+                    settingsRepository.setClipboardSuggestion(promptShown = true, enabled = enabled)
+                }.onFailure {
+                    appEventBus.send(AppEvent.ShowSnackbar(UiText.Resource(R.string.home_clipboard_save_failed)))
+                }
             }
         }
 
         fun analyzeSharedUrl() {
             val sharedUrl = uiState.value.sharedUrl ?: return
-            viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Navigate(DetectionResultKey(sharedUrl)))
-                sharedUrlBus.clear()
-            }
+            savedStateHandle[URL_KEY] = sharedUrl
+            navigateFromHome(DetectionResultKey(sharedUrl, requestId = UUID.randomUUID().toString()))
+            sharedUrlBus.clear()
         }
 
         fun dismissSharedUrl() {
@@ -121,39 +116,32 @@ internal class HomeViewModel
 
         fun analyzeUrl() {
             val currentUrl = uiState.value.url.trim()
-            if (currentUrl.isValidHttpUrl()) navigateToDetection(currentUrl)
+            if (currentUrl.isValidHttpUrl()) {
+                navigateFromHome(DetectionResultKey(currentUrl, requestId = UUID.randomUUID().toString()))
+            }
         }
 
         fun openSettings() {
-            viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Navigate(SettingsKey))
-            }
+            navigateFromHome(SettingsKey)
         }
 
         fun openWeb(url: String? = null) {
-            viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Navigate(WebKey(url)))
-            }
+            navigateFromHome(WebKey(url))
         }
 
         fun openDownloads() {
-            viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Navigate(DownloadsKey))
-            }
+            navigateFromHome(DownloadsKey)
         }
 
-        private fun navigateToDetection(url: String) {
+        private fun navigateFromHome(key: AppNavKey) {
             viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Navigate(DetectionResultKey(url)))
+                navigation.dispatch(NavigationEvent.PopTo(HomeKey))
+                navigation.dispatch(NavigationEvent.Navigate(key))
             }
         }
     }
 
-private fun String.isValidHttpUrl(): Boolean =
-    runCatching {
-        val uri = URI(trim())
-        (uri.scheme.equals("http", true) || uri.scheme.equals("https", true)) && !uri.host.isNullOrBlank()
-    }.getOrDefault(false)
+private fun String.isValidHttpUrl(): Boolean = isHttpUrl()
 
 private fun String.extractHttpUrl(): String? =
     HTTP_URL_REGEX

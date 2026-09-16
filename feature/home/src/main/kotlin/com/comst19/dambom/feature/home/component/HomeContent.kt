@@ -8,23 +8,32 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ContentPaste
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.designsystem.DambomShapes
@@ -44,6 +53,8 @@ internal fun HomePrimarySection(
     compactHeight: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val keyboard = LocalSoftwareKeyboardController.current
+    val canAnalyze = uiState.isUrlValid && canUseInternet
     val descriptionSpacing = if (compactHeight) 4.dp else 8.dp
     val inputSpacing = if (compactHeight) 12.dp else 24.dp
     val actionSpacing = if (compactHeight) 8.dp else 12.dp
@@ -51,7 +62,7 @@ internal fun HomePrimarySection(
     Column(modifier) {
         Text(
             text = stringResource(R.string.home_title),
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
         )
         Spacer(Modifier.height(descriptionSpacing))
@@ -61,28 +72,26 @@ internal fun HomePrimarySection(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(inputSpacing))
-        OutlinedTextField(
-            value = uiState.url,
-            onValueChange = onUrlChange,
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text(stringResource(R.string.home_url_label)) },
-            placeholder = { Text(stringResource(R.string.home_url_placeholder)) },
-            singleLine = true,
-            trailingIcon = {
-                IconButton(onClick = onPaste) {
-                    Icon(
-                        imageVector = Icons.Outlined.ContentPaste,
-                        contentDescription = stringResource(R.string.home_paste),
-                    )
+        HomeUrlField(
+            uiState = uiState,
+            onUrlChange = onUrlChange,
+            onPaste = onPaste,
+            onSubmit = {
+                if (canAnalyze) {
+                    keyboard?.hide()
+                    onAnalyze()
                 }
             },
-            shape = DambomShapes.Control,
         )
         Spacer(Modifier.height(actionSpacing))
         Button(
-            onClick = onAnalyze,
-            modifier = Modifier.fillMaxWidth().height(54.dp),
-            enabled = uiState.isUrlValid && canUseInternet,
+            onClick = {
+                keyboard?.hide()
+                onAnalyze()
+            },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+            enabled = canAnalyze,
             shape = DambomShapes.Control,
         ) {
             Text(stringResource(R.string.home_analyze), style = MaterialTheme.typography.labelLarge)
@@ -99,6 +108,45 @@ internal fun HomePrimarySection(
 }
 
 @Composable
+private fun HomeUrlField(
+    uiState: HomeUiState,
+    onUrlChange: (String) -> Unit,
+    onPaste: () -> Unit,
+    onSubmit: () -> Unit,
+) {
+    TextField(
+        value = uiState.url,
+        onValueChange = onUrlChange,
+        modifier = Modifier.fillMaxWidth(),
+        label = { Text(stringResource(R.string.home_url_label)) },
+        placeholder = { Text(stringResource(R.string.home_url_placeholder)) },
+        singleLine = true,
+        isError = uiState.url.isNotBlank() && !uiState.isUrlValid,
+        supportingText =
+            if (uiState.url.isNotBlank() && !uiState.isUrlValid) {
+                { Text(stringResource(R.string.home_invalid_url)) }
+            } else {
+                null
+            },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
+        keyboardActions = KeyboardActions(onGo = { onSubmit() }),
+        trailingIcon = {
+            TextButton(onClick = onPaste, modifier = Modifier.padding(end = 4.dp)) {
+                Text(stringResource(R.string.home_paste))
+            }
+        },
+        colors =
+            TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+            ),
+        shape = DambomShapes.Control,
+    )
+}
+
+@Composable
 internal fun HomeSupportingSection(
     downloadSummary: HomeDownloadSummary,
     canUseInternet: Boolean,
@@ -107,26 +155,29 @@ internal fun HomeSupportingSection(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
-        Text(
-            text = stringResource(R.string.home_web_prompt_title),
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = stringResource(R.string.home_web_prompt_description),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        TextButton(
+        Card(
             onClick = onOpenWeb,
             enabled = canUseInternet,
-            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.fillMaxWidth(),
+            shape = DambomShapes.Card,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         ) {
-            Icon(imageVector = Icons.Outlined.Language, contentDescription = null)
-            Text(
-                text = stringResource(R.string.home_browse_web),
-                modifier = Modifier.padding(start = 8.dp),
-            )
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(imageVector = Icons.Outlined.Language, contentDescription = null, modifier = Modifier.size(24.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(stringResource(R.string.home_browse_web), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        stringResource(R.string.home_web_prompt_description),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Icon(imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight, contentDescription = null)
+            }
         }
         if (downloadSummary.isVisible) {
             Spacer(Modifier.height(24.dp))
@@ -156,10 +207,10 @@ private fun HomeDownloadStatus(
             Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = DambomShapes.Card,
     ) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             Text(
                 stringResource(R.string.home_download_open),
@@ -182,10 +233,10 @@ private fun ClipboardSuggestion(
     onDismiss: () -> Unit,
 ) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = DambomShapes.Card,
     ) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.home_clipboard_found), style = MaterialTheme.typography.titleMedium)
             Text(
                 text = url,

@@ -10,21 +10,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -39,6 +29,7 @@ import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.designsystem.previewNoOp
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.feature.home.component.ClipboardConsentDialog
+import com.comst19.dambom.feature.home.component.HomeHeader
 import com.comst19.dambom.feature.home.component.HomePrimarySection
 import com.comst19.dambom.feature.home.component.HomeSupportingSection
 import com.comst19.dambom.feature.home.component.SharedUrlDialog
@@ -47,10 +38,13 @@ import com.comst19.dambom.feature.home.contract.HomeUiState
 @Composable
 internal fun HomeRoute(
     networkAccess: NetworkAccessState,
+    isResultPaneVisible: Boolean,
+    onResultPaneVisibilityChange: (Boolean) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         if (uiState.clipboardSuggestionEnabled) {
@@ -63,20 +57,30 @@ internal fun HomeRoute(
         canUseInternet = networkAccess.canUseInternet,
         onUrlChange = viewModel::updateUrl,
         onPaste = { viewModel.useClipboardText(context.clipboardText()) },
-        onAnalyze = viewModel::analyzeUrl,
+        onAnalyze = {
+            focusManager.clearFocus()
+            onResultPaneVisibilityChange(true)
+            viewModel.analyzeUrl()
+        },
         onOpenWeb = viewModel::openWeb,
         onOpenDownloads = viewModel::openDownloads,
         onOpenSettings = viewModel::openSettings,
         onClipboardConsent = viewModel::setClipboardSuggestionEnabled,
         onUseClipboardSuggestion = { viewModel.useClipboardText(uiState.clipboardUrl) },
         onDismissClipboardSuggestion = viewModel::dismissClipboardSuggestion,
-        onAnalyzeSharedUrl = viewModel::analyzeSharedUrl,
+        onAnalyzeSharedUrl = {
+            focusManager.clearFocus()
+            onResultPaneVisibilityChange(true)
+            viewModel.analyzeSharedUrl()
+        },
         onDismissSharedUrl = viewModel::dismissSharedUrl,
+        isResultPaneVisible = isResultPaneVisible,
+        onResultPaneVisibilityChange = onResultPaneVisibilityChange,
     )
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+@Suppress("LongParameterList")
 internal fun HomeScreen(
     uiState: HomeUiState,
     canUseInternet: Boolean,
@@ -91,6 +95,8 @@ internal fun HomeScreen(
     onDismissClipboardSuggestion: () -> Unit,
     onAnalyzeSharedUrl: () -> Unit,
     onDismissSharedUrl: () -> Unit,
+    isResultPaneVisible: Boolean = true,
+    onResultPaneVisibilityChange: (Boolean) -> Unit = {},
 ) {
     val compactHeight = currentAdaptiveLayoutInfo().isCompactHeight
     val screenVerticalPadding = if (compactHeight) 8.dp else 16.dp
@@ -99,27 +105,7 @@ internal fun HomeScreen(
     AppScreen(
         maxWidth = AppScreenDefaults.SinglePaneMaxWidth,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.home_brand),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                },
-                actions = {
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(
-                            imageVector = Icons.Outlined.Settings,
-                            contentDescription = stringResource(R.string.home_open_settings),
-                        )
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        titleContentColor = MaterialTheme.colorScheme.primary,
-                    ),
-            )
+            HomeHeader(isResultPaneVisible, onResultPaneVisibilityChange, onOpenSettings)
         },
     ) { innerPadding ->
         Column(

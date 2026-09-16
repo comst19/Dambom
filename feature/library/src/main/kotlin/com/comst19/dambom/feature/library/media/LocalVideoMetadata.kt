@@ -11,7 +11,10 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.LocalContext
 import com.comst19.dambom.core.common.ui.loadOrCreateVideoThumbnailFile
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.io.File
 
 internal data class LocalVideoMetadata(
     val thumbnail: Bitmap?,
@@ -22,22 +25,30 @@ internal data class LocalVideoMetadata(
 
 internal data class LocalVideoCacheKey(
     val path: String,
-    val revision: Long,
+    val lastModifiedMillis: Long,
+    val sizeBytes: Long,
 )
 
+internal fun localVideoCacheKey(path: String): LocalVideoCacheKey =
+    File(path).let { file ->
+        LocalVideoCacheKey(
+            path = path,
+            lastModifiedMillis = file.lastModified(),
+            sizeBytes = file.length(),
+        )
+    }
+
 @Composable
-internal fun rememberLocalVideoMetadata(
-    path: String?,
-    revision: Long,
-): State<LocalVideoMetadata?> =
+internal fun rememberLocalVideoMetadata(path: String?): State<LocalVideoMetadata?> =
     LocalContext.current.let { context ->
-        val cacheKey = path?.let { LocalVideoCacheKey(it, revision) }
+        val cacheKey = path?.let(::localVideoCacheKey)
         produceState<LocalVideoMetadata?>(initialValue = null, key1 = context, key2 = cacheKey) {
             value = cacheKey?.let { LocalVideoMetadataLoader.load(context.applicationContext, it) }
         }
     }
 
-private object LocalVideoMetadataLoader {
+internal object LocalVideoMetadataLoader {
+    private val readMutex = Mutex()
     private val cache =
         object : LruCache<LocalVideoCacheKey, LocalVideoMetadata>(THUMBNAIL_CACHE_KB) {
             override fun sizeOf(
@@ -55,12 +66,16 @@ private object LocalVideoMetadataLoader {
         context: Context,
         key: LocalVideoCacheKey,
     ): LocalVideoMetadata =
-        cache[key] ?: withContext(Dispatchers.IO) {
-            readMetadata(
-                key.path,
-                loadOrCreateVideoThumbnailFile(context, key.path)?.let { BitmapFactory.decodeFile(it.absolutePath) },
-            )
-        }.also { cache.put(key, it) }
+        cache[key] ?: readMutex.withLock {
+            cache[key] ?: withContext(Dispatchers.IO) {
+                readMetadata(
+                    key.path,
+                    loadOrCreateVideoThumbnailFile(context, key.path)?.let {
+                        BitmapFactory.decodeFile(it.absolutePath)
+                    },
+                ).also { cache.put(key, it) }
+            }
+        }
 
     private fun readMetadata(
         path: String,

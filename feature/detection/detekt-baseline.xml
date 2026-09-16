@@ -2,7 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>LongMethod:CandidatePreviewDialog.kt$@Composable internal fun CandidatePreviewDialog( candidate: MediaCandidate, onDismiss: () -&gt; Unit, )</ID>
+    <ID>LongMethod:CandidatePreviewDialog.kt$@Composable @androidx.annotation.OptIn(markerClass = [UnstableApi::class]) internal fun CandidatePreviewDialog( candidate: MediaCandidate, onDismiss: () -&gt; Unit, )</ID>
     <ID>LongMethod:DetectionCandidateContent.kt$@Composable internal fun DetectionCandidateContent( state: DetectionUiState.Content, networkAccess: NetworkAccessState, onToggleCandidate: (String) -&gt; Unit, onSelectVariant: (String, String) -&gt; Unit, onDownload: () -&gt; Unit, )</ID>
     <ID>LongMethod:DetectionCandidateItem.kt$@Composable internal fun DetectionCandidateItem( candidate: MediaCandidate, selectedVariant: MediaVariant, index: Int, selected: Boolean, onClick: () -&gt; Unit, onSelectVariant: (String) -&gt; Unit, onPreview: () -&gt; Unit, )</ID>
     <ID>LongMethod:DetectionQualitySheet.kt$@Composable @OptIn(ExperimentalMaterial3Api::class) internal fun DetectionQualitySheet( candidate: MediaCandidate, selectedVariant: MediaVariant, title: String, onDismiss: () -&gt; Unit, onSelect: (MediaVariant) -&gt; Unit, )</ID>

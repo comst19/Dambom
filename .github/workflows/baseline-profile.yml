@@ -1,0 +1,148 @@
+name: Baseline Profile Maintenance
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "**/src/**"
+      - "**/*.gradle.kts"
+      - "**/proguard*.pro"
+      - "**/consumer-rules.pro"
+      - "gradle/**"
+      - gradle.properties
+      - gradlew
+      - "build-logic/**"
+      - .github/actions/setup-android/action.yml
+      - .github/workflows/baseline-profile.yml
+      - "!app/src/release/generated/baselineProfiles/**"
+      - "!**/*.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: baseline-profile-develop
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    name: Generate Baseline Profile
+    if: ${{ github.repository == 'comst19/Dambom' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    outputs:
+      source-sha: ${{ steps.source.outputs.sha }}
+
+    steps:
+      - name: Enable KVM
+        shell: bash
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Check out develop
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ github.event_name == 'push' && github.sha || 'develop' }}
+          fetch-depth: 0
+
+      - name: Record generation source
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Android environment
+        uses: ./.github/actions/setup-android
+        with:
+          cache-read-only: "false"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: platform-tools
+
+      - name: Generate release Baseline Profile
+        run: >-
+          ./gradlew
+          :app:generateGooglePlayReleaseBaselineProfile
+          -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+          -Pandroid.experimental.testOptions.managedDevices.emulator.showKernelLogging=true
+          --stacktrace
+
+      - name: Upload generated profiles
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: baseline-profile-${{ github.run_id }}
+          path: app/src/googlePlayRelease/generated/baselineProfiles/
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Commit Baseline Profile
+    if: ${{ github.ref == 'refs/heads/develop' }}
+    needs: generate
+    runs-on: ubuntu-latest
+    environment: baseline-profile
+    timeout-minutes: 10
+
+    steps:
+      - name: Require the dedicated profile deploy key
+        env:
+          PROFILE_DEPLOY_KEY: ${{ secrets.BASELINE_PROFILE_DEPLOY_KEY }}
+        run: |
+          if [[ -z "$PROFILE_DEPLOY_KEY" ]]; then
+            echo '::error::Configure BASELINE_PROFILE_DEPLOY_KEY in the baseline-profile environment.'
+            exit 1
+          fi
+
+      - name: Check out develop
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: develop
+          fetch-depth: 0
+          ssh-key: ${{ secrets.BASELINE_PROFILE_DEPLOY_KEY }}
+
+      - name: Check whether generation inputs are still current
+        id: current
+        env:
+          SOURCE_SHA: ${{ needs.generate.outputs.source-sha }}
+        run: |
+          if git diff --quiet "$SOURCE_SHA" HEAD -- \
+            ':(glob)**/src/**' ':(glob)**/*.gradle.kts' \
+            ':(glob)**/proguard*.pro' ':(glob)**/consumer-rules.pro' \
+            ':(glob)gradle/**' gradle.properties gradlew \
+            ':(glob)build-logic/**' .github/actions/setup-android/action.yml \
+            .github/workflows/baseline-profile.yml \
+            ':(exclude)app/src/release/generated/baselineProfiles/**' \
+            ':(exclude,glob)**/*.md'; then
+            echo 'matches=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'matches=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download generated profiles
+        if: ${{ steps.current.outputs.matches == 'true' }}
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: baseline-profile-${{ github.run_id }}
+          path: ${{ runner.temp }}/generated-profiles
+
+      - name: Commit generated profiles to develop
+        if: ${{ steps.current.outputs.matches == 'true' }}
+        run: |
+          for profile in baseline-prof.txt startup-prof.txt; do
+            test -s "$RUNNER_TEMP/generated-profiles/$profile"
+            cp "$RUNNER_TEMP/generated-profiles/$profile" "app/src/release/generated/baselineProfiles/$profile"
+          done
+          git add -- app/src/release/generated/baselineProfiles/baseline-prof.txt \
+            app/src/release/generated/baselineProfiles/startup-prof.txt
+          if git diff --cached --quiet; then
+            echo 'Baseline Profile is unchanged.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: Baseline Profile 자동 갱신 [skip ci]'
+          git push origin HEAD:develop

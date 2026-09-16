@@ -13,6 +13,63 @@ import org.junit.Test
 
 class LibraryUiStateTest {
     @Test
+    fun `hidden selection count follows search without changing deletion selection`() {
+        val first = task("first", DownloadStatus.COMPLETED, "/video/first.mp4")
+        val second = task("second", DownloadStatus.COMPLETED, "/video/second.mp4")
+        val state =
+            toLibraryUiState(
+                LibrarySnapshot(listOf(first, second)),
+                selectedId = null,
+                query = "first",
+                selection = LibrarySelectionState().selectAll(listOf(first.id, second.id)),
+            )
+
+        assertEquals(1, state.hiddenSelectedCount)
+        assertEquals(setOf(first.id, second.id), state.selectedIds)
+    }
+
+    @Test
+    fun `successful deletions leave only failed items selected`() {
+        val selected = LibrarySelectionState().selectAll(listOf("first", "failed", "last"))
+        val partial = selected.removeDeleted("first").removeDeleted("last")
+
+        assertEquals(setOf("failed"), partial.selectedIds)
+        assertTrue(partial.isActive)
+        assertEquals(LibrarySelectionState(), partial.removeDeleted("failed"))
+    }
+
+    @Test
+    fun `query and selection reuse prepared snapshot without reading source again`() {
+        var reads = 0
+        val video = task("video", DownloadStatus.COMPLETED, "/video/video.mp4")
+        val source =
+            object : AbstractList<DownloadTask>() {
+                override val size = 1
+
+                override fun get(index: Int): DownloadTask {
+                    reads++
+                    return video
+                }
+            }
+        val snapshot = LibrarySnapshot(source)
+        val initialReads = reads
+
+        val searching = toLibraryUiState(snapshot, selectedId = null, query = "absent")
+        val selecting =
+            toLibraryUiState(
+                snapshot,
+                selectedId = video.id,
+                selection = LibrarySelectionState(isActive = true).toggle(video.id),
+            )
+
+        assertEquals(initialReads, reads)
+        assertTrue(searching.videos.isEmpty())
+        assertEquals(100L, searching.totalBytes)
+        assertEquals(setOf(video.id), selecting.selectedIds)
+        assertEquals(video, selecting.selectedVideo)
+    }
+
+    @Test
     fun `only completed files are shown and selected`() {
         val completed = task("completed", DownloadStatus.COMPLETED, "/video/completed.mp4")
         val state =
@@ -22,7 +79,7 @@ class LibraryUiStateTest {
                         completed,
                         task("missing", DownloadStatus.COMPLETED, null),
                         task("active", DownloadStatus.DOWNLOADING, "/video/active.mp4"),
-                    ),
+                    ).let(::LibrarySnapshot),
                 selectedId = completed.id,
             )
 
@@ -34,7 +91,7 @@ class LibraryUiStateTest {
     fun `missing selected id leaves detail empty`() {
         val state =
             toLibraryUiState(
-                tasks = listOf(task("completed", DownloadStatus.COMPLETED, "/video/completed.mp4")),
+                tasks = LibrarySnapshot(listOf(task("completed", DownloadStatus.COMPLETED, "/video/completed.mp4"))),
                 selectedId = "missing",
             )
 
@@ -47,7 +104,7 @@ class LibraryUiStateTest {
         val newer = task("newer", DownloadStatus.COMPLETED, "/video/newer.mp4").copy(updatedAtMillis = 300L)
         val middle = task("middle", DownloadStatus.COMPLETED, "/video/middle.mp4").copy(updatedAtMillis = 200L)
 
-        val state = toLibraryUiState(listOf(older, newer, middle), selectedId = null)
+        val state = toLibraryUiState(LibrarySnapshot(listOf(older, newer, middle)), selectedId = null)
 
         assertEquals(listOf(newer, middle, older), state.videos)
     }
@@ -60,7 +117,7 @@ class LibraryUiStateTest {
 
         val state =
             toLibraryUiState(
-                tasks = listOf(selected, matching),
+                tasks = LibrarySnapshot(listOf(selected, matching)),
                 selectedId = selected.id,
                 query = "travel",
             )
@@ -75,7 +132,7 @@ class LibraryUiStateTest {
     fun `selected view mode is kept in ui state`() {
         val state =
             toLibraryUiState(
-                tasks = listOf(task("completed", DownloadStatus.COMPLETED, "/video/completed.mp4")),
+                tasks = LibrarySnapshot(listOf(task("completed", DownloadStatus.COMPLETED, "/video/completed.mp4"))),
                 selectedId = null,
                 viewMode = LibraryViewMode.LIST,
             )
@@ -100,14 +157,16 @@ class LibraryUiStateTest {
         val web = task("web", DownloadStatus.COMPLETED, "/video/web.mp4")
         val x = task("x", DownloadStatus.COMPLETED, "/video/x.mp4").copy(sourcePageUrl = "https://x.com/user/status/1")
 
-        val all = toLibraryUiState(listOf(web, x), selectedId = null, sourceFilter = LibrarySourceFilter.ALL)
-        val xOnly = toLibraryUiState(listOf(web, x), selectedId = null, sourceFilter = LibrarySourceFilter.X)
-        val webOnly = toLibraryUiState(listOf(web, x), selectedId = null, sourceFilter = LibrarySourceFilter.WEB)
+        val snapshot = LibrarySnapshot(listOf(web, x))
+        val all = toLibraryUiState(snapshot, selectedId = null, sourceFilter = LibrarySourceFilter.ALL)
+        val xOnly = toLibraryUiState(snapshot, selectedId = null, sourceFilter = LibrarySourceFilter.X)
+        val webOnly = toLibraryUiState(snapshot, selectedId = null, sourceFilter = LibrarySourceFilter.WEB)
 
         assertEquals(listOf(web, x), all.videos)
         assertEquals(listOf(x), xOnly.videos)
         assertEquals(listOf(web), webOnly.videos)
         assertEquals(2, xOnly.totalVideoCount)
+        assertEquals(200L, xOnly.totalBytes)
     }
 
     @Test

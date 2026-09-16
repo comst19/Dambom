@@ -19,17 +19,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.semantics.progressBarRangeInfo
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.domain.model.DownloadStatus
@@ -40,46 +37,69 @@ import com.comst19.dambom.feature.downloads.contract.DownloadsViewMode
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.lazy.items as listItems
 
+@Immutable
+internal data class DownloadsActions(
+    val navigation: DownloadsNavigationActions,
+    val task: DownloadTaskActions,
+    val queue: DownloadQueueActions,
+)
+
+@Immutable
+internal data class DownloadsNavigationActions(
+    val onBack: () -> Unit,
+    val onOpenLibrary: () -> Unit,
+    val onViewModeChange: (DownloadsViewMode) -> Unit,
+)
+
+@Immutable
+internal data class DownloadTaskActions(
+    val onPause: (String) -> Unit,
+    val onResume: (String) -> Unit,
+    val onCancel: (String) -> Unit,
+    val onRetry: (String) -> Unit,
+)
+
+@Immutable
+internal data class DownloadQueueActions(
+    val onPauseAll: () -> Unit,
+    val onResumeAll: () -> Unit,
+)
+
 @Composable
 internal fun DownloadsContent(
     uiState: DownloadsUiState,
     canDownload: Boolean,
-    onPause: (String) -> Unit,
-    onResume: (String) -> Unit,
-    onCancel: (String) -> Unit,
-    onRetry: (String) -> Unit,
-    onPauseAll: () -> Unit,
-    onResumeAll: () -> Unit,
+    actions: DownloadsActions,
 ) {
     if (uiState.tasks.isEmpty()) {
-        EmptyDownloads()
+        EmptyDownloads(actions.navigation.onOpenLibrary)
     } else if (uiState.viewMode == DownloadsViewMode.GRID) {
         DownloadGrid(
             uiState = uiState,
             canDownload = canDownload,
-            onPause = onPause,
-            onResume = onResume,
-            onCancel = onCancel,
-            onRetry = onRetry,
-            onPauseAll = onPauseAll,
-            onResumeAll = onResumeAll,
+            onPause = actions.task.onPause,
+            onResume = actions.task.onResume,
+            onCancel = actions.task.onCancel,
+            onRetry = actions.task.onRetry,
+            onPauseAll = actions.queue.onPauseAll,
+            onResumeAll = actions.queue.onResumeAll,
         )
     } else {
         DownloadList(
             uiState = uiState,
             canDownload = canDownload,
-            onPause = onPause,
-            onResume = onResume,
-            onCancel = onCancel,
-            onRetry = onRetry,
-            onPauseAll = onPauseAll,
-            onResumeAll = onResumeAll,
+            onPause = actions.task.onPause,
+            onResume = actions.task.onResume,
+            onCancel = actions.task.onCancel,
+            onRetry = actions.task.onRetry,
+            onPauseAll = actions.queue.onPauseAll,
+            onResumeAll = actions.queue.onResumeAll,
         )
     }
 }
 
 @Composable
-private fun EmptyDownloads() {
+private fun EmptyDownloads(onOpenLibrary: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -97,6 +117,9 @@ private fun EmptyDownloads() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
         )
+        Button(onClick = onOpenLibrary, shape = DambomShapes.Control) {
+            Text(stringResource(R.string.downloads_open_library))
+        }
     }
 }
 
@@ -114,16 +137,16 @@ private fun DownloadGrid(
     LazyVerticalGrid(
         columns = GridCells.Adaptive(MIN_DOWNLOAD_CARD_WIDTH),
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 16.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(span = { GridItemSpan(maxLineSpan) }) {
             DownloadSummary(uiState, canDownload, onPauseAll, onResumeAll)
             Spacer(Modifier.height(12.dp))
         }
         DOWNLOAD_GROUPS.forEach { status ->
-            val tasks = uiState.tasks.filter { it.status == status }
+            val tasks = uiState.tasksByStatus[status].orEmpty()
             if (tasks.isNotEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     DownloadGroupTitle(status, tasks.size)
@@ -144,6 +167,26 @@ private fun DownloadGrid(
                 }
             }
         }
+        val pendingDeletions = uiState.pendingDeletionTasks
+        if (pendingDeletions.isNotEmpty()) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                PendingDeletionGroupTitle(pendingDeletions.size)
+            }
+            gridItems(
+                items = pendingDeletions,
+                key = DownloadTask::id,
+                contentType = { DOWNLOAD_ITEM_CONTENT_TYPE },
+            ) { task ->
+                DownloadGridCard(
+                    task = task,
+                    canDownload = canDownload,
+                    onPause = { onPause(task.id) },
+                    onResume = { onResume(task.id) },
+                    onCancel = { onCancel(task.id) },
+                    onRetry = { onRetry(task.id) },
+                )
+            }
+        }
     }
 }
 
@@ -160,15 +203,15 @@ private fun DownloadList(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
             DownloadSummary(uiState, canDownload, onPauseAll, onResumeAll)
             Spacer(Modifier.height(12.dp))
         }
         DOWNLOAD_GROUPS.forEach { status ->
-            val tasks = uiState.tasks.filter { it.status == status }
+            val tasks = uiState.tasksByStatus[status].orEmpty()
             if (tasks.isNotEmpty()) {
                 item { DownloadGroupTitle(status, tasks.size) }
                 listItems(
@@ -187,6 +230,24 @@ private fun DownloadList(
                 }
             }
         }
+        val pendingDeletions = uiState.pendingDeletionTasks
+        if (pendingDeletions.isNotEmpty()) {
+            item { PendingDeletionGroupTitle(pendingDeletions.size) }
+            listItems(
+                items = pendingDeletions,
+                key = DownloadTask::id,
+                contentType = { DOWNLOAD_ITEM_CONTENT_TYPE },
+            ) { task ->
+                DownloadListCard(
+                    task = task,
+                    canDownload = canDownload,
+                    onPause = { onPause(task.id) },
+                    onResume = { onResume(task.id) },
+                    onCancel = { onCancel(task.id) },
+                    onRetry = { onRetry(task.id) },
+                )
+            }
+        }
     }
 }
 
@@ -199,11 +260,11 @@ private fun DownloadSummary(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = DambomShapes.Summary,
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             androidx.compose.foundation.layout.Row(
@@ -218,7 +279,7 @@ private fun DownloadSummary(
                 )
                 Column(Modifier.weight(1f)) {
                     Text(
-                        stringResource(R.string.downloads_summary, state.activeCount),
+                        state.summaryTitle(),
                         style = MaterialTheme.typography.titleLarge,
                     )
                     Text(
@@ -229,12 +290,14 @@ private fun DownloadSummary(
                 }
             }
             if (state.activeCount > 0) {
-                LinearProgressIndicator(
-                    progress = { state.progress },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .semantics { progressBarRangeInfo = ProgressBarRangeInfo(state.progress, 0f..1f) },
+                Text(
+                    stringResource(R.string.downloads_remaining_progress),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                DownloadProgress(
+                    progress = state.progress.takeUnless { state.hasUnknownSize },
+                    running = true,
                 )
             }
             androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -252,12 +315,30 @@ private fun DownloadSummary(
 }
 
 @Composable
+private fun DownloadsUiState.summaryTitle(): String =
+    when {
+        activeCount > 0 -> stringResource(R.string.downloads_summary, activeCount)
+        !tasksByStatus[DownloadStatus.QUEUED].isNullOrEmpty() -> stringResource(R.string.downloads_summary_waiting)
+        canResumeAll -> stringResource(R.string.downloads_summary_paused)
+        else -> stringResource(R.string.downloads_summary_attention)
+    }
+
+@Composable
 private fun DownloadGroupTitle(
     status: DownloadStatus,
     count: Int,
 ) {
     Text(
         text = stringResource(R.string.downloads_group_count, status.groupTitle(), count),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+    )
+}
+
+@Composable
+private fun PendingDeletionGroupTitle(count: Int) {
+    Text(
+        text = stringResource(R.string.downloads_delete_group_count, count),
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.onSurface,
     )

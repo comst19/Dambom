@@ -19,6 +19,7 @@ fun DambomTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = DambomTypography,
+        shapes = DambomShapes.Theme,
         content = content,
     )
 }

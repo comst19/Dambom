@@ -12,7 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Download
@@ -35,6 +38,7 @@ import com.comst19.dambom.core.common.ui.VideoThumbnail
 import com.comst19.dambom.core.common.ui.format.formatFileSize
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaVariant
+import com.comst19.dambom.core.domain.model.ORIGINAL_QUALITY
 import com.comst19.dambom.feature.detection.R
 
 @Composable
@@ -48,7 +52,14 @@ internal fun DetectionQualitySheet(
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
-            modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 24.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(
+                        rememberScrollState(),
+                    ).selectableGroup()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp),
         ) {
             Text(
                 text = stringResource(R.string.detection_choose_quality),
@@ -57,7 +68,7 @@ internal fun DetectionQualitySheet(
             )
             Spacer(Modifier.height(16.dp))
             Row(
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
@@ -100,17 +111,22 @@ internal fun DetectionQualitySheet(
                                 selected = selected,
                                 role = Role.RadioButton,
                                 onClick = { onSelect(variant) },
-                            ).padding(vertical = 14.dp),
+                            ).padding(vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Download,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        text = variant.quality,
-                        modifier = Modifier.padding(start = 18.dp).weight(1f),
+                        text =
+                            if (variant.quality == ORIGINAL_QUALITY) {
+                                stringResource(R.string.detection_quality_original)
+                            } else {
+                                variant.quality
+                            },
+                        modifier = Modifier.padding(start = 16.dp).weight(1f),
                         style = MaterialTheme.typography.titleMedium,
                     )
                     variant.contentLength?.let { contentLength ->

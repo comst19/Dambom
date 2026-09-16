@@ -12,6 +12,7 @@ android {
 dependencies {
     implementation(projects.core.common)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.coroutines.core)
     implementation(libs.okhttp.core)
     implementation(libs.okhttp.logging)
     testImplementation(libs.mockwebserver)

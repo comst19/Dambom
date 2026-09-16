@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
+import com.comst19.dambom.core.domain.repository.MediaDetectionSnapshots
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
@@ -28,6 +29,19 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class WebViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
+
+    @Test
+    fun `web accepts uppercase explicit schemes and still supplies a missing scheme`() {
+        assertEquals("HTTP://example.com/video.mp4", "HTTP://example.com/video.mp4".normalizeAddress())
+        assertEquals("https://example.com/video.mp4", "example.com/video.mp4".normalizeAddress())
+    }
+
+    @Test
+    fun `video extension is read from the uri path only`() {
+        assertTrue("https://example.com/video.mp4#player".hasVideoExtension())
+        assertTrue("https://example.com/video.mp4?token=x#player".hasVideoExtension())
+        assertEquals(false, "https://example.com/video.jpg#fake.mp4".hasVideoExtension())
+    }
 
     @Test
     fun `tabs can be created selected and closed without leaving an empty list`() {
@@ -199,7 +213,8 @@ class WebViewModelTest {
     fun `detection result opens only after media is found`() =
         runTest(mainDispatcherRule.dispatcher) {
             val navigation = SpyNavigationDispatcher()
-            val viewModel = WebViewModel(FakeMediaDetectionRepository, navigation, SavedStateHandle())
+            val snapshots = MediaDetectionSnapshots()
+            val viewModel = WebViewModel(FakeMediaDetectionRepository, navigation, SavedStateHandle(), snapshots)
             viewModel.applyInitialUrl("https://example.com")
             viewModel.onPageStarted(
                 viewModel.uiState.value.currentTabId,
@@ -227,9 +242,16 @@ class WebViewModelTest {
             viewModel.openDetectedMedia()
             advanceUntilIdle()
 
+            val destination = (navigation.dispatched.single() as NavigationEvent.Navigate).key as DetectionResultKey
+            assertEquals("https://example.com", destination.url)
+            assertTrue(destination.snapshotId != null)
             assertEquals(
-                NavigationEvent.Navigate(DetectionResultKey("https://example.com")),
-                navigation.dispatched.single(),
+                "https://example.com/video.mp4",
+                snapshots
+                    .get(checkNotNull(destination.snapshotId), destination.url)
+                    ?.candidates
+                    ?.single()
+                    ?.url,
             )
         }
 
@@ -254,7 +276,7 @@ class WebViewModelTest {
         }
 
     @Test
-    fun `media request is ignored until the current page finishes`() =
+    fun `current page media is collected during loading and stale generations are ignored`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel = createViewModel()
             val tabId = viewModel.uiState.value.currentTabId
@@ -263,12 +285,13 @@ class WebViewModelTest {
             viewModel.onMediaRequest(tabId, 1L, "https://example.com/first.mp4")
             runCurrent()
             assertEquals(
-                WebDetectionState.Idle,
+                WebDetectionState.Found(1),
                 viewModel.uiState.value.currentTab
                     ?.detectionState,
             )
 
             viewModel.onPageFinished(tabId, FIRST_PAGE_URL, "First", 1L)
+            viewModel.onMediaRequest(tabId, 0L, "https://example.com/stale.mp4")
             viewModel.onMediaRequest(tabId, 1L, "https://example.com/first.mp4")
             runCurrent()
             assertEquals(

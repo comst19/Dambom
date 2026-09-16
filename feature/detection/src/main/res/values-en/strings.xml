@@ -1,16 +1,24 @@
 <resources>
+    <string name="detection_failed">Couldn’t analyze the video. Opening the page in the browser.</string>
+    <string name="detection_select_all">Select all</string>
     <string name="detection_title">Find videos</string>
+    <string name="detection_results_title">Results</string>
+    <string name="detection_placeholder_title">Your videos will appear here</string>
+    <string name="detection_placeholder_description">Enter a link and tap Find videos\nto choose videos and quality.</string>
     <string name="detection_back">Back</string>
     <string name="detection_loading">Finding videos</string>
     <string name="detection_loading_description">Some pages may take a moment.</string>
-    <string name="detection_found_count">Found %1$d videos you can save.</string>
-    <string name="detection_choose_videos">Check the thumbnails or previews, then select the videos to save.</string>
+    <string name="detection_found_count">Videos ready to save: %1$d</string>
+    <string name="detection_choose_videos">Check a thumbnail or play the selected quality, then choose videos to save.</string>
     <string name="detection_video_number">Video %1$d</string>
     <string name="detection_thumbnail">Video %1$d thumbnail</string>
-    <string name="detection_preview">Preview</string>
+    <string name="detection_play">Play</string>
+    <string name="detection_play_selected_quality">Playing selected quality</string>
     <string name="detection_choose_quality">Choose download quality</string>
     <string name="detection_quality_selected">Selected</string>
+    <string name="detection_quality_original">Original</string>
     <string name="detection_close_preview">Close</string>
+    <string name="detection_toggle_playback_controls">Show or hide playback controls</string>
     <string name="detection_download_selected">Download %1$d</string>
     <string name="detection_adding_to_queue">Adding %1$d</string>
     <string name="detection_enqueue_failed">Couldn’t add these videos to the queue. Try again.</string>

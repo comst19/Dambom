@@ -1,5 +1,6 @@
 package com.comst19.dambom.feature.library
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -88,6 +89,7 @@ internal fun LibraryScreen(
     onDetailPaneVisibilityChange: (Boolean) -> Unit = {},
 ) {
     var deleteSelectedOpen by remember { mutableStateOf(false) }
+    BackHandler(enabled = uiState.isSelecting, onBack = onClearSelection)
     AppScreen(
         topBar = {
             LibraryHeader(
@@ -124,6 +126,7 @@ internal fun LibraryScreen(
     if (deleteSelectedOpen) {
         DeleteSelectedVideosDialog(
             count = uiState.selectedIds.size,
+            hiddenCount = uiState.hiddenSelectedCount,
             onDismiss = { deleteSelectedOpen = false },
             onConfirm = {
                 deleteSelectedOpen = false

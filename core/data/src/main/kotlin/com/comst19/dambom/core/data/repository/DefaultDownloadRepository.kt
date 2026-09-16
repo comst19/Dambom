@@ -12,11 +12,12 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.URI
@@ -24,6 +25,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+@Suppress("TooManyFunctions")
 class DefaultDownloadRepository
     @Inject
     internal constructor(
@@ -32,9 +34,30 @@ class DefaultDownloadRepository
         private val fileStore: DownloadFileStore,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : DownloadRepository {
+        private val deletionMutex = Mutex()
+
         override val downloads: Flow<List<DownloadTask>> =
             dao
                 .observeAll()
+                .map { entities ->
+                    entities.filterNot(DownloadTaskEntity::deletePending).map { entity ->
+                        entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
+                    }
+                }.distinctUntilChanged()
+                .flowOn(ioDispatcher)
+
+        override fun observeDownload(id: String): Flow<DownloadTask?> =
+            dao
+                .observeById(id)
+                .distinctUntilChanged()
+                .map { entity ->
+                    entity?.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
+                }.flowOn(ioDispatcher)
+
+        override val completedDownloads: Flow<List<DownloadTask>> =
+            dao
+                .observeCompleted()
+                .distinctUntilChanged()
                 .map { entities ->
                     entities.map { entity ->
                         entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
@@ -42,9 +65,10 @@ class DefaultDownloadRepository
                 }.distinctUntilChanged()
                 .flowOn(ioDispatcher)
 
-        override val completedDownloads: Flow<List<DownloadTask>> =
+        override val deletionPendingDownloads: Flow<List<DownloadTask>> =
             dao
-                .observeCompleted()
+                .observePendingDeletions()
+                .distinctUntilChanged()
                 .map { entities ->
                     entities.map { entity ->
                         entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
@@ -86,23 +110,7 @@ class DefaultDownloadRepository
 
         override suspend fun delete(id: String) =
             withContext(ioDispatcher) {
-                val task = dao.getById(id)
-                if (task == null || dao.claimForDeletion(id, System.currentTimeMillis()) == 0) return@withContext
-                var cleanupComplete = false
-                try {
-                    cleanupComplete = fileStore.delete(id, task.localFileName)
-                    if (!cleanupComplete) throw IOException("Unable to delete download files")
-                    if (dao.deleteClaimed(id) == 0) {
-                        cleanupComplete = false
-                        throw IOException("Unable to delete download record")
-                    }
-                } finally {
-                    if (!cleanupComplete) {
-                        withContext(NonCancellable) {
-                            dao.releaseDeletionClaim(id)
-                        }
-                    }
-                }
+                deletionMutex.withLock { cleanupDeletion(id, recordIntent = true) }
             }
 
         override suspend fun retry(id: String) {
@@ -119,12 +127,37 @@ class DefaultDownloadRepository
             scheduler.schedule()
         }
 
-        override suspend fun recoverPendingDownloads() {
-            if (dao.countSchedulable() > 0) scheduler.ensureScheduled()
-        }
+        override suspend fun recoverPendingDownloads() =
+            withContext(ioDispatcher) {
+                dao.getPendingDeletions().forEach { task ->
+                    try {
+                        deletionMutex.withLock { cleanupDeletion(task.id, recordIntent = false) }
+                    } catch (_: IOException) {
+                    }
+                }
+                if (dao.countSchedulable() > 0) scheduler.ensureScheduled()
+            }
 
         override suspend fun refreshNetworkPolicy() {
             if (dao.countSchedulable() > 0) scheduler.reschedule()
+        }
+
+        private suspend fun cleanupDeletion(
+            id: String,
+            recordIntent: Boolean,
+        ) {
+            val task =
+                dao.getById(id)?.let { current ->
+                    when {
+                        current.deletePending -> current
+                        !recordIntent -> null
+                        dao.claimForDeletion(id, System.currentTimeMillis()) == 0 -> null
+                        else -> dao.getById(id)
+                    }
+                } ?: return
+            val localFileName = task.localFileName ?: fileStore.completedFile(id, task.url, task.mimeType).name
+            if (!fileStore.delete(id, localFileName)) throw IOException("Unable to delete download files")
+            if (dao.deleteClaimed(id) == 0) throw IOException("Unable to delete download record")
         }
     }
 
@@ -164,6 +197,7 @@ private fun DownloadTaskEntity.toDomain(localFilePath: String?): DownloadTask =
         localFilePath = localFilePath,
         createdAtMillis = createdAtMillis,
         updatedAtMillis = updatedAtMillis,
+        deletePending = deletePending,
     )
 
 private inline fun <reified T : Enum<T>> enumValueOrDefault(

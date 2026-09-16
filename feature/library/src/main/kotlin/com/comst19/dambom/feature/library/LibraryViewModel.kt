@@ -10,6 +10,7 @@ import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.domain.model.AppSettings
+import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -46,6 +48,7 @@ internal class LibraryViewModel
         private val viewMode = savedStateHandle.getStateFlow(VIEW_MODE_KEY, LibraryViewMode.GRID.name)
         private val sourceFilter = savedStateHandle.getStateFlow(SOURCE_FILTER_KEY, LibrarySourceFilter.ALL.name)
         private val selection = MutableStateFlow(LibrarySelectionState())
+        private var deletingSelection = false
         private val displayPreferences =
             combine(viewMode, sourceFilter) { viewMode, sourceFilter ->
                 LibraryDisplayPreferences(
@@ -53,6 +56,13 @@ internal class LibraryViewModel
                     sourceFilter = LibrarySourceFilter.entries.firstOrNull { it.name == sourceFilter } ?: LibrarySourceFilter.ALL,
                 )
             }
+        private val libraryDownloads =
+            combine(repository.completedDownloads, repository.deletionPendingDownloads) { completed, pending ->
+                (
+                    completed.filterNot(DownloadTask::deletePending) +
+                        pending.filter { it.status == DownloadStatus.COMPLETED }
+                ).distinctBy(DownloadTask::id)
+            }.map(::LibrarySnapshot)
 
         val settings: StateFlow<AppSettings> =
             settingsRepository.settings.stateIn(
@@ -63,7 +73,7 @@ internal class LibraryViewModel
 
         val uiState: StateFlow<LibraryUiState> =
             combine(
-                repository.completedDownloads,
+                libraryDownloads,
                 selectedId,
                 query,
                 displayPreferences,
@@ -83,7 +93,11 @@ internal class LibraryViewModel
                 initialValue = LibraryUiState(),
             )
 
+        fun observeVideo(id: String) = repository.observeDownload(id).asVideoDetailState()
+
         fun openVideo(id: String) {
+            val task = uiState.value.videos.firstOrNull { it.id == id }
+            if (task?.deletePending != false || task.localFilePath == null) return
             savedStateHandle[SELECTED_ID_KEY] = id
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoDetailKey(id))) }
         }
@@ -109,29 +123,42 @@ internal class LibraryViewModel
         }
 
         fun toggleSelection(id: String) {
+            if (deletingSelection) return
             selection.update { it.toggle(id) }
         }
 
         fun selectAllVisible() {
+            if (deletingSelection) return
             selection.update { it.selectAll(uiState.value.videos.map(DownloadTask::id)) }
         }
 
         fun clearSelection() {
+            if (deletingSelection) return
             selection.update(LibrarySelectionState::clear)
         }
 
         fun deleteSelected() {
             val ids = uiState.value.selectedIds
-            if (ids.isEmpty()) return
+            if (ids.isEmpty() || deletingSelection) return
+            deletingSelection = true
             viewModelScope.launch {
-                suspendRunCatching { ids.forEach { repository.delete(it) } }.fold(
-                    onSuccess = {
-                        if (selectedId.value in ids) savedStateHandle[SELECTED_ID_KEY] = null
-                        selection.value = LibrarySelectionState()
+                try {
+                    var deletedCount = 0
+                    ids.forEach { id ->
+                        if (suspendRunCatching { repository.delete(id) }.isSuccess) {
+                            deletedCount++
+                            if (selectedId.value == id) savedStateHandle[SELECTED_ID_KEY] = null
+                            selection.update { it.removeDeleted(id) }
+                        }
+                    }
+                    if (deletedCount == ids.size) {
                         showMessage(R.string.library_delete_selected_success, ids.size)
-                    },
-                    onFailure = { showMessage(R.string.library_delete_failure) },
-                )
+                    } else {
+                        showMessage(R.string.library_delete_selected_partial, deletedCount, ids.size - deletedCount)
+                    }
+                } finally {
+                    deletingSelection = false
+                }
             }
         }
 
@@ -139,6 +166,7 @@ internal class LibraryViewModel
             task: DownloadTask,
             title: String,
         ) {
+            if (task.deletePending || task.localFilePath == null) return
             val trimmedTitle = title.trim()
             if (trimmedTitle.isEmpty() || trimmedTitle == task.title) return
             viewModelScope.launch {
@@ -167,6 +195,7 @@ internal class LibraryViewModel
             task: DownloadTask,
             destination: Uri,
         ) {
+            if (task.deletePending || task.localFilePath == null) return
             viewModelScope.launch {
                 suspendRunCatching { fileManager.export(task, destination) }
                     .notifyResult(R.string.library_export_success, R.string.library_export_failure)
@@ -174,6 +203,7 @@ internal class LibraryViewModel
         }
 
         fun exportToConfiguredLocation(task: DownloadTask) {
+            if (task.deletePending || task.localFilePath == null) return
             val treeUri = settings.value.downloadTreeUri?.let(Uri::parse)
             if (treeUri != null && !fileManager.hasPersistedTreePermission(treeUri)) {
                 clearInvalidDownloadLocation()
@@ -204,7 +234,8 @@ internal class LibraryViewModel
             }
         }
 
-        fun createShareIntent(task: DownloadTask): Intent? = fileManager.createShareIntent(task)
+        fun createShareIntent(task: DownloadTask): Intent? =
+            task.takeIf { !it.deletePending && it.localFilePath != null }?.let(fileManager::createShareIntent)
 
         fun notifyShareFailure() {
             viewModelScope.launch { showMessage(R.string.library_share_failure) }

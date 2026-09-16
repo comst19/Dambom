@@ -1,5 +1,7 @@
 package com.comst19.dambom.feature.web.component
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Close
@@ -27,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.feature.web.R
 import com.comst19.dambom.feature.web.contract.WebTab
 import com.comst19.dambom.feature.web.contract.WebUiState
@@ -42,7 +44,7 @@ internal fun WebTabsSheet(
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -70,20 +72,16 @@ internal fun WebTabsSheet(
                             ),
                     colors =
                         CardDefaults.cardColors(
-                            containerColor =
-                                if (selected) {
-                                    MaterialTheme.colorScheme.primaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceContainer
-                                },
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                         ),
-                    shape = RoundedCornerShape(16.dp),
+                    border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
+                    shape = DambomShapes.Control,
                 ) {
                     Row(
-                        modifier = Modifier.padding(start = 18.dp, top = 14.dp, bottom = 14.dp),
+                        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Column(Modifier.weight(1f)) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             Text(
                                 tab.url ?: stringResource(R.string.web_empty_tab),

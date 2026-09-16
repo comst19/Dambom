@@ -54,63 +54,68 @@ internal fun VideoActionsButton(
             expanded = menuExpanded,
             onDismissRequest = { menuExpanded = false },
         ) {
-            ActionMenuItem(
-                label = stringResource(R.string.library_rename),
-                icon = { Icon(Icons.Outlined.Edit, contentDescription = null) },
-                onClick = {
-                    menuExpanded = false
-                    renameOpen = true
-                },
-            )
-            ActionMenuItem(
-                label = stringResource(R.string.library_share_video),
-                icon = { Icon(Icons.Outlined.Share, contentDescription = null) },
-                onClick = {
-                    menuExpanded = false
-                    actions.onShareVideo(task)
-                },
-            )
-            ActionMenuItem(
-                label = stringResource(R.string.library_share_link),
-                icon = { Icon(Icons.Outlined.Share, contentDescription = null) },
-                onClick = {
-                    menuExpanded = false
-                    actions.onShareLink(task)
-                },
-            )
-            ActionMenuItem(
-                label = stringResource(R.string.library_copy_link),
-                icon = { Icon(Icons.Outlined.Link, contentDescription = null) },
-                onClick = {
-                    menuExpanded = false
-                    actions.onCopyLink(task)
-                },
-            )
+            if (!task.deletePending) {
+                ActionMenuItem(
+                    label = stringResource(R.string.library_rename),
+                    icon = { Icon(Icons.Outlined.Edit, contentDescription = null) },
+                    onClick = {
+                        menuExpanded = false
+                        renameOpen = true
+                    },
+                )
+                ActionMenuItem(
+                    label = stringResource(R.string.library_share_video),
+                    icon = { Icon(Icons.Outlined.Share, contentDescription = null) },
+                    onClick = {
+                        menuExpanded = false
+                        actions.onShareVideo(task)
+                    },
+                )
+                ActionMenuItem(
+                    label = stringResource(R.string.library_share_link),
+                    icon = { Icon(Icons.Outlined.Share, contentDescription = null) },
+                    onClick = {
+                        menuExpanded = false
+                        actions.onShareLink(task)
+                    },
+                )
+                ActionMenuItem(
+                    label = stringResource(R.string.library_copy_link),
+                    icon = { Icon(Icons.Outlined.Link, contentDescription = null) },
+                    onClick = {
+                        menuExpanded = false
+                        actions.onCopyLink(task)
+                    },
+                )
+                ActionMenuItem(
+                    label =
+                        stringResource(
+                            if (sourceKind == VideoSourceKind.X) {
+                                R.string.player_open_in_x
+                            } else {
+                                R.string.player_open_website
+                            },
+                        ),
+                    icon = { Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null) },
+                    onClick = {
+                        menuExpanded = false
+                        actions.onOpenOriginal(task)
+                    },
+                )
+                ActionMenuItem(
+                    label = stringResource(R.string.library_export),
+                    icon = { Icon(Icons.Outlined.Download, contentDescription = null) },
+                    onClick = {
+                        menuExpanded = false
+                        actions.onExport(task)
+                    },
+                )
+            }
             ActionMenuItem(
                 label =
                     stringResource(
-                        if (sourceKind == VideoSourceKind.X) {
-                            R.string.player_open_in_x
-                        } else {
-                            R.string.player_open_website
-                        },
+                        if (task.deletePending) R.string.library_delete_retry else R.string.library_delete,
                     ),
-                icon = { Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null) },
-                onClick = {
-                    menuExpanded = false
-                    actions.onOpenOriginal(task)
-                },
-            )
-            ActionMenuItem(
-                label = stringResource(R.string.library_export),
-                icon = { Icon(Icons.Outlined.Download, contentDescription = null) },
-                onClick = {
-                    menuExpanded = false
-                    actions.onExport(task)
-                },
-            )
-            ActionMenuItem(
-                label = stringResource(R.string.library_delete),
                 icon = { Icon(Icons.Outlined.DeleteOutline, contentDescription = null) },
                 onClick = {
                     menuExpanded = false

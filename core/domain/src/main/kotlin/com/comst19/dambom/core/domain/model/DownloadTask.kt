@@ -25,6 +25,7 @@ data class DownloadTask(
     val localFilePath: String? = null,
     val createdAtMillis: Long,
     val updatedAtMillis: Long,
+    val deletePending: Boolean = false,
 ) {
     val progress: Float
         get() =
@@ -47,6 +48,7 @@ enum class DownloadFailureReason {
     UNSUPPORTED_FORMAT,
     NETWORK,
     STORAGE,
+    INSUFFICIENT_STORAGE,
     SERVER,
     UNKNOWN,
 }

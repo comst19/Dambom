@@ -1,0 +1,225 @@
+name: Android CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_branch:
+        description: Branch gate to run
+        required: true
+        default: develop
+        type: choice
+        options:
+          - develop
+          - release
+  pull_request:
+    branches:
+      - develop
+      - release
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  branch-flow:
+    name: Branch flow
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Require the supported promotion path
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref || inputs.target_branch }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if [[ "$EVENT_NAME" != "pull_request" ]]; then
+            exit 0
+          fi
+
+          if [[ "$BASE_BRANCH" == "release" && "$HEAD_BRANCH" != "develop" ]]; then
+            echo "::error::Only develop can be promoted to release."
+            exit 1
+          fi
+
+          if [[ "$BASE_BRANCH" == "develop" && "$HEAD_BRANCH" == "release" ]]; then
+            echo "::error::release cannot be merged back into develop."
+            exit 1
+          fi
+
+  version:
+    name: Version code
+    if: >-
+      ${{
+        (github.event_name == 'pull_request' && github.base_ref == 'release') ||
+        (github.event_name == 'workflow_dispatch' && inputs.target_branch == 'release')
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository history
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+
+      - name: Require a versionCode increase
+        shell: bash
+        env:
+          BASE_REF: release
+        run: |
+          base_version_code=$(git show "origin/$BASE_REF:app/build.gradle.kts" | sed -nE 's/.*versionCode = ([0-9]+).*/\1/p' | head -1)
+          current_version_code=$(sed -nE 's/.*versionCode = ([0-9]+).*/\1/p' app/build.gradle.kts | head -1)
+          if [[ -z "$base_version_code" || -z "$current_version_code" ]]; then
+            echo "::error::Unable to read versionCode from app/build.gradle.kts."
+            exit 1
+          fi
+          if (( current_version_code <= base_version_code )); then
+            echo "::error::versionCode must increase from $base_version_code before promotion."
+            exit 1
+          fi
+
+  develop-checks:
+    name: ${{ matrix.name }}
+    if: >-
+      ${{
+        (github.event_name == 'pull_request' && github.base_ref == 'develop') ||
+        (github.event_name == 'workflow_dispatch' && inputs.target_branch == 'develop')
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: static-analysis
+            name: Static analysis
+            tasks: ktlintCheck detekt
+          - id: unit-tests
+            name: Unit tests
+            tasks: testDebugUnitTest
+          - id: debug-lint
+            name: Debug lint
+            tasks: lintDebug
+          - id: debug-build
+            name: Debug build
+            tasks: :app:assembleDebug
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Android environment
+        uses: ./.github/actions/setup-android
+        with:
+          cache-read-only: "true"
+
+      - name: Run ${{ matrix.name }}
+        env:
+          GRADLE_TASKS: ${{ matrix.tasks }}
+        run: ./gradlew $GRADLE_TASKS --parallel --stacktrace
+
+      - name: Upload failure reports
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ci-failure-reports-${{ matrix.id }}-${{ github.run_id }}
+          path: |
+            **/build/reports/**
+            **/build/test-results/**
+          if-no-files-found: ignore
+          retention-days: 14
+
+  release-checks:
+    name: ${{ matrix.name }}
+    if: >-
+      ${{
+        (github.event_name == 'pull_request' && github.base_ref == 'release') ||
+        (github.event_name == 'workflow_dispatch' && inputs.target_branch == 'release')
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: release-unit-tests
+            name: Debug unit tests for release promotion
+            tasks: testDebugUnitTest
+          - id: release-lint
+            name: Release lint
+            tasks: lintRelease
+          - id: release-build
+            name: Google Play and ONE store release build
+            tasks: >-
+              :app:assembleGooglePlayRelease :app:bundleGooglePlayRelease
+              :app:assembleOnestoreRelease :app:bundleOnestoreRelease
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Set up Android environment
+        uses: ./.github/actions/setup-android
+        with:
+          cache-read-only: "true"
+
+      - name: Run ${{ matrix.name }}
+        env:
+          GRADLE_TASKS: ${{ matrix.tasks }}
+        run: ./gradlew $GRADLE_TASKS --parallel --stacktrace
+
+      - name: Upload failure reports
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ci-failure-reports-${{ matrix.id }}-${{ github.run_id }}
+          path: |
+            **/build/reports/**
+            **/build/test-results/**
+          if-no-files-found: ignore
+          retention-days: 14
+
+  quality:
+    name: Quality gate
+    if: ${{ always() }}
+    needs:
+      - branch-flow
+      - version
+      - develop-checks
+      - release-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Require every parallel check to pass
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref || inputs.target_branch }}
+          FLOW_RESULT: ${{ needs.branch-flow.result }}
+          DEVELOP_RESULT: ${{ needs.develop-checks.result }}
+          RELEASE_RESULT: ${{ needs.release-checks.result }}
+          VERSION_RESULT: ${{ needs.version.result }}
+        run: |
+          if [[ "$FLOW_RESULT" != "success" ]]; then
+            echo "::error::Unsupported branch promotion path."
+            exit 1
+          fi
+
+          if [[ "$TARGET_BRANCH" == "develop" ]]; then
+            if [[ "$DEVELOP_RESULT" != "success" || "$RELEASE_RESULT" != "skipped" || "$VERSION_RESULT" != "skipped" ]]; then
+              echo "::error::Develop PR checks did not complete successfully."
+              exit 1
+            fi
+          elif [[ "$TARGET_BRANCH" == "release" ]]; then
+            if [[ "$DEVELOP_RESULT" != "skipped" || "$RELEASE_RESULT" != "success" || "$VERSION_RESULT" != "success" ]]; then
+              echo "::error::Release promotion checks did not complete successfully."
+              exit 1
+            fi
+          else
+            echo "::error::Unsupported target branch: $TARGET_BRANCH"
+            exit 1
+          fi

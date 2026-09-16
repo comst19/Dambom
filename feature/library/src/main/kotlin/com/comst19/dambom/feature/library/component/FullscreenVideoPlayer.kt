@@ -54,6 +54,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.ContentFrame
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
+import com.comst19.dambom.core.common.ui.player.DambomPlayerControls
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
 import kotlinx.coroutines.delay
@@ -193,7 +194,7 @@ private fun BoxScope.FullscreenOverlayControls(
             VideoActionsButton(task = task, actions = fileActions)
         }
     }
-    PlayerControls(
+    DambomPlayerControls(
         player = player,
         showPlay = showPlay,
         playEnabled = playEnabled,

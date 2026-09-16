@@ -8,6 +8,8 @@
     <string name="settings_default_download_location">Default folder</string>
     <string name="settings_download_location_value">Download/Dambom</string>
     <string name="settings_download_location_failure">Couldn’t keep access to this folder.</string>
+    <string name="settings_update_failure">Couldn’t save the setting.</string>
+    <string name="settings_wifi_policy_apply_failure">The Wi-Fi setting was saved but couldn’t be applied to current downloads.</string>
     <string name="settings_section_download">Downloads</string>
     <string name="settings_wifi_only">Download on Wi-Fi only</string>
     <string name="settings_wifi_only_description">New and resumed downloads wait while using mobile data.</string>

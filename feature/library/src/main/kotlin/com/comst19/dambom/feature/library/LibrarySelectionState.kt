@@ -13,4 +13,9 @@ internal data class LibrarySelectionState(
     fun selectAll(ids: Collection<String>): LibrarySelectionState = copy(isActive = true, selectedIds = ids.toSet())
 
     fun clear(): LibrarySelectionState = LibrarySelectionState()
+
+    fun removeDeleted(id: String): LibrarySelectionState {
+        val remaining = selectedIds - id
+        return LibrarySelectionState(isActive = remaining.isNotEmpty(), selectedIds = remaining)
+    }
 }

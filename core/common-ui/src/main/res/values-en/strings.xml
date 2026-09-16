@@ -1,0 +1,7 @@
+<resources>
+    <string name="playback_seek_description">Playback position</string>
+    <string name="playback_rewind">Back 10 seconds</string>
+    <string name="playback_play">Play</string>
+    <string name="playback_pause">Pause</string>
+    <string name="playback_forward">Forward 10 seconds</string>
+</resources>

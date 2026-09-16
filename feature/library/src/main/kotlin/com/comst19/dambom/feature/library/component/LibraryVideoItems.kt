@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -28,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
@@ -49,10 +51,11 @@ internal fun VideoCard(
     onClick: () -> Unit,
     onToggleSelection: () -> Unit,
 ) {
-    val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
-    val style = libraryVideoItemStyle(task.sourcePageUrl, selected || selectionSelected)
+    val metadata by rememberLocalVideoMetadata(task.localFilePath)
+    val style = libraryVideoItemStyle(task.sourcePageUrl, selected && !isSelecting)
     Surface(
         onClick = onClick,
+        enabled = !task.deletePending || isSelecting,
         modifier =
             Modifier
                 .fillMaxWidth()
@@ -67,20 +70,21 @@ internal fun VideoCard(
         Column {
             LibraryVideoThumbnail(
                 metadata = metadata,
+                deletePending = task.deletePending,
                 modifier = Modifier.fillMaxWidth().aspectRatio(VIDEO_ASPECT_RATIO),
             )
             VideoItemInfo(
                 task = task,
-                fileActions = fileActions,
-                selectionSelected = selectionSelected,
-                isSelecting = isSelecting,
-                onToggleSelection = onToggleSelection,
                 metadataColor = style.metadataColor,
-                sourceBadgeContainerColor = style.sourceBadgeContainerColor,
-                sourceBadgeContentColor = style.sourceBadgeContentColor,
-                sourceLabel = style.sourceLabel,
-                sourceHost = style.sourceHost,
+                source = style.sourceHost ?: style.sourceLabel,
                 modifier = Modifier.padding(start = 12.dp, top = 12.dp, end = 4.dp, bottom = 12.dp),
+                trailing = {
+                    if (isSelecting) {
+                        Checkbox(checked = selectionSelected, onCheckedChange = { onToggleSelection() })
+                    } else {
+                        VideoActionsButton(task = task, actions = fileActions, iconOffsetY = (-8).dp)
+                    }
+                },
             )
         }
     }
@@ -96,10 +100,11 @@ internal fun VideoListItem(
     onClick: () -> Unit,
     onToggleSelection: () -> Unit,
 ) {
-    val metadata by rememberLocalVideoMetadata(task.localFilePath, task.updatedAtMillis)
-    val style = libraryVideoItemStyle(task.sourcePageUrl, selected || selectionSelected)
+    val metadata by rememberLocalVideoMetadata(task.localFilePath)
+    val style = libraryVideoItemStyle(task.sourcePageUrl, selected && !isSelecting)
     Surface(
         onClick = onClick,
+        enabled = !task.deletePending || isSelecting,
         modifier =
             Modifier.semantics {
                 stateDescription = style.sourceDescription
@@ -110,24 +115,26 @@ internal fun VideoListItem(
         border = style.border,
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(vertical = 8.dp),
+            verticalAlignment = Alignment.Top,
         ) {
             LibraryVideoThumbnail(
                 metadata = metadata,
+                deletePending = task.deletePending,
                 modifier = Modifier.width(LIST_THUMBNAIL_WIDTH).aspectRatio(VIDEO_ASPECT_RATIO),
             )
             VideoItemInfo(
                 task = task,
-                fileActions = fileActions,
-                selectionSelected = selectionSelected,
-                isSelecting = isSelecting,
-                onToggleSelection = onToggleSelection,
                 metadataColor = style.metadataColor,
-                sourceBadgeContainerColor = style.sourceBadgeContainerColor,
-                sourceBadgeContentColor = style.sourceBadgeContentColor,
-                sourceLabel = style.sourceLabel,
-                sourceHost = style.sourceHost,
-                modifier = Modifier.weight(1f).padding(start = 12.dp, top = 8.dp, end = 4.dp, bottom = 8.dp),
+                source = style.sourceHost ?: style.sourceLabel,
+                modifier = Modifier.weight(1f).padding(start = 12.dp, end = 4.dp),
+                trailing = {
+                    if (isSelecting) {
+                        Checkbox(checked = selectionSelected, onCheckedChange = { onToggleSelection() })
+                    } else {
+                        VideoActionsButton(task = task, actions = fileActions, iconOffsetY = (-8).dp)
+                    }
+                },
             )
         }
     }
@@ -136,49 +143,16 @@ internal fun VideoListItem(
 @Composable
 private fun VideoItemInfo(
     task: DownloadTask,
-    fileActions: LibraryFileActions,
-    selectionSelected: Boolean,
-    isSelecting: Boolean,
-    onToggleSelection: () -> Unit,
     metadataColor: Color,
-    sourceBadgeContainerColor: Color,
-    sourceBadgeContentColor: Color,
-    sourceLabel: String,
-    sourceHost: String?,
+    source: String,
     modifier: Modifier = Modifier,
+    trailing: @Composable () -> Unit,
 ) {
     Row(modifier = modifier) {
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = sourceBadgeContainerColor,
-                    contentColor = sourceBadgeContentColor,
-                ) {
-                    Text(
-                        text = sourceLabel,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-                sourceHost?.let { host ->
-                    Text(
-                        text = host,
-                        color = metadataColor,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
             Text(
                 text = task.title,
                 style = MaterialTheme.typography.titleSmall,
@@ -186,29 +160,31 @@ private fun VideoItemInfo(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = task.downloadedBytes.formatFileSize(),
+                text =
+                    if (task.deletePending) {
+                        stringResource(com.comst19.dambom.feature.library.R.string.library_delete_pending)
+                    } else {
+                        task.downloadedBytes.formatFileSize()
+                    },
                 color = metadataColor,
                 style = MaterialTheme.typography.bodySmall,
             )
-        }
-        if (isSelecting) {
-            Checkbox(
-                checked = selectionSelected,
-                onCheckedChange = { onToggleSelection() },
-            )
-        } else {
-            VideoActionsButton(
-                task = task,
-                actions = fileActions,
-                iconOffsetY = (-8).dp,
+            Text(
+                text = source,
+                color = metadataColor,
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
+        trailing()
     }
 }
 
 @Composable
 private fun LibraryVideoThumbnail(
     metadata: LocalVideoMetadata?,
+    deletePending: Boolean,
     modifier: Modifier,
 ) {
     Box(
@@ -218,7 +194,7 @@ private fun LibraryVideoThumbnail(
         val thumbnail = metadata?.thumbnail
         if (thumbnail == null) {
             Icon(
-                imageVector = Icons.Outlined.PlayArrow,
+                imageVector = if (deletePending) Icons.Outlined.DeleteOutline else Icons.Outlined.PlayArrow,
                 contentDescription = null,
                 modifier = Modifier.size(44.dp),
                 tint = Color.White,

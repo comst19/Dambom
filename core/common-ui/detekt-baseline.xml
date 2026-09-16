@@ -2,6 +2,9 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>LongParameterList:DambomSeekBar.kt$( value: Float, enabled: Boolean, contentDescription: String, stateDescription: String, onValueChange: (Float) -&gt; Unit, onInteractionChanged: (Boolean) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>LongParameterList:DambomPlayerControls.kt$( player: Player, showPlay: Boolean, playEnabled: Boolean, onPlayPause: () -&gt; Unit, onInteraction: () -&gt; Unit, contentColor: Color, rewindInteractionSource: MutableInteractionSource, playPauseInteractionSource: MutableInteractionSource, forwardInteractionSource: MutableInteractionSource, modifier: Modifier = Modifier, )</ID>
+    <ID>LongParameterList:DambomPlayerControls.kt$( player: Player, showPlay: Boolean, playEnabled: Boolean, onPlayPause: () -&gt; Unit, positionMillis: Long, durationMillis: Long, contentColor: Color = MaterialTheme.colorScheme.onSurfaceVariant, onInteraction: () -&gt; Unit = {}, onInteractionChanged: (Boolean) -&gt; Unit = {}, modifier: Modifier = Modifier, timelineModifier: Modifier = Modifier, )</ID>
     <ID>MaxLineLength:AdaptiveLayoutInfo.kt$fun</ID>
     <ID>MaxLineLength:PersistentVideoThumbnail.kt$private fun videoThumbnailUnavailableFile(videoFile: File): File</ID>
     <ID>ReturnCount:PersistentVideoThumbnail.kt$internal fun ensureVideoThumbnailFile( videoFile: File, writeThumbnail: (File) -&gt; Boolean, ): File?</ID>

@@ -56,11 +56,11 @@ private fun HelpScreen(onBack: () -> Unit) {
             ) { step ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                 ) {
                     Column(
-                        modifier = Modifier.padding(18.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Text(
                             text = stringResource(step.titleRes),
@@ -104,9 +104,9 @@ private fun SettingsSubScreen(
     ) { innerPadding ->
         content(
             PaddingValues(
-                start = 24.dp,
+                start = 16.dp,
                 top = innerPadding.calculateTopPadding(),
-                end = 24.dp,
+                end = 16.dp,
                 bottom = innerPadding.calculateBottomPadding() + 32.dp,
             ),
         )

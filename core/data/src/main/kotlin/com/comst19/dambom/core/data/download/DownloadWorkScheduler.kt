@@ -6,6 +6,7 @@ import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.Operation
 import androidx.work.WorkManager
 import androidx.work.await
 import com.comst19.dambom.core.domain.repository.SettingsRepository
@@ -23,12 +24,15 @@ internal interface DownloadWorkScheduler {
 }
 
 internal class WorkManagerDownloadScheduler
-    @Inject
-    constructor(
-        @ApplicationContext context: Context,
+    internal constructor(
         private val settingsRepository: SettingsRepository,
+        private val workManager: DownloadWorkManager,
     ) : DownloadWorkScheduler {
-        private val workManager by lazy { WorkManager.getInstance(context) }
+        @Inject
+        constructor(
+            @ApplicationContext context: Context,
+            settingsRepository: SettingsRepository,
+        ) : this(settingsRepository, ContextDownloadWorkManager(context))
 
         override suspend fun schedule() {
             enqueue(ExistingWorkPolicy.APPEND_OR_REPLACE)
@@ -60,13 +64,38 @@ internal class WorkManagerDownloadScheduler
                         TimeUnit.SECONDS,
                     ).addTag(DOWNLOAD_WORK_TAG)
                     .build()
-            workManager.enqueueUniqueWork(
-                DOWNLOAD_WORK_NAME,
-                existingWorkPolicy,
-                request,
-            )
+            workManager
+                .enqueueUniqueWork(
+                    DOWNLOAD_WORK_NAME,
+                    existingWorkPolicy,
+                    request,
+                ).await()
         }
     }
+
+internal interface DownloadWorkManager {
+    fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: ExistingWorkPolicy,
+        request: androidx.work.OneTimeWorkRequest,
+    ): Operation
+
+    fun cancelUniqueWork(uniqueWorkName: String): Operation
+}
+
+private class ContextDownloadWorkManager(
+    context: Context,
+) : DownloadWorkManager {
+    private val delegate by lazy { WorkManager.getInstance(context) }
+
+    override fun enqueueUniqueWork(
+        uniqueWorkName: String,
+        existingWorkPolicy: ExistingWorkPolicy,
+        request: androidx.work.OneTimeWorkRequest,
+    ): Operation = delegate.enqueueUniqueWork(uniqueWorkName, existingWorkPolicy, request)
+
+    override fun cancelUniqueWork(uniqueWorkName: String): Operation = delegate.cancelUniqueWork(uniqueWorkName)
+}
 
 internal fun requiredNetworkType(wifiOnlyDownloads: Boolean): NetworkType =
     if (wifiOnlyDownloads) NetworkType.UNMETERED else NetworkType.CONNECTED

@@ -19,7 +19,10 @@ internal data class LibraryUiState(
     val totalBytes: Long = 0L,
     val totalVideoCount: Int = 0,
     val sourceFilter: LibrarySourceFilter = LibrarySourceFilter.ALL,
-)
+) {
+    val hiddenSelectedCount: Int
+        get() = selectedIds.size - videos.count { it.id in selectedIds }
+}
 
 internal enum class LibraryViewMode {
     GRID,

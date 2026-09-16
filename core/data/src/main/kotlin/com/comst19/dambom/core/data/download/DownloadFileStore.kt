@@ -1,13 +1,17 @@
 package com.comst19.dambom.core.data.download
 
 import android.content.Context
+import android.os.StatFs
+import com.comst19.dambom.core.common.io.videoThumbnailFile
+import com.comst19.dambom.core.common.io.videoThumbnailTemporaryFile
+import com.comst19.dambom.core.common.io.videoThumbnailUnavailableFile
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class DownloadFileStore
+internal open class DownloadFileStore
     @Inject
     constructor(
         @ApplicationContext context: Context,
@@ -16,6 +20,11 @@ internal class DownloadFileStore
         private val videoDirectory = context.filesDir.resolve("videos").apply(File::mkdirs)
 
         fun partialFile(id: String): File = partialDirectory.resolve("$id.part")
+
+        fun hasSpaceFor(byteCount: Int): Boolean {
+            val availableBytes = StatFs(partialDirectory.path).availableBytes
+            return availableBytes - MIN_FREE_BYTES >= byteCount
+        }
 
         fun partialValidatorFile(id: String): File = partialDirectory.resolve("$id.part.validator")
 
@@ -36,7 +45,7 @@ internal class DownloadFileStore
                 ?.takeIf(File::isFile)
                 ?.absolutePath
 
-        fun delete(
+        open fun delete(
             id: String,
             localFileName: String?,
         ): Boolean {
@@ -47,9 +56,9 @@ internal class DownloadFileStore
                     localFileName?.let { fileName ->
                         val videoFile = videoDirectory.resolve(fileName)
                         add(videoFile)
-                        add(File(videoFile.absolutePath + VIDEO_THUMBNAIL_SUFFIX))
-                        add(File(videoFile.absolutePath + VIDEO_THUMBNAIL_SUFFIX + TEMPORARY_FILE_SUFFIX))
-                        add(File(videoFile.absolutePath + VIDEO_THUMBNAIL_UNAVAILABLE_SUFFIX))
+                        add(videoFile.videoThumbnailFile())
+                        add(videoFile.videoThumbnailTemporaryFile())
+                        add(videoFile.videoThumbnailUnavailableFile())
                     }
                 }
             var allDeleted = true
@@ -85,6 +94,4 @@ private fun fileExtension(
     }
 }
 
-private const val VIDEO_THUMBNAIL_SUFFIX = ".thumbnail.jpg"
-private const val VIDEO_THUMBNAIL_UNAVAILABLE_SUFFIX = ".thumbnail.unavailable"
-private const val TEMPORARY_FILE_SUFFIX = ".tmp"
+private const val MIN_FREE_BYTES = 16L * 1024 * 1024

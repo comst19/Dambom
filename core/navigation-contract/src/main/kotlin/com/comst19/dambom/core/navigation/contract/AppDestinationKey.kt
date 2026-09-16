@@ -2,6 +2,8 @@ package com.comst19.dambom.core.navigation.contract
 
 import kotlinx.serialization.Serializable
 
+const val HOME_DETECTION_DESTINATION = "dambom.homeDetectionDestination"
+
 sealed interface HomeGraph : AppNavKey {
     @Serializable
     data object HomeKey : HomeGraph, TopLevelNavKey
@@ -14,6 +16,8 @@ sealed interface HomeGraph : AppNavKey {
     @Serializable
     data class DetectionResultKey(
         val url: String,
+        val snapshotId: String? = null,
+        val requestId: String? = null,
     ) : HomeGraph
 
     @Serializable

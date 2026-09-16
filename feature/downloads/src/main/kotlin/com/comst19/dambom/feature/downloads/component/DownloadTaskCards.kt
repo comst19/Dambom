@@ -12,7 +12,6 @@ import androidx.compose.material.icons.outlined.Downloading
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -20,15 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
-import androidx.compose.ui.semantics.progressBarRangeInfo
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.common.ui.format.formatFileSize
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.core.domain.model.ORIGINAL_QUALITY
 import com.comst19.dambom.feature.downloads.R
 
 @Composable
@@ -46,7 +43,7 @@ internal fun DownloadGridCard(
         shape = DambomShapes.Card,
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+            modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             DownloadTaskHeader(task)
@@ -71,16 +68,16 @@ internal fun DownloadListCard(
         shape = DambomShapes.Card,
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 DownloadStatusIcon()
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    DownloadTaskDetails(task, maxLines = 2)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    DownloadTaskDetails(task, maxLines = 2, showStatus = true)
                 }
             }
             DownloadActions(task, canDownload, onPause, onResume, onCancel, onRetry)
@@ -96,7 +93,11 @@ private fun DownloadTaskHeader(task: DownloadTask) {
     ) {
         DownloadStatusIcon()
         Text(
-            task.status.statusText(),
+            if (task.deletePending) {
+                stringResource(R.string.downloads_delete_pending)
+            } else {
+                task.status.statusText()
+            },
             color = task.status.statusColor(),
             style = MaterialTheme.typography.labelLarge,
         )
@@ -123,6 +124,7 @@ private fun DownloadStatusIcon() {
 private fun DownloadTaskDetails(
     task: DownloadTask,
     maxLines: Int = Int.MAX_VALUE,
+    showStatus: Boolean = false,
 ) {
     Text(
         task.title,
@@ -130,9 +132,13 @@ private fun DownloadTaskDetails(
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
     )
-    if (maxLines != Int.MAX_VALUE) {
+    if (showStatus) {
         Text(
-            task.status.statusText(),
+            if (task.deletePending) {
+                stringResource(R.string.downloads_delete_pending)
+            } else {
+                task.status.statusText()
+            },
             color = task.status.statusColor(),
             style = MaterialTheme.typography.labelLarge,
         )
@@ -142,22 +148,23 @@ private fun DownloadTaskDetails(
             R.string.downloads_bytes,
             task.downloadedBytes.formatFileSize(),
             task.expectedBytes?.formatFileSize() ?: stringResource(R.string.downloads_unknown_size),
-            task.quality,
+            if (task.quality == ORIGINAL_QUALITY) {
+                stringResource(R.string.downloads_quality_original)
+            } else {
+                task.quality
+            },
         ),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodySmall,
         maxLines = maxLines,
     )
-    if (task.status == DownloadStatus.DOWNLOADING) {
-        LinearProgressIndicator(
-            progress = { task.progress },
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .semantics { progressBarRangeInfo = ProgressBarRangeInfo(task.progress, 0f..1f) },
+    if (!task.deletePending && task.status != DownloadStatus.FAILED && task.status != DownloadStatus.COMPLETED) {
+        DownloadProgress(
+            progress = task.expectedBytes?.takeIf { it > 0L }?.let { task.progress },
+            running = task.status == DownloadStatus.DOWNLOADING,
         )
     }
-    task.failureReason?.let {
+    task.failureReason?.takeUnless { task.deletePending }?.let {
         Text(
             it.failureText(),
             color = MaterialTheme.colorScheme.error,

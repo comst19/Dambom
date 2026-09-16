@@ -12,6 +12,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -60,6 +63,80 @@ class LibraryFileManagerTest {
         } finally {
             unsupportedFile.delete()
         }
+    }
+
+    @Test
+    fun `input open failure does not open the output stream`() {
+        var outputOpenCount = 0
+
+        try {
+            copyStreams(
+                openInput = { throw IOException("source disappeared") },
+                openOutput = {
+                    outputOpenCount++
+                    ByteArrayOutputStream()
+                },
+            )
+        } catch (_: IOException) {
+        }
+
+        assertEquals(0, outputOpenCount)
+    }
+
+    @Test
+    fun `output open failure closes the input stream`() {
+        val input = CloseTrackingInputStream()
+
+        try {
+            copyStreams(
+                openInput = { input },
+                openOutput = { throw IOException("destination unavailable") },
+            )
+        } catch (_: IOException) {
+        }
+
+        assertEquals(1, input.closeCount)
+    }
+
+    @Test
+    fun `copy failure closes both streams`() {
+        val input = CloseTrackingInputStream()
+        val output = FailingOutputStream()
+
+        try {
+            copyStreams(
+                openInput = { input },
+                openOutput = { output },
+            )
+        } catch (_: IOException) {
+        }
+
+        assertEquals(1, input.closeCount)
+        assertEquals(1, output.closeCount)
+    }
+}
+
+private class CloseTrackingInputStream : ByteArrayInputStream(byteArrayOf(1)) {
+    var closeCount = 0
+
+    override fun close() {
+        closeCount++
+        super.close()
+    }
+}
+
+private class FailingOutputStream : ByteArrayOutputStream() {
+    var closeCount = 0
+
+    override fun write(
+        buffer: ByteArray,
+        offset: Int,
+        length: Int,
+    ): Unit = throw IOException("copy failed")
+
+    override fun close() {
+        closeCount++
+        super.close()
     }
 }
 

@@ -25,10 +25,12 @@ import com.comst19.dambom.core.navigation.Navigator
  */
 @Composable
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Suppress("LongParameterList")
 internal fun AppNavDisplay(
     entries: List<NavEntry<NavKey>>,
     navigator: Navigator,
     isLibraryDetailPaneVisible: Boolean,
+    isHomeResultPaneVisible: Boolean,
     isVideoFullscreen: Boolean,
     modifier: Modifier,
 ) {
@@ -49,6 +51,7 @@ internal fun AppNavDisplay(
             directive = directive,
             paneExpansionState = paneExpansionState,
         )
+    val sceneStrategy = homeDetectionSceneStrategy(directive, isHomeResultPaneVisible, listDetailSceneStrategy)
 
     LaunchedEffect(isLibraryDetailPaneVisible) {
         if (isLibraryDetailPaneVisible) {
@@ -60,7 +63,7 @@ internal fun AppNavDisplay(
     NavDisplay(
         entries = entries,
         onBack = navigator::goBack,
-        sceneStrategies = listOf(listDetailSceneStrategy),
+        sceneStrategies = listOf(sceneStrategy),
         // Navigation 3 기본 scale 전환 대신 화면 크기가 유지되는 fade 전환을 사용합니다.
         transitionSpec = {
             fadeIn(tween(NAVIGATION_ENTER_DURATION_MILLIS)) togetherWith

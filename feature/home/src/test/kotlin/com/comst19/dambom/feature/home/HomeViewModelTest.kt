@@ -2,6 +2,9 @@ package com.comst19.dambom.feature.home
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
+import com.comst19.dambom.core.common.ui.AppEvent
+import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.url.SharedUrlBus
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadRequest
@@ -11,20 +14,83 @@ import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
+import com.comst19.dambom.core.navigation.NavigationEvent
+import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
+import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
+import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Rule
 import org.junit.Test
+import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
+
+    @Test
+    fun `home requires an explicit http scheme and accepts scheme case variants`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = createViewModel()
+            viewModel.uiState.test {
+                awaitItem()
+                awaitItem()
+
+                viewModel.updateUrl("example.com/video.mp4")
+                assertEquals(false, awaitItem().isUrlValid)
+
+                viewModel.updateUrl("HTTP://example.com/video.mp4")
+                assertEquals(true, awaitItem().isUrlValid)
+            }
+        }
+
+    @Test
+    fun `repeated analysis clears the old result and creates a fresh request for the same URL`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val viewModel = createViewModel(navigation = navigation)
+            viewModel.uiState.test {
+                awaitItem()
+                awaitItem()
+                viewModel.updateUrl(FIRST_URL)
+                awaitItem()
+                viewModel.analyzeUrl()
+                runCurrent()
+                viewModel.analyzeUrl()
+                runCurrent()
+
+                assertEquals(NavigationEvent.PopTo(HomeKey), navigation.dispatched[0])
+                assertEquals(NavigationEvent.PopTo(HomeKey), navigation.dispatched[2])
+                val first = (navigation.dispatched[1] as NavigationEvent.Navigate).key as DetectionResultKey
+                val second = (navigation.dispatched[3] as NavigationEvent.Navigate).key as DetectionResultKey
+                assertEquals(FIRST_URL, first.url)
+                assertEquals(FIRST_URL, second.url)
+                assertNotEquals(first.requestId, second.requestId)
+            }
+        }
+
+    @Test
+    fun `opening settings from the input pane removes the active result first`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val viewModel = createViewModel(navigation = navigation)
+            viewModel.openSettings()
+            runCurrent()
+            assertEquals(
+                listOf(NavigationEvent.PopTo(HomeKey), NavigationEvent.Navigate(SettingsKey)),
+                navigation.dispatched,
+            )
+        }
 
     @Test
     fun `dismissed clipboard URL is suggested only once`() =
@@ -77,16 +143,144 @@ class HomeViewModelTest {
                 assertEquals(0.25f, awaitItem().downloadSummary.progress, 0f)
             }
         }
+
+    @Test
+    fun `download summary excludes pending deletions`() {
+        val normal = activeDownload("normal", expectedBytes = 100L, downloadedBytes = 25L)
+        val pending =
+            listOf(
+                activeDownload("queued-pending", expectedBytes = 100L, downloadedBytes = 50L)
+                    .copy(status = DownloadStatus.QUEUED, deletePending = true),
+                activeDownload("paused-pending", expectedBytes = 100L, downloadedBytes = 50L)
+                    .copy(status = DownloadStatus.PAUSED, deletePending = true),
+                activeDownload("failed-pending", expectedBytes = 100L, downloadedBytes = 50L)
+                    .copy(status = DownloadStatus.FAILED, deletePending = true),
+            )
+
+        val summary = toHomeDownloadSummary(listOf(normal) + pending)
+
+        assertEquals(1, summary.activeCount)
+        assertEquals(0, summary.pausedCount)
+        assertEquals(0, summary.failedCount)
+        assertEquals(0.25f, summary.progress)
+    }
+
+    @Test
+    fun `editing URL does not rescan unchanged download history`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val downloads =
+                CountingDownloadList(
+                    List(1_000) { activeDownload("video-$it", expectedBytes = 100L, downloadedBytes = 25L) },
+                )
+            val repository =
+                object : DownloadRepository by EmptyDownloadRepository {
+                    override val downloads: Flow<List<DownloadTask>> = flowOf(downloads)
+                }
+            val viewModel = createViewModel(repository)
+
+            viewModel.uiState.test {
+                awaitItem()
+                assertEquals(1_000, awaitItem().downloadSummary.activeCount)
+                val readsBeforeEditing = downloads.readCount
+
+                repeat(20) { index ->
+                    val url = "https://example.com/$index"
+                    viewModel.updateUrl(url)
+                    assertEquals(url, awaitItem().url)
+                }
+
+                assertEquals("URL edits must not reread download history", readsBeforeEditing, downloads.readCount)
+            }
+        }
+
+    @Test
+    fun `clipboard preference write failure does not escape the ViewModel`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val settings =
+                object : SettingsRepository by EnabledClipboardSettingsRepository {
+                    override suspend fun setClipboardSuggestion(
+                        promptShown: Boolean,
+                        enabled: Boolean,
+                    ): Unit = throw IOException("Storage unavailable")
+                }
+            val events = AppEventBus()
+            val viewModel = createViewModel(settingsRepository = settings, appEventBus = events)
+
+            viewModel.setClipboardSuggestionEnabled(true)
+            runCurrent()
+            assertEquals(
+                AppEvent.ShowSnackbar(UiText.Resource(R.string.home_clipboard_save_failed)),
+                events.events.first(),
+            )
+        }
+
+    @Test
+    fun `download updates still refresh summary after URL edits`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val task = activeDownload("video", expectedBytes = 100L, downloadedBytes = 25L)
+            val downloads = MutableStateFlow(listOf(task))
+            val repository =
+                object : DownloadRepository by EmptyDownloadRepository {
+                    override val downloads: Flow<List<DownloadTask>> = downloads
+                }
+            val viewModel = createViewModel(repository)
+            viewModel.uiState.test {
+                awaitItem()
+                assertEquals(0.25f, awaitItem().downloadSummary.progress)
+                viewModel.updateUrl(FIRST_URL)
+                assertEquals(FIRST_URL, awaitItem().url)
+                downloads.value = listOf(task.copy(downloadedBytes = 75L))
+                assertEquals(0.75f, awaitItem().downloadSummary.progress)
+            }
+        }
+
+    @Test
+    fun `cancelled clipboard preference write does not show a failure message`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val settings =
+                object : SettingsRepository by EnabledClipboardSettingsRepository {
+                    override suspend fun setClipboardSuggestion(
+                        promptShown: Boolean,
+                        enabled: Boolean,
+                    ): Unit = throw CancellationException("Cancelled")
+                }
+            val events = AppEventBus()
+            val viewModel = createViewModel(settingsRepository = settings, appEventBus = events)
+            events.events.test {
+                viewModel.setClipboardSuggestionEnabled(true)
+                runCurrent()
+                expectNoEvents()
+            }
+        }
 }
 
-private fun createViewModel(downloadRepository: DownloadRepository = EmptyDownloadRepository) =
-    HomeViewModel(
-        navigation = SpyNavigationDispatcher(),
-        settingsRepository = EnabledClipboardSettingsRepository,
-        downloadRepository = downloadRepository,
-        sharedUrlBus = SharedUrlBus(),
-        savedStateHandle = SavedStateHandle(),
-    )
+private class CountingDownloadList(
+    private val tasks: List<DownloadTask>,
+) : AbstractList<DownloadTask>() {
+    var readCount: Int = 0
+        private set
+
+    override val size: Int get() = tasks.size
+
+    override fun get(index: Int): DownloadTask {
+        readCount++
+        return tasks[index]
+    }
+}
+
+private fun createViewModel(
+    downloadRepository: DownloadRepository = EmptyDownloadRepository,
+    settingsRepository: SettingsRepository = EnabledClipboardSettingsRepository,
+    appEventBus: AppEventBus = AppEventBus(),
+    navigation: SpyNavigationDispatcher = SpyNavigationDispatcher(),
+) = HomeViewModel(
+    navigation = navigation,
+    settingsRepository = settingsRepository,
+    downloadRepository = downloadRepository,
+    sharedUrlBus = SharedUrlBus(),
+    savedStateHandle = SavedStateHandle(),
+    appEventBus = appEventBus,
+)
 
 private object EnabledClipboardSettingsRepository : SettingsRepository {
     override val settings: Flow<AppSettings> =

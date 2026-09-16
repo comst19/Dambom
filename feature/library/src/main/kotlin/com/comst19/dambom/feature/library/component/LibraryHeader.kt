@@ -3,7 +3,6 @@ package com.comst19.dambom.feature.library.component
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.PlaylistAddCheck
 import androidx.compose.material.icons.automirrored.outlined.ViewList
-import androidx.compose.material.icons.automirrored.outlined.ViewSidebar
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.GridView
@@ -11,13 +10,13 @@ import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconToggleButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.comst19.dambom.core.designsystem.DambomIconTooltip
+import com.comst19.dambom.core.designsystem.DambomPaneToggleButton
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
 
@@ -58,53 +57,15 @@ internal fun LibraryHeader(
                     onClearSelection = onClearSelection,
                 )
             } else {
-                IconButton(
-                    onClick = {
-                        onViewModeChange(
-                            if (viewMode == LibraryViewMode.GRID) LibraryViewMode.LIST else LibraryViewMode.GRID,
-                        )
-                    },
-                ) {
-                    Icon(
-                        imageVector =
-                            if (viewMode == LibraryViewMode.GRID) {
-                                Icons.AutoMirrored.Outlined.ViewList
-                            } else {
-                                Icons.Outlined.GridView
-                            },
-                        contentDescription =
-                            stringResource(
-                                if (viewMode == LibraryViewMode.GRID) {
-                                    R.string.library_view_as_list
-                                } else {
-                                    R.string.library_view_as_grid
-                                },
-                            ),
-                    )
-                }
+                LibraryViewModeButton(viewMode, onViewModeChange)
                 if (showDetailPaneControl) {
-                    IconToggleButton(
+                    val label =
+                        if (isDetailPaneVisible) R.string.library_hide_details else R.string.library_show_details
+                    DambomPaneToggleButton(
                         checked = isDetailPaneVisible,
                         onCheckedChange = onDetailPaneVisibilityChange,
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ViewSidebar,
-                            contentDescription =
-                                stringResource(
-                                    if (isDetailPaneVisible) {
-                                        R.string.library_hide_details
-                                    } else {
-                                        R.string.library_show_details
-                                    },
-                                ),
-                            tint =
-                                if (isDetailPaneVisible) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                },
-                        )
-                    }
+                        actionLabel = stringResource(label),
+                    )
                 }
                 if (hasVideos) {
                     IconButton(onClick = onStartSelection) {
@@ -134,5 +95,22 @@ private fun SelectionActions(
     }
     IconButton(onClick = onClearSelection) {
         Icon(Icons.Outlined.Close, stringResource(R.string.library_cancel_selection))
+    }
+}
+
+@Composable
+private fun LibraryViewModeButton(
+    viewMode: LibraryViewMode,
+    onViewModeChange: (LibraryViewMode) -> Unit,
+) {
+    val isGrid = viewMode == LibraryViewMode.GRID
+    val label = stringResource(if (isGrid) R.string.library_view_as_list else R.string.library_view_as_grid)
+    DambomIconTooltip(label) {
+        IconButton(onClick = { onViewModeChange(if (isGrid) LibraryViewMode.LIST else LibraryViewMode.GRID) }) {
+            Icon(
+                imageVector = if (isGrid) Icons.AutoMirrored.Outlined.ViewList else Icons.Outlined.GridView,
+                contentDescription = label,
+            )
+        }
     }
 }

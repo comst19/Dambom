@@ -107,6 +107,19 @@ class MainViewModelTest {
         assertEquals(2, feedback.count)
         assertEquals(null, feedback.title)
     }
+
+    @Test
+    fun `download feedback excludes pending deletion failures`() {
+        val pendingFailure = downloadTask(DownloadStatus.FAILED).copy(deletePending = true)
+
+        val feedback =
+            downloadFailureFeedback(
+                previousStatuses = mapOf(pendingFailure.id to DownloadStatus.DOWNLOADING),
+                tasks = listOf(pendingFailure),
+            )
+
+        assertEquals(null, feedback)
+    }
 }
 
 private object SuccessfulStartupCoordinator : StartupCoordinator {

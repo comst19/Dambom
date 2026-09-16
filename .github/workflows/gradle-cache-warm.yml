@@ -30,4 +30,4 @@ jobs:
           cache-read-only: "false"
 
       - name: Build Debug APK for the shared cache
-        run: ./gradlew :app:assembleDebug --parallel --stacktrace
+        run: ./gradlew :app:assembleGooglePlayDebug --parallel --stacktrace

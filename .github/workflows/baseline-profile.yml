@@ -64,7 +64,7 @@ jobs:
       - name: Generate release Baseline Profile
         run: >-
           ./gradlew
-          :app:generateReleaseBaselineProfile
+          :app:generateGooglePlayReleaseBaselineProfile
           -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
           -Pandroid.experimental.testOptions.managedDevices.emulator.showKernelLogging=true
           --stacktrace
@@ -73,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: baseline-profile-${{ github.run_id }}
-          path: app/src/release/generated/baselineProfiles/
+          path: app/src/googlePlayRelease/generated/baselineProfiles/
           if-no-files-found: error
           retention-days: 14
 

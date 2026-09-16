@@ -14,6 +14,11 @@ pluginManagement {
     }
 }
 
+plugins {
+    // 필요한 JDK가 로컬에 없을 때 자동 다운로드할 수 있도록 resolver 등록 (Java 버전은 기존 toolchain 설정 유지)
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {

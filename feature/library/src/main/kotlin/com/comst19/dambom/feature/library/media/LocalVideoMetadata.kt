@@ -2,7 +2,6 @@ package com.comst19.dambom.feature.library.media
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.util.LruCache
 import androidx.compose.runtime.Composable
@@ -71,7 +70,7 @@ internal object LocalVideoMetadataLoader {
                 readMetadata(
                     key.path,
                     loadOrCreateVideoThumbnailFile(context, key.path)?.let {
-                        BitmapFactory.decodeFile(it.absolutePath)
+                        decodeVideoThumbnail(it.absolutePath)
                     },
                 ).also { cache.put(key, it) }
             }

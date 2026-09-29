@@ -43,6 +43,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -76,6 +78,8 @@ internal fun CandidatePreviewDialog(
     var controlsInteracting by remember(candidate.id, candidate.url) { mutableStateOf(false) }
     var controlsInteractionRevision by remember(candidate.id, candidate.url) { mutableStateOf(0) }
     val toggleControlsLabel = stringResource(R.string.detection_toggle_playback_controls)
+
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { player.pause() }
 
     DisposableEffect(player) {
         val listener =

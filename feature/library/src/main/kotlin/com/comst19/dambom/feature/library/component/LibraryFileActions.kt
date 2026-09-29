@@ -34,6 +34,7 @@ internal data class LibraryFileActions(
     val onCopyLink: (DownloadTask) -> Unit,
     val onOpenOriginal: (DownloadTask) -> Unit,
     val onDelete: (DownloadTask) -> Unit,
+    val onTrim: ((DownloadTask) -> Unit)? = null,
 )
 
 @Composable
@@ -123,6 +124,7 @@ internal fun rememberLibraryFileActions(
                 if (!openOriginalLink(context, task.sourcePageUrl)) viewModel.notifyOpenOriginalFailure()
             },
             onDelete = { task -> currentOnDelete.value?.invoke(task) ?: viewModel.delete(task) },
+            onTrim = viewModel::trimVideo,
         )
     }
 }

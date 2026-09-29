@@ -90,4 +90,21 @@
     <string name="player_open_website">Open website</string>
     <string name="player_info_unknown">Unknown</string>
     <string name="player_quality_original">Original</string>
+    <string name="trim_title">Trim video</string>
+    <string name="trim_back">Close editor</string>
+    <string name="trim_preview">Preview selection</string>
+    <string name="trim_pause">Pause preview</string>
+    <string name="trim_range">Select trim range</string>
+    <string name="trim_start_end">Start %1$s · End %2$s</string>
+    <string name="trim_duration">Selected duration %1$s</string>
+    <string name="trim_original_kept">Keep the original and save a new MP4 file to your chosen location.</string>
+    <string name="trim_save">Save as MP4</string>
+    <string name="trim_exporting">Saving your video. Please stay on this screen.</string>
+    <string name="trim_saved">Video saved to your chosen location.</string>
+    <string name="trim_export_failed">Could not save the video. Check available storage and the video format, then try again.</string>
+    <string name="trim_cancel_title">Cancel saving?</string>
+    <string name="trim_cancel_description">Stop this export. Your selection and original video will be kept.</string>
+    <string name="trim_cancel_export">Cancel export</string>
+    <string name="trim_continue">Keep saving</string>
+    <string name="trim_done">OK</string>
 </resources>

@@ -83,7 +83,14 @@ internal class DownloadsViewModel
         }
 
         fun openLibrary() {
-            viewModelScope.launch { navigation.dispatch(NavigationEvent.NavigateTopLevel(LibraryGraph.LibraryKey)) }
+            viewModelScope.launch {
+                navigation.dispatch(
+                    NavigationEvent.NavigateDeepLink(
+                        topLevelKey = LibraryGraph.LibraryKey,
+                        backStack = listOf(LibraryGraph.LibraryKey),
+                    ),
+                )
+            }
         }
 
         private fun launchCommand(block: suspend () -> Unit) {

@@ -12,7 +12,7 @@ import com.comst19.dambom.feature.library.VideoPlayerRoute
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 fun EntryProviderScope<NavKey>.libraryEntries(
-    isDetailPaneVisible: () -> Boolean,
+    paneState: () -> LibraryPaneState,
     onDetailPaneVisibilityChange: (Boolean) -> Unit,
     isVideoFullscreen: () -> Boolean,
     onVideoFullscreenChange: (Boolean) -> Unit,
@@ -24,8 +24,10 @@ fun EntryProviderScope<NavKey>.libraryEntries(
                 detailPlaceholder = { LibraryDetailPlaceholderRoute() },
             ),
     ) {
+        val currentPaneState = paneState()
         LibraryRoute(
-            isDetailPaneVisible = isDetailPaneVisible(),
+            isDetailPaneVisible = currentPaneState.isVisible,
+            activeVideoId = currentPaneState.activeVideoId,
             onDetailPaneVisibilityChange = onDetailPaneVisibilityChange,
         )
     }

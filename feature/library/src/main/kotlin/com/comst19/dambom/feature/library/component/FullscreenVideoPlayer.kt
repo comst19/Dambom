@@ -160,6 +160,7 @@ private fun BoxScope.FullscreenOverlayControls(
     onInteraction: () -> Unit,
     onInteractionChanged: (Boolean) -> Unit,
 ) {
+    val isFit = contentMode == FullscreenContentMode.Fit
     Surface(
         modifier =
             Modifier.align(Alignment.TopStart).fillMaxWidth().windowInsetsPadding(
@@ -178,18 +179,18 @@ private fun BoxScope.FullscreenOverlayControls(
             )
             IconButton(onContentModeToggle) {
                 Icon(
-                    if (contentMode == FullscreenContentMode.Fit) Icons.Outlined.CropFree else Icons.Outlined.ZoomOutMap,
-                    stringResource(
-                        if (contentMode ==
-                            FullscreenContentMode.Fit
-                        ) {
-                            R.string.player_expand_crop
-                        } else {
-                            R.string.player_fit_video
-                        },
-                    ),
+                    if (isFit) Icons.Outlined.CropFree else Icons.Outlined.ZoomOutMap,
+                    stringResource(if (isFit) R.string.player_expand_crop else R.string.player_fit_video),
                 )
             }
+            VideoFavoriteButton(
+                task = task,
+                onToggle = {
+                    onInteraction()
+                    fileActions.onToggleFavorite(it)
+                },
+                onVideoSurface = true,
+            )
             if (showRotationControl) IconButton(onRotate) { Icon(Icons.Outlined.Rotate90DegreesCw, stringResource(R.string.player_rotate)) }
             VideoActionsButton(task = task, actions = fileActions)
         }

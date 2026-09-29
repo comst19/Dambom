@@ -1,4 +1,13 @@
 <resources>
+    <string name="library_favorites">Favorites</string>
+    <string name="library_favorite_action_description">%1$s: %2$s</string>
+    <string name="library_favorites_filter_on">Show favorites only</string>
+    <string name="library_favorites_filter_off">Clear favorites filter</string>
+    <string name="library_favorite_add">Add to favorites</string>
+    <string name="library_favorite_remove">Remove from favorites</string>
+    <string name="library_favorite_failure">Couldn’t update favorites. Try again.</string>
+    <string name="library_favorites_empty_title">No favorite videos to show</string>
+    <string name="library_favorites_empty_description">Tap the star on a video to save a favorite, or try another source filter.</string>
     <string name="library_title">Library</string>
     <string name="library_empty_title">No saved videos yet</string>
     <string name="library_empty_description">Find a video on Home and save it to your library.</string>

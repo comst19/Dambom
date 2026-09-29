@@ -26,6 +26,7 @@ data class DownloadTask(
     val createdAtMillis: Long,
     val updatedAtMillis: Long,
     val deletePending: Boolean = false,
+    val isFavorite: Boolean = false,
 ) {
     val progress: Float
         get() =

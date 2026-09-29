@@ -9,13 +9,20 @@ import com.comst19.dambom.core.database.download.DownloadTaskEntity
 
 @Database(
     entities = [DownloadTaskEntity::class],
-    version = 2,
+    version = FAVORITES_DATABASE_VERSION,
     exportSchema = true,
 )
 abstract class DambomDatabase : RoomDatabase() {
     abstract fun downloadTaskDao(): DownloadTaskDao
 
     internal companion object {
+        val MIGRATION_2_3 =
+            object : Migration(2, FAVORITES_DATABASE_VERSION) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("ALTER TABLE download_tasks ADD COLUMN isFavorite INTEGER NOT NULL DEFAULT 0")
+                }
+            }
+
         val MIGRATION_1_2 =
             object : Migration(1, 2) {
                 override fun migrate(db: SupportSQLiteDatabase) {
@@ -25,3 +32,5 @@ abstract class DambomDatabase : RoomDatabase() {
             }
     }
 }
+
+private const val FAVORITES_DATABASE_VERSION = 3

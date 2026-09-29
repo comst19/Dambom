@@ -70,6 +70,8 @@ internal fun LibraryPane(
         LibrarySourceFilters(
             selected = uiState.sourceFilter,
             onSelected = onSourceFilterChange,
+            favoritesOnly = uiState.favoritesOnly,
+            onFavoritesOnlyChange = fileActions.onFavoritesOnlyChange,
         )
         if (!uiState.hasVideos) {
             if (showInlineEmptyState) {
@@ -81,6 +83,8 @@ internal fun LibraryPane(
                     query = uiState.query,
                     modifier = Modifier.weight(1f),
                 )
+            } else if (uiState.favoritesOnly) {
+                EmptyFavorites(Modifier.weight(1f))
             } else {
                 EmptySourceResults(Modifier.weight(1f))
             }

@@ -33,6 +33,8 @@ internal data class LibraryFileActions(
     val onShareLink: (DownloadTask) -> Unit,
     val onCopyLink: (DownloadTask) -> Unit,
     val onOpenOriginal: (DownloadTask) -> Unit,
+    val onToggleFavorite: (DownloadTask) -> Unit = {},
+    val onFavoritesOnlyChange: (Boolean) -> Unit = {},
     val onDelete: (DownloadTask) -> Unit,
 )
 
@@ -69,6 +71,8 @@ internal fun rememberLibraryFileActions(
     return remember(viewModel, context, shareLinkChooserTitle, exportLauncher, legacyStoragePermissionLauncher) {
         LibraryFileActions(
             onRename = viewModel::rename,
+            onToggleFavorite = viewModel::toggleFavorite,
+            onFavoritesOnlyChange = viewModel::setFavoritesOnly,
             onExport = { task ->
                 val downloadSettings = currentSettings.value
                 when {

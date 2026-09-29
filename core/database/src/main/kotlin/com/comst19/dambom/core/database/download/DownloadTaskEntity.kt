@@ -1,5 +1,6 @@
 package com.comst19.dambom.core.database.download
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -25,4 +26,5 @@ data class DownloadTaskEntity(
     val localFileName: String?,
     val createdAtMillis: Long,
     val updatedAtMillis: Long,
+    @ColumnInfo(defaultValue = "0") val isFavorite: Boolean = false,
 )

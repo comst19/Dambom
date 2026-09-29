@@ -4,11 +4,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,7 +31,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
@@ -65,7 +69,6 @@ internal fun VideoCard(
         shape = style.shape,
         color = style.containerColor,
         contentColor = style.contentColor,
-        border = style.border,
     ) {
         Column {
             LibraryVideoThumbnail(
@@ -82,7 +85,7 @@ internal fun VideoCard(
                     if (isSelecting) {
                         Checkbox(checked = selectionSelected, onCheckedChange = { onToggleSelection() })
                     } else {
-                        VideoActionsButton(task = task, actions = fileActions, iconOffsetY = (-8).dp)
+                        VideoItemActions(task, fileActions)
                     }
                 },
             )
@@ -106,35 +109,85 @@ internal fun VideoListItem(
         onClick = onClick,
         enabled = !task.deletePending || isSelecting,
         modifier =
-            Modifier.semantics {
+            Modifier.fillMaxWidth().testTag("library-video-${task.id}").semantics {
                 stateDescription = style.sourceDescription
+                this.selected = selected && !isSelecting
             },
         shape = style.shape,
         color = style.containerColor,
         contentColor = style.contentColor,
-        border = style.border,
     ) {
-        Row(
-            modifier = Modifier.padding(vertical = 8.dp),
-            verticalAlignment = Alignment.Top,
-        ) {
-            LibraryVideoThumbnail(
-                metadata = metadata,
-                deletePending = task.deletePending,
-                modifier = Modifier.width(LIST_THUMBNAIL_WIDTH).aspectRatio(VIDEO_ASPECT_RATIO),
-            )
-            VideoItemInfo(
-                task = task,
-                metadataColor = style.metadataColor,
-                source = style.sourceHost ?: style.sourceLabel,
-                modifier = Modifier.weight(1f).padding(start = 12.dp, end = 4.dp),
-                trailing = {
-                    if (isSelecting) {
-                        Checkbox(checked = selectionSelected, onCheckedChange = { onToggleSelection() })
-                    } else {
-                        VideoActionsButton(task = task, actions = fileActions, iconOffsetY = (-8).dp)
-                    }
-                },
+        BoxWithConstraints {
+            val thumbnailWidth = if (maxWidth < 360.dp) 112.dp else 128.dp
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 104.dp)
+                        .padding(start = 8.dp, top = 16.dp, bottom = 16.dp),
+                verticalAlignment = Alignment.Top,
+            ) {
+                VideoListThumbnail(task, metadata, thumbnailWidth, fileActions, !isSelecting)
+                VideoListInfo(
+                    task = task,
+                    source = style.sourceHost ?: style.sourceLabel,
+                    modifier = Modifier.weight(1f).padding(start = 12.dp, end = 48.dp),
+                )
+            }
+            if (isSelecting) {
+                Checkbox(
+                    checked = selectionSelected,
+                    onCheckedChange = { onToggleSelection() },
+                    modifier = Modifier.align(Alignment.TopEnd),
+                )
+            } else {
+                VideoActionsButton(task, fileActions, Modifier.align(Alignment.TopEnd))
+            }
+        }
+    }
+}
+
+@Composable
+private fun VideoListThumbnail(
+    task: DownloadTask,
+    metadata: LocalVideoMetadata?,
+    width: androidx.compose.ui.unit.Dp,
+    actions: LibraryFileActions,
+    showFavorite: Boolean,
+) {
+    Box(Modifier.width(width).aspectRatio(VIDEO_ASPECT_RATIO).testTag("library-thumbnail-${task.id}")) {
+        LibraryVideoThumbnail(metadata, task.deletePending, Modifier.fillMaxSize())
+        if (showFavorite && !task.deletePending) {
+            VideoFavoriteButton(task, actions.onToggleFavorite, Modifier.align(Alignment.TopStart), onThumbnail = true)
+        }
+    }
+}
+
+@Composable
+private fun VideoListInfo(
+    task: DownloadTask,
+    source: String,
+    modifier: Modifier,
+) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = task.title,
+            style = MaterialTheme.typography.titleSmall,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            text = source,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (task.deletePending) {
+            Text(
+                text = stringResource(com.comst19.dambom.feature.library.R.string.library_delete_pending),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error,
             )
         }
     }
@@ -148,36 +201,49 @@ private fun VideoItemInfo(
     modifier: Modifier = Modifier,
     trailing: @Composable () -> Unit,
 ) {
-    Row(modifier = modifier) {
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Text(
-                text = task.title,
-                style = MaterialTheme.typography.titleSmall,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text =
-                    if (task.deletePending) {
-                        stringResource(com.comst19.dambom.feature.library.R.string.library_delete_pending)
-                    } else {
-                        task.downloadedBytes.formatFileSize()
-                    },
-                color = metadataColor,
-                style = MaterialTheme.typography.bodySmall,
-            )
-            Text(
-                text = source,
-                color = metadataColor,
-                style = MaterialTheme.typography.labelSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = task.title,
+            modifier = Modifier.padding(end = 8.dp),
+            style = MaterialTheme.typography.titleSmall,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text =
+                        if (task.deletePending) {
+                            stringResource(com.comst19.dambom.feature.library.R.string.library_delete_pending)
+                        } else {
+                            task.downloadedBytes.formatFileSize()
+                        },
+                    color = metadataColor,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = source,
+                    color = metadataColor,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            trailing()
         }
-        trailing()
+    }
+}
+
+@Composable
+private fun VideoItemActions(
+    task: DownloadTask,
+    actions: LibraryFileActions,
+) {
+    Row {
+        if (!task.deletePending) VideoFavoriteButton(task, actions.onToggleFavorite)
+        VideoActionsButton(task = task, actions = actions)
     }
 }
 
@@ -224,6 +290,5 @@ private fun LibraryVideoThumbnail(
     }
 }
 
-private val LIST_THUMBNAIL_WIDTH = 112.dp
 private val THUMBNAIL_SHAPE = RoundedCornerShape(12.dp)
 private const val VIDEO_ASPECT_RATIO = 16f / 9f

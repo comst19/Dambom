@@ -14,7 +14,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
         pluginManager.apply("jacoco")
         extensions.configure<ApplicationExtension> {
             configureAndroid()
-            defaultConfig.targetSdk = 36
+            defaultConfig.targetSdk = 37
             buildTypes {
                 debug {
                     applicationIdSuffix = ".debug"

@@ -22,6 +22,8 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.comst19.dambom.feature.web.component.WebNavigationErrorContent
 import com.comst19.dambom.feature.web.component.WebRescanButton
 import com.comst19.dambom.feature.web.component.WebToolbar
@@ -48,6 +50,9 @@ internal fun ColumnScope.WebContent(
     var webView by remember(tab.id) { mutableStateOf<WebView?>(null) }
     var loadingProgress by remember(tab.id) { mutableStateOf(0) }
     var webViewGeneration by remember(tab.id) { androidx.compose.runtime.mutableIntStateOf(0) }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_START) { webView?.onResume() }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { webView?.onPause() }
 
     if (loadingProgress in 1..99) {
         LinearProgressIndicator(

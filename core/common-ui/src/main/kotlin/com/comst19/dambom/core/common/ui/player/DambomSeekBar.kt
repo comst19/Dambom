@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.pointerInput
@@ -21,7 +20,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 
 @Composable
-internal fun DambomSeekBar(
+fun DambomSeekBar(
     value: Float,
     enabled: Boolean,
     contentDescription: String,
@@ -40,7 +39,6 @@ internal fun DambomSeekBar(
             modifier
                 .fillMaxWidth()
                 .height(48.dp)
-                .clipToBounds()
                 .semantics(mergeDescendants = true) {
                     this.contentDescription = contentDescription
                     this.stateDescription = stateDescription

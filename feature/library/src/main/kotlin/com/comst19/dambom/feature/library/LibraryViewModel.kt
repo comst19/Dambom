@@ -17,6 +17,7 @@ import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoTrimKey
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
@@ -103,6 +104,11 @@ internal class LibraryViewModel
             if (task?.deletePending != false || task.localFilePath == null) return
             savedStateHandle[SELECTED_ID_KEY] = id
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoDetailKey(id))) }
+        }
+
+        fun trimVideo(task: DownloadTask) {
+            if (task.deletePending || task.localFilePath == null) return
+            viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoTrimKey(task.id))) }
         }
 
         fun goBack() {

@@ -32,7 +32,11 @@ internal fun libraryVideoItemStyle(
     return LibraryVideoItemStyle(
         shape = DambomShapes.Media,
         containerColor =
-            if (selected) MaterialTheme.colorScheme.surfaceContainer else MaterialTheme.colorScheme.surface,
+            if (selected) {
+                MaterialTheme.colorScheme.secondaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceContainer
+            },
         contentColor = MaterialTheme.colorScheme.onSurface,
         metadataColor = MaterialTheme.colorScheme.onSurfaceVariant,
         sourceLabel =

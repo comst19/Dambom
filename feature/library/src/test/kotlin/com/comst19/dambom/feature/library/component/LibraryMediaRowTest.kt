@@ -42,7 +42,7 @@ class LibraryMediaRowTest {
         )
 
     @Test
-    fun `favorite stays inside thumbnail while overflow anchors to row top right`() {
+    fun `favorite and overflow stay inside the card without overlapping thumbnail`() {
         var favoriteClicks = 0
         var videoClicks = 0
         composeRule.setContent {
@@ -65,12 +65,11 @@ class LibraryMediaRowTest {
             composeRule.onNodeWithContentDescription("Add to favorites: Saved video").getUnclippedBoundsInRoot()
         val more = composeRule.onNodeWithContentDescription("More actions for Saved video").getUnclippedBoundsInRoot()
         val row = composeRule.onNodeWithTag("library-video-${video.id}").getUnclippedBoundsInRoot()
-        assertEquals(thumbnail.top, favorite.top)
-        assertEquals(thumbnail.left, favorite.left)
-        assertTrue(favorite.bottom <= thumbnail.bottom && favorite.right <= thumbnail.right)
-        assertEquals(row.top, more.top)
-        assertEquals(row.right, more.right)
-        assertTrue(row.bottom - row.top >= 104.dp)
+        assertTrue(favorite.left >= thumbnail.right)
+        assertTrue(favorite.top >= more.bottom)
+        assertTrue(favorite.bottom <= row.bottom && favorite.right <= row.right)
+        assertTrue(more.top >= row.top && more.right <= row.right)
+        assertTrue(row.bottom - row.top >= 112.dp)
         assertEquals(48.dp, favorite.right - favorite.left)
         assertEquals(48.dp, favorite.bottom - favorite.top)
         composeRule.onNodeWithContentDescription("Add to favorites: Saved video").performClick()

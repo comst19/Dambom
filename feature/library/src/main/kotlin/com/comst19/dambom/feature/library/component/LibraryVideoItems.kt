@@ -72,9 +72,9 @@ internal fun VideoCard(
     ) {
         Column {
             LibraryVideoThumbnail(
-                metadata = metadata,
-                deletePending = task.deletePending,
-                modifier = Modifier.fillMaxWidth().aspectRatio(VIDEO_ASPECT_RATIO),
+                metadata,
+                task.deletePending,
+                Modifier.fillMaxWidth().aspectRatio(VIDEO_ASPECT_RATIO),
             )
             VideoItemInfo(
                 task = task,
@@ -85,7 +85,10 @@ internal fun VideoCard(
                     if (isSelecting) {
                         Checkbox(checked = selectionSelected, onCheckedChange = { onToggleSelection() })
                     } else {
-                        VideoItemActions(task, fileActions)
+                        Row {
+                            VideoFavoriteButton(task, fileActions.onToggleFavorite)
+                            VideoActionsButton(task, fileActions)
+                        }
                     }
                 },
             )
@@ -123,15 +126,15 @@ internal fun VideoListItem(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 104.dp)
-                        .padding(start = 8.dp, top = 16.dp, bottom = 16.dp),
+                        .heightIn(min = 112.dp)
+                        .padding(start = 12.dp, top = 16.dp, bottom = 16.dp),
                 verticalAlignment = Alignment.Top,
             ) {
-                VideoListThumbnail(task, metadata, thumbnailWidth, fileActions, !isSelecting)
+                VideoListThumbnail(task, metadata, thumbnailWidth)
                 VideoListInfo(
                     task = task,
                     source = style.sourceHost ?: style.sourceLabel,
-                    modifier = Modifier.weight(1f).padding(start = 12.dp, end = 48.dp),
+                    modifier = Modifier.weight(1f).padding(start = 12.dp, end = 52.dp),
                 )
             }
             if (isSelecting) {
@@ -141,7 +144,14 @@ internal fun VideoListItem(
                     modifier = Modifier.align(Alignment.TopEnd),
                 )
             } else {
-                VideoActionsButton(task, fileActions, Modifier.align(Alignment.TopEnd))
+                VideoActionsButton(task, fileActions, Modifier.align(Alignment.TopEnd).padding(top = 4.dp, end = 4.dp))
+                if (!task.deletePending) {
+                    VideoFavoriteButton(
+                        task,
+                        fileActions.onToggleFavorite,
+                        Modifier.align(Alignment.BottomEnd).padding(bottom = 4.dp, end = 4.dp),
+                    )
+                }
             }
         }
     }
@@ -152,14 +162,9 @@ private fun VideoListThumbnail(
     task: DownloadTask,
     metadata: LocalVideoMetadata?,
     width: androidx.compose.ui.unit.Dp,
-    actions: LibraryFileActions,
-    showFavorite: Boolean,
 ) {
     Box(Modifier.width(width).aspectRatio(VIDEO_ASPECT_RATIO).testTag("library-thumbnail-${task.id}")) {
         LibraryVideoThumbnail(metadata, task.deletePending, Modifier.fillMaxSize())
-        if (showFavorite && !task.deletePending) {
-            VideoFavoriteButton(task, actions.onToggleFavorite, Modifier.align(Alignment.TopStart), onThumbnail = true)
-        }
     }
 }
 
@@ -233,17 +238,6 @@ private fun VideoItemInfo(
             }
             trailing()
         }
-    }
-}
-
-@Composable
-private fun VideoItemActions(
-    task: DownloadTask,
-    actions: LibraryFileActions,
-) {
-    Row {
-        if (!task.deletePending) VideoFavoriteButton(task, actions.onToggleFavorite)
-        VideoActionsButton(task = task, actions = actions)
     }
 }
 

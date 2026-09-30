@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.common.ui.player.DambomSliderDefaults
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.toTimeText
 import com.comst19.dambom.feature.library.trim.contract.TrimSelection
@@ -43,6 +44,9 @@ internal fun TrimRange(
         onValueChangeFinished = { onSelect(TrimSelection(range.start.toLong(), range.endInclusive.toLong())) },
         valueRange = 0f..state.durationMillis.toFloat(),
         enabled = !state.exporting,
+        startThumb = { DambomSliderDefaults.Thumb(enabled = !state.exporting) },
+        endThumb = { DambomSliderDefaults.Thumb(enabled = !state.exporting) },
+        track = { DambomSliderDefaults.RangeTrack(it, enabled = !state.exporting) },
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).semantics { contentDescription = label },
     )
     Text(stringResource(R.string.trim_duration, (range.endInclusive - range.start).toLong().toTrimTimeText()))

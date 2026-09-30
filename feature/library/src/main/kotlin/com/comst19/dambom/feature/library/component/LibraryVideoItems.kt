@@ -83,9 +83,9 @@ internal fun VideoCard(
                     VideoFavoriteButton(
                         task,
                         fileActions.onToggleFavorite,
-                        Modifier.align(Alignment.TopEnd),
+                        Modifier.align(Alignment.TopStart),
                         onVideoSurface = true,
-                        iconAlignment = Alignment.TopEnd,
+                        iconAlignment = Alignment.TopStart,
                     )
                 }
             }

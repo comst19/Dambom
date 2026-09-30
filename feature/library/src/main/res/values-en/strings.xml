@@ -90,4 +90,24 @@
     <string name="player_open_website">Open website</string>
     <string name="player_info_unknown">Unknown</string>
     <string name="player_quality_original">Original</string>
+    <string name="trim_title">Trim video</string>
+    <string name="trim_back">Close editor</string>
+    <string name="trim_preview">Preview selection</string>
+    <string name="trim_pause">Pause preview</string>
+    <string name="trim_range">Select trim range</string>
+    <string name="trim_start_end">Start %1$s · End %2$s</string>
+    <string name="trim_duration">%1$.1f sec selected</string>
+    <string name="trim_original_kept">Your original stays unchanged</string>
+    <string name="trim_save">Save selection</string>
+    <string name="trim_exporting">Saving your video. Please stay on this screen.</string>
+    <string name="trim_saved">Video saved to your chosen location.</string>
+    <string name="trim_export_failed">Could not save the video. Check available storage and the video format, then try again.</string>
+    <string name="trim_cancel_title">Cancel saving?</string>
+    <string name="trim_cancel_description">Stop this export. Your selection and original video will be kept.</string>
+    <string name="trim_cancel_export">Cancel export</string>
+    <string name="trim_continue">Keep saving</string>
+    <string name="trim_done">OK</string>
+    <string name="trim_choose_scene">Choose the moment to keep</string>
+    <string name="trim_range_hint">Drag the edges to adjust your clip</string>
+    <string name="trim_seek">Seek within selection</string>
 </resources>

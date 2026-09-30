@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.ContentCut
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Edit
@@ -55,6 +56,16 @@ internal fun VideoActionsButton(
             onDismissRequest = { menuExpanded = false },
         ) {
             if (!task.deletePending) {
+                actions.onTrim?.takeIf { task.localFilePath != null }?.let { onTrim ->
+                    ActionMenuItem(
+                        label = stringResource(R.string.trim_title),
+                        icon = { Icon(Icons.Outlined.ContentCut, contentDescription = null) },
+                        onClick = {
+                            menuExpanded = false
+                            onTrim(task)
+                        },
+                    )
+                }
                 ActionMenuItem(
                     label = stringResource(R.string.library_rename),
                     icon = { Icon(Icons.Outlined.Edit, contentDescription = null) },

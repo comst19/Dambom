@@ -85,6 +85,7 @@ internal fun VideoCard(
                         fileActions.onToggleFavorite,
                         Modifier.align(Alignment.TopEnd),
                         onVideoSurface = true,
+                        iconAlignment = Alignment.TopEnd,
                     )
                 }
             }
@@ -192,6 +193,7 @@ private fun VideoListThumbnail(
                 actions.onToggleFavorite,
                 Modifier.align(Alignment.TopStart),
                 onVideoSurface = true,
+                iconAlignment = Alignment.TopStart,
             )
         }
     }

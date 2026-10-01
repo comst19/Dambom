@@ -98,7 +98,7 @@ internal fun VideoTrimScreen(
                             state.exporting -> {
                                 Text(stringResource(R.string.trim_exporting))
                                 DambomLinearProgressIndicator(
-                                    progress = state.progress?.div(100f),
+                                    progress = state.progress?.div(PROGRESS_PERCENT_SCALE),
                                     modifier = Modifier.fillMaxWidth(),
                                 )
                                 OutlinedButton(
@@ -140,3 +140,5 @@ internal fun VideoTrimScreen(
         }
     }
 }
+
+private const val PROGRESS_PERCENT_SCALE = 100f

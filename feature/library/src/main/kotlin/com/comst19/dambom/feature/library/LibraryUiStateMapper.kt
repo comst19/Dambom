@@ -14,15 +14,25 @@ internal fun toLibraryUiState(
     viewMode: LibraryViewMode = LibraryViewMode.GRID,
     sourceFilter: LibrarySourceFilter = LibrarySourceFilter.ALL,
     selection: LibrarySelectionState = LibrarySelectionState(),
+    favoritesOnly: Boolean = false,
 ): LibraryUiState {
     val savedVideos = tasks.videos
     val sourceVideos =
         savedVideos.filter { task ->
-            when (sourceFilter) {
-                LibrarySourceFilter.ALL -> true
-                LibrarySourceFilter.X -> videoSourcePresentation(task.sourcePageUrl).kind == VideoSourceKind.X
-                LibrarySourceFilter.WEB -> videoSourcePresentation(task.sourcePageUrl).kind == VideoSourceKind.WEBSITE
-            }
+            (!favoritesOnly || task.isFavorite) &&
+                when (sourceFilter) {
+                    LibrarySourceFilter.ALL -> {
+                        true
+                    }
+
+                    LibrarySourceFilter.X -> {
+                        videoSourcePresentation(task.sourcePageUrl).kind == VideoSourceKind.X
+                    }
+
+                    LibrarySourceFilter.WEB -> {
+                        videoSourcePresentation(task.sourcePageUrl).kind == VideoSourceKind.WEBSITE
+                    }
+                }
         }
     val trimmedQuery = query.trim()
     val videos =
@@ -42,5 +52,6 @@ internal fun toLibraryUiState(
         totalBytes = tasks.totalBytes,
         totalVideoCount = tasks.totalVideoCount,
         sourceFilter = sourceFilter,
+        favoritesOnly = favoritesOnly,
     )
 }

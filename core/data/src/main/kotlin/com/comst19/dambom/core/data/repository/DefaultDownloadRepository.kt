@@ -113,6 +113,11 @@ class DefaultDownloadRepository
                 deletionMutex.withLock { cleanupDeletion(id, recordIntent = true) }
             }
 
+        override suspend fun toggleFavorite(id: String) =
+            withContext(ioDispatcher) {
+                check(dao.toggleFavorite(id) == 1) { "Video is no longer available" }
+            }
+
         override suspend fun retry(id: String) {
             dao.retry(id, System.currentTimeMillis())
             scheduler.schedule()
@@ -198,6 +203,7 @@ private fun DownloadTaskEntity.toDomain(localFilePath: String?): DownloadTask =
         createdAtMillis = createdAtMillis,
         updatedAtMillis = updatedAtMillis,
         deletePending = deletePending,
+        isFavorite = isFavorite,
     )
 
 private inline fun <reified T : Enum<T>> enumValueOrDefault(

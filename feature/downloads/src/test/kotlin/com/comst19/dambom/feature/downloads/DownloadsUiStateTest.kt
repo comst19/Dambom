@@ -1,6 +1,8 @@
 package com.comst19.dambom.feature.downloads
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import app.cash.turbine.test
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
@@ -10,6 +12,14 @@ import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.repository.DownloadRepository
+import com.comst19.dambom.core.navigation.NavigationState
+import com.comst19.dambom.core.navigation.Navigator
+import com.comst19.dambom.core.navigation.TopLevelBackBehavior
+import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
+import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
+import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.LibraryKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.downloads.component.thumbnailSource
@@ -31,6 +41,47 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class DownloadsUiStateTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
+
+    @Test
+    fun `opening library finishes the download flow and both back and home return to home`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            listOf(false, true).forEach { fromWeb ->
+                listOf(false, true).forEach { useBack ->
+                    val homeStack = NavBackStack<NavKey>(HomeKey)
+                    if (fromWeb) homeStack.add(WebKey("https://example.com"))
+                    homeStack.add(DownloadsKey)
+                    val state =
+                        NavigationState(
+                            bottomHomeKey = HomeKey,
+                            bottomBarKeys = setOf(HomeKey, LibraryKey),
+                            topLevelHistory = NavBackStack<NavKey>(HomeKey),
+                            backStacks =
+                                mapOf(
+                                    HomeKey to homeStack,
+                                    LibraryKey to NavBackStack<NavKey>(LibraryKey, VideoDetailKey("previous")),
+                                ),
+                            topLevelBackBehavior = TopLevelBackBehavior.ExitThroughHome,
+                        )
+                    val navigation = SpyNavigationDispatcher()
+                    val navigator = Navigator(state)
+                    val viewModel =
+                        DownloadsViewModel(EmptyDownloadRepository, navigation, SavedStateHandle(), AppEventBus())
+
+                    viewModel.openLibrary()
+                    advanceUntilIdle()
+                    navigation.dispatched.forEach(navigator::handle)
+
+                    assertEquals(LibraryKey, state.currentKey)
+                    assertEquals(listOf(HomeKey), homeStack.toList())
+                    assertEquals(listOf(LibraryKey), state.currentStack.toList())
+
+                    if (useBack) navigator.goBack() else navigator.navigateTopLevel(HomeKey)
+
+                    assertEquals(HomeKey, state.currentKey)
+                    assertTrue(state.isAtRoot)
+                }
+            }
+        }
 
     @Test
     fun `summary counts active queue and weighted progress`() {
@@ -212,6 +263,8 @@ private object EmptyDownloadRepository : DownloadRepository {
     override suspend fun resume(id: String) = Unit
 
     override suspend fun cancel(id: String) = Unit
+
+    override suspend fun toggleFavorite(id: String) = Unit
 
     override suspend fun rename(
         id: String,

@@ -114,6 +114,13 @@ class VideoPlayerLifecycleTest {
             assertEquals(15_000L, playerViewModel.player.currentPosition)
             assertFalse(playerViewModel.player.playWhenReady)
             assertTrue(fullscreen.value)
+            assertTrue(repository.updates.tryEmit(video.copy(isFavorite = true)))
+        }
+        composeRule.waitForIdle()
+        composeRule.runOnIdle {
+            assertEquals(15_000L, playerViewModel.player.currentPosition)
+            assertFalse(playerViewModel.player.playWhenReady)
+            assertTrue(fullscreen.value)
             assertTrue(repository.updates.tryEmit(null))
         }
         composeRule.waitForIdle()
@@ -138,6 +145,8 @@ private class LifecycleDownloadRepository : DownloadRepository {
     override suspend fun resume(id: String) = Unit
 
     override suspend fun delete(id: String) = Unit
+
+    override suspend fun toggleFavorite(id: String) = Unit
 
     override suspend fun rename(
         id: String,

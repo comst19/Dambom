@@ -5,10 +5,8 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.pointerInput
@@ -22,7 +20,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 
 @Composable
-internal fun DambomSeekBar(
+fun DambomSeekBar(
     value: Float,
     enabled: Boolean,
     contentDescription: String,
@@ -32,15 +30,15 @@ internal fun DambomSeekBar(
     modifier: Modifier = Modifier,
 ) {
     val clampedValue = normalizedSeekBarValue(value)
-    val activeColor = MaterialTheme.colorScheme.primary
-    val inactiveColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 0.32f else 0.12f)
-    val thumbColor = if (enabled) activeColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    val colors = DambomSliderDefaults.colors()
+    val activeColor = colors.activeTrackColor
+    val inactiveColor = if (enabled) colors.inactiveTrackColor else colors.disabledInactiveTrackColor
+    val thumbColor = if (enabled) colors.thumbColor else colors.disabledThumbColor
     Canvas(
         modifier =
             modifier
                 .fillMaxWidth()
                 .height(48.dp)
-                .clipToBounds()
                 .semantics(mergeDescendants = true) {
                     this.contentDescription = contentDescription
                     this.stateDescription = stateDescription
@@ -74,8 +72,8 @@ internal fun DambomSeekBar(
                 },
     ) {
         val centerY = size.height / 2f
-        val trackStroke = 4.dp.toPx()
-        val thumbRadius = 8.dp.toPx()
+        val trackStroke = DambomSliderDefaults.TrackHeight.toPx()
+        val thumbRadius = DambomSliderDefaults.ThumbDiameter.toPx() / 2f
         val thumbX = size.width * clampedValue
         drawLine(
             inactiveColor,

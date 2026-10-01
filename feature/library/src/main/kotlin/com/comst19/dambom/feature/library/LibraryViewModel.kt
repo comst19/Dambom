@@ -17,6 +17,7 @@ import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoTrimKey
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
@@ -47,13 +48,15 @@ internal class LibraryViewModel
         private val query = savedStateHandle.getStateFlow(QUERY_KEY, "")
         private val viewMode = savedStateHandle.getStateFlow(VIEW_MODE_KEY, LibraryViewMode.GRID.name)
         private val sourceFilter = savedStateHandle.getStateFlow(SOURCE_FILTER_KEY, LibrarySourceFilter.ALL.name)
+        private val favoritesOnly = savedStateHandle.getStateFlow(FAVORITES_ONLY_KEY, false)
         private val selection = MutableStateFlow(LibrarySelectionState())
         private var deletingSelection = false
         private val displayPreferences =
-            combine(viewMode, sourceFilter) { viewMode, sourceFilter ->
+            combine(viewMode, sourceFilter, favoritesOnly) { viewMode, sourceFilter, favoritesOnly ->
                 LibraryDisplayPreferences(
                     viewMode = LibraryViewMode.entries.firstOrNull { it.name == viewMode } ?: LibraryViewMode.GRID,
                     sourceFilter = LibrarySourceFilter.entries.firstOrNull { it.name == sourceFilter } ?: LibrarySourceFilter.ALL,
+                    favoritesOnly = favoritesOnly,
                 )
             }
         private val libraryDownloads =
@@ -86,6 +89,7 @@ internal class LibraryViewModel
                     viewMode = preferences.viewMode,
                     sourceFilter = preferences.sourceFilter,
                     selection = selection,
+                    favoritesOnly = preferences.favoritesOnly,
                 )
             }.stateIn(
                 scope = viewModelScope,
@@ -100,6 +104,11 @@ internal class LibraryViewModel
             if (task?.deletePending != false || task.localFilePath == null) return
             savedStateHandle[SELECTED_ID_KEY] = id
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoDetailKey(id))) }
+        }
+
+        fun trimVideo(task: DownloadTask) {
+            if (task.deletePending || task.localFilePath == null) return
+            viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoTrimKey(task.id))) }
         }
 
         fun goBack() {
@@ -120,6 +129,18 @@ internal class LibraryViewModel
 
         fun startSelection() {
             selection.update { it.copy(isActive = true) }
+        }
+
+        fun setFavoritesOnly(enabled: Boolean) {
+            savedStateHandle[FAVORITES_ONLY_KEY] = enabled
+        }
+
+        fun toggleFavorite(task: DownloadTask) {
+            if (task.deletePending || task.status != DownloadStatus.COMPLETED || task.localFilePath == null) return
+            viewModelScope.launch {
+                suspendRunCatching { repository.toggleFavorite(task.id) }
+                    .onFailure { showMessage(R.string.library_favorite_failure) }
+            }
         }
 
         fun toggleSelection(id: String) {
@@ -274,10 +295,12 @@ internal class LibraryViewModel
 private data class LibraryDisplayPreferences(
     val viewMode: LibraryViewMode,
     val sourceFilter: LibrarySourceFilter,
+    val favoritesOnly: Boolean,
 )
 
 private const val SELECTED_ID_KEY = "library-selected-video-id"
 private const val QUERY_KEY = "library-search-query"
 private const val VIEW_MODE_KEY = "library-view-mode"
 private const val SOURCE_FILTER_KEY = "library-source-filter"
+private const val FAVORITES_ONLY_KEY = "library-favorites-only"
 private const val STOP_TIMEOUT_MILLIS = 5_000L

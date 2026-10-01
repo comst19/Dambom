@@ -16,12 +16,14 @@ import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.navigation.NavigationConfig
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.Navigator
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
 import com.comst19.dambom.core.navigation.rememberNavigationState
 import com.comst19.dambom.core.navigation.toEntries
 import com.comst19.dambom.feature.detection.DetectionPlaceholder
 import com.comst19.dambom.feature.detection.navigation.detectionEntries
 import com.comst19.dambom.feature.downloads.navigation.downloadEntries
 import com.comst19.dambom.feature.home.navigation.homeEntries
+import com.comst19.dambom.feature.library.navigation.LibraryPaneState
 import com.comst19.dambom.feature.library.navigation.libraryEntries
 import com.comst19.dambom.feature.settings.navigation.settingsEntries
 import com.comst19.dambom.feature.web.navigation.webEntries
@@ -70,7 +72,9 @@ internal fun DambomApp(
                     onResultPaneVisibilityChange = { isHomeResultPaneVisible = it },
                 ) { currentNetworkAccess.value }
                 libraryEntries(
-                    isDetailPaneVisible = { isLibraryDetailPaneVisible },
+                    paneState = {
+                        LibraryPaneState(isLibraryDetailPaneVisible, (state.currentKey as? VideoDetailKey)?.id)
+                    },
                     onDetailPaneVisibilityChange = { isLibraryDetailPaneVisible = it },
                     isVideoFullscreen = { isVideoFullscreen },
                     onVideoFullscreenChange = updateVideoFullscreen,

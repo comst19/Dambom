@@ -41,6 +41,8 @@ interface DownloadRepository {
 
     suspend fun delete(id: String)
 
+    suspend fun toggleFavorite(id: String)
+
     suspend fun retry(id: String)
 
     suspend fun pauseAll()

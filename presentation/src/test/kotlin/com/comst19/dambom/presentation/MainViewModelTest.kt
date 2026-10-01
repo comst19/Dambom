@@ -163,6 +163,8 @@ private object FakeDownloadRepository : DownloadRepository {
 
     override suspend fun cancel(id: String) = Unit
 
+    override suspend fun toggleFavorite(id: String) = Unit
+
     override suspend fun rename(
         id: String,
         title: String,

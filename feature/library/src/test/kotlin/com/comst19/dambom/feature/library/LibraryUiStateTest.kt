@@ -13,6 +13,43 @@ import org.junit.Test
 
 class LibraryUiStateTest {
     @Test
+    fun `favorites intersect source and search without changing totals or selected detail`() {
+        val web = task("web", DownloadStatus.COMPLETED, "/video/web.mp4").copy(isFavorite = true, title = "Travel")
+        val x = web.copy(id = "x", sourcePageUrl = "https://x.com/user/status/1")
+        val ordinary = x.copy(id = "ordinary", isFavorite = false)
+        val other = x.copy(id = "other", title = "Other")
+        val snapshot = LibrarySnapshot(listOf(web, x, ordinary, other))
+
+        val state =
+            toLibraryUiState(
+                snapshot,
+                selectedId = ordinary.id,
+                query = " travel ",
+                sourceFilter = LibrarySourceFilter.X,
+                favoritesOnly = true,
+                selection = LibrarySelectionState().selectAll(listOf(x.id, ordinary.id)),
+            )
+
+        assertEquals(listOf(x), state.videos)
+        assertEquals(ordinary, state.selectedVideo)
+        assertTrue(state.favoritesOnly)
+        assertEquals(4, state.totalVideoCount)
+        assertEquals(400L, state.totalBytes)
+        assertEquals(1, state.hiddenSelectedCount)
+        assertEquals(4, toLibraryUiState(snapshot, selectedId = null).videos.size)
+    }
+
+    @Test
+    fun `removing last favorite leaves a filtered empty state not an empty library`() {
+        val video = task("video", DownloadStatus.COMPLETED, "/video/video.mp4")
+        val state = toLibraryUiState(LibrarySnapshot(listOf(video)), selectedId = null, favoritesOnly = true)
+
+        assertTrue(state.hasVideos)
+        assertTrue(state.videos.isEmpty())
+        assertEquals(1, state.totalVideoCount)
+    }
+
+    @Test
     fun `hidden selection count follows search without changing deletion selection`() {
         val first = task("first", DownloadStatus.COMPLETED, "/video/first.mp4")
         val second = task("second", DownloadStatus.COMPLETED, "/video/second.mp4")

@@ -91,6 +91,73 @@ class DefaultDownloadRepositoryTest {
         }
 
     @Test
+    fun `favorite toggle is atomic and maps to every repository stream without rescheduling`() =
+        runTest {
+            repository = createRepository(testScheduler)
+            val dao = database.downloadTaskDao()
+            val video = entity(TEST_ID, "example.com").copy(status = "COMPLETED", localFileName = "video.mp4")
+            dao.insert(video)
+
+            repository.toggleFavorite(TEST_ID)
+
+            assertTrue(
+                repository.downloads
+                    .first()
+                    .single()
+                    .isFavorite,
+            )
+            assertTrue(
+                repository.completedDownloads
+                    .first()
+                    .single()
+                    .isFavorite,
+            )
+            assertTrue(requireNotNull(repository.observeDownload(TEST_ID).first()).isFavorite)
+            assertEquals(video.copy(isFavorite = true), dao.getById(TEST_ID))
+            val firstToggle = async { repository.toggleFavorite(TEST_ID) }
+            val secondToggle = async { repository.toggleFavorite(TEST_ID) }
+            firstToggle.await()
+            secondToggle.await()
+            assertTrue(requireNotNull(dao.getById(TEST_ID)).isFavorite)
+            repository.toggleFavorite(TEST_ID)
+            assertEquals(video, dao.getById(TEST_ID))
+            assertEquals(0, scheduler.scheduleCount)
+        }
+
+    @Test
+    fun `favorites reject unfinished and deleted downloads`() =
+        runTest {
+            repository = createRepository(testScheduler)
+            val dao = database.downloadTaskDao()
+            dao.insert(entity(TEST_ID, "example.com"))
+            assertTrue(runCatching { repository.toggleFavorite(TEST_ID) }.isFailure)
+            assertEquals(false, requireNotNull(dao.getById(TEST_ID)).isFavorite)
+            assertTrue(runCatching { repository.toggleFavorite("missing") }.isFailure)
+        }
+
+    @Test
+    fun `room invalidates both active list and detail collectors after each toggle`() =
+        runTest {
+            repository = createRepository(testScheduler)
+            database.downloadTaskDao().insert(
+                entity(TEST_ID, "example.com").copy(status = "COMPLETED", localFileName = "video.mp4"),
+            )
+            repository.completedDownloads.test {
+                val list = this
+                assertEquals(false, list.awaitItem().single().isFavorite)
+                repository.observeDownload(TEST_ID).test {
+                    assertEquals(false, requireNotNull(awaitItem()).isFavorite)
+                    repository.toggleFavorite(TEST_ID)
+                    assertTrue(list.awaitItem().single().isFavorite)
+                    assertTrue(requireNotNull(awaitItem()).isFavorite)
+                    repository.toggleFavorite(TEST_ID)
+                    assertEquals(false, list.awaitItem().single().isFavorite)
+                    assertEquals(false, requireNotNull(awaitItem()).isFavorite)
+                }
+            }
+        }
+
+    @Test
     fun `different quality jobs coexist while the same source quality stays duplicate`() =
         runTest {
             repository =

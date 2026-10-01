@@ -18,7 +18,7 @@ internal data class HomeDownloadSummary(
     val activeCount: Int = 0,
     val pausedCount: Int = 0,
     val failedCount: Int = 0,
-    val progress: Float = 0f,
+    val progress: Float? = null,
 ) {
     val isVisible: Boolean
         get() = activeCount + pausedCount + failedCount > 0

@@ -91,7 +91,7 @@ class DetectionViewModelTest {
 
             viewModel.detect(SOURCE_URL)
             advanceUntilIdle()
-            viewModel.downloadSelected()
+            viewModel.downloadSelected("Web video")
             advanceUntilIdle()
 
             assertEquals(listOf(MEDIA_URL), downloads.enqueued.single().map(DownloadRequest::url))
@@ -120,7 +120,7 @@ class DetectionViewModelTest {
                 viewModel.detect(SOURCE_URL)
                 advanceUntilIdle()
                 viewModel.selectVariant("video-1", url)
-                viewModel.downloadSelected()
+                viewModel.downloadSelected("Web video")
                 advanceUntilIdle()
             }
             val requests = downloads.enqueued.flatten()
@@ -143,7 +143,7 @@ class DetectionViewModelTest {
             viewModel.detect(SOURCE_URL)
             advanceUntilIdle()
             viewModel.selectVariant("video-1", LOW_MEDIA_URL)
-            viewModel.downloadSelected()
+            viewModel.downloadSelected("Web video")
             advanceUntilIdle()
 
             assertEquals(listOf(LOW_MEDIA_URL), downloads.enqueued.single().map(DownloadRequest::url))
@@ -173,7 +173,7 @@ class DetectionViewModelTest {
             advanceUntilIdle()
             viewModel.toggleCandidate("video-1")
             viewModel.toggleCandidate("video-2")
-            viewModel.downloadSelected()
+            viewModel.downloadSelected("Web video")
             advanceUntilIdle()
 
             assertTrue(feedback.isCompleted)

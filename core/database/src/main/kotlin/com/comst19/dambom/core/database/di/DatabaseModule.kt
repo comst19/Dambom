@@ -21,7 +21,7 @@ object DatabaseModule {
     ): DambomDatabase =
         Room
             .databaseBuilder(context, DambomDatabase::class.java, DATABASE_NAME)
-            .addMigrations(DambomDatabase.MIGRATION_1_2, DambomDatabase.MIGRATION_2_3)
+            .addMigrations(DambomDatabase.MIGRATION_1_2, DambomDatabase.MIGRATION_2_3, DambomDatabase.MIGRATION_3_4)
             .build()
 
     @Provides

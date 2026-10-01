@@ -15,7 +15,7 @@ import com.comst19.dambom.core.domain.error.ErrorHandler
 import com.comst19.dambom.core.domain.error.NetworkFailureReason
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadStatus
-import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.core.domain.model.DownloadStatusSnapshot
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.NetworkMonitor
@@ -89,7 +89,7 @@ class MainViewModel
         private fun observeDownloadFeedback(repository: DownloadRepository) {
             viewModelScope.launch {
                 var previousStatuses: Map<String, DownloadStatus>? = null
-                repository.downloads.collect { tasks ->
+                repository.statuses.collect { tasks ->
                     previousStatuses?.let { previous ->
                         downloadFailureFeedback(previous, tasks)?.let { feedback ->
                             appEventBus.send(
@@ -143,7 +143,7 @@ internal data class DownloadFailureFeedback(
 
 internal fun downloadFailureFeedback(
     previousStatuses: Map<String, DownloadStatus>,
-    tasks: List<DownloadTask>,
+    tasks: List<DownloadStatusSnapshot>,
 ): DownloadFailureFeedback? {
     val failures =
         tasks.filter { task ->

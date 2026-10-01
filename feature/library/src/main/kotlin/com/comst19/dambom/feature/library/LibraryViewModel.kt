@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -212,6 +213,31 @@ internal class LibraryViewModel
             }
         }
 
+        suspend fun findExportTask(id: String?): DownloadTask? {
+            val task =
+                suspendRunCatching {
+                    id
+                        ?.let { repository.observeDownload(it).first() }
+                        ?.takeIf { !it.deletePending && it.localFilePath != null }
+                }.getOrNull()
+            if (task == null) showMessage(R.string.library_export_failure)
+            return task
+        }
+
+        fun exportRestored(
+            id: String?,
+            destination: Uri,
+        ) {
+            viewModelScope.launch {
+                val task = findExportTask(id)
+                if (task == null) {
+                    fileManager.discardExport(destination)
+                } else {
+                    export(task, destination)
+                }
+            }
+        }
+
         fun export(
             task: DownloadTask,
             destination: Uri,
@@ -225,12 +251,16 @@ internal class LibraryViewModel
 
         fun exportToConfiguredLocation(task: DownloadTask) {
             if (task.deletePending || task.localFilePath == null) return
-            val treeUri = settings.value.downloadTreeUri?.let(Uri::parse)
-            if (treeUri != null && !fileManager.hasPersistedTreePermission(treeUri)) {
-                clearInvalidDownloadLocation()
-                return
-            }
             viewModelScope.launch {
+                val treeUri =
+                    settingsRepository.settings
+                        .first()
+                        .downloadTreeUri
+                        ?.let(Uri::parse)
+                if (treeUri != null && !fileManager.hasPersistedTreePermission(treeUri)) {
+                    clearInvalidDownloadLocation()
+                    return@launch
+                }
                 suspendRunCatching { fileManager.exportToConfiguredLocation(task, treeUri) }
                     .fold(
                         onSuccess = { showMessage(R.string.library_export_success) },

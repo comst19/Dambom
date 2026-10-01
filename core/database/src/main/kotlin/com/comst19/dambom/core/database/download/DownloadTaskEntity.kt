@@ -7,7 +7,10 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "download_tasks",
-    indices = [Index(value = ["url", "quality"], unique = true)],
+    indices = [
+        Index(value = ["url", "quality"], unique = true),
+        Index(value = ["status", "deletePending", "createdAtMillis"]),
+    ],
 )
 data class DownloadTaskEntity(
     @PrimaryKey val id: String,

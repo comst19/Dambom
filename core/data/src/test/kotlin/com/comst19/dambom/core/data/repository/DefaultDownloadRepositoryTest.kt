@@ -11,6 +11,8 @@ import com.comst19.dambom.core.data.download.DownloadFileStore
 import com.comst19.dambom.core.data.download.DownloadWorkScheduler
 import com.comst19.dambom.core.data.download.selectNextDownload
 import com.comst19.dambom.core.database.DambomDatabase
+import com.comst19.dambom.core.database.download.DownloadOverviewRow
+import com.comst19.dambom.core.database.download.DownloadStatusRow
 import com.comst19.dambom.core.database.download.DownloadTaskDao
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadRequest
@@ -42,6 +44,44 @@ import java.util.concurrent.atomic.AtomicInteger
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class DefaultDownloadRepositoryTest {
+    @Test
+    fun `overview and status projections omit history and pending deletions`() =
+        runTest {
+            val dao = database.downloadTaskDao()
+            dao.insert(
+                entity("known", "media.example").copy(
+                    status = "DOWNLOADING",
+                    expectedBytes = 100L,
+                    downloadedBytes = 25L,
+                ),
+            )
+            dao.insert(entity("unknown", "media.example").copy(expectedBytes = null))
+            dao.insert(entity("paused", "media.example").copy(status = "PAUSED"))
+            dao.insert(entity("failed", "media.example").copy(status = "FAILED"))
+            dao.insert(entity("deleted", "media.example").copy(deletePending = true))
+            repeat(100) { index ->
+                dao.insert(entity("history-$index", "media.example").copy(status = "COMPLETED"))
+            }
+            repository = createRepository(testScheduler)
+
+            val overview = repository.overview.first()
+            assertEquals(2, overview.activeCount)
+            assertEquals(1, overview.pausedCount)
+            assertEquals(1, overview.failedCount)
+            assertEquals(25L, overview.downloadedBytes)
+            assertEquals(100L, overview.totalBytes)
+            assertEquals(null, overview.progress)
+            assertEquals(
+                setOf("known", "unknown", "paused", "failed"),
+                repository.statuses
+                    .first()
+                    .map { it.id }
+                    .toSet(),
+            )
+            dao.pause("unknown", 2L)
+            assertEquals(0.25f, repository.overview.first().progress)
+        }
+
     private lateinit var database: DambomDatabase
     private lateinit var scheduler: RecordingScheduler
     private lateinit var repository: DefaultDownloadRepository
@@ -445,6 +485,8 @@ class DefaultDownloadRepositoryTest {
                 ) { _, method, _ ->
                     when (method.name) {
                         "observeAll" -> flowOf(listOf(normal, pending))
+                        "observeOverview" -> flowOf(DownloadOverviewRow(1, 0, 0, 0L, 1024L, false))
+                        "observeStatuses" -> flowOf(listOf(DownloadStatusRow(normal.id, normal.title, normal.status)))
                         "observeCompleted" -> flowOf(emptyList<DownloadTaskEntity>())
                         "observePendingDeletions" -> flowOf(listOf(pending))
                         else -> error("Unexpected DAO call: ${method.name}")

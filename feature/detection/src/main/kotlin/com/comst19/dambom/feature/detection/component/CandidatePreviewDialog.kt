@@ -1,5 +1,6 @@
 package com.comst19.dambom.feature.detection.component
 
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -22,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -46,12 +48,14 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.ContentFrame
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
 import com.comst19.dambom.core.common.ui.player.DambomPlayerControls
+import com.comst19.dambom.core.common.ui.player.KeepScreenOnWhilePlaying
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.feature.detection.R
 import kotlinx.coroutines.delay
@@ -61,125 +65,166 @@ import kotlinx.coroutines.delay
 internal fun CandidatePreviewDialog(
     candidate: MediaCandidate,
     onDismiss: () -> Unit,
+    playerFactory: (Context) -> Player = ::createCandidatePreviewPlayer,
 ) {
     val context = LocalContext.current
     val player =
         remember(candidate.url) {
-            createCandidatePreviewPlayer(context).apply {
+            playerFactory(context).apply {
                 repeatMode = Player.REPEAT_MODE_ONE
                 setMediaItem(MediaItem.fromUri(candidate.url))
                 prepare()
                 playWhenReady = true
             }
         }
-    var isPrepared by remember(candidate.id, candidate.url) { mutableStateOf(false) }
-    var isPlaying by remember(candidate.id, candidate.url) { mutableStateOf(false) }
-    var controlsVisible by remember(candidate.id, candidate.url) { mutableStateOf(true) }
-    var controlsInteracting by remember(candidate.id, candidate.url) { mutableStateOf(false) }
-    var controlsInteractionRevision by remember(candidate.id, candidate.url) { mutableStateOf(0) }
-    val toggleControlsLabel = stringResource(R.string.detection_toggle_playback_controls)
-
+    val state = rememberPreviewState(player)
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { player.pause() }
-
-    DisposableEffect(player) {
-        val listener =
-            object : Player.Listener {
-                override fun onPlaybackStateChanged(playbackState: Int) {
-                    if (playbackState == Player.STATE_READY) isPrepared = true
-                }
-
-                override fun onIsPlayingChanged(value: Boolean) {
-                    isPlaying = value
-                }
-            }
-        player.addListener(listener)
-        isPrepared = player.playbackState == Player.STATE_READY
-        isPlaying = player.isPlaying
-        onDispose {
-            player.removeListener(listener)
-            player.release()
-        }
-    }
-    LaunchedEffect(controlsVisible, isPlaying, controlsInteracting, controlsInteractionRevision) {
-        if (controlsVisible && isPlaying && !controlsInteracting) {
+    LaunchedEffect(state.controlsVisible, state.isPlaying, state.controlsInteracting, state.interactionRevision) {
+        if (state.controlsVisible && state.isPlaying && !state.controlsInteracting) {
             delay(CONTROLS_AUTO_HIDE_MILLIS)
-            controlsVisible = false
+            state.controlsVisible = false
         }
     }
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
+        KeepScreenOnWhilePlaying(player)
         Surface(modifier = Modifier.fillMaxSize(), color = Color.Black, contentColor = Color.White) {
             Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.detection_play_selected_quality),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.White.copy(alpha = 0.72f),
-                        )
-                        Text(
-                            text = candidate.title,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            imageVector = Icons.Outlined.Close,
-                            contentDescription = stringResource(R.string.detection_close_preview),
-                        )
-                    }
-                }
-                Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .semantics {
-                                    onClick(label = toggleControlsLabel) {
-                                        controlsVisible = !controlsVisible
-                                        true
-                                    }
-                                }.pointerInput(Unit) {
-                                    detectTapGestures { controlsVisible = !controlsVisible }
-                                },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        ContentFrame(
-                            player = player,
-                            shutter = {},
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Black)
-                                    .alpha(if (isPrepared) 1f else 0f),
-                        )
-                        if (!isPrepared) {
-                            CircularProgressIndicator(color = Color.White)
-                        }
-                        CandidatePreviewControlOverlay(
-                            player = player,
-                            visible = isPrepared && controlsVisible,
-                            modifier = Modifier.matchParentSize(),
-                            onInteraction = {
-                                controlsVisible = true
-                                controlsInteractionRevision++
-                            },
-                            onInteractionChanged = { controlsInteracting = it },
-                        )
-                    }
+                CandidatePreviewHeader(candidate.title, onDismiss)
+                Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                    CandidatePreviewSurface(player, state)
                 }
             }
+        }
+    }
+}
+
+private class PreviewPlaybackState {
+    var isPrepared by mutableStateOf(false)
+    var failed by mutableStateOf(false)
+    var isPlaying by mutableStateOf(false)
+    var controlsVisible by mutableStateOf(true)
+    var controlsInteracting by mutableStateOf(false)
+    var interactionRevision by mutableStateOf(0)
+}
+
+@Composable
+private fun rememberPreviewState(player: Player): PreviewPlaybackState {
+    val state = remember(player) { PreviewPlaybackState() }
+    DisposableEffect(player) {
+        val listener =
+            object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_READY) state.isPrepared = true
+                }
+
+                override fun onIsPlayingChanged(value: Boolean) {
+                    state.isPlaying = value
+                }
+
+                override fun onPlayerError(error: PlaybackException) {
+                    state.failed = true
+                }
+            }
+        player.addListener(listener)
+        state.isPrepared = player.playbackState == Player.STATE_READY
+        state.isPlaying = player.isPlaying
+        state.failed = player.playerError != null
+        onDispose {
+            player.removeListener(listener)
+            player.release()
+        }
+    }
+    return state
+}
+
+@Composable
+private fun CandidatePreviewHeader(
+    title: String,
+    onDismiss: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.detection_play_selected_quality),
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White.copy(alpha = 0.72f),
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        IconButton(onClick = onDismiss) {
+            Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.detection_close_preview))
+        }
+    }
+}
+
+@Composable
+@androidx.annotation.OptIn(markerClass = [UnstableApi::class])
+private fun CandidatePreviewSurface(
+    player: Player,
+    state: PreviewPlaybackState,
+) {
+    val toggleControlsLabel = stringResource(R.string.detection_toggle_playback_controls)
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .semantics {
+                    onClick(label = toggleControlsLabel) {
+                        state.controlsVisible = !state.controlsVisible
+                        true
+                    }
+                }.pointerInput(Unit) {
+                    detectTapGestures { state.controlsVisible = !state.controlsVisible }
+                },
+        contentAlignment = Alignment.Center,
+    ) {
+        ContentFrame(
+            player = player,
+            shutter = {},
+            modifier = Modifier.fillMaxSize().background(Color.Black).alpha(if (state.isPrepared) 1f else 0f),
+        )
+        if (state.failed) {
+            CandidatePreviewError {
+                state.failed = false
+                state.isPrepared = false
+                state.controlsVisible = true
+                player.prepare()
+                player.play()
+            }
+        } else if (!state.isPrepared) {
+            CircularProgressIndicator(color = Color.White)
+        }
+        CandidatePreviewControlOverlay(
+            player = player,
+            visible = !state.failed && state.isPrepared && state.controlsVisible,
+            modifier = Modifier.matchParentSize(),
+            onInteraction = {
+                state.controlsVisible = true
+                state.interactionRevision++
+            },
+            onInteractionChanged = { state.controlsInteracting = it },
+        )
+    }
+}
+
+@Composable
+private fun CandidatePreviewError(onRetry: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(stringResource(R.string.detection_preview_error))
+        TextButton(onClick = onRetry) {
+            Text(stringResource(R.string.detection_preview_retry))
         }
     }
 }

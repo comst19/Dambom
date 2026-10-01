@@ -235,6 +235,14 @@ interface DownloadTaskDao {
 
     @Query("DELETE FROM download_tasks WHERE id = :id")
     suspend fun delete(id: String)
+
+    @Query(
+        """
+        UPDATE download_tasks SET isFavorite = NOT isFavorite
+        WHERE id = :id AND status = 'COMPLETED' AND deletePending = 0 AND localFileName IS NOT NULL
+        """,
+    )
+    suspend fun toggleFavorite(id: String): Int
 }
 
 data class QueuedDownloadCandidate(

@@ -37,6 +37,7 @@ import kotlinx.collections.immutable.persistentListOf
 internal fun LibraryRoute(
     isDetailPaneVisible: Boolean,
     onDetailPaneVisibilityChange: (Boolean) -> Unit,
+    activeVideoId: String?,
 ) {
     val viewModel: LibraryViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -49,7 +50,7 @@ internal fun LibraryRoute(
     }
 
     LibraryScreen(
-        uiState = uiState,
+        uiState = uiState.copy(selectedVideo = uiState.videos.firstOrNull { it.id == activeVideoId }),
         fileActions = fileActions,
         onQueryChange = viewModel::updateQuery,
         onViewModeChange = viewModel::setViewMode,
@@ -109,7 +110,8 @@ internal fun LibraryScreen(
         },
     ) { innerPadding ->
         LibraryPane(
-            uiState = uiState,
+            uiState =
+                if (showDetailPaneControl && isDetailPaneVisible) uiState else uiState.copy(selectedVideo = null),
             fileActions = fileActions,
             onQueryChange = onQueryChange,
             onSourceFilterChange = onSourceFilterChange,

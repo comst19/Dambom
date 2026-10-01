@@ -38,6 +38,7 @@ import com.comst19.dambom.feature.library.component.FullscreenVideoPlayer
 import com.comst19.dambom.feature.library.component.LibraryFileActions
 import com.comst19.dambom.feature.library.component.MissingVideo
 import com.comst19.dambom.feature.library.component.VideoActionsButton
+import com.comst19.dambom.feature.library.component.VideoFavoriteButton
 import com.comst19.dambom.feature.library.component.VideoPlayerPanel
 import com.comst19.dambom.feature.library.component.rememberLibraryFileActions
 import com.comst19.dambom.feature.library.file.isLocalVideoAvailable
@@ -192,6 +193,7 @@ internal fun VideoPlayerScreen(
                         },
                     actions = {
                         task?.let {
+                            VideoFavoriteButton(task = it, onToggle = fileActions.onToggleFavorite)
                             IconButton(onClick = { onVideoFullscreenChange(true) }) {
                                 Icon(
                                     imageVector = Icons.Outlined.Fullscreen,

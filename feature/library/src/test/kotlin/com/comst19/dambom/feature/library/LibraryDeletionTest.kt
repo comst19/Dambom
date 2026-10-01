@@ -195,6 +195,8 @@ private class DeletionRepository : DownloadRepository {
 
     override suspend fun resume(id: String) = Unit
 
+    override suspend fun toggleFavorite(id: String) = Unit
+
     override suspend fun rename(
         id: String,
         title: String,

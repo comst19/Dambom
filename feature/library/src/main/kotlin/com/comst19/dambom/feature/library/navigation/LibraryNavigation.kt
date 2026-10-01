@@ -15,7 +15,7 @@ import com.comst19.dambom.feature.library.trim.VideoTrimRoute
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 fun EntryProviderScope<NavKey>.libraryEntries(
-    isDetailPaneVisible: () -> Boolean,
+    paneState: () -> LibraryPaneState,
     onDetailPaneVisibilityChange: (Boolean) -> Unit,
     isVideoFullscreen: () -> Boolean,
     onVideoFullscreenChange: (Boolean) -> Unit,
@@ -28,8 +28,10 @@ fun EntryProviderScope<NavKey>.libraryEntries(
                 detailPlaceholder = { LibraryDetailPlaceholderRoute() },
             ),
     ) {
+        val currentPaneState = paneState()
         LibraryRoute(
-            isDetailPaneVisible = isDetailPaneVisible(),
+            isDetailPaneVisible = currentPaneState.isVisible,
+            activeVideoId = currentPaneState.activeVideoId,
             onDetailPaneVisibilityChange = onDetailPaneVisibilityChange,
         )
     }

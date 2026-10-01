@@ -20,7 +20,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,6 +35,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.designsystem.DambomLinearProgressIndicator
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.feature.home.R
 import com.comst19.dambom.feature.home.contract.HomeDownloadSummary
@@ -217,8 +217,8 @@ private fun HomeDownloadStatus(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (summary.activeCount > 0) {
-                LinearProgressIndicator(
-                    progress = { summary.progress },
+                DambomLinearProgressIndicator(
+                    progress = summary.progress,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }

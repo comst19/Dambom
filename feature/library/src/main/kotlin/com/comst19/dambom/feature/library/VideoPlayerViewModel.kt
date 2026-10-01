@@ -40,7 +40,7 @@ internal class VideoPlayerViewModel
                     setHandleAudioBecomingNoisy(true)
                 }
 
-        fun play(task: DownloadTask) {
+        fun prepare(task: DownloadTask) {
             val path = task.localFilePath ?: return
             val uri = Uri.fromFile(File(path))
             if (
@@ -57,6 +57,8 @@ internal class VideoPlayerViewModel
             ) {
                 return
             }
+            visibilityState.onPlaybackStopped()
+            player.pause()
             player.setMediaItem(
                 MediaItem
                     .Builder()
@@ -66,7 +68,6 @@ internal class VideoPlayerViewModel
                     .build(),
             )
             player.prepare()
-            player.play()
         }
 
         fun onUiStarted() = applyPlaybackCommand(visibilityState.onStarted())

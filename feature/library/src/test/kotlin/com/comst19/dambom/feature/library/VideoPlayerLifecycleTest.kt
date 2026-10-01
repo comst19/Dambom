@@ -91,6 +91,7 @@ class VideoPlayerLifecycleTest {
         composeRule.waitForIdle()
         composeRule.runOnIdle {
             assertEquals("video", playerViewModel.player.currentMediaItem?.mediaId)
+            assertFalse(playerViewModel.player.playWhenReady)
             playerViewModel.player.pause()
             playerViewModel.player.seekTo(15_000L)
             fullscreen.value = true

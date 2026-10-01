@@ -15,7 +15,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -31,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import com.comst19.dambom.core.common.ui.AppScreen
+import com.comst19.dambom.core.designsystem.DambomLinearProgressIndicator
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.trim.component.TrimPreview
 import com.comst19.dambom.feature.library.trim.component.TrimRange
@@ -97,14 +97,10 @@ internal fun VideoTrimScreen(
                         when {
                             state.exporting -> {
                                 Text(stringResource(R.string.trim_exporting))
-                                if (state.progress == null) {
-                                    LinearProgressIndicator(Modifier.fillMaxWidth())
-                                } else {
-                                    LinearProgressIndicator(
-                                        progress = { state.progress / 100f },
-                                        modifier = Modifier.fillMaxWidth(),
-                                    )
-                                }
+                                DambomLinearProgressIndicator(
+                                    progress = state.progress?.div(100f),
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
                                 OutlinedButton(
                                     onClick = onCancel,
                                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),

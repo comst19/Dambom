@@ -94,7 +94,7 @@ internal fun VideoPlayerRoute(
     LaunchedEffect(detailState, task?.id, task?.localFilePath, isLocalVideoAvailable) {
         if (detailState == VideoDetailState.Loading) return@LaunchedEffect
         if (isLocalVideoAvailable) {
-            task?.let(playerViewModel::play)
+            task?.let(playerViewModel::prepare)
         } else {
             playerViewModel.stopUnavailableVideo()
         }

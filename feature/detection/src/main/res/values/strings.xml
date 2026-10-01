@@ -1,4 +1,6 @@
 <resources>
+    <string name="detection_preview_error">영상을 재생하지 못했어요.</string>
+    <string name="detection_preview_retry">다시 재생</string>
     <string name="detection_failed">영상을 분석하지 못했어요. 웹에서 페이지를 열어요.</string>
     <string name="detection_select_all">전체 선택</string>
     <string name="detection_title">영상 찾기</string>
@@ -38,4 +40,5 @@
     <string name="detection_no_media">이 페이지에서 저장할 수 있는 영상을 찾지 못했어요.</string>
     <string name="detection_network_error">페이지에 연결하지 못했어요. 네트워크 상태를 확인해 주세요.</string>
     <string name="detection_unsupported_format">담봄이 아직 지원하지 않는 형식이에요.</string>
+    <string name="detection_default_video_title">웹 영상</string>
 </resources>

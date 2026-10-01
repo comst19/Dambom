@@ -42,6 +42,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.ContentFrame
 import com.comst19.dambom.core.common.ui.player.DambomSeekBar
+import com.comst19.dambom.core.common.ui.player.KeepScreenOnWhilePlaying
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.toTimeText
 import com.comst19.dambom.feature.library.trim.contract.TrimSelection
@@ -66,6 +67,7 @@ internal fun TrimPreview(
             }
         }
     var isPlaying by remember { mutableStateOf(false) }
+    KeepScreenOnWhilePlaying(player, enabled)
     var position by remember { mutableLongStateOf(0L) }
     var failed by remember { mutableStateOf(false) }
     DisposableEffect(player) {

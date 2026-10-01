@@ -33,8 +33,20 @@ internal class LibraryFileManager
             task: DownloadTask,
             destination: Uri,
         ) = withContext(ioDispatcher) {
-            task.requireLocalFile().copyTo(destination)
+            var copied = false
+            try {
+                task.requireLocalFile().copyToDocument(context, destination)
+                copied = true
+            } finally {
+                if (!copied) runCatching { DocumentsContract.deleteDocument(context.contentResolver, destination) }
+            }
         }
+
+        suspend fun discardExport(destination: Uri) =
+            withContext(ioDispatcher) {
+                runCatching { DocumentsContract.deleteDocument(context.contentResolver, destination) }
+                Unit
+            }
 
         suspend fun exportToConfiguredLocation(
             task: DownloadTask,
@@ -88,13 +100,6 @@ internal class LibraryFileManager
                 null
             }
 
-        private fun File.copyTo(destination: Uri) {
-            copyStreams(
-                openInput = ::inputStream,
-                openOutput = { checkNotNull(context.contentResolver.openOutputStream(destination)) },
-            )
-        }
-
         private fun File.copyToTree(
             task: DownloadTask,
             treeUri: Uri,
@@ -114,7 +119,7 @@ internal class LibraryFileManager
                     ),
                 )
             try {
-                copyTo(destination)
+                copyToDocument(context, destination)
             } catch (throwable: Throwable) {
                 DocumentsContract.deleteDocument(context.contentResolver, destination)
                 throw throwable
@@ -143,7 +148,7 @@ internal class LibraryFileManager
                     context.contentResolver.insert(defaultDownloadCollectionUri(), values),
                 )
             try {
-                copyTo(destination)
+                copyToDocument(context, destination)
                 values.clear()
                 values.put(MediaStore.Video.Media.IS_PENDING, 0)
                 context.contentResolver.update(destination, values, null, null)
@@ -161,7 +166,7 @@ internal class LibraryFileManager
                     .resolve(DEFAULT_DOWNLOAD_DIRECTORY)
             check(directory.isDirectory || directory.mkdirs())
             val destination = directory.availableFile(task.suggestedFileName())
-            copyTo(destination)
+            copyToNewFile(destination, ::inputStream)
             MediaScannerConnection.scanFile(
                 context,
                 arrayOf(destination.path),
@@ -177,6 +182,30 @@ internal fun copyStreams(
 ) {
     openInput().use { input ->
         openOutput().use(input::copyTo)
+    }
+}
+
+private fun File.copyToDocument(
+    context: Context,
+    destination: Uri,
+) {
+    copyStreams(
+        openInput = ::inputStream,
+        openOutput = { checkNotNull(context.contentResolver.openOutputStream(destination)) },
+    )
+}
+
+internal fun copyToNewFile(
+    destination: File,
+    openInput: () -> InputStream,
+) {
+    check(destination.createNewFile()) { "Export destination already exists" }
+    var copied = false
+    try {
+        copyStreams(openInput, destination::outputStream)
+        copied = true
+    } finally {
+        if (!copied) runCatching { destination.delete() }
     }
 }
 

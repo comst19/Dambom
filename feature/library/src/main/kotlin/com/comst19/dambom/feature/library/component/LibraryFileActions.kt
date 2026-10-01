@@ -11,7 +11,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -24,6 +26,7 @@ import com.comst19.dambom.feature.library.external.copyOriginalLink
 import com.comst19.dambom.feature.library.external.openOriginalLink
 import com.comst19.dambom.feature.library.external.shareOriginalLink
 import com.comst19.dambom.feature.library.file.suggestedFileName
+import kotlinx.coroutines.launch
 
 @Immutable
 internal data class LibraryFileActions(
@@ -48,24 +51,27 @@ internal fun rememberLibraryFileActions(
     val shareLinkChooserTitle = stringResource(R.string.library_share_link_chooser)
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val currentSettings = rememberUpdatedState(settings)
-    var pendingExport by remember { mutableStateOf<DownloadTask?>(null) }
+    val scope = rememberCoroutineScope()
+    var pendingExport by rememberSaveable { mutableStateOf<String?>(null) }
     val exportLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("video/*")) { destination ->
             val task = pendingExport
             pendingExport = null
-            if (destination != null && task != null) viewModel.export(task, destination)
+            if (destination != null) viewModel.exportRestored(task, destination)
         }
-    var pendingDefaultExport by remember { mutableStateOf<DownloadTask?>(null) }
+    var pendingDefaultExport by rememberSaveable { mutableStateOf<String?>(null) }
     val legacyStoragePermissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            val task = pendingDefaultExport
+            val taskId = pendingDefaultExport
             pendingDefaultExport = null
-            if (task == null) return@rememberLauncherForActivityResult
-            if (granted) {
-                viewModel.exportToConfiguredLocation(task)
-            } else {
-                pendingExport = task
-                exportLauncher.launch(task.suggestedFileName())
+            scope.launch {
+                val task = viewModel.findExportTask(taskId) ?: return@launch
+                if (granted) {
+                    viewModel.exportToConfiguredLocation(task)
+                } else {
+                    pendingExport = task.id
+                    exportLauncher.launch(task.suggestedFileName())
+                }
             }
         }
     val currentOnDelete = rememberUpdatedState(onDelete)
@@ -78,13 +84,13 @@ internal fun rememberLibraryFileActions(
                 val downloadSettings = currentSettings.value
                 when {
                     !downloadSettings.useConfiguredDownloadLocation -> {
-                        pendingExport = task
+                        pendingExport = task.id
                         exportLauncher.launch(task.suggestedFileName())
                     }
 
                     !viewModel.hasValidConfiguredDownloadLocation(downloadSettings.downloadTreeUri) -> {
                         viewModel.clearInvalidDownloadLocation()
-                        pendingExport = task
+                        pendingExport = task.id
                         exportLauncher.launch(task.suggestedFileName())
                     }
 
@@ -92,7 +98,7 @@ internal fun rememberLibraryFileActions(
                         downloadSettings.downloadTreeUri == null &&
                         ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
                         PackageManager.PERMISSION_GRANTED -> {
-                        pendingDefaultExport = task
+                        pendingDefaultExport = task.id
                         legacyStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     }
 
@@ -122,7 +128,7 @@ internal fun rememberLibraryFileActions(
             },
             onCopyLink = { task ->
                 copyOriginalLink(context, task.sourcePageUrl)
-                viewModel.notifyLinkCopied()
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) viewModel.notifyLinkCopied()
             },
             onOpenOriginal = { task ->
                 if (!openOriginalLink(context, task.sourcePageUrl)) viewModel.notifyOpenOriginalFailure()

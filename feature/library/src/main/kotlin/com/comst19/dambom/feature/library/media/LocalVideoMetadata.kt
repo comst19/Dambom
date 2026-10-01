@@ -3,6 +3,7 @@ package com.comst19.dambom.feature.library.media
 import android.content.Context
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
+import android.os.FileObserver
 import android.util.LruCache
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -10,6 +11,12 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.LocalContext
 import com.comst19.dambom.core.common.ui.loadOrCreateVideoThumbnailFile
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -40,11 +47,38 @@ internal fun localVideoCacheKey(path: String): LocalVideoCacheKey =
 @Composable
 internal fun rememberLocalVideoMetadata(path: String?): State<LocalVideoMetadata?> =
     LocalContext.current.let { context ->
-        val cacheKey = path?.let(::localVideoCacheKey)
-        produceState<LocalVideoMetadata?>(initialValue = null, key1 = context, key2 = cacheKey) {
-            value = cacheKey?.let { LocalVideoMetadataLoader.load(context.applicationContext, it) }
+        produceState<LocalVideoMetadata?>(initialValue = null, key1 = context, key2 = path) {
+            value = null
+            if (path != null) {
+                observeLocalVideoCacheKey(path).collect { key ->
+                    value = LocalVideoMetadataLoader.load(context.applicationContext, key)
+                }
+            }
         }
     }
+
+internal fun observeLocalVideoCacheKey(path: String) =
+    callbackFlow {
+        val file = File(path)
+        val parent = checkNotNull(file.absoluteFile.parentFile)
+
+        @Suppress("DEPRECATION")
+        val observer =
+            object : FileObserver(
+                parent.path,
+                DELETE or MOVED_FROM or CREATE or MOVED_TO or CLOSE_WRITE or MODIFY or ATTRIB,
+            ) {
+                override fun onEvent(
+                    event: Int,
+                    changedPath: String?,
+                ) {
+                    if (changedPath == file.name) trySend(Unit)
+                }
+            }
+        observer.startWatching()
+        trySend(Unit)
+        awaitClose { observer.stopWatching() }
+    }.conflate().map { localVideoCacheKey(path) }.distinctUntilChanged().flowOn(Dispatchers.IO)
 
 internal object LocalVideoMetadataLoader {
     private val readMutex = Mutex()

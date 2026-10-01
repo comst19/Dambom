@@ -46,7 +46,7 @@ internal class HomeViewModel
         private val url = savedStateHandle.getStateFlow(URL_KEY, "")
         private val clipboardUrl = MutableStateFlow<String?>(null)
         private var lastSuggestedClipboardUrl: String? = null
-        private val downloadSummary = downloadRepository.downloads.map(::toHomeDownloadSummary).distinctUntilChanged()
+        private val downloadSummary = downloadRepository.overview.map(::toHomeDownloadSummary).distinctUntilChanged()
 
         val uiState: StateFlow<HomeUiState> =
             combine(

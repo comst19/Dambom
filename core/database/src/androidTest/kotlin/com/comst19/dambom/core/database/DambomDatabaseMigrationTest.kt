@@ -15,6 +15,43 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class DambomDatabaseMigrationTest {
     @Test
+    fun queueIndexMigrationPreservesExistingDownloads() {
+        val name = "queue-index-migration-test"
+        helper.createDatabase(name, 3).apply {
+            execSQL(
+                """
+                INSERT INTO download_tasks (
+                    id, url, sourcePageUrl, host, title, mimeType, expectedBytes, downloadedBytes,
+                    quality, status, failureReason, retryCount, deletePending, localFileName,
+                    createdAtMillis, updatedAtMillis, isFavorite
+                ) VALUES (
+                    'queued', 'https://example.com/video.mp4', 'https://example.com', 'example.com',
+                    'Keep title', 'video/mp4', 100, 25, 'original', 'QUEUED', NULL, 1, 0, NULL, 10, 20, 1
+                )
+                """.trimIndent(),
+            )
+            close()
+        }
+        helper.runMigrationsAndValidate(name, 4, true, DambomDatabase.MIGRATION_3_4).use { db ->
+            db.query("SELECT title, downloadedBytes, retryCount, isFavorite FROM download_tasks WHERE id = 'queued'").use { cursor ->
+                assertTrue(cursor.moveToFirst())
+                assertEquals("Keep title", cursor.getString(0))
+                assertEquals(25L, cursor.getLong(1))
+                assertEquals(1, cursor.getInt(2))
+                assertEquals(1, cursor.getInt(3))
+            }
+            db
+                .query(
+                    "EXPLAIN QUERY PLAN SELECT * FROM download_tasks " +
+                        "WHERE status = 'QUEUED' AND deletePending = 0 ORDER BY createdAtMillis ASC",
+                ).use { cursor ->
+                    assertTrue(cursor.moveToFirst())
+                    assertTrue(cursor.getString(3).contains("index_download_tasks_status_deletePending_createdAtMillis"))
+                }
+        }
+    }
+
+    @Test
     fun favoritesSurviveReopeningAndDoNotChangeVideoMetadata() =
         runBlocking {
             val context = InstrumentationRegistry.getInstrumentation().targetContext
@@ -35,7 +72,7 @@ class DambomDatabaseMigrationTest {
                 )
                 close()
             }
-            helper.runMigrationsAndValidate(name, 3, true, DambomDatabase.MIGRATION_2_3).close()
+            helper.runMigrationsAndValidate(name, 4, true, DambomDatabase.MIGRATION_2_3, DambomDatabase.MIGRATION_3_4).close()
             val first = Room.databaseBuilder(context, DambomDatabase::class.java, name).build()
             try {
                 val dao = first.downloadTaskDao()

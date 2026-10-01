@@ -153,9 +153,10 @@ internal class DetectionViewModel
             }
         }
 
-        fun downloadSelected() {
-            val state = mutableUiState.value as? DetectionUiState.Content ?: return
-            val sourcePageUrl = loadedUrl ?: return
+        fun downloadSelected(fallbackTitle: String) {
+            val state = mutableUiState.value as? DetectionUiState.Content
+            val sourcePageUrl = loadedUrl
+            if (state == null || sourcePageUrl == null) return
             if (state.isSubmitting || state.selectedIds.isEmpty()) return
             mutableUiState.value = state.copy(isSubmitting = true)
             viewModelScope.launch {
@@ -171,7 +172,12 @@ internal class DetectionViewModel
                                 id = UUID.randomUUID().toString(),
                                 url = variant.url,
                                 sourcePageUrl = sourcePageUrl,
-                                title = candidate.title,
+                                title =
+                                    candidate.displayTitle(
+                                        fallbackTitle,
+                                        state.candidates.indexOf(candidate),
+                                        state.candidates.size,
+                                    ),
                                 mimeType = variant.mimeType,
                                 expectedBytes = variant.contentLength,
                                 quality = variant.quality,

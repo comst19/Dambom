@@ -20,6 +20,50 @@ import java.io.IOException
 @Config(sdk = [35])
 class LibraryFileManagerTest {
     @Test
+    fun `partial copy failure removes only the new destination and preserves original error`() {
+        val directory =
+            java.nio.file.Files
+                .createTempDirectory("failed-export")
+                .toFile()
+        val source = directory.resolve("source.mp4").apply { writeBytes(byteArrayOf(1, 2, 3)) }
+        val existing = directory.resolve("existing.mp4").apply { writeText("existing") }
+        val destination = directory.resolve("new.mp4")
+        val failure = IOException("read failed after partial write")
+        var read = false
+        try {
+            val thrown =
+                org.junit.Assert.assertThrows(IOException::class.java) {
+                    copyToNewFile(destination) {
+                        object : java.io.InputStream() {
+                            override fun read(): Int = throw failure
+
+                            override fun read(
+                                bytes: ByteArray,
+                                offset: Int,
+                                length: Int,
+                            ): Int {
+                                if (read) throw failure
+                                read = true
+                                bytes[offset] = 1
+                                return 1
+                            }
+                        }
+                    }
+                }
+            org.junit.Assert.assertSame(failure, thrown)
+            org.junit.Assert.assertFalse(destination.exists())
+            org.junit.Assert.assertArrayEquals(byteArrayOf(1, 2, 3), source.readBytes())
+            assertEquals("existing", existing.readText())
+            org.junit.Assert.assertThrows(IllegalStateException::class.java) {
+                copyToNewFile(existing, source::inputStream)
+            }
+            assertEquals("existing", existing.readText())
+        } finally {
+            directory.deleteRecursively()
+        }
+    }
+
+    @Test
     fun `default export uses the downloads collection`() {
         assertEquals(MediaStore.Downloads.EXTERNAL_CONTENT_URI, defaultDownloadCollectionUri())
     }

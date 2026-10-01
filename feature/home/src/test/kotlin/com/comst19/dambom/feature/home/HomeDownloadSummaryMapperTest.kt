@@ -2,16 +2,17 @@ package com.comst19.dambom.feature.home
 
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.core.domain.model.toDownloadOverview
 import com.comst19.dambom.feature.home.contract.HomeDownloadSummary
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class HomeDownloadSummaryMapperTest {
     @Test
-    fun `only active known size downloads contribute to progress`() {
+    fun `unknown active size keeps home progress indeterminate`() {
         val active = task(DownloadStatus.DOWNLOADING, 25L, 100L)
         val summary =
-            toHomeDownloadSummary(
+            homeSummary(
                 listOf(
                     active,
                     task(DownloadStatus.QUEUED, 0L, 100L),
@@ -22,10 +23,26 @@ class HomeDownloadSummaryMapperTest {
                 ),
             )
 
-        assertEquals(HomeDownloadSummary(activeCount = 3, pausedCount = 1, failedCount = 1, progress = 0.125f), summary)
-        assertEquals(HomeDownloadSummary(), toHomeDownloadSummary(emptyList()))
+        assertEquals(HomeDownloadSummary(activeCount = 3, pausedCount = 1, failedCount = 1, progress = null), summary)
+        assertEquals(HomeDownloadSummary(), homeSummary(emptyList()))
+    }
+
+    @Test
+    fun `known active progress excludes paused failed and completed bytes`() {
+        val summary =
+            homeSummary(
+                listOf(
+                    task(DownloadStatus.DOWNLOADING, 25L, 100L),
+                    task(DownloadStatus.QUEUED, 0L, 100L),
+                    task(DownloadStatus.PAUSED, 100L, 100L),
+                    task(DownloadStatus.COMPLETED, 100L, 100L),
+                ),
+            )
+        assertEquals(0.125f, summary.progress)
     }
 }
+
+private fun homeSummary(tasks: List<DownloadTask>) = toHomeDownloadSummary(tasks.toDownloadOverview())
 
 private fun task(
     status: DownloadStatus,

@@ -6,8 +6,10 @@ import com.comst19.dambom.core.data.download.DownloadWorkScheduler
 import com.comst19.dambom.core.database.download.DownloadTaskDao
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadFailureReason
+import com.comst19.dambom.core.domain.model.DownloadOverview
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadStatus
+import com.comst19.dambom.core.domain.model.DownloadStatusSnapshot
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.repository.DownloadRepository
@@ -35,6 +37,35 @@ class DefaultDownloadRepository
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : DownloadRepository {
         private val deletionMutex = Mutex()
+
+        override val overview: Flow<DownloadOverview> =
+            dao
+                .observeOverview()
+                .distinctUntilChanged()
+                .map { row ->
+                    DownloadOverview(
+                        row.activeCount,
+                        row.pausedCount,
+                        row.failedCount,
+                        row.downloadedBytes,
+                        row.totalBytes,
+                        row.hasUnknownSize,
+                    )
+                }.flowOn(ioDispatcher)
+
+        override val statuses: Flow<List<DownloadStatusSnapshot>> =
+            dao
+                .observeStatuses()
+                .distinctUntilChanged()
+                .map { rows ->
+                    rows.map { row ->
+                        DownloadStatusSnapshot(
+                            id = row.id,
+                            title = row.title,
+                            status = enumValueOrDefault(row.status, DownloadStatus.FAILED),
+                        )
+                    }
+                }.flowOn(ioDispatcher)
 
         override val downloads: Flow<List<DownloadTask>> =
             dao

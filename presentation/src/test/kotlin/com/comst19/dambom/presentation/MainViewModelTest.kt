@@ -5,6 +5,7 @@ import com.comst19.dambom.core.domain.error.ErrorHandler
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadStatus
+import com.comst19.dambom.core.domain.model.DownloadStatusSnapshot
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.model.NetworkConnection
@@ -184,18 +185,8 @@ private object FakeDownloadRepository : DownloadRepository {
 }
 
 private fun downloadTask(status: DownloadStatus) =
-    DownloadTask(
+    DownloadStatusSnapshot(
         id = "video-1",
-        url = "https://example.com/video.mp4",
-        sourcePageUrl = "https://example.com/watch",
         title = "여행 영상",
-        mimeType = "video/mp4",
-        expectedBytes = 100L,
-        downloadedBytes = 50L,
-        quality = "원본",
         status = status,
-        failureReason = null,
-        localFileName = null,
-        createdAtMillis = 1L,
-        updatedAtMillis = 2L,
     )

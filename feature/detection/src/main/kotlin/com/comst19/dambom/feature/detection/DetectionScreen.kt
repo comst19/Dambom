@@ -56,9 +56,10 @@ internal fun DetectionRoute(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val fallbackTitle = stringResource(R.string.detection_default_video_title)
     val notificationPermissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-            viewModel.downloadSelected()
+            viewModel.downloadSelected(fallbackTitle)
         }
     LaunchedEffect(url, snapshotId, networkAccess.canUseInternet) {
         if (networkAccess.canUseInternet) viewModel.detect(url, snapshotId) else viewModel.setNetworkUnavailable()
@@ -76,7 +77,7 @@ internal fun DetectionRoute(
                 ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED
             ) {
-                viewModel.downloadSelected()
+                viewModel.downloadSelected(fallbackTitle)
             } else {
                 notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
@@ -124,8 +125,10 @@ internal fun DetectionScreen(
                 }
 
                 is DetectionUiState.Content -> {
+                    val fallback = stringResource(R.string.detection_default_video_title)
+                    val content = remember(uiState, fallback) { uiState.withFallbackTitles(fallback) }
                     DetectionCandidateContent(
-                        state = uiState,
+                        state = content,
                         networkAccess = networkAccess,
                         onToggleCandidate = onToggleCandidate,
                         onSelectVariant = onSelectVariant,

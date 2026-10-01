@@ -41,6 +41,7 @@ import androidx.media3.ui.compose.ContentFrame
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
 import com.comst19.dambom.core.common.ui.player.DambomPlayerControls
+import com.comst19.dambom.core.common.ui.player.KeepScreenOnWhilePlaying
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.media.rememberLocalVideoMetadata
@@ -157,6 +158,7 @@ private fun InlineVideoSurface(
     onControlsInteractionChanged: (Boolean) -> Unit,
 ) {
     val toggleControlsLabel = stringResource(R.string.player_toggle_controls)
+    KeepScreenOnWhilePlaying(player)
     Box(
         modifier =
             Modifier

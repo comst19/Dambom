@@ -5,7 +5,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import android.os.Build
 import android.widget.Toast
 import androidx.core.net.toUri
 
@@ -25,7 +25,9 @@ internal fun Context.copyLink(
     copiedMessage: String,
 ) {
     getSystemService(ClipboardManager::class.java).setPrimaryClip(ClipData.newPlainText("URL", url))
-    Toast.makeText(this, copiedMessage, Toast.LENGTH_SHORT).show()
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        Toast.makeText(this, copiedMessage, Toast.LENGTH_SHORT).show()
+    }
 }
 
 internal fun Context.shareLink(

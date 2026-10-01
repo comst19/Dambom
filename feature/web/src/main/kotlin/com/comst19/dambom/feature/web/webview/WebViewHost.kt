@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import com.comst19.dambom.core.designsystem.DambomLinearProgressIndicator
 import com.comst19.dambom.feature.web.component.WebNavigationErrorContent
 import com.comst19.dambom.feature.web.component.WebRescanButton
 import com.comst19.dambom.feature.web.component.WebToolbar
@@ -54,9 +54,9 @@ internal fun ColumnScope.WebContent(
     LifecycleEventEffect(Lifecycle.Event.ON_START) { webView?.onResume() }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { webView?.onPause() }
 
-    if (loadingProgress in 1..99) {
-        LinearProgressIndicator(
-            progress = { loadingProgress / 100f },
+    if (navigationFailureState.value == null && loadingProgress in 1..99) {
+        DambomLinearProgressIndicator(
+            progress = loadingProgress / WEB_PROGRESS_SCALE,
             modifier = Modifier.fillMaxWidth(),
         )
     }
@@ -71,7 +71,10 @@ internal fun ColumnScope.WebContent(
                         context = context,
                         tab = tab,
                         savedState = savedState,
-                        onPageStarted = onPageStarted,
+                        onPageStarted = { id, url, title, generation ->
+                            loadingProgress = 0
+                            onPageStarted(id, url, title, generation)
+                        },
                         onPageFinished = onPageFinished,
                         onPageChanged = onPageChanged,
                         onMediaRequest = onMediaRequest,
@@ -135,3 +138,5 @@ internal fun ColumnScope.WebContent(
         onOpenDetectedMedia = onOpenDetectedMedia,
     )
 }
+
+private const val WEB_PROGRESS_SCALE = 100f

@@ -12,6 +12,7 @@ import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.model.ThemeMode
+import com.comst19.dambom.core.domain.model.toDownloadOverview
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationEvent
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -133,14 +135,14 @@ class HomeViewModelTest {
         }
 
     @Test
-    fun `download progress excludes bytes with unknown expected size`() =
+    fun `download progress is indeterminate with unknown active size`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel = createViewModel(MixedExpectedSizeDownloadRepository)
 
             viewModel.uiState.test {
                 awaitItem()
 
-                assertEquals(0.25f, awaitItem().downloadSummary.progress, 0f)
+                assertEquals(null, awaitItem().downloadSummary.progress)
             }
         }
 
@@ -157,7 +159,7 @@ class HomeViewModelTest {
                     .copy(status = DownloadStatus.FAILED, deletePending = true),
             )
 
-        val summary = toHomeDownloadSummary(listOf(normal) + pending)
+        val summary = toHomeDownloadSummary((listOf(normal) + pending).toDownloadOverview())
 
         assertEquals(1, summary.activeCount)
         assertEquals(0, summary.pausedCount)
@@ -175,6 +177,7 @@ class HomeViewModelTest {
             val repository =
                 object : DownloadRepository by EmptyDownloadRepository {
                     override val downloads: Flow<List<DownloadTask>> = flowOf(downloads)
+                    override val overview = this.downloads.map { it.toDownloadOverview() }
                 }
             val viewModel = createViewModel(repository)
 
@@ -222,6 +225,7 @@ class HomeViewModelTest {
             val repository =
                 object : DownloadRepository by EmptyDownloadRepository {
                     override val downloads: Flow<List<DownloadTask>> = downloads
+                    override val overview = this.downloads.map { it.toDownloadOverview() }
                 }
             val viewModel = createViewModel(repository)
             viewModel.uiState.test {
@@ -339,6 +343,7 @@ private object EmptyDownloadRepository : DownloadRepository {
 }
 
 private object MixedExpectedSizeDownloadRepository : DownloadRepository by EmptyDownloadRepository {
+    override val overview get() = downloads.map { it.toDownloadOverview() }
     override val downloads: Flow<List<DownloadTask>> =
         flowOf(
             listOf(

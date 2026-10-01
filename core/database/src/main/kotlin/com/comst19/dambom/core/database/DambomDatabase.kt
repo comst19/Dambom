@@ -9,13 +9,23 @@ import com.comst19.dambom.core.database.download.DownloadTaskEntity
 
 @Database(
     entities = [DownloadTaskEntity::class],
-    version = FAVORITES_DATABASE_VERSION,
+    version = DOWNLOAD_INDEX_DATABASE_VERSION,
     exportSchema = true,
 )
 abstract class DambomDatabase : RoomDatabase() {
     abstract fun downloadTaskDao(): DownloadTaskDao
 
     internal companion object {
+        val MIGRATION_3_4 =
+            object : Migration(FAVORITES_DATABASE_VERSION, DOWNLOAD_INDEX_DATABASE_VERSION) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "CREATE INDEX IF NOT EXISTS index_download_tasks_status_deletePending_createdAtMillis " +
+                            "ON download_tasks(status, deletePending, createdAtMillis)",
+                    )
+                }
+            }
+
         val MIGRATION_2_3 =
             object : Migration(2, FAVORITES_DATABASE_VERSION) {
                 override fun migrate(db: SupportSQLiteDatabase) {
@@ -34,3 +44,4 @@ abstract class DambomDatabase : RoomDatabase() {
 }
 
 private const val FAVORITES_DATABASE_VERSION = 3
+private const val DOWNLOAD_INDEX_DATABASE_VERSION = 4

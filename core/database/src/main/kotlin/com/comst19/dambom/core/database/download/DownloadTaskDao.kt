@@ -8,6 +8,29 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DownloadTaskDao {
+    @Query(
+        """
+        SELECT
+            COALESCE(SUM(CASE WHEN status IN ('QUEUED', 'DOWNLOADING') THEN 1 ELSE 0 END), 0) AS activeCount,
+            COALESCE(SUM(CASE WHEN status = 'PAUSED' THEN 1 ELSE 0 END), 0) AS pausedCount,
+            COALESCE(SUM(CASE WHEN status = 'FAILED' THEN 1 ELSE 0 END), 0) AS failedCount,
+            COALESCE(SUM(CASE WHEN status IN ('QUEUED', 'DOWNLOADING') AND expectedBytes > 0
+                THEN downloadedBytes ELSE 0 END), 0) AS downloadedBytes,
+            COALESCE(SUM(CASE WHEN status IN ('QUEUED', 'DOWNLOADING') AND expectedBytes > 0
+                THEN expectedBytes ELSE 0 END), 0) AS totalBytes,
+            COALESCE(MAX(CASE WHEN status IN ('QUEUED', 'DOWNLOADING') AND COALESCE(expectedBytes, 0) <= 0
+                THEN 1 ELSE 0 END), 0) AS hasUnknownSize
+        FROM download_tasks WHERE deletePending = 0 AND status != 'COMPLETED'
+        """,
+    )
+    fun observeOverview(): Flow<DownloadOverviewRow>
+
+    @Query(
+        "SELECT id, title, status FROM download_tasks " +
+            "WHERE deletePending = 0 AND status != 'COMPLETED' ORDER BY createdAtMillis ASC",
+    )
+    fun observeStatuses(): Flow<List<DownloadStatusRow>>
+
     @Query("SELECT * FROM download_tasks WHERE deletePending = 0 ORDER BY createdAtMillis ASC")
     fun observeAll(): Flow<List<DownloadTaskEntity>>
 

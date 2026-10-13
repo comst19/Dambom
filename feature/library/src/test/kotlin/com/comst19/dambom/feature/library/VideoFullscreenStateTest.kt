@@ -144,7 +144,7 @@ class VideoFullscreenStateTest {
             }
         }
 
-        composeRule.onNodeWithContentDescription(fullscreenDescription).performClick()
+        composeRule.onNodeWithText(fullscreenDescription).assertIsDisplayed().performClick()
 
         assertTrue(isVideoFullscreen)
     }

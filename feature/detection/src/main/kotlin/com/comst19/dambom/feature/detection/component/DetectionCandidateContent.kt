@@ -139,8 +139,11 @@ internal fun DetectionCandidateContent(
             onDownload = {
                 pendingDownloadQualityIds =
                     state.candidates
-                        .filter { it.id in state.selectedIds && it.downloadVariants.size > 1 }
-                        .map(MediaCandidate::id)
+                        .filter { candidate ->
+                            !state.automaticQuality &&
+                                candidate.id in state.selectedIds &&
+                                candidate.downloadVariants.size > 1
+                        }.map(MediaCandidate::id)
                 if (pendingDownloadQualityIds.isEmpty()) {
                     onDownload()
                 }

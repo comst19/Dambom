@@ -17,6 +17,8 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.InputStream
@@ -100,7 +102,7 @@ internal class LibraryFileManager
                 null
             }
 
-        private fun File.copyToTree(
+        private suspend fun File.copyToTree(
             task: DownloadTask,
             treeUri: Uri,
         ) {
@@ -126,7 +128,7 @@ internal class LibraryFileManager
             }
         }
 
-        private fun File.copyToDefaultDownloads(task: DownloadTask) {
+        private suspend fun File.copyToDefaultDownloads(task: DownloadTask) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 copyToMediaStore(task)
             } else {
@@ -135,7 +137,7 @@ internal class LibraryFileManager
         }
 
         @RequiresApi(Build.VERSION_CODES.Q)
-        private fun File.copyToMediaStore(task: DownloadTask) {
+        private suspend fun File.copyToMediaStore(task: DownloadTask) {
             val values =
                 ContentValues().apply {
                     put(MediaStore.Video.Media.DISPLAY_NAME, task.suggestedFileName())
@@ -159,7 +161,7 @@ internal class LibraryFileManager
         }
 
         @Suppress("DEPRECATION")
-        private fun File.copyToLegacyDownloads(task: DownloadTask) {
+        private suspend fun File.copyToLegacyDownloads(task: DownloadTask) {
             val directory =
                 Environment
                     .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -176,16 +178,27 @@ internal class LibraryFileManager
         }
     }
 
-internal fun copyStreams(
+internal suspend fun copyStreams(
     openInput: () -> InputStream,
     openOutput: () -> OutputStream,
 ) {
+    currentCoroutineContext().ensureActive()
     openInput().use { input ->
-        openOutput().use(input::copyTo)
+        openOutput().use { output ->
+            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+            var count = input.read(buffer)
+            while (count >= 0) {
+                currentCoroutineContext().ensureActive()
+                output.write(buffer, 0, count)
+                currentCoroutineContext().ensureActive()
+                count = input.read(buffer)
+            }
+            currentCoroutineContext().ensureActive()
+        }
     }
 }
 
-private fun File.copyToDocument(
+private suspend fun File.copyToDocument(
     context: Context,
     destination: Uri,
 ) {
@@ -195,7 +208,7 @@ private fun File.copyToDocument(
     )
 }
 
-internal fun copyToNewFile(
+internal suspend fun copyToNewFile(
     destination: File,
     openInput: () -> InputStream,
 ) {

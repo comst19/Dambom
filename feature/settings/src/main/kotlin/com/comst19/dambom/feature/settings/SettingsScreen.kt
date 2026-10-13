@@ -79,6 +79,9 @@ internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
     SettingsScreen(
         state =
             SettingsContentState(
+                sharedLinkAutoDownload = settings.sharedLinkAutoDownload,
+                sharedLinkQuality = settings.sharedLinkQuality,
+                sharedLinkResolution = settings.sharedLinkResolution,
                 themeMode = settings.themeMode,
                 language = language,
                 clipboardSuggestionEnabled = settings.clipboardSuggestionEnabled,
@@ -97,7 +100,12 @@ internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
                             downloadDirectoryLauncher.launch(settings.downloadTreeUri?.let(Uri::parse))
                         },
                     ),
-                download = DownloadSettingsActions(onWifiOnlyDownloadsChange = viewModel::setWifiOnlyDownloads),
+                download =
+                    DownloadSettingsActions(
+                        onWifiOnlyDownloadsChange = viewModel::setWifiOnlyDownloads,
+                        onSharedLinkAutoDownloadChange = viewModel::setSharedLinkAutoDownload,
+                        onSharedLinkQualityChange = viewModel::setSharedLinkQuality,
+                    ),
                 general =
                     GeneralSettingsActions(
                         onThemeModeChange = viewModel::setThemeMode,

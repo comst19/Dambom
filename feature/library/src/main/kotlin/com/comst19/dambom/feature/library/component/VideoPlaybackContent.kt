@@ -5,7 +5,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,8 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
@@ -38,6 +38,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.ContentFrame
+import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
 import com.comst19.dambom.core.common.ui.player.DambomPlayerControls
@@ -45,6 +46,7 @@ import com.comst19.dambom.core.common.ui.player.KeepScreenOnWhilePlaying
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.media.rememberLocalVideoMetadata
+import com.comst19.dambom.feature.library.player.PlayerInteractionState
 import kotlinx.coroutines.delay
 
 @Composable
@@ -60,9 +62,11 @@ internal fun MissingVideo(modifier: Modifier = Modifier) {
 
 @Composable
 @androidx.annotation.OptIn(markerClass = [UnstableApi::class])
+@Suppress("LongParameterList", "LongMethod")
 internal fun VideoPlayerPanel(
     task: DownloadTask,
     player: Player,
+    interaction: PlayerInteractionState,
     onOpenOriginal: () -> Unit,
     onCopyLink: () -> Unit,
     onShareLink: () -> Unit,
@@ -106,6 +110,7 @@ internal fun VideoPlayerPanel(
     ) {
         InlineVideoSurface(
             player = player,
+            interaction = interaction,
             surfaceDescription = surfaceDescription,
             controlsVisible = controlsVisible,
             showPlay = playPauseState.showPlay,
@@ -144,8 +149,10 @@ internal fun VideoPlayerPanel(
 
 @Composable
 @androidx.annotation.OptIn(markerClass = [UnstableApi::class])
+@Suppress("LongParameterList", "LongMethod")
 private fun InlineVideoSurface(
     player: Player,
+    interaction: PlayerInteractionState,
     surfaceDescription: String,
     controlsVisible: Boolean,
     showPlay: Boolean,
@@ -164,12 +171,22 @@ private fun InlineVideoSurface(
             Modifier
                 .fillMaxWidth()
                 .aspectRatio(VIDEO_ASPECT_RATIO)
-                .background(Color.Black),
+                .background(Color.Black)
+                .clipToBounds(),
     ) {
         ContentFrame(
             player = player,
             shutter = {},
-            modifier = Modifier.fillMaxSize().semantics { contentDescription = surfaceDescription },
+            surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        scaleX = interaction.scale
+                        scaleY = interaction.scale
+                        translationX = interaction.panX
+                        translationY = interaction.panY
+                    }.semantics { contentDescription = surfaceDescription },
         )
         Box(
             Modifier
@@ -179,9 +196,7 @@ private fun InlineVideoSurface(
                         onToggleControls()
                         true
                     }
-                }.pointerInput(Unit) {
-                    detectTapGestures(onTap = { onToggleControls() })
-                },
+                }.fullscreenPlayerGestures(toggleControlsLabel, onToggleControls, {}, interaction),
         )
         AnimatedVisibility(
             visible = controlsVisible,

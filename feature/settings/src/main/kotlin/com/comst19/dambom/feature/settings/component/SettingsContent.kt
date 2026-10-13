@@ -23,6 +23,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.domain.model.SharedLinkQuality
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.feature.settings.R
 import com.comst19.dambom.feature.settings.contract.AppLanguage
@@ -37,6 +38,9 @@ internal data class SettingsContentState(
     val saveLocationMode: SaveLocationMode,
     val downloadLocation: String,
     val versionName: String,
+    val sharedLinkAutoDownload: Boolean = false,
+    val sharedLinkQuality: SharedLinkQuality = SharedLinkQuality.HIGHEST,
+    val sharedLinkResolution: Int = 1080,
 )
 
 @Immutable
@@ -51,6 +55,8 @@ internal data class SettingsActions(
 @Immutable
 internal data class DownloadSettingsActions(
     val onWifiOnlyDownloadsChange: (Boolean) -> Unit,
+    val onSharedLinkAutoDownloadChange: (Boolean) -> Unit = {},
+    val onSharedLinkQualityChange: (SharedLinkQuality, Int) -> Unit = { _, _ -> },
 )
 
 @Immutable
@@ -132,6 +138,18 @@ private fun LazyListScope.downloadSection(
     actions: DownloadSettingsActions,
 ) {
     item { SettingsSectionTitle(stringResource(R.string.settings_section_download)) }
+    item {
+        SettingsRow(
+            icon = Icons.Outlined.ContentPaste,
+            title = stringResource(R.string.settings_shared_auto_download),
+            subtitle = stringResource(R.string.settings_shared_auto_description),
+            onClick = { actions.onSharedLinkAutoDownloadChange(!state.sharedLinkAutoDownload) },
+            trailing = { Switch(checked = state.sharedLinkAutoDownload, onCheckedChange = null) },
+        )
+    }
+    if (state.sharedLinkAutoDownload) {
+        item { SharedDownloadQualityPreference(state, actions) }
+    }
     item {
         SettingsRow(
             icon = Icons.Outlined.Wifi,

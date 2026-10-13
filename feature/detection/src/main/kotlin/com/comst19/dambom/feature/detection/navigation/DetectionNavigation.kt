@@ -22,6 +22,7 @@ fun EntryProviderScope<NavKey>.detectionEntries(networkAccess: () -> NetworkAcce
             key.url,
             networkAccess(),
             snapshotId = key.snapshotId,
+            sharedLink = key.sharedLink,
             isSupportingPane = LocalListDetailSceneScope.current != null,
         )
     }

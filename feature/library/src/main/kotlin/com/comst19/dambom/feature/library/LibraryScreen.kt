@@ -31,7 +31,10 @@ import com.comst19.dambom.feature.library.component.rememberLibraryFileActions
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
+import com.comst19.dambom.feature.library.tag.LibraryTagViewModel
+import com.comst19.dambom.feature.library.tag.component.LibraryTagControls
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 
 @Composable
 internal fun LibraryRoute(
@@ -41,6 +44,12 @@ internal fun LibraryRoute(
 ) {
     val viewModel: LibraryViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val tagViewModel: LibraryTagViewModel = hiltViewModel()
+    val tagState by tagViewModel.state.collectAsStateWithLifecycle()
+    val visibleVideos =
+        remember(uiState.videos, tagState.selectedTagIds, tagState.matchedVideoIds) {
+            uiState.videos.filter { tagState.matches(it.id) }.toPersistentList()
+        }
     val fileActions = rememberLibraryFileActions(viewModel)
     val multiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
     val focusManager = LocalFocusManager.current
@@ -50,14 +59,30 @@ internal fun LibraryRoute(
     }
 
     LibraryScreen(
-        uiState = uiState.copy(selectedVideo = uiState.videos.firstOrNull { it.id == activeVideoId }),
+        uiState =
+            uiState.copy(
+                videos = visibleVideos,
+                selectedVideo = uiState.videos.firstOrNull { it.id == activeVideoId },
+                hasTagFilter = tagState.selectedTagIds.isNotEmpty(),
+            ),
+        tagControls = {
+            LibraryTagControls(
+                state = tagState,
+                selectedVideoIds = uiState.selectedIds,
+                onToggleFilter = tagViewModel::toggleFilter,
+                onCreate = tagViewModel::create,
+                onRename = tagViewModel::rename,
+                onDelete = tagViewModel::delete,
+                onAssign = tagViewModel::assign,
+            )
+        },
         fileActions = fileActions,
         onQueryChange = viewModel::updateQuery,
         onViewModeChange = viewModel::setViewMode,
         onSourceFilterChange = viewModel::setSourceFilter,
         onStartSelection = viewModel::startSelection,
         onToggleSelection = viewModel::toggleSelection,
-        onSelectAll = viewModel::selectAllVisible,
+        onSelectAll = { viewModel.selectAllVisible(visibleVideos.map(DownloadTask::id)) },
         onClearSelection = viewModel::clearSelection,
         onDeleteSelected = viewModel::deleteSelected,
         onVideoClick = { task ->
@@ -72,6 +97,7 @@ internal fun LibraryRoute(
 }
 
 @Composable
+@Suppress("LongParameterList")
 internal fun LibraryScreen(
     uiState: LibraryUiState,
     fileActions: LibraryFileActions,
@@ -88,6 +114,7 @@ internal fun LibraryScreen(
     showDetailPaneControl: Boolean = false,
     isDetailPaneVisible: Boolean = true,
     onDetailPaneVisibilityChange: (Boolean) -> Unit = {},
+    tagControls: @Composable () -> Unit = {},
 ) {
     var deleteSelectedOpen by remember { mutableStateOf(false) }
     BackHandler(enabled = uiState.isSelecting, onBack = onClearSelection)
@@ -123,6 +150,7 @@ internal fun LibraryScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .consumeWindowInsets(innerPadding),
+            tagControls = tagControls,
         )
     }
     if (deleteSelectedOpen) {

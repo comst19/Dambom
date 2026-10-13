@@ -36,6 +36,7 @@ import com.comst19.dambom.core.common.ui.R
 import kotlin.math.roundToLong
 
 @Composable
+@Suppress("LongParameterList", "LongMethod")
 fun DambomPlayerControls(
     player: Player,
     showPlay: Boolean,
@@ -56,7 +57,6 @@ fun DambomPlayerControls(
         } else {
             0f
         }
-    val positionText = positionMillis.toTimeText()
     val durationText = safeDuration.toTimeText()
     val seekDescription = stringResource(R.string.playback_seek_description)
     val rewindInteractionSource = remember { MutableInteractionSource() }
@@ -66,6 +66,8 @@ fun DambomPlayerControls(
     val isPlayPausePressed by playPauseInteractionSource.collectIsPressedAsState()
     val isForwardPressed by forwardInteractionSource.collectIsPressedAsState()
     var isTimelineInteracting by remember { mutableStateOf(false) }
+    var scrubPosition by remember { mutableStateOf(0L) }
+    val positionText = (if (isTimelineInteracting) scrubPosition else positionMillis).toTimeText()
 
     LaunchedEffect(isTimelineInteracting, isRewindPressed, isPlayPausePressed, isForwardPressed) {
         val isInteracting = isTimelineInteracting || isRewindPressed || isPlayPausePressed || isForwardPressed
@@ -74,26 +76,38 @@ fun DambomPlayerControls(
     }
 
     Box(modifier) {
-        PlaybackButtons(
-            player = player,
-            showPlay = showPlay,
-            playEnabled = playEnabled,
-            onPlayPause = onPlayPause,
-            onInteraction = onInteraction,
-            contentColor = contentColor,
-            rewindInteractionSource = rewindInteractionSource,
-            playPauseInteractionSource = playPauseInteractionSource,
-            forwardInteractionSource = forwardInteractionSource,
-            modifier = Modifier.align(Alignment.Center),
-        )
+        if (!isTimelineInteracting) {
+            PlaybackButtons(
+                player = player,
+                showPlay = showPlay,
+                playEnabled = playEnabled,
+                onPlayPause = onPlayPause,
+                onInteraction = onInteraction,
+                contentColor = contentColor,
+                rewindInteractionSource = rewindInteractionSource,
+                playPauseInteractionSource = playPauseInteractionSource,
+                forwardInteractionSource = forwardInteractionSource,
+                modifier = Modifier.align(Alignment.Center),
+            )
+        }
         Column(modifier = Modifier.align(Alignment.BottomCenter).then(timelineModifier)) {
             DambomSeekBar(
-                value = progress,
+                value =
+                    if (isTimelineInteracting && safeDuration > 0) {
+                        scrubPosition.toFloat() / safeDuration
+                    } else {
+                        progress
+                    },
                 enabled = isDambomSeekBarEnabled(safeDuration),
                 contentDescription = seekDescription,
                 stateDescription = "$positionText / $durationText",
-                onValueChange = { value -> player.seekTo((value * safeDuration).roundToLong()) },
+                onValueChange = { value ->
+                    val targetPosition = (value * safeDuration).roundToLong()
+                    if (!isTimelineInteracting || targetPosition != scrubPosition) player.seekTo(targetPosition)
+                    scrubPosition = targetPosition
+                },
                 onInteractionChanged = { interacting ->
+                    if (interacting) scrubPosition = positionMillis
                     isTimelineInteracting = interacting
                     if (interacting) onInteraction()
                 },

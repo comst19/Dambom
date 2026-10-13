@@ -8,6 +8,7 @@ import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.url.SharedUrlBus
+import com.comst19.dambom.core.common.url.extractHttpUrl
 import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
@@ -63,6 +64,7 @@ internal class HomeViewModel
                     clipboardSuggestionEnabled = settings.clipboardSuggestionEnabled,
                     clipboardUrl = clipboardUrl,
                     sharedUrl = sharedUrl,
+                    sharedLinkAutoDownload = settings.sharedLinkAutoDownload,
                     downloadSummary = summary,
                 )
             }.stateIn(
@@ -76,14 +78,14 @@ internal class HomeViewModel
         }
 
         fun useClipboardText(text: String?) {
-            val detectedUrl = text?.extractHttpUrl() ?: return
+            val detectedUrl = text?.let(::extractHttpUrl) ?: return
             savedStateHandle[URL_KEY] = detectedUrl
             clipboardUrl.value = null
         }
 
         fun suggestClipboardText(text: String?) {
             if (!uiState.value.clipboardSuggestionEnabled) return
-            val detectedUrl = text?.extractHttpUrl() ?: return
+            val detectedUrl = text?.let(::extractHttpUrl) ?: return
             if (detectedUrl == lastSuggestedClipboardUrl || detectedUrl == uiState.value.url) return
             lastSuggestedClipboardUrl = detectedUrl
             clipboardUrl.value = detectedUrl
@@ -104,10 +106,10 @@ internal class HomeViewModel
         }
 
         fun analyzeSharedUrl() {
-            val sharedUrl = uiState.value.sharedUrl ?: return
+            val sharedUrl = sharedUrlBus.pendingUrl.value ?: return
             savedStateHandle[URL_KEY] = sharedUrl
-            navigateFromHome(DetectionResultKey(sharedUrl, requestId = UUID.randomUUID().toString()))
             sharedUrlBus.clear()
+            navigateFromHome(DetectionResultKey(sharedUrl, requestId = UUID.randomUUID().toString(), sharedLink = true))
         }
 
         fun dismissSharedUrl() {
@@ -143,12 +145,5 @@ internal class HomeViewModel
 
 private fun String.isValidHttpUrl(): Boolean = isHttpUrl()
 
-private fun String.extractHttpUrl(): String? =
-    HTTP_URL_REGEX
-        .findAll(this)
-        .map { it.value.trimEnd('.', ',', ')', ']', '}') }
-        .firstOrNull(String::isValidHttpUrl)
-
-private val HTTP_URL_REGEX = Regex("https?://[^\\s<]+", RegexOption.IGNORE_CASE)
 private const val URL_KEY = "url"
 private const val STOP_TIMEOUT_MILLIS = 5_000L

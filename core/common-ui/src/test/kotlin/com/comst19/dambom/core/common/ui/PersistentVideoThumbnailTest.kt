@@ -189,6 +189,134 @@ class PersistentVideoThumbnailTest {
         }
 
     @Test
+    fun `cancelled queued requests do not generate after permits become available`() =
+        runTest {
+            val coordinator = coordinator()
+            val generationGate = CompletableDeferred<Unit>()
+            val blockers = startBlockingGenerations(coordinator, generationGate)
+            val generationCount = AtomicInteger()
+            val queued =
+                List(8) { index ->
+                    val videoFile = temporaryFolder.newFile("cancelled-queued-$index.mp4")
+                    async {
+                        coordinator.load(videoFile, noThumbnail, available) {
+                            generationCount.incrementAndGet()
+                            videoFile
+                        }
+                    }
+                }
+            runCurrent()
+
+            queued.forEach { it.cancelAndJoin() }
+            generationGate.complete(Unit)
+            blockers.awaitAll()
+            runCurrent()
+
+            assertEquals(0, generationCount.get())
+        }
+
+    @Test
+    fun `cancelling one queued waiter preserves generation for the remaining waiter`() =
+        runTest {
+            val coordinator = coordinator()
+            val generationGate = CompletableDeferred<Unit>()
+            val blockers = startBlockingGenerations(coordinator, generationGate)
+            val videoFile = temporaryFolder.newFile("shared-queued.mp4")
+            val generationCount = AtomicInteger()
+
+            suspend fun load() =
+                coordinator.load(videoFile, noThumbnail, available) {
+                    generationCount.incrementAndGet()
+                    videoFile
+                }
+
+            val cancelled = async { load() }
+            val remaining = async { load() }
+            runCurrent()
+            cancelled.cancelAndJoin()
+            assertEquals(0, generationCount.get())
+            generationGate.complete(Unit)
+
+            assertEquals(videoFile, remaining.await())
+            blockers.awaitAll()
+            assertEquals(1, generationCount.get())
+        }
+
+    @Test
+    fun `running generation finishes its sidecar after its last waiter cancels`() =
+        runTest {
+            val coordinator = coordinator()
+            val videoFile = temporaryFolder.newFile("cancelled-running.mp4").apply { writeBytes(byteArrayOf(1)) }
+            val generationGate = CompletableDeferred<Unit>()
+            val generationFinished = CompletableDeferred<Unit>()
+            val generationCount = AtomicInteger()
+            val existingThumbnail: (File) -> File? = { candidate ->
+                candidate.videoThumbnailFile().takeIf { it.isFile && it.length() > 0L }
+            }
+
+            val request =
+                async {
+                    coordinator.load(videoFile, existingThumbnail, available) {
+                        generationCount.incrementAndGet()
+                        generationGate.await()
+                        storeDecodedVideoThumbnail(videoFile) { output ->
+                            output.writeBytes(byteArrayOf(2))
+                            true
+                        }.also { generationFinished.complete(Unit) }
+                    }
+                }
+            runCurrent()
+            assertEquals(1, generationCount.get())
+
+            request.cancelAndJoin()
+            generationGate.complete(Unit)
+            generationFinished.await()
+            val cached =
+                coordinator.load(videoFile, existingThumbnail, available) {
+                    error("completed sidecar must be reused")
+                }
+
+            assertEquals(videoFile.videoThumbnailFile(), cached)
+            assertTrue(cached?.isFile == true)
+            assertEquals(1, generationCount.get())
+        }
+
+    @Test
+    fun `request after queued cancellation starts a new generation`() =
+        runTest {
+            val coordinator = coordinator()
+            val generationGate = CompletableDeferred<Unit>()
+            val blockers = startBlockingGenerations(coordinator, generationGate)
+            val videoFile = temporaryFolder.newFile("retry-queued.mp4")
+            val cancelledGenerationCount = AtomicInteger()
+            val retryGenerationCount = AtomicInteger()
+
+            val cancelled =
+                async {
+                    coordinator.load(videoFile, noThumbnail, available) {
+                        cancelledGenerationCount.incrementAndGet()
+                        videoFile
+                    }
+                }
+            runCurrent()
+            cancelled.cancelAndJoin()
+            val retry =
+                async {
+                    coordinator.load(videoFile, noThumbnail, available) {
+                        retryGenerationCount.incrementAndGet()
+                        videoFile
+                    }
+                }
+            runCurrent()
+            generationGate.complete(Unit)
+
+            assertEquals(videoFile, retry.await())
+            blockers.awaitAll()
+            assertEquals(0, cancelledGenerationCount.get())
+            assertEquals(1, retryGenerationCount.get())
+        }
+
+    @Test
     fun `failed generation is removed so the next request can retry`() =
         runTest {
             val coordinator = coordinator()

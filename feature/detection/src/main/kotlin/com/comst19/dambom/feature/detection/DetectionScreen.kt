@@ -47,11 +47,13 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentSetOf
 
 @Composable
+@Suppress("LongParameterList")
 internal fun DetectionRoute(
     url: String,
     networkAccess: NetworkAccessState,
     viewModel: DetectionViewModel = hiltViewModel(),
     snapshotId: String? = null,
+    sharedLink: Boolean = false,
     isSupportingPane: Boolean = false,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -61,8 +63,29 @@ internal fun DetectionRoute(
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
             viewModel.downloadSelected(fallbackTitle)
         }
-    LaunchedEffect(url, snapshotId, networkAccess.canUseInternet) {
-        if (networkAccess.canUseInternet) viewModel.detect(url, snapshotId) else viewModel.setNetworkUnavailable()
+    LaunchedEffect(url, snapshotId, sharedLink, networkAccess.canUseInternet) {
+        if (networkAccess.canUseInternet) {
+            viewModel.detect(url, snapshotId, sharedLink)
+        } else {
+            viewModel.setNetworkUnavailable()
+        }
+    }
+    val download: () -> Unit = {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            viewModel.downloadSelected(fallbackTitle)
+        } else {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+    val automaticDownloadPending = (uiState as? DetectionUiState.Content)?.automaticDownloadPending == true
+    LaunchedEffect(automaticDownloadPending, networkAccess.canDownload) {
+        if (automaticDownloadPending && networkAccess.canDownload) {
+            viewModel.consumeAutomaticDownload()
+            download()
+        }
     }
     DetectionScreen(
         uiState = uiState,
@@ -72,16 +95,7 @@ internal fun DetectionRoute(
         onOpenWeb = viewModel::openInWeb,
         onToggleCandidate = viewModel::toggleCandidate,
         onSelectVariant = viewModel::selectVariant,
-        onDownload = {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
-                PackageManager.PERMISSION_GRANTED
-            ) {
-                viewModel.downloadSelected(fallbackTitle)
-            } else {
-                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        },
+        onDownload = download,
         isSupportingPane = isSupportingPane,
         sourceUrl = url,
     )

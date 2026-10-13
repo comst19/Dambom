@@ -6,6 +6,8 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
@@ -20,6 +22,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 
 @Composable
+@Suppress("LongParameterList", "LongMethod")
 fun DambomSeekBar(
     value: Float,
     enabled: Boolean,
@@ -29,6 +32,8 @@ fun DambomSeekBar(
     onInteractionChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val currentOnValueChange by rememberUpdatedState(onValueChange)
+    val currentOnInteractionChanged by rememberUpdatedState(onInteractionChanged)
     val clampedValue = normalizedSeekBarValue(value)
     val colors = DambomSliderDefaults.colors()
     val activeColor = colors.activeTrackColor
@@ -45,28 +50,31 @@ fun DambomSeekBar(
                     progressBarRangeInfo = ProgressBarRangeInfo(clampedValue, 0f..1f)
                     if (enabled) {
                         setProgress { target ->
-                            onValueChange(normalizedSeekBarValue(target))
+                            currentOnValueChange(normalizedSeekBarValue(target))
                             true
                         }
                     } else {
                         disabled()
                     }
-                }.pointerInput(enabled, onValueChange, onInteractionChanged) {
+                }.pointerInput(enabled) {
                     if (!enabled) return@pointerInput
                     awaitEachGesture {
                         val firstDown = awaitFirstDown(requireUnconsumed = false)
-                        onInteractionChanged(true)
+                        currentOnInteractionChanged(true)
                         try {
-                            onValueChange(seekBarValueFromTouch(firstDown.position.x, size.width.toFloat()))
+                            firstDown.consume()
+                            currentOnValueChange(seekBarValueFromTouch(firstDown.position.x, size.width.toFloat()))
                             do {
                                 val event = awaitPointerEvent()
-                                event.changes.filter { it.pressed }.forEach { change ->
-                                    onValueChange(seekBarValueFromTouch(change.position.x, size.width.toFloat()))
-                                    change.consume()
+                                val change = event.changes.firstOrNull { it.id == firstDown.id }
+                                if (change == null || !change.pressed) break
+                                if (change.position != change.previousPosition) {
+                                    currentOnValueChange(seekBarValueFromTouch(change.position.x, size.width.toFloat()))
                                 }
-                            } while (event.changes.any { it.pressed })
+                                change.consume()
+                            } while (true)
                         } finally {
-                            onInteractionChanged(false)
+                            currentOnInteractionChanged(false)
                         }
                     }
                 },

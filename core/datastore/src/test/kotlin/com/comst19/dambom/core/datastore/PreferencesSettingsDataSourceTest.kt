@@ -6,8 +6,12 @@ import app.cash.turbine.test
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -81,6 +85,46 @@ class PreferencesSettingsDataSourceTest {
         }
 
     @Test
+    fun `shared download policy survives reopening the DataStore`() =
+        runTest {
+            val path = temporaryFolder.root.resolve("shared.preferences_pb")
+            val firstScope = CoroutineScope(StandardTestDispatcher(testScheduler) + SupervisorJob())
+            val source = PreferencesSettingsDataSource(PreferenceDataStoreFactory.create(scope = firstScope) { path })
+            source.setSharedLinkAutoDownload(true)
+            source.setSharedLinkQuality("PREFERRED_RESOLUTION", 720)
+            firstScope.cancel()
+            testScheduler.advanceUntilIdle()
+            val reopenedScope = CoroutineScope(StandardTestDispatcher(testScheduler) + SupervisorJob())
+            val reopened =
+                PreferencesSettingsDataSource(PreferenceDataStoreFactory.create(scope = reopenedScope) { path })
+            reopened.settings.test {
+                val settings = awaitItem()
+                assertEquals(true, settings.sharedLinkAutoDownload)
+                assertEquals("PREFERRED_RESOLUTION", settings.sharedLinkQuality)
+                assertEquals(720, settings.sharedLinkResolution)
+                cancelAndIgnoreRemainingEvents()
+            }
+            reopenedScope.cancel()
+        }
+
+    @Test
+    fun `transient read failure recovers updates without a new subscription`() =
+        runTest {
+            val store = TransientIoDataStore()
+            val source = PreferencesSettingsDataSource(store)
+            source.settings.test {
+                assertEquals(StoredSettings(), awaitItem())
+                source.setThemeMode("DARK")
+                advanceTimeBy(1_000)
+                runCurrent()
+                assertEquals(StoredSettings(themeMode = "DARK"), awaitItem())
+                source.setWifiOnlyDownloads(true)
+                assertEquals(StoredSettings(themeMode = "DARK", wifiOnlyDownloads = true), awaitItem())
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
     fun `read IOException emits the system theme default`() =
         runTest {
             val source = PreferencesSettingsDataSource(IoExceptionDataStore)
@@ -96,4 +140,24 @@ private object IoExceptionDataStore : androidx.datastore.core.DataStore<Preferen
     override val data = flow<Preferences> { throw IOException("Read failed") }
 
     override suspend fun updateData(transform: suspend (Preferences) -> Preferences): Preferences = error("Not used")
+}
+
+private class TransientIoDataStore : androidx.datastore.core.DataStore<Preferences> {
+    private var firstRead = true
+    private val values =
+        MutableStateFlow(
+            androidx.datastore.preferences.core
+                .emptyPreferences(),
+        )
+    override val data =
+        flow {
+            if (firstRead) {
+                firstRead = false
+                throw IOException("Temporary read failure")
+            }
+            emitAll(values)
+        }
+
+    override suspend fun updateData(transform: suspend (Preferences) -> Preferences): Preferences =
+        transform(values.value).also { values.value = it }
 }

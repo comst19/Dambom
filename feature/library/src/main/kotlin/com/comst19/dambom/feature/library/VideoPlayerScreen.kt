@@ -7,17 +7,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Fullscreen
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +45,7 @@ import com.comst19.dambom.feature.library.component.rememberLibraryFileActions
 import com.comst19.dambom.feature.library.file.isLocalVideoAvailable
 import com.comst19.dambom.feature.library.file.rememberLocalVideoAvailable
 import com.comst19.dambom.feature.library.pip.PipPlatformEffect
+import com.comst19.dambom.feature.library.player.PlayerInteractionState
 
 @Composable
 @Suppress("LongParameterList", "LongMethod")
@@ -139,7 +141,7 @@ internal fun VideoPlayerRoute(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("LongParameterList", "LongMethod")
+@Suppress("LongParameterList", "LongMethod", "CyclomaticComplexMethod")
 internal fun VideoPlayerScreen(
     task: DownloadTask?,
     player: Player,
@@ -153,13 +155,20 @@ internal fun VideoPlayerScreen(
     onVideoBoundsChanged: (androidx.compose.ui.unit.IntRect?) -> Unit = {},
     detailState: VideoDetailState = VideoDetailState.NotFound,
 ) {
-    BackHandler(enabled = isVideoFullscreen) { onVideoFullscreenChange(false) }
+    val interaction = rememberSaveable(task?.id, saver = PlayerInteractionState.Saver) { PlayerInteractionState() }
+    LaunchedEffect(isVideoFullscreen) {
+        if (!isVideoFullscreen) interaction.locked = false
+    }
+    BackHandler(enabled = isVideoFullscreen || interaction.locked) {
+        if (!interaction.locked) onVideoFullscreenChange(false)
+    }
     val showRotationControl = shouldShowFullscreenRotationControl(LocalConfiguration.current.smallestScreenWidthDp)
 
     if ((isVideoFullscreen || isPipContentOnly) && task != null) {
         FullscreenVideoPlayer(
             task = task,
             player = player,
+            interaction = interaction,
             fileActions = fileActions,
             onDismiss = { onVideoFullscreenChange(false) },
             onRotate = onVideoRotate,
@@ -194,11 +203,8 @@ internal fun VideoPlayerScreen(
                     actions = {
                         task?.let {
                             VideoFavoriteButton(task = it, onToggle = fileActions.onToggleFavorite)
-                            IconButton(onClick = { onVideoFullscreenChange(true) }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Fullscreen,
-                                    contentDescription = stringResource(R.string.player_fullscreen),
-                                )
+                            TextButton(onClick = { onVideoFullscreenChange(true) }) {
+                                Text(stringResource(R.string.player_fullscreen))
                             }
                             VideoActionsButton(
                                 task = it,
@@ -233,6 +239,7 @@ internal fun VideoPlayerScreen(
                 VideoPlayerPanel(
                     task = task,
                     player = player,
+                    interaction = interaction,
                     onOpenOriginal = { fileActions.onOpenOriginal(task) },
                     onCopyLink = { fileActions.onCopyLink(task) },
                     onShareLink = { fileActions.onShareLink(task) },

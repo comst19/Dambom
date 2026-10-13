@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -19,9 +20,6 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.CropFree
-import androidx.compose.material.icons.outlined.Rotate90DegreesCw
-import androidx.compose.material.icons.outlined.ZoomOutMap
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -33,10 +31,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalView
@@ -52,20 +53,27 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.ContentFrame
+import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
 import com.comst19.dambom.core.common.ui.player.DambomPlayerControls
 import com.comst19.dambom.core.common.ui.player.KeepScreenOnWhilePlaying
+import com.comst19.dambom.core.designsystem.DambomIconTooltip
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
+import com.comst19.dambom.feature.library.player.PlayerInteractionState
+import com.comst19.dambom.feature.library.player.component.PlayerLockButton
+import com.comst19.dambom.feature.library.player.component.PlayerSettingsButton
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 @Composable
 @androidx.annotation.OptIn(markerClass = [UnstableApi::class])
+@Suppress("LongParameterList", "LongMethod")
 internal fun FullscreenVideoPlayer(
     task: DownloadTask,
     player: Player,
+    interaction: PlayerInteractionState,
     fileActions: LibraryFileActions,
     onDismiss: () -> Unit,
     onRotate: () -> Unit,
@@ -78,7 +86,7 @@ internal fun FullscreenVideoPlayer(
     val progressState = rememberProgressStateWithTickInterval(player, PROGRESS_TICK_MILLIS)
     val surfaceDescription = stringResource(R.string.player_surface_description, task.title)
     val toggleControlsLabel = stringResource(R.string.player_toggle_controls)
-    var selectedContentMode by remember(task.id) { mutableStateOf(FullscreenContentMode.Fit) }
+    var selectedContentMode by rememberSaveable(task.id) { mutableStateOf(FullscreenContentMode.Fit) }
     var controlsVisible by remember(task.id) { mutableStateOf(true) }
     var controlsInteracting by remember(task.id) { mutableStateOf(false) }
     var controlsInteractionRevision by remember(task.id) { mutableStateOf(0) }
@@ -99,33 +107,61 @@ internal fun FullscreenVideoPlayer(
         if (isPipContentOnly) {
             FullscreenContentFrame(player, surfaceDescription, Modifier.fillMaxSize(), onVideoBoundsChanged, contentMode)
         } else {
-            Box(Modifier.fillMaxSize()) {
-                FullscreenContentFrame(player, surfaceDescription, Modifier.fillMaxSize(), onVideoBoundsChanged, contentMode)
+            Box(Modifier.fillMaxSize().clipToBounds()) {
+                FullscreenContentFrame(
+                    player,
+                    surfaceDescription,
+                    Modifier.fillMaxSize().graphicsLayer {
+                        scaleX = interaction.scale
+                        scaleY = interaction.scale
+                        translationX = interaction.panX
+                        translationY = interaction.panY
+                    },
+                    onVideoBoundsChanged,
+                    contentMode,
+                )
                 Box(
                     Modifier
                         .fillMaxSize()
                         .fullscreenPlayerGestures(
+                            interaction = interaction,
                             toggleControlsLabel = toggleControlsLabel,
                             onToggleControls = { controlsVisible = !controlsVisible },
                             onContentModeChanged = { selectedContentMode = it },
                         ),
                 )
+                if (interaction.locked) {
+                    Column(
+                        Modifier.align(Alignment.TopEnd).windowInsetsPadding(WindowInsets.displayCutout).padding(16.dp),
+                        horizontalAlignment = Alignment.End,
+                    ) {
+                        Text(
+                            stringResource(R.string.player_locked_status),
+                            Modifier.background(Color.Black.copy(alpha = 0.72f)).padding(8.dp),
+                        )
+                        PlayerLockButton(interaction)
+                    }
+                }
                 AnimatedVisibility(
-                    visible = controlsVisible,
+                    visible = controlsVisible && !interaction.locked,
                     enter = fadeIn(tween(FULLSCREEN_CONTROLS_FADE_MILLIS)),
                     exit = fadeOut(tween(FULLSCREEN_CONTROLS_FADE_MILLIS)),
                     modifier = Modifier.matchParentSize(),
                 ) {
-                    Box(Modifier.fillMaxSize()) {
+                    Box(Modifier.fillMaxSize().clipToBounds()) {
                         FullscreenOverlayControls(
                             task,
                             player,
+                            interaction,
                             fileActions,
                             onDismiss,
                             onRotate,
                             showRotationControl,
                             contentMode,
-                            { selectedContentMode = contentMode.toggled() },
+                            {
+                                selectedContentMode = contentMode.toggled()
+                                interaction.resetZoom()
+                            },
                             playPauseState.showPlay,
                             playPauseState.isEnabled,
                             playPauseState::onClick,
@@ -145,9 +181,11 @@ internal fun FullscreenVideoPlayer(
 }
 
 @Composable
+@Suppress("LongParameterList", "LongMethod")
 private fun BoxScope.FullscreenOverlayControls(
     task: DownloadTask,
     player: Player,
+    interaction: PlayerInteractionState,
     fileActions: LibraryFileActions,
     onDismiss: () -> Unit,
     onRotate: () -> Unit,
@@ -162,7 +200,6 @@ private fun BoxScope.FullscreenOverlayControls(
     onInteraction: () -> Unit,
     onInteractionChanged: (Boolean) -> Unit,
 ) {
-    val isFit = contentMode == FullscreenContentMode.Fit
     Surface(
         modifier =
             Modifier.align(Alignment.TopStart).fillMaxWidth().windowInsetsPadding(
@@ -172,29 +209,23 @@ private fun BoxScope.FullscreenOverlayControls(
         contentColor = Color.White,
     ) {
         Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onDismiss) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.player_exit_fullscreen)) }
+            DambomIconTooltip(stringResource(R.string.player_exit_fullscreen)) {
+                IconButton(onDismiss) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.player_exit_fullscreen)) }
+            }
             Text(
                 text = task.title,
                 modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            IconButton(onContentModeToggle) {
-                Icon(
-                    if (isFit) Icons.Outlined.CropFree else Icons.Outlined.ZoomOutMap,
-                    stringResource(if (isFit) R.string.player_expand_crop else R.string.player_fit_video),
-                )
-            }
-            VideoFavoriteButton(
-                task = task,
-                onToggle = {
-                    onInteraction()
-                    fileActions.onToggleFavorite(it)
-                },
-                onVideoSurface = true,
+            PlayerSettingsButton(
+                interaction = interaction,
+                contentMode = contentMode,
+                onContentModeToggle = onContentModeToggle,
+                onRotate = if (showRotationControl) onRotate else null,
+                onExpandedChange = onInteractionChanged,
             )
-            if (showRotationControl) IconButton(onRotate) { Icon(Icons.Outlined.Rotate90DegreesCw, stringResource(R.string.player_rotate)) }
-            VideoActionsButton(task = task, actions = fileActions)
+            VideoActionsButton(task = task, actions = fileActions, showFavoriteAction = true)
         }
     }
     DambomPlayerControls(
@@ -231,6 +262,7 @@ private fun FullscreenContentFrame(
 ) = ContentFrame(
     player = player,
     shutter = {},
+    surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
     contentScale = contentMode.contentScale,
     modifier =
         modifier

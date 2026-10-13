@@ -6,16 +6,44 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.comst19.dambom.core.database.download.DownloadTaskDao
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
+import com.comst19.dambom.core.database.tag.VideoTagAssignmentEntity
+import com.comst19.dambom.core.database.tag.VideoTagDao
+import com.comst19.dambom.core.database.tag.VideoTagEntity
 
 @Database(
-    entities = [DownloadTaskEntity::class],
-    version = DOWNLOAD_INDEX_DATABASE_VERSION,
+    entities = [DownloadTaskEntity::class, VideoTagEntity::class, VideoTagAssignmentEntity::class],
+    version = TAG_DATABASE_VERSION,
     exportSchema = true,
 )
 abstract class DambomDatabase : RoomDatabase() {
     abstract fun downloadTaskDao(): DownloadTaskDao
 
+    abstract fun videoTagDao(): VideoTagDao
+
     internal companion object {
+        val MIGRATION_4_5 =
+            object : Migration(DOWNLOAD_INDEX_DATABASE_VERSION, TAG_DATABASE_VERSION) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "CREATE TABLE IF NOT EXISTS video_tags " +
+                            "(id TEXT NOT NULL, name TEXT NOT NULL, PRIMARY KEY(id))",
+                    )
+                    db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_video_tags_name ON video_tags(name)")
+                    db.execSQL(
+                        "CREATE TABLE IF NOT EXISTS video_tag_assignments " +
+                            "(videoId TEXT NOT NULL, tagId TEXT NOT NULL, " +
+                            "PRIMARY KEY(videoId, tagId), " +
+                            "FOREIGN KEY(videoId) REFERENCES download_tasks(id) " +
+                            "ON UPDATE NO ACTION ON DELETE CASCADE, " +
+                            "FOREIGN KEY(tagId) REFERENCES video_tags(id) ON UPDATE NO ACTION ON DELETE CASCADE)",
+                    )
+                    db.execSQL(
+                        "CREATE INDEX IF NOT EXISTS index_video_tag_assignments_tagId " +
+                            "ON video_tag_assignments(tagId)",
+                    )
+                }
+            }
+
         val MIGRATION_3_4 =
             object : Migration(FAVORITES_DATABASE_VERSION, DOWNLOAD_INDEX_DATABASE_VERSION) {
                 override fun migrate(db: SupportSQLiteDatabase) {
@@ -45,3 +73,4 @@ abstract class DambomDatabase : RoomDatabase() {
 
 private const val FAVORITES_DATABASE_VERSION = 3
 private const val DOWNLOAD_INDEX_DATABASE_VERSION = 4
+private const val TAG_DATABASE_VERSION = 5

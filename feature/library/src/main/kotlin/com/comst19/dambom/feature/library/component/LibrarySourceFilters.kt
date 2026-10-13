@@ -3,7 +3,6 @@ package com.comst19.dambom.feature.library.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -28,16 +27,17 @@ internal fun LibrarySourceFilters(
     onSelected: (LibrarySourceFilter) -> Unit,
     favoritesOnly: Boolean,
     onFavoritesOnlyChange: (Boolean) -> Unit,
+    tagControls: @Composable () -> Unit = {},
 ) {
     FlowRow(
         modifier =
             Modifier
-                .fillMaxWidth()
-                .padding(horizontal = LibraryHorizontalPadding, vertical = 4.dp),
+                .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         SourceChips(selected, onSelected)
         FavoritesFilterButton(favoritesOnly, onFavoritesOnlyChange)
+        tagControls()
     }
 }
 

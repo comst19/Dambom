@@ -6,6 +6,20 @@ import org.junit.Test
 
 class SharedUrlBusTest {
     @Test
+    fun `malformed shared URL is ignored`() {
+        val bus = SharedUrlBus()
+        bus.offer("https://bad_host/video")
+        assertNull(bus.pendingUrl.value)
+    }
+
+    @Test
+    fun `malformed first URL does not hide later valid URL`() {
+        val bus = SharedUrlBus()
+        bus.offer("https://bad_host/video https://example.com/video.mp4")
+        assertEquals("https://example.com/video.mp4", bus.pendingUrl.value)
+    }
+
+    @Test
     fun `shared text extracts the first http url`() {
         val bus = SharedUrlBus()
 

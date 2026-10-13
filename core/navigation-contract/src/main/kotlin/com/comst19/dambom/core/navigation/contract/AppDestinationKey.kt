@@ -11,6 +11,7 @@ sealed interface HomeGraph : AppNavKey {
     @Serializable
     data class WebKey(
         val url: String? = null,
+        val sharedLink: Boolean = false,
     ) : HomeGraph
 
     @Serializable
@@ -18,6 +19,7 @@ sealed interface HomeGraph : AppNavKey {
         val url: String,
         val snapshotId: String? = null,
         val requestId: String? = null,
+        val sharedLink: Boolean = false,
     ) : HomeGraph
 
     @Serializable

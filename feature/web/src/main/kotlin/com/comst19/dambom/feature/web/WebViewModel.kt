@@ -51,12 +51,19 @@ internal class WebViewModel
             )
         private var initialUrlApplied = savedStateHandle[INITIAL_URL_APPLIED_KEY] ?: false
 
-        fun applyInitialUrl(url: String?) {
+        fun applyInitialUrl(
+            url: String?,
+            sharedLink: Boolean = false,
+        ) {
             if (initialUrlApplied) return
             initialUrlApplied = true
             savedStateHandle[INITIAL_URL_APPLIED_KEY] = true
             val normalizedUrl = url?.normalizeAddress() ?: return
             navigateCurrentTab(normalizedUrl)
+            if (sharedLink) {
+                savedStateHandle[SHARED_ORIGIN_TAB_ID] = uiState.value.currentTabId
+                savedStateHandle[SHARED_ORIGIN_URL] = normalizedUrl
+            }
         }
 
         fun createTab(url: String? = null) {
@@ -76,6 +83,7 @@ internal class WebViewModel
         }
 
         fun closeTab(id: Long) {
+            clearSharedOrigin(id)
             savedWebStates.remove(id)
             invalidatePage(id)
             updateState { state ->
@@ -102,6 +110,7 @@ internal class WebViewModel
 
         fun navigateCurrentTab(value: String) {
             val url = value.normalizeAddress() ?: return
+            if (uiState.value.currentTab?.url != url) clearSharedOrigin(uiState.value.currentTabId)
             invalidatePage(uiState.value.currentTabId)
             updateCurrentTab { tab ->
                 tab.copy(
@@ -123,7 +132,10 @@ internal class WebViewModel
                     .firstOrNull { it.id == tabId }
                     ?.url
             val pageChanged = previousUrl != safeUrl
-            if (pageChanged) invalidatePage(tabId)
+            if (pageChanged) {
+                clearSharedOrigin(tabId)
+                invalidatePage(tabId)
+            }
             updateState { state ->
                 val tabs =
                     state.tabs
@@ -226,8 +238,19 @@ internal class WebViewModel
             val url = tab?.url ?: return
             if (candidates.isEmpty()) return
             val snapshotId = snapshots.save(url, MediaDetectionResult.Success(tab.title, candidates))
+            val sharedLink =
+                savedStateHandle.get<Long>(SHARED_ORIGIN_TAB_ID) == tab.id &&
+                    savedStateHandle.get<String>(SHARED_ORIGIN_URL) == url
             viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Navigate(DetectionResultKey(url, snapshotId)))
+                navigation.dispatch(
+                    NavigationEvent.Navigate(
+                        DetectionResultKey(
+                            url,
+                            snapshotId,
+                            sharedLink = sharedLink,
+                        ),
+                    ),
+                )
             }
         }
 
@@ -307,6 +330,12 @@ internal class WebViewModel
             updateCurrentTabIf(tabId, transform)
         }
 
+        private fun clearSharedOrigin(tabId: Long) {
+            if (savedStateHandle.get<Long>(SHARED_ORIGIN_TAB_ID) != tabId) return
+            savedStateHandle.remove<Long>(SHARED_ORIGIN_TAB_ID)
+            savedStateHandle.remove<String>(SHARED_ORIGIN_URL)
+        }
+
         private fun invalidatePage(tabId: Long) {
             scanJobs.remove(tabId)?.cancel()
             detectedMedia.remove(tabId)
@@ -324,3 +353,6 @@ private const val MAX_DETECTED_MEDIA = 100
 private const val MAX_RETAINED_WEB_STATES = 3
 private const val NEXT_TAB_ID_KEY = "web-next-tab-id"
 private const val INITIAL_URL_APPLIED_KEY = "web-initial-url-applied"
+
+private const val SHARED_ORIGIN_TAB_ID = "sharedOriginTabId"
+private const val SHARED_ORIGIN_URL = "sharedOriginUrl"

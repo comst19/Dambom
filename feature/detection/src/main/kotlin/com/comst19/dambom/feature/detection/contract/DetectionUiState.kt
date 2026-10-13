@@ -22,6 +22,8 @@ internal sealed interface DetectionUiState {
         val selectedVariantUrls: PersistentMap<String, String> = persistentMapOf(),
         val isSubmitting: Boolean = false,
         val enqueueFailed: Boolean = false,
+        val automaticQuality: Boolean = false,
+        val automaticDownloadPending: Boolean = false,
     ) : DetectionUiState
 
     @Immutable

@@ -12,20 +12,20 @@ internal fun parseHtmlMedia(
 ): MediaDetectionResult {
     val documentBaseUrl = html.documentBaseUrl(requestUrl)
     val pageTitle =
-        TITLE_REGEX
+        TITLE_OPEN_TAG_REGEX
             .find(html)
-            ?.groupValues
-            ?.get(1)
-            ?.stripHtml()
+            ?.let { opening ->
+                TITLE_CLOSE_TAG_REGEX.find(html, opening.range.last + 1)?.let { closing ->
+                    html.substring(opening.range.last + 1, closing.range.first)
+                }
+            }?.stripHtml()
             .orEmpty()
 
     val candidates = linkedMapOf<String, MediaCandidate>()
-    VIDEO_ELEMENT_REGEX.findAll(html).forEach { match ->
-        val attributes = match.groupValues[1]
-        val body = match.groupValues[2]
-        val thumbnailUrl = attributes.attribute("poster")?.let { resolveUrl(documentBaseUrl, it) }
+    videoElements(html).forEach { (attributes, body) ->
+        val thumbnailUrl = attributes.attribute(POSTER_ATTRIBUTE_REGEX)?.let { resolveUrl(documentBaseUrl, it) }
         val sources =
-            sequenceOf(attributes.attribute("src")) +
+            sequenceOf(attributes.attribute(SRC_ATTRIBUTE_REGEX)) +
                 SOURCE_TAG_REGEX.findAll(body).map { it.groupValues[1] }
         sources
             .filterNotNull()
@@ -69,6 +69,19 @@ internal fun parseHtmlMedia(
     }
 }
 
+private fun videoElements(html: String): Sequence<Pair<String, String>> =
+    sequence {
+        var opening: MatchResult? = null
+        VIDEO_TAG_REGEX.findAll(html).forEach { tag ->
+            val previous = opening
+            if (previous != null) {
+                yield(previous.groupValues[2] to html.substring(previous.range.last + 1, tag.range.first))
+            }
+            opening = tag.takeIf { it.groupValues[1].isEmpty() }
+        }
+        opening?.let { tag -> yield(tag.groupValues[2] to html.substring(tag.range.last + 1)) }
+    }
+
 private fun resolveUrl(
     baseUrl: String,
     source: String,
@@ -77,7 +90,7 @@ private fun resolveUrl(
 private fun String.documentBaseUrl(responseUrl: String): String =
     BASE_TAG_REGEX
         .findAll(this)
-        .mapNotNull { match -> match.groupValues[1].attribute("href") }
+        .mapNotNull { match -> match.groupValues[1].attribute(HREF_ATTRIBUTE_REGEX) }
         .mapNotNull { href -> resolveUrl(responseUrl, href) }
         .firstOrNull()
         ?: responseUrl
@@ -113,11 +126,7 @@ private fun String.decodeHtmlAttribute(): String =
         }
     }
 
-private fun String.attribute(name: String): String? =
-    Regex("""\b${Regex.escape(name)}\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
-        .find(this)
-        ?.groupValues
-        ?.get(1)
+private fun String.attribute(pattern: Regex): String? = pattern.find(this)?.groupValues?.get(1)
 
 private fun String.candidateCollectionTitle(): String =
     substringBefore('·')
@@ -130,31 +139,27 @@ private fun String.stripHtml(): String = replace(HTML_TAG_REGEX, "").trim()
 
 private fun unsupported(reason: UnsupportedReason) = MediaDetectionResult.Unsupported(reason)
 
-private val TITLE_REGEX =
-    Regex(
-        "<title[^>]*>(.*?)</title>",
-        setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
-    )
-private val BASE_TAG_REGEX = Regex("<base\\b([^>]*)>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+private val POSTER_ATTRIBUTE_REGEX = Regex("""\bposter\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+private val SRC_ATTRIBUTE_REGEX = Regex("""\bsrc\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+private val HREF_ATTRIBUTE_REGEX = Regex("""\bhref\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+private val TITLE_OPEN_TAG_REGEX = Regex("<title\\b[^<>]*>", RegexOption.IGNORE_CASE)
+private val TITLE_CLOSE_TAG_REGEX = Regex("</title>", RegexOption.IGNORE_CASE)
+private val BASE_TAG_REGEX = Regex("<base\\b([^<>]*)>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
 private val HTML_ENTITY_REGEX = Regex("&(#(?:[xX][0-9a-fA-F]+|[0-9]+)|amp|quot|apos|lt|gt);", RegexOption.IGNORE_CASE)
 private val MEDIA_TAG_REGEX =
     Regex(
-        "<(?:video|source)[^>]+src\\s*=\\s*[\"']([^\"']+)[\"']",
+        "<(?:video|source)[^<>]+src\\s*=\\s*[\"']([^\"']+)[\"']",
         setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
     )
-private val VIDEO_ELEMENT_REGEX =
-    Regex(
-        "<video\\b([^>]*)>(.*?)</video>",
-        setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
-    )
+private val VIDEO_TAG_REGEX = Regex("<(/?)video\\b([^<>]*)>", RegexOption.IGNORE_CASE)
 private val SOURCE_TAG_REGEX =
     Regex(
-        "<source[^>]+src\\s*=\\s*[\"']([^\"']+)[\"']",
+        "<source[^<>]+src\\s*=\\s*[\"']([^\"']+)[\"']",
         setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
     )
 private val DIRECT_VIDEO_REGEX =
     Regex("https?://[^\\s\"'<>]+\\.(?:mp4|webm|mov|m4v)(?:[?#][^\\s\"'<>]*)?", RegexOption.IGNORE_CASE)
-private val HTML_TAG_REGEX = Regex("<[^>]+>")
+private val HTML_TAG_REGEX = Regex("<[^<>]+>")
 private val OPAQUE_MEDIA_TITLE_REGEX = Regex("[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}")
 private val LEADING_RESULT_COUNT_REGEX = Regex("^[\\d,+]+개의\\s+(?:최고의\\s+)?")
 private const val MAX_CANDIDATE_PAGE_TITLE_LENGTH = 48

@@ -210,6 +210,89 @@ class WebViewModelTest {
         }
 
     @Test
+    fun `shared origin is restricted to the original shared page`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            for (page in listOf(FIRST_PAGE_URL, SECOND_PAGE_URL)) {
+                val navigation = SpyNavigationDispatcher()
+                val viewModel = WebViewModel(FakeMediaDetectionRepository, navigation, SavedStateHandle())
+                viewModel.applyInitialUrl(FIRST_PAGE_URL, sharedLink = true)
+                val tabId = viewModel.uiState.value.currentTabId
+                viewModel.onPageStarted(tabId, page, "Page", 1L)
+                viewModel.onPageFinished(tabId, page, "Page", 1L)
+                viewModel.onMediaRequest(tabId, 1L, "https://example.com/video.mp4")
+                runCurrent()
+
+                viewModel.openDetectedMedia()
+                advanceUntilIdle()
+
+                val key = (navigation.dispatched.single() as NavigationEvent.Navigate).key as DetectionResultKey
+                assertEquals(page == FIRST_PAGE_URL, key.sharedLink)
+            }
+        }
+
+    @Test
+    fun `navigating another tab preserves shared origin after recreation`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val savedState = SavedStateHandle()
+            val original = WebViewModel(FakeMediaDetectionRepository, navigation, savedState)
+            original.applyInitialUrl(FIRST_PAGE_URL, sharedLink = true)
+            val sharedTab = original.uiState.value.currentTabId
+            original.createTab()
+            original.navigateCurrentTab(SECOND_PAGE_URL)
+            original.selectTab(sharedTab)
+            val restored = WebViewModel(FakeMediaDetectionRepository, navigation, savedState)
+            restored.onPageStarted(sharedTab, FIRST_PAGE_URL, "Shared", 1L)
+            restored.onMediaRequest(sharedTab, 1L, "https://example.com/video.mp4")
+            runCurrent()
+
+            restored.openDetectedMedia()
+            advanceUntilIdle()
+
+            val key = (navigation.dispatched.single() as NavigationEvent.Navigate).key as DetectionResultKey
+            assertTrue(key.sharedLink)
+        }
+
+    @Test
+    fun `returning to the shared page does not revive its original consent`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val viewModel = WebViewModel(FakeMediaDetectionRepository, navigation, SavedStateHandle())
+            viewModel.applyInitialUrl(FIRST_PAGE_URL, sharedLink = true)
+            val tabId = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(tabId, SECOND_PAGE_URL, "Other", 1L)
+            viewModel.onPageStarted(tabId, FIRST_PAGE_URL, "Returned", 2L)
+            viewModel.onMediaRequest(tabId, 2L, "https://example.com/video.mp4")
+            runCurrent()
+
+            viewModel.openDetectedMedia()
+            advanceUntilIdle()
+
+            val key = (navigation.dispatched.single() as NavigationEvent.Navigate).key as DetectionResultKey
+            assertEquals(false, key.sharedLink)
+        }
+
+    @Test
+    fun `opening detected media captures the tab before dispatch`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val viewModel = WebViewModel(FakeMediaDetectionRepository, navigation, SavedStateHandle())
+            viewModel.applyInitialUrl(FIRST_PAGE_URL, sharedLink = true)
+            val tabId = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(tabId, FIRST_PAGE_URL, "Shared", 1L)
+            viewModel.onMediaRequest(tabId, 1L, "https://example.com/video.mp4")
+            runCurrent()
+
+            viewModel.openDetectedMedia()
+            viewModel.createTab(SECOND_PAGE_URL)
+            advanceUntilIdle()
+
+            val key = (navigation.dispatched.single() as NavigationEvent.Navigate).key as DetectionResultKey
+            assertEquals(FIRST_PAGE_URL, key.url)
+            assertTrue(key.sharedLink)
+        }
+
+    @Test
     fun `detection result opens only after media is found`() =
         runTest(mainDispatcherRule.dispatcher) {
             val navigation = SpyNavigationDispatcher()

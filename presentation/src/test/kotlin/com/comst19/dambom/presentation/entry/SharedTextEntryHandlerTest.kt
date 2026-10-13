@@ -19,6 +19,24 @@ import org.robolectric.annotation.Config
 @Config(manifest = Config.NONE, sdk = [35])
 class SharedTextEntryHandlerTest {
     @Test
+    fun `styled text share offers URL`() =
+        runTest {
+            val dispatcher = RecordingNavigationDispatcher()
+            val sharedUrlBus = SharedUrlBus()
+            val handler = SharedTextEntryHandler(dispatcher, sharedUrlBus)
+            val intent =
+                Intent(Intent.ACTION_SEND).apply {
+                    type = "text/html"
+                    putExtra(Intent.EXTRA_TEXT, android.text.SpannableString("https://example.com/video"))
+                }
+
+            handler.handle(intent)
+
+            assertEquals(listOf(NavigationEvent.NavigateTopLevel(HomeKey)), dispatcher.dispatched)
+            assertEquals("https://example.com/video", sharedUrlBus.pendingUrl.value)
+        }
+
+    @Test
     fun `text share navigates home and offers the first URL`() =
         runTest {
             val dispatcher = RecordingNavigationDispatcher()

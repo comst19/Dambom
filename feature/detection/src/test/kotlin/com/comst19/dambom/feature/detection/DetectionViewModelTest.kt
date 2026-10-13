@@ -3,15 +3,20 @@ package com.comst19.dambom.feature.detection
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
+import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.MediaVariant
+import com.comst19.dambom.core.domain.model.SharedLinkQuality
+import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionSnapshots
+import com.comst19.dambom.core.domain.repository.SettingsRepository
+import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
@@ -41,13 +46,65 @@ class DetectionViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
     @Test
+    fun `only opted in shared links request automatic download`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            for ((shared, enabled) in listOf(false to true, true to true, true to false)) {
+                val viewModel =
+                    testDetectionViewModel(
+                        SuccessfulDetectionRepository,
+                        RecordingDownloadRepository(),
+                        SpyNavigationDispatcher(),
+                        AppEventBus(),
+                        settings =
+                            AppSettings(sharedLinkAutoDownload = enabled),
+                    )
+                viewModel.detect(SOURCE_URL, sharedLink = shared)
+                advanceUntilIdle()
+                val state = viewModel.uiState.value as DetectionUiState.Content
+                assertEquals(shared && enabled, state.automaticDownloadPending)
+                assertEquals(shared && enabled, state.automaticQuality)
+                viewModel.consumeAutomaticDownload()
+                assertEquals(false, (viewModel.uiState.value as DetectionUiState.Content).automaticDownloadPending)
+            }
+        }
+
+    @Test
+    fun `multiple shared videos need selection but use automatic quality`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String): MediaDetectionResult {
+                        val result =
+                            SuccessfulDetectionRepository.detect(url) as MediaDetectionResult.Success
+                        val second = result.candidates.first().copy(id = "second")
+                        return result.copy(candidates = result.candidates + second)
+                    }
+                }
+            val viewModel =
+                testDetectionViewModel(
+                    repository,
+                    RecordingDownloadRepository(),
+                    SpyNavigationDispatcher(),
+                    AppEventBus(),
+                    settings =
+                        AppSettings(sharedLinkAutoDownload = true),
+                )
+            viewModel.detect(SOURCE_URL, sharedLink = true)
+            advanceUntilIdle()
+            val state = viewModel.uiState.value as DetectionUiState.Content
+            assertTrue(state.selectedIds.isEmpty())
+            assertEquals(false, state.automaticDownloadPending)
+            assertEquals(true, state.automaticQuality)
+        }
+
+    @Test
     fun `web snapshot is displayed without fetching its page again`() =
         runTest(mainDispatcherRule.dispatcher) {
             val snapshots = MediaDetectionSnapshots()
             val result = SuccessfulDetectionRepository.detect(SOURCE_URL) as MediaDetectionResult.Success
             val snapshotId = snapshots.save(SOURCE_URL, result)
             val viewModel =
-                DetectionViewModel(
+                testDetectionViewModel(
                     object : MediaDetectionRepository {
                         override suspend fun detect(url: String): MediaDetectionResult {
                             error("Page must not be fetched")
@@ -67,7 +124,7 @@ class DetectionViewModelTest {
     fun `an evicted or process lost snapshot falls back to page detection`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel =
-                DetectionViewModel(
+                testDetectionViewModel(
                     SuccessfulDetectionRepository,
                     RecordingDownloadRepository(),
                     SpyNavigationDispatcher(),
@@ -87,7 +144,7 @@ class DetectionViewModelTest {
         runTest(mainDispatcherRule.dispatcher) {
             val downloads = RecordingDownloadRepository()
             val navigation = SpyNavigationDispatcher()
-            val viewModel = DetectionViewModel(SuccessfulDetectionRepository, downloads, navigation, AppEventBus())
+            val viewModel = testDetectionViewModel(SuccessfulDetectionRepository, downloads, navigation, AppEventBus())
 
             viewModel.detect(SOURCE_URL)
             advanceUntilIdle()
@@ -111,7 +168,7 @@ class DetectionViewModelTest {
             val downloads = RecordingDownloadRepository()
             for (url in listOf(MEDIA_URL, LOW_MEDIA_URL)) {
                 val viewModel =
-                    DetectionViewModel(
+                    testDetectionViewModel(
                         SuccessfulDetectionRepository,
                         downloads,
                         SpyNavigationDispatcher(),
@@ -133,7 +190,7 @@ class DetectionViewModelTest {
         runTest(mainDispatcherRule.dispatcher) {
             val downloads = RecordingDownloadRepository()
             val viewModel =
-                DetectionViewModel(
+                testDetectionViewModel(
                     SuccessfulDetectionRepository,
                     downloads,
                     SpyNavigationDispatcher(),
@@ -162,7 +219,7 @@ class DetectionViewModelTest {
                     events.events.first()
                 }
             val viewModel =
-                DetectionViewModel(
+                testDetectionViewModel(
                     MultipleVideoDetectionRepository,
                     RecordingDownloadRepository(),
                     SpyNavigationDispatcher(),
@@ -187,7 +244,7 @@ class DetectionViewModelTest {
     fun `multiple detected videos require an explicit selection`() =
         runTest(mainDispatcherRule.dispatcher) {
             val viewModel =
-                DetectionViewModel(
+                testDetectionViewModel(
                     MultipleVideoDetectionRepository,
                     RecordingDownloadRepository(),
                     SpyNavigationDispatcher(),
@@ -207,7 +264,7 @@ class DetectionViewModelTest {
             val navigation = SpyNavigationDispatcher()
             val events = AppEventBus()
             val viewModel =
-                DetectionViewModel(
+                testDetectionViewModel(
                     UnsupportedDetectionRepository,
                     RecordingDownloadRepository(),
                     navigation,
@@ -233,7 +290,7 @@ class DetectionViewModelTest {
                 object : MediaDetectionRepository {
                     override suspend fun detect(url: String): MediaDetectionResult = error("Parser failure")
                 }
-            val viewModel = DetectionViewModel(repository, RecordingDownloadRepository(), navigation, events)
+            val viewModel = testDetectionViewModel(repository, RecordingDownloadRepository(), navigation, events)
 
             viewModel.detect(SOURCE_URL)
             advanceUntilIdle()
@@ -247,7 +304,7 @@ class DetectionViewModelTest {
         runTest(mainDispatcherRule.dispatcher) {
             val repository = ControllableDetectionRepository()
             val viewModel =
-                DetectionViewModel(
+                testDetectionViewModel(
                     repository,
                     RecordingDownloadRepository(),
                     SpyNavigationDispatcher(),
@@ -272,7 +329,7 @@ class DetectionViewModelTest {
         runTest(mainDispatcherRule.dispatcher) {
             val repository = ControllableDetectionRepository()
             val viewModel =
-                DetectionViewModel(
+                testDetectionViewModel(
                     repository,
                     RecordingDownloadRepository(),
                     SpyNavigationDispatcher(),
@@ -395,3 +452,49 @@ private const val MEDIA_URL = "https://example.com/video.mp4"
 private const val LOW_MEDIA_URL = "https://example.com/video-low.mp4"
 private const val MEDIA_QUALITY = "720×1280 · 2176 kbps"
 private const val LOW_MEDIA_QUALITY = "360×640 · 832 kbps"
+
+@Suppress("LongParameterList")
+private fun testDetectionViewModel(
+    repository: MediaDetectionRepository,
+    downloadRepository: DownloadRepository,
+    navigation: NavigationDispatcher,
+    appEventBus: AppEventBus,
+    snapshots: MediaDetectionSnapshots = MediaDetectionSnapshots(),
+    settings: AppSettings =
+        AppSettings(),
+): DetectionViewModel =
+    DetectionViewModel(
+        repository = repository,
+        settingsRepository = DetectionSettingsRepository(settings),
+        downloadRepository = downloadRepository,
+        navigation = navigation,
+        appEventBus = appEventBus,
+        snapshots = snapshots,
+    )
+
+private class DetectionSettingsRepository(
+    private val value: AppSettings,
+) : SettingsRepository {
+    override val settings = flowOf(value)
+
+    override suspend fun setThemeMode(mode: ThemeMode) = Unit
+
+    override suspend fun setClipboardSuggestion(
+        promptShown: Boolean,
+        enabled: Boolean,
+    ) = Unit
+
+    override suspend fun setWifiOnlyDownloads(enabled: Boolean) = Unit
+
+    override suspend fun setDownloadLocation(
+        enabled: Boolean,
+        treeUri: String?,
+    ) = Unit
+
+    override suspend fun setSharedLinkAutoDownload(enabled: Boolean) = Unit
+
+    override suspend fun setSharedLinkQuality(
+        quality: SharedLinkQuality,
+        resolution: Int,
+    ) = Unit
+}

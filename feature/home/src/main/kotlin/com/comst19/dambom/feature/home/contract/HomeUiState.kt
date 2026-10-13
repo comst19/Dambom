@@ -10,8 +10,12 @@ internal data class HomeUiState(
     val clipboardSuggestionEnabled: Boolean = false,
     val clipboardUrl: String? = null,
     val sharedUrl: String? = null,
+    val sharedLinkAutoDownload: Boolean = false,
     val downloadSummary: HomeDownloadSummary = HomeDownloadSummary(),
-)
+) {
+    fun shouldAutomaticallyAnalyzeSharedUrl(canUseInternet: Boolean): Boolean =
+        sharedUrl != null && sharedLinkAutoDownload && canUseInternet
+}
 
 @Immutable
 internal data class HomeDownloadSummary(

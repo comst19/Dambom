@@ -1,7 +1,6 @@
 package com.comst19.dambom.feature.library.component
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -28,6 +27,7 @@ import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
 
 @Composable
+@Suppress("LongParameterList", "LongMethod")
 internal fun LibraryPane(
     uiState: LibraryUiState,
     fileActions: LibraryFileActions,
@@ -37,8 +37,53 @@ internal fun LibraryPane(
     onToggleSelection: (String) -> Unit,
     showInlineEmptyState: Boolean,
     modifier: Modifier,
+    tagControls: @Composable () -> Unit = {},
 ) {
-    Column(modifier) {
+    val header: @Composable () -> Unit = {
+        LibraryPaneHeader(uiState, onQueryChange, onSourceFilterChange, fileActions.onFavoritesOnlyChange, tagControls)
+    }
+    val emptyContent: @Composable () -> Unit = {
+        when {
+            !uiState.hasVideos -> if (showInlineEmptyState) EmptyLibrary()
+            uiState.query.isNotBlank() -> EmptySearchResults(uiState.query)
+            uiState.favoritesOnly -> EmptyFavorites()
+            else -> EmptySourceResults(hasTagFilter = uiState.hasTagFilter)
+        }
+    }
+    if (uiState.viewMode == LibraryViewMode.GRID) {
+        VideoGrid(
+            uiState = uiState,
+            fileActions = fileActions,
+            onVideoClick = onVideoClick,
+            isSelecting = uiState.isSelecting,
+            onToggleSelection = onToggleSelection,
+            header = header,
+            emptyContent = emptyContent,
+            modifier = modifier,
+        )
+    } else {
+        VideoList(
+            uiState = uiState,
+            fileActions = fileActions,
+            onVideoClick = onVideoClick,
+            isSelecting = uiState.isSelecting,
+            onToggleSelection = onToggleSelection,
+            header = header,
+            emptyContent = emptyContent,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun LibraryPaneHeader(
+    uiState: LibraryUiState,
+    onQueryChange: (String) -> Unit,
+    onSourceFilterChange: (LibrarySourceFilter) -> Unit,
+    onFavoritesOnlyChange: (Boolean) -> Unit,
+    tagControls: @Composable () -> Unit,
+) {
+    Column {
         if (!uiState.isSelecting && uiState.hasVideos) {
             Text(
                 text =
@@ -47,64 +92,19 @@ internal fun LibraryPane(
                         uiState.totalVideoCount,
                         uiState.totalBytes.formatFileSize(),
                     ),
-                modifier =
-                    Modifier.padding(
-                        start = LibraryHorizontalPadding,
-                        end = LibraryHorizontalPadding,
-                        bottom = 8.dp,
-                    ),
+                modifier = Modifier.padding(bottom = 8.dp),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall,
             )
         }
-        LibrarySearchField(
-            query = uiState.query,
-            onQueryChange = onQueryChange,
-            modifier =
-                Modifier.padding(
-                    start = LibraryHorizontalPadding,
-                    end = LibraryHorizontalPadding,
-                    bottom = 8.dp,
-                ),
-        )
+        LibrarySearchField(uiState.query, onQueryChange, Modifier.padding(bottom = 8.dp))
         LibrarySourceFilters(
             selected = uiState.sourceFilter,
             onSelected = onSourceFilterChange,
             favoritesOnly = uiState.favoritesOnly,
-            onFavoritesOnlyChange = fileActions.onFavoritesOnlyChange,
+            onFavoritesOnlyChange = onFavoritesOnlyChange,
+            tagControls = tagControls,
         )
-        if (!uiState.hasVideos) {
-            if (showInlineEmptyState) {
-                EmptyLibrary(Modifier.weight(1f))
-            }
-        } else if (uiState.videos.isEmpty()) {
-            if (uiState.query.isNotBlank()) {
-                EmptySearchResults(
-                    query = uiState.query,
-                    modifier = Modifier.weight(1f),
-                )
-            } else if (uiState.favoritesOnly) {
-                EmptyFavorites(Modifier.weight(1f))
-            } else {
-                EmptySourceResults(Modifier.weight(1f))
-            }
-        } else if (uiState.viewMode == LibraryViewMode.GRID) {
-            VideoGrid(
-                uiState = uiState,
-                fileActions = fileActions,
-                onVideoClick = onVideoClick,
-                isSelecting = uiState.isSelecting,
-                onToggleSelection = onToggleSelection,
-            )
-        } else {
-            VideoList(
-                uiState = uiState,
-                fileActions = fileActions,
-                onVideoClick = onVideoClick,
-                isSelecting = uiState.isSelecting,
-                onToggleSelection = onToggleSelection,
-            )
-        }
     }
 }
 

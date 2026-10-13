@@ -21,6 +21,7 @@ import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
+import com.comst19.dambom.feature.home.contract.HomeUiState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +40,57 @@ import java.io.IOException
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
+
+    @Test
+    fun `automatic shared analysis requires opt in a pending link and internet`() {
+        val state =
+            com.comst19.dambom.feature.home.contract.HomeUiState(
+                sharedUrl = FIRST_URL,
+                sharedLinkAutoDownload = true,
+            )
+        assertEquals(true, state.shouldAutomaticallyAnalyzeSharedUrl(canUseInternet = true))
+        assertEquals(false, state.shouldAutomaticallyAnalyzeSharedUrl(canUseInternet = false))
+        assertEquals(false, state.copy(sharedLinkAutoDownload = false).shouldAutomaticallyAnalyzeSharedUrl(true))
+        assertEquals(false, state.copy(sharedUrl = null).shouldAutomaticallyAnalyzeSharedUrl(true))
+    }
+
+    @Test
+    fun `shared auto setting reaches home and analyzing consumes the pending link`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val settings =
+                object : SettingsRepository by EnabledClipboardSettingsRepository {
+                    override val settings = flowOf(AppSettings(sharedLinkAutoDownload = true))
+                }
+            val bus = SharedUrlBus()
+            val navigation = SpyNavigationDispatcher()
+            val viewModel =
+                HomeViewModel(
+                    navigation,
+                    settings,
+                    EmptyDownloadRepository,
+                    bus,
+                    SavedStateHandle(),
+                    AppEventBus(),
+                )
+            viewModel.uiState.test {
+                awaitItem()
+                awaitItem()
+                bus.offer(FIRST_URL)
+                val pending = awaitItem()
+                assertEquals(true, pending.shouldAutomaticallyAnalyzeSharedUrl(true))
+
+                viewModel.analyzeSharedUrl()
+                runCurrent()
+                cancelAndIgnoreRemainingEvents()
+            }
+            assertEquals(null, bus.pendingUrl.value)
+            val key = (navigation.dispatched.last() as NavigationEvent.Navigate).key as DetectionResultKey
+            assertEquals(FIRST_URL, key.url)
+            assertEquals(true, key.sharedLink)
+            viewModel.analyzeSharedUrl()
+            runCurrent()
+            assertEquals(2, navigation.dispatched.size)
+        }
 
     @Test
     fun `home requires an explicit http scheme and accepts scheme case variants`() =
@@ -300,6 +352,13 @@ private object EnabledClipboardSettingsRepository : SettingsRepository {
     override suspend fun setClipboardSuggestion(
         promptShown: Boolean,
         enabled: Boolean,
+    ) = Unit
+
+    override suspend fun setSharedLinkAutoDownload(enabled: Boolean) = Unit
+
+    override suspend fun setSharedLinkQuality(
+        quality: com.comst19.dambom.core.domain.model.SharedLinkQuality,
+        resolution: Int,
     ) = Unit
 
     override suspend fun setWifiOnlyDownloads(enabled: Boolean) = Unit

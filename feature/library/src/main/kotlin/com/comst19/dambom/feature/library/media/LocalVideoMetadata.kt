@@ -1,6 +1,8 @@
 package com.comst19.dambom.feature.library.media
 
+import android.content.ComponentCallbacks2
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.os.FileObserver
@@ -95,20 +97,61 @@ internal object LocalVideoMetadataLoader {
                     ?: 1
         }
 
+    private var registeredApplication: Context? = null
+    private var cacheVersion = 0L
+    private val memoryCallbacks =
+        object : ComponentCallbacks2 {
+            @Suppress("DEPRECATION")
+            override fun onTrimMemory(level: Int) {
+                if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) clearCache()
+            }
+
+            override fun onConfigurationChanged(newConfig: Configuration) = Unit
+
+            @Deprecated("Deprecated in Java")
+            override fun onLowMemory() {
+                clearCache()
+            }
+        }
+
+    private fun clearCache() {
+        synchronized(this) {
+            cacheVersion++
+            cache.evictAll()
+        }
+    }
+
     suspend fun load(
         context: Context,
         key: LocalVideoCacheKey,
-    ): LocalVideoMetadata =
-        cache[key] ?: readMutex.withLock {
+    ): LocalVideoMetadata {
+        val version =
+            synchronized(this) {
+                val application = context.applicationContext
+                if (registeredApplication !== application) {
+                    registeredApplication?.unregisterComponentCallbacks(memoryCallbacks)
+                    application.registerComponentCallbacks(memoryCallbacks)
+                    registeredApplication = application
+                    cacheVersion++
+                    cache.evictAll()
+                }
+                cacheVersion
+            }
+        return cache[key] ?: readMutex.withLock {
             cache[key] ?: withContext(Dispatchers.IO) {
                 readMetadata(
                     key.path,
                     loadOrCreateVideoThumbnailFile(context, key.path)?.let {
                         decodeVideoThumbnail(it.absolutePath)
                     },
-                ).also { cache.put(key, it) }
+                ).also { metadata ->
+                    synchronized(this@LocalVideoMetadataLoader) {
+                        if (version == cacheVersion) cache.put(key, metadata)
+                    }
+                }
             }
         }
+    }
 
     private fun readMetadata(
         path: String,

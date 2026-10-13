@@ -12,6 +12,13 @@ interface SettingsDataSource {
         enabled: Boolean,
     )
 
+    suspend fun setSharedLinkAutoDownload(enabled: Boolean)
+
+    suspend fun setSharedLinkQuality(
+        quality: String,
+        resolution: Int,
+    )
+
     suspend fun setWifiOnlyDownloads(enabled: Boolean)
 
     suspend fun setDownloadLocation(
@@ -21,6 +28,9 @@ interface SettingsDataSource {
 }
 
 data class StoredSettings(
+    val sharedLinkAutoDownload: Boolean = false,
+    val sharedLinkQuality: String = "HIGHEST",
+    val sharedLinkResolution: Int = 1080,
     val themeMode: String = "SYSTEM",
     val clipboardPromptShown: Boolean = false,
     val clipboardSuggestionEnabled: Boolean = false,

@@ -11,6 +11,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -25,117 +26,138 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.designsystem.DambomIconTooltip
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.VideoSourceKind
 import com.comst19.dambom.feature.library.videoSourcePresentation
 
 @Composable
+@Suppress("LongMethod")
 internal fun VideoActionsButton(
     task: DownloadTask,
     actions: LibraryFileActions,
     modifier: Modifier = Modifier,
     iconOffsetY: Dp = 0.dp,
+    showFavoriteAction: Boolean = false,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     var renameOpen by remember { mutableStateOf(false) }
     var deleteOpen by remember { mutableStateOf(false) }
     val sourceKind = videoSourcePresentation(task.sourcePageUrl).kind
 
-    IconButton(
-        onClick = { menuExpanded = true },
-        modifier = modifier.size(ACTION_TARGET_SIZE),
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.MoreVert,
-            contentDescription = stringResource(R.string.library_more_actions, task.title),
-            modifier = Modifier.offset(y = iconOffsetY),
-        )
-        DropdownMenu(
-            expanded = menuExpanded,
-            onDismissRequest = { menuExpanded = false },
+    DambomIconTooltip(stringResource(R.string.library_more_actions, task.title)) {
+        IconButton(
+            onClick = { menuExpanded = true },
+            modifier = modifier.size(ACTION_TARGET_SIZE),
         ) {
-            if (!task.deletePending) {
-                actions.onTrim?.takeIf { task.localFilePath != null }?.let { onTrim ->
+            Icon(
+                imageVector = Icons.Outlined.MoreVert,
+                contentDescription = stringResource(R.string.library_more_actions, task.title),
+                modifier = Modifier.offset(y = iconOffsetY),
+            )
+            DropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false },
+            ) {
+                if (!task.deletePending) {
+                    if (showFavoriteAction) {
+                        ActionMenuItem(
+                            label =
+                                stringResource(
+                                    if (task.isFavorite) {
+                                        R.string.library_favorite_remove
+                                    } else {
+                                        R.string.library_favorite_add
+                                    },
+                                ),
+                            icon = { Icon(Icons.Outlined.StarBorder, contentDescription = null) },
+                            onClick = {
+                                menuExpanded = false
+                                actions.onToggleFavorite(task)
+                            },
+                        )
+                    }
+                    actions.onTrim?.takeIf { task.localFilePath != null }?.let { onTrim ->
+                        ActionMenuItem(
+                            label = stringResource(R.string.trim_title),
+                            icon = { Icon(Icons.Outlined.ContentCut, contentDescription = null) },
+                            onClick = {
+                                menuExpanded = false
+                                onTrim(task)
+                            },
+                        )
+                    }
                     ActionMenuItem(
-                        label = stringResource(R.string.trim_title),
-                        icon = { Icon(Icons.Outlined.ContentCut, contentDescription = null) },
+                        label = stringResource(R.string.library_rename),
+                        icon = { Icon(Icons.Outlined.Edit, contentDescription = null) },
                         onClick = {
                             menuExpanded = false
-                            onTrim(task)
+                            renameOpen = true
+                        },
+                    )
+                    ActionMenuItem(
+                        label = stringResource(R.string.library_share_video),
+                        icon = { Icon(Icons.Outlined.Share, contentDescription = null) },
+                        onClick = {
+                            menuExpanded = false
+                            actions.onShareVideo(task)
+                        },
+                    )
+                    ActionMenuItem(
+                        label = stringResource(R.string.library_share_link),
+                        icon = { Icon(Icons.Outlined.Share, contentDescription = null) },
+                        onClick = {
+                            menuExpanded = false
+                            actions.onShareLink(task)
+                        },
+                    )
+                    ActionMenuItem(
+                        label = stringResource(R.string.library_copy_link),
+                        icon = { Icon(Icons.Outlined.Link, contentDescription = null) },
+                        onClick = {
+                            menuExpanded = false
+                            actions.onCopyLink(task)
+                        },
+                    )
+                    ActionMenuItem(
+                        label =
+                            stringResource(
+                                if (sourceKind == VideoSourceKind.X) {
+                                    R.string.player_open_in_x
+                                } else {
+                                    R.string.player_open_website
+                                },
+                            ),
+                        icon = { Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null) },
+                        onClick = {
+                            menuExpanded = false
+                            actions.onOpenOriginal(task)
+                        },
+                    )
+                    ActionMenuItem(
+                        label = stringResource(R.string.library_export),
+                        icon = { Icon(Icons.Outlined.Download, contentDescription = null) },
+                        onClick = {
+                            menuExpanded = false
+                            actions.onExport(task)
                         },
                     )
                 }
                 ActionMenuItem(
-                    label = stringResource(R.string.library_rename),
-                    icon = { Icon(Icons.Outlined.Edit, contentDescription = null) },
-                    onClick = {
-                        menuExpanded = false
-                        renameOpen = true
-                    },
-                )
-                ActionMenuItem(
-                    label = stringResource(R.string.library_share_video),
-                    icon = { Icon(Icons.Outlined.Share, contentDescription = null) },
-                    onClick = {
-                        menuExpanded = false
-                        actions.onShareVideo(task)
-                    },
-                )
-                ActionMenuItem(
-                    label = stringResource(R.string.library_share_link),
-                    icon = { Icon(Icons.Outlined.Share, contentDescription = null) },
-                    onClick = {
-                        menuExpanded = false
-                        actions.onShareLink(task)
-                    },
-                )
-                ActionMenuItem(
-                    label = stringResource(R.string.library_copy_link),
-                    icon = { Icon(Icons.Outlined.Link, contentDescription = null) },
-                    onClick = {
-                        menuExpanded = false
-                        actions.onCopyLink(task)
-                    },
-                )
-                ActionMenuItem(
                     label =
                         stringResource(
-                            if (sourceKind == VideoSourceKind.X) {
-                                R.string.player_open_in_x
-                            } else {
-                                R.string.player_open_website
-                            },
+                            if (task.deletePending) R.string.library_delete_retry else R.string.library_delete,
                         ),
-                    icon = { Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null) },
+                    icon = { Icon(Icons.Outlined.DeleteOutline, contentDescription = null) },
                     onClick = {
                         menuExpanded = false
-                        actions.onOpenOriginal(task)
-                    },
-                )
-                ActionMenuItem(
-                    label = stringResource(R.string.library_export),
-                    icon = { Icon(Icons.Outlined.Download, contentDescription = null) },
-                    onClick = {
-                        menuExpanded = false
-                        actions.onExport(task)
+                        deleteOpen = true
                     },
                 )
             }
-            ActionMenuItem(
-                label =
-                    stringResource(
-                        if (task.deletePending) R.string.library_delete_retry else R.string.library_delete,
-                    ),
-                icon = { Icon(Icons.Outlined.DeleteOutline, contentDescription = null) },
-                onClick = {
-                    menuExpanded = false
-                    deleteOpen = true
-                },
-            )
         }
     }
-
     if (renameOpen) {
         RenameVideoDialog(
             task = task,

@@ -7,6 +7,7 @@ import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.domain.model.AppSettings
+import com.comst19.dambom.core.domain.model.SharedLinkQuality
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
@@ -29,6 +30,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
+@Suppress("TooManyFunctions")
 @HiltViewModel
 internal class SettingsViewModel
     @Inject
@@ -64,6 +66,17 @@ internal class SettingsViewModel
             launchSettingUpdate {
                 repository.setClipboardSuggestion(promptShown = true, enabled = enabled)
             }
+        }
+
+        fun setSharedLinkAutoDownload(enabled: Boolean) {
+            launchSettingUpdate { repository.setSharedLinkAutoDownload(enabled) }
+        }
+
+        fun setSharedLinkQuality(
+            quality: SharedLinkQuality,
+            resolution: Int,
+        ) {
+            launchSettingUpdate { repository.setSharedLinkQuality(quality, resolution) }
         }
 
         fun setWifiOnlyDownloads(enabled: Boolean) {

@@ -151,6 +151,13 @@ private object TestSettingsRepository : SettingsRepository {
         enabled: Boolean,
     ) = Unit
 
+    override suspend fun setSharedLinkAutoDownload(enabled: Boolean) = Unit
+
+    override suspend fun setSharedLinkQuality(
+        quality: com.comst19.dambom.core.domain.model.SharedLinkQuality,
+        resolution: Int,
+    ) = Unit
+
     override suspend fun setWifiOnlyDownloads(enabled: Boolean) = Unit
 
     override suspend fun setDownloadLocation(

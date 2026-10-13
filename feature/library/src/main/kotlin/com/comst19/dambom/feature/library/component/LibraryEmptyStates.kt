@@ -68,18 +68,24 @@ internal fun EmptySearchResults(
 }
 
 @Composable
-internal fun EmptySourceResults(modifier: Modifier = Modifier) {
+internal fun EmptySourceResults(
+    modifier: Modifier = Modifier,
+    hasTagFilter: Boolean = false,
+) {
+    val title = if (hasTagFilter) R.string.library_tag_empty_title else R.string.library_filter_empty_title
+    val description =
+        if (hasTagFilter) R.string.library_tag_empty_description else R.string.library_filter_empty_description
     Column(
         modifier = modifier.fillMaxWidth().padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = stringResource(R.string.library_filter_empty_title),
+            text = stringResource(title),
             style = MaterialTheme.typography.titleMedium,
         )
         Text(
-            text = stringResource(R.string.library_filter_empty_description),
+            text = stringResource(description),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
         )

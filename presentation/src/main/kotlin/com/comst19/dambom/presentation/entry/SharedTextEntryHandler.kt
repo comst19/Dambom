@@ -14,10 +14,10 @@ internal class SharedTextEntryHandler
         private val sharedUrlBus: SharedUrlBus,
     ) {
         suspend fun handle(intent: Intent) {
-            if (intent.action != Intent.ACTION_SEND || intent.type != TEXT_MIME_TYPE) return
+            if (intent.action != Intent.ACTION_SEND || intent.type?.startsWith(TEXT_MIME_PREFIX) != true) return
             navigationDispatcher.dispatch(NavigationEvent.NavigateTopLevel(HomeKey))
-            sharedUrlBus.offer(intent.getStringExtra(Intent.EXTRA_TEXT))
+            sharedUrlBus.offer(intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString())
         }
     }
 
-private const val TEXT_MIME_TYPE = "text/plain"
+private const val TEXT_MIME_PREFIX = "text/"

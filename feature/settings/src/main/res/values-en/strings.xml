@@ -57,4 +57,12 @@
     <string name="help_step_download_description">Check queue progress and pause, resume, cancel, or retry each download.</string>
     <string name="help_step_library_title">5. Watch in Library</string>
     <string name="help_step_library_description">When you leave while a completed local video is playing full screen, playback continues in PiP on supported devices. Inline, paused, or missing videos do not enter automatically, and no background playback service is provided.</string>
+    <string name="settings_shared_auto_download">Auto-download shared links</string>
+    <string name="settings_shared_auto_description">Download only shared links at your chosen quality. Select videos first when several are found.</string>
+    <string name="settings_shared_quality">Automatic download quality</string>
+    <string name="settings_shared_highest">Highest quality</string>
+    <string name="settings_shared_lowest">Lowest quality</string>
+    <string name="settings_shared_preferred">Preferred resolution</string>
+    <string name="settings_shared_resolution">Preferred resolution</string>
+    <string name="settings_shared_fallback">If unavailable, use the highest resolution below your preference, or the lowest when all are higher.</string>
 </resources>

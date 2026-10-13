@@ -53,7 +53,7 @@ internal class VideoThumbnailGenerationCoordinator(
 ) {
     private val generationSemaphore = Semaphore(maxConcurrentGenerations)
     private val inFlightLock = Mutex()
-    private val inFlight = mutableMapOf<String, CompletableDeferred<File?>>()
+    private val inFlight = mutableMapOf<String, PendingGeneration>()
 
     suspend fun load(
         videoFile: File,
@@ -71,9 +71,9 @@ internal class VideoThumbnailGenerationCoordinator(
                     .toAbsolutePath()
                     .normalize()
                     .toString()
-            val deferred =
+            val generation =
                 inFlightLock.withLock {
-                    inFlight[pathKey] ?: startGeneration(
+                    inFlight[pathKey]?.also { it.waiters++ } ?: startGeneration(
                         pathKey = pathKey,
                         videoFile = videoFile,
                         existingThumbnail = existingThumbnail,
@@ -81,7 +81,11 @@ internal class VideoThumbnailGenerationCoordinator(
                         generate = generate,
                     )
                 }
-            deferred.await()
+            try {
+                generation.deferred.await()
+            } finally {
+                releaseWaiter(pathKey, generation)
+            }
         }
     }
 
@@ -92,40 +96,66 @@ internal class VideoThumbnailGenerationCoordinator(
         existingThumbnail: (File) -> File?,
         isUnavailable: (File) -> Boolean,
         generate: suspend (File) -> File?,
-    ): CompletableDeferred<File?> {
-        val deferred = CompletableDeferred<File?>()
-        val ownerJob = SupervisorJob()
-        inFlight[pathKey] = deferred
-        CoroutineScope(ownerJob + dispatcher).launch {
+    ): PendingGeneration {
+        val generation = PendingGeneration()
+        inFlight[pathKey] = generation
+        CoroutineScope(generation.ownerJob + dispatcher).launch {
             try {
                 val result =
                     generationSemaphore.withPermit {
+                        inFlightLock.withLock {
+                            if (inFlight[pathKey] !== generation) {
+                                throw CancellationException("Thumbnail request has no waiters")
+                            }
+                            generation.started = true
+                        }
                         existingThumbnail(videoFile)
                             ?: if (isUnavailable(videoFile)) null else generate(videoFile)
                     }
-                removeInFlight(pathKey, deferred)
-                deferred.complete(result)
+                removeInFlight(pathKey, generation)
+                generation.deferred.complete(result)
             } catch (cancellation: CancellationException) {
-                removeInFlight(pathKey, deferred)
-                deferred.cancel(cancellation)
+                removeInFlight(pathKey, generation)
+                generation.deferred.cancel(cancellation)
                 throw cancellation
             } catch (throwable: Throwable) {
-                removeInFlight(pathKey, deferred)
-                deferred.completeExceptionally(throwable)
+                removeInFlight(pathKey, generation)
+                generation.deferred.completeExceptionally(throwable)
             } finally {
-                ownerJob.cancel()
+                generation.ownerJob.cancel()
             }
         }
-        return deferred
+        return generation
+    }
+
+    private suspend fun releaseWaiter(
+        pathKey: String,
+        generation: PendingGeneration,
+    ) = withContext(NonCancellable) {
+        inFlightLock.withLock {
+            generation.waiters--
+            if (generation.waiters == 0 && !generation.started && inFlight[pathKey] === generation) {
+                inFlight.remove(pathKey)
+                generation.ownerJob.cancel()
+                generation.deferred.cancel()
+            }
+        }
     }
 
     private suspend fun removeInFlight(
         pathKey: String,
-        deferred: CompletableDeferred<File?>,
+        generation: PendingGeneration,
     ) = withContext(NonCancellable) {
         inFlightLock.withLock {
-            if (inFlight[pathKey] === deferred) inFlight.remove(pathKey)
+            if (inFlight[pathKey] === generation) inFlight.remove(pathKey)
         }
+    }
+
+    private class PendingGeneration {
+        val deferred = CompletableDeferred<File?>()
+        val ownerJob = SupervisorJob()
+        var waiters = 1
+        var started = false
     }
 }
 

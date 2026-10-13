@@ -1,5 +1,6 @@
 package com.comst19.dambom.core.common.url
 
+import com.comst19.dambom.core.common.net.isHttpUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +23,10 @@ class SharedUrlBus
         }
     }
 
-internal fun extractHttpUrl(text: String): String? = HTTP_URL_REGEX.find(text)?.value?.trimEnd('.', ',', ')', ']', '}')
+fun extractHttpUrl(text: String): String? =
+    HTTP_URL_REGEX
+        .findAll(text)
+        .map { it.value.trimEnd('.', ',', ')', ']', '}') }
+        .firstOrNull(String::isHttpUrl)
 
 private val HTTP_URL_REGEX = Regex("https?://[^\\s<]+", RegexOption.IGNORE_CASE)

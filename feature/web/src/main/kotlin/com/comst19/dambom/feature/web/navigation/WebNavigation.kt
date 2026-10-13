@@ -6,5 +6,5 @@ import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
 import com.comst19.dambom.feature.web.WebRoute
 
 fun EntryProviderScope<NavKey>.webEntries() {
-    entry<WebKey> { key -> WebRoute(key.url) }
+    entry<WebKey> { key -> WebRoute(key.url, sharedLink = key.sharedLink) }
 }

@@ -64,6 +64,13 @@ private class FakeSettingsDataSource : SettingsDataSource {
             )
     }
 
+    override suspend fun setSharedLinkAutoDownload(enabled: Boolean) = Unit
+
+    override suspend fun setSharedLinkQuality(
+        quality: String,
+        resolution: Int,
+    ) = Unit
+
     override suspend fun setWifiOnlyDownloads(enabled: Boolean) {
         settingsState.value = settingsState.value.copy(wifiOnlyDownloads = enabled)
     }

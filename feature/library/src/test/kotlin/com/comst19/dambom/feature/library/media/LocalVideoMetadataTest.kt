@@ -1,5 +1,7 @@
 package com.comst19.dambom.feature.library.media
 
+import android.app.Application
+import android.content.ComponentCallbacks2
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import androidx.compose.material3.Text
@@ -15,6 +17,8 @@ import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertEquals
@@ -33,6 +37,54 @@ import java.io.File
 @Config(sdk = [35])
 class LocalVideoMetadataTest {
     @get:Rule val composeRule = createComposeRule()
+
+    @Test
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @Suppress("DEPRECATION")
+    fun `trim signal prevents a pending load from repopulating the cache`() =
+        runTest {
+            val context = ApplicationProvider.getApplicationContext<Application>()
+            val file = context.filesDir.resolve("pending-hidden-cache.mp4").apply { writeBytes(byteArrayOf(1)) }
+            val key = localVideoCacheKey(file.path)
+            val mutex =
+                LocalVideoMetadataLoader::class.java.getDeclaredField("readMutex").let {
+                    it.isAccessible = true
+                    it.get(LocalVideoMetadataLoader) as Mutex
+                }
+            mutex.lock()
+            val pending = async { LocalVideoMetadataLoader.load(context, key) }
+            try {
+                runCurrent()
+                context.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+            } finally {
+                mutex.unlock()
+            }
+            assertNotSame(pending.await(), LocalVideoMetadataLoader.load(context, key))
+        }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `hidden UI releases cached metadata`() =
+        runTest {
+            val context = ApplicationProvider.getApplicationContext<Application>()
+            val file = context.filesDir.resolve("hidden-cache.mp4").apply { writeBytes(byteArrayOf(1)) }
+            val key = localVideoCacheKey(file.path)
+            val first = LocalVideoMetadataLoader.load(context, key)
+            context.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+            assertNotSame(first, LocalVideoMetadataLoader.load(context, key))
+        }
+
+    @Test
+    @Suppress("DEPRECATION")
+    fun `visible moderate signal preserves cached metadata`() =
+        runTest {
+            val context = ApplicationProvider.getApplicationContext<Application>()
+            val file = context.filesDir.resolve("visible-cache.mp4").apply { writeBytes(byteArrayOf(1)) }
+            val key = localVideoCacheKey(file.path)
+            val first = LocalVideoMetadataLoader.load(context, key)
+            context.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE)
+            assertSame(first, LocalVideoMetadataLoader.load(context, key))
+        }
 
     @Test
     fun `revision observer sees missing file creation replacement and deletion and stops on cancel`() =

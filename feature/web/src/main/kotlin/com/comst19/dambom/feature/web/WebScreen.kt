@@ -29,13 +29,14 @@ import com.comst19.dambom.feature.web.webview.WebNavigationFailure
 @Composable
 internal fun WebRoute(
     initialUrl: String?,
+    sharedLink: Boolean = false,
     viewModel: WebViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val copiedMessage = stringResource(R.string.web_link_copied)
     val actionFailureMessage = stringResource(R.string.web_action_failure)
-    LaunchedEffect(initialUrl) { viewModel.applyInitialUrl(initialUrl) }
+    LaunchedEffect(initialUrl) { viewModel.applyInitialUrl(initialUrl, sharedLink) }
     WebScreen(
         uiState = uiState,
         onBack = viewModel::goBack,

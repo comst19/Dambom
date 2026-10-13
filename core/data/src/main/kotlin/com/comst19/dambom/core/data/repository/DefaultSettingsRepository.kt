@@ -2,6 +2,7 @@ package com.comst19.dambom.core.data.repository
 
 import com.comst19.dambom.core.datastore.SettingsDataSource
 import com.comst19.dambom.core.domain.model.AppSettings
+import com.comst19.dambom.core.domain.model.SharedLinkQuality
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,11 @@ class DefaultSettingsRepository
         override val settings: Flow<AppSettings> =
             dataSource.settings.map { settings ->
                 AppSettings(
+                    sharedLinkAutoDownload = settings.sharedLinkAutoDownload,
+                    sharedLinkQuality =
+                        SharedLinkQuality.entries.find { it.name == settings.sharedLinkQuality }
+                            ?: SharedLinkQuality.HIGHEST,
+                    sharedLinkResolution = settings.sharedLinkResolution.coerceAtLeast(1),
                     themeMode = ThemeMode.entries.find { it.name == settings.themeMode } ?: ThemeMode.SYSTEM,
                     clipboardPromptShown = settings.clipboardPromptShown,
                     clipboardSuggestionEnabled = settings.clipboardSuggestionEnabled,
@@ -31,6 +37,13 @@ class DefaultSettingsRepository
             promptShown: Boolean,
             enabled: Boolean,
         ) = dataSource.setClipboardSuggestion(promptShown, enabled)
+
+        override suspend fun setSharedLinkAutoDownload(enabled: Boolean) = dataSource.setSharedLinkAutoDownload(enabled)
+
+        override suspend fun setSharedLinkQuality(
+            quality: SharedLinkQuality,
+            resolution: Int,
+        ) = dataSource.setSharedLinkQuality(quality.name, resolution.coerceAtLeast(1))
 
         override suspend fun setWifiOnlyDownloads(enabled: Boolean) = dataSource.setWifiOnlyDownloads(enabled)
 

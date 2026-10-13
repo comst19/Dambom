@@ -1,6 +1,9 @@
 package com.comst19.dambom.core.domain.model
 
 data class AppSettings(
+    val sharedLinkAutoDownload: Boolean = false,
+    val sharedLinkQuality: SharedLinkQuality = SharedLinkQuality.HIGHEST,
+    val sharedLinkResolution: Int = 1080,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val clipboardPromptShown: Boolean = false,
     val clipboardSuggestionEnabled: Boolean = false,
@@ -13,4 +16,10 @@ enum class ThemeMode {
     SYSTEM,
     LIGHT,
     DARK,
+}
+
+enum class SharedLinkQuality {
+    HIGHEST,
+    LOWEST,
+    PREFERRED_RESOLUTION,
 }

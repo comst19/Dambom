@@ -2,25 +2,40 @@ package com.comst19.dambom.feature.library.component
 
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.changedToUp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
+import com.comst19.dambom.feature.library.player.PlayerInteractionState
 
+@Composable
+@Suppress("CyclomaticComplexMethod", "ComplexCondition", "LongMethod")
 internal fun Modifier.fullscreenPlayerGestures(
     toggleControlsLabel: String,
     onToggleControls: () -> Unit,
     onContentModeChanged: (FullscreenContentMode) -> Unit,
-): Modifier =
-    semantics {
+    interaction: PlayerInteractionState? = null,
+): Modifier {
+    val currentOnToggleControls by rememberUpdatedState(onToggleControls)
+    val currentOnContentModeChanged by rememberUpdatedState(onContentModeChanged)
+    return onSizeChanged { size ->
+        interaction?.updateViewport(size.width.toFloat(), size.height.toFloat())
+    }.semantics {
         onClick(label = toggleControlsLabel) {
-            onToggleControls()
+            if (interaction?.locked != true) currentOnToggleControls()
             true
         }
-    }.pointerInput(onToggleControls, onContentModeChanged) {
+    }.pointerInput(interaction, interaction?.locked) {
+        if (interaction?.locked == true) return@pointerInput
         awaitEachGesture {
             val firstDown = awaitFirstDown(requireUnconsumed = false)
             val initialPositions = mutableMapOf<PointerId, androidx.compose.ui.geometry.Offset>()
@@ -43,7 +58,18 @@ internal fun Modifier.fullscreenPlayerGestures(
                     val initialPosition = initialPositions.getOrPut(change.id) { change.position }
                     if ((change.position - initialPosition).getDistance() > viewConfiguration.touchSlop) movedBeyondTouchSlop = true
                 }
-                if (pressedPointers.size >= 2 && contentModeChange == null) {
+                if (interaction != null && !interaction.locked && !event.changes.any { it.isConsumed } &&
+                    (pressedPointers.size >= 2 || interaction.scale > 1f) && movedBeyondTouchSlop
+                ) {
+                    interaction.transform(
+                        event.calculateZoom(),
+                        event.calculatePan(),
+                        size.width.toFloat(),
+                        size.height.toFloat(),
+                    )
+                    event.changes.forEach { it.consume() }
+                }
+                if (interaction == null && pressedPointers.size >= 2 && contentModeChange == null) {
                     val distance = (pressedPointers[0].position - pressedPointers[1].position).getDistance()
                     val startDistance = initialDistance ?: distance.also { initialDistance = it }
                     contentModeChange =
@@ -57,13 +83,18 @@ internal fun Modifier.fullscreenPlayerGestures(
             } while (event.changes.any { it.pressed })
 
             when {
-                contentModeChange != null -> onContentModeChanged(contentModeChange)
+                contentModeChange != null -> {
+                    currentOnContentModeChanged(contentModeChange)
+                }
 
                 !hadMultiplePointers && !movedBeyondTouchSlop && !consumed && released &&
-                    durationMillis < viewConfiguration.longPressTimeoutMillis -> onToggleControls()
+                    durationMillis < viewConfiguration.longPressTimeoutMillis && interaction?.locked != true -> {
+                    currentOnToggleControls()
+                }
             }
         }
     }
+}
 
 internal enum class FullscreenContentMode(
     val contentScale: ContentScale,

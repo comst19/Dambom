@@ -6,10 +6,12 @@ import com.comst19.dambom.core.data.repository.ConnectivityNetworkMonitor
 import com.comst19.dambom.core.data.repository.DefaultDownloadRepository
 import com.comst19.dambom.core.data.repository.DefaultMediaDetectionRepository
 import com.comst19.dambom.core.data.repository.DefaultSettingsRepository
+import com.comst19.dambom.core.data.repository.DefaultVideoTagRepository
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.domain.repository.NetworkMonitor
 import com.comst19.dambom.core.domain.repository.SettingsRepository
+import com.comst19.dambom.core.domain.repository.VideoTagRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -19,6 +21,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+    @Binds
+    @Singleton
+    abstract fun bindVideoTagRepository(implementation: DefaultVideoTagRepository): VideoTagRepository
+
     @Binds
     @Singleton
     abstract fun bindDownloadRepository(implementation: DefaultDownloadRepository): DownloadRepository

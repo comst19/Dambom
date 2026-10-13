@@ -72,7 +72,15 @@ class DambomDatabaseMigrationTest {
                 )
                 close()
             }
-            helper.runMigrationsAndValidate(name, 4, true, DambomDatabase.MIGRATION_2_3, DambomDatabase.MIGRATION_3_4).close()
+            helper
+                .runMigrationsAndValidate(
+                    name,
+                    5,
+                    true,
+                    DambomDatabase.MIGRATION_2_3,
+                    DambomDatabase.MIGRATION_3_4,
+                    DambomDatabase.MIGRATION_4_5,
+                ).close()
             val first = Room.databaseBuilder(context, DambomDatabase::class.java, name).build()
             try {
                 val dao = first.downloadTaskDao()

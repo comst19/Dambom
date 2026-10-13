@@ -13,6 +13,7 @@ import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionSnapshots
+import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
@@ -27,6 +28,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -37,6 +39,7 @@ internal class DetectionViewModel
     @Inject
     constructor(
         private val repository: MediaDetectionRepository,
+        private val settingsRepository: SettingsRepository,
         private val downloadRepository: DownloadRepository,
         private val navigation: NavigationDispatcher,
         private val appEventBus: AppEventBus,
@@ -47,29 +50,32 @@ internal class DetectionViewModel
         private var loadedUrl: String? = null
         private var detectionJob: Job? = null
         private var requestGeneration = 0L
+        private var loadedSharedLink = false
 
         fun detect(
             url: String,
             snapshotId: String? = null,
+            sharedLink: Boolean = false,
         ) {
-            if (loadedUrl == url &&
-                (mutableUiState.value is DetectionUiState.Loading || mutableUiState.value is DetectionUiState.Content)
-            ) {
+            val hasActiveResult =
+                mutableUiState.value is DetectionUiState.Loading || mutableUiState.value is DetectionUiState.Content
+            if (loadedUrl == url && loadedSharedLink == sharedLink && hasActiveResult) {
                 return
             }
             val generation = ++requestGeneration
             detectionJob?.cancel()
             loadedUrl = url
+            loadedSharedLink = sharedLink
             mutableUiState.value = DetectionUiState.Loading
             detectionJob =
                 viewModelScope.launch {
                     suspendRunCatching { snapshotId?.let { snapshots.get(it, url) } ?: repository.detect(url) }
                         .onSuccess { result ->
-                            if (generation == requestGeneration) applyDetectionResult(url, result)
+                            if (generation == requestGeneration) applyDetectionResult(url, result, generation)
                         }.onFailure {
                             if (generation == requestGeneration) {
                                 appEventBus.send(AppEvent.ShowSnackbar(UiText.Resource(R.string.detection_failed)))
-                                navigation.dispatch(NavigationEvent.Replace(WebKey(url)))
+                                navigation.dispatch(NavigationEvent.Replace(WebKey(url, sharedLink = loadedSharedLink)))
                             }
                         }
                 }
@@ -78,13 +84,13 @@ internal class DetectionViewModel
         fun retry() {
             val url = loadedUrl ?: return
             loadedUrl = null
-            detect(url)
+            detect(url, sharedLink = loadedSharedLink)
         }
 
         fun openInWeb() {
             val url = loadedUrl ?: return
             viewModelScope.launch {
-                navigation.dispatch(NavigationEvent.Replace(WebKey(url)))
+                navigation.dispatch(NavigationEvent.Replace(WebKey(url, sharedLink = loadedSharedLink)))
             }
         }
 
@@ -99,12 +105,18 @@ internal class DetectionViewModel
         private suspend fun applyDetectionResult(
             url: String,
             result: MediaDetectionResult,
+            generation: Long,
         ) {
             when (result) {
                 is MediaDetectionResult.Success -> {
+                    val settings = settingsRepository.settings.first()
+                    if (generation != requestGeneration) return
+                    val autoDownload = loadedSharedLink && settings.sharedLinkAutoDownload
                     mutableUiState.value =
                         DetectionUiState.Content(
                             pageTitle = result.pageTitle,
+                            automaticQuality = autoDownload,
+                            automaticDownloadPending = autoDownload && result.candidates.size == 1,
                             candidates = result.candidates.toPersistentList(),
                             selectedIds =
                                 result.candidates
@@ -114,8 +126,14 @@ internal class DetectionViewModel
                                     .toPersistentSet(),
                             selectedVariantUrls =
                                 result.candidates
-                                    .associate { candidate -> candidate.id to candidate.url }
-                                    .toPersistentMap(),
+                                    .associate { candidate ->
+                                        candidate.id to
+                                            if (autoDownload) {
+                                                candidate.preferredSharedVariant(settings).url
+                                            } else {
+                                                candidate.url
+                                            }
+                                    }.toPersistentMap(),
                         )
                 }
 
@@ -124,7 +142,7 @@ internal class DetectionViewModel
                         mutableUiState.value = DetectionUiState.Unsupported(result.reason)
                     } else {
                         appEventBus.send(AppEvent.ShowSnackbar(UiText.Resource(result.reason.messageRes())))
-                        navigation.dispatch(NavigationEvent.Replace(WebKey(url)))
+                        navigation.dispatch(NavigationEvent.Replace(WebKey(url, sharedLink = loadedSharedLink)))
                     }
                 }
             }
@@ -150,6 +168,12 @@ internal class DetectionViewModel
                 val candidate = state.candidates.firstOrNull { it.id == candidateId } ?: return@update state
                 if (candidate.downloadVariants.none { it.url == url }) return@update state
                 state.copy(selectedVariantUrls = state.selectedVariantUrls.putting(candidateId, url))
+            }
+        }
+
+        fun consumeAutomaticDownload() {
+            mutableUiState.update { state ->
+                if (state is DetectionUiState.Content) state.copy(automaticDownloadPending = false) else state
             }
         }
 

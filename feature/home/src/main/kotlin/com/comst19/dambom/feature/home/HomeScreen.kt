@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +46,14 @@ internal fun HomeRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(uiState.sharedUrl, uiState.sharedLinkAutoDownload, networkAccess.canUseInternet) {
+        if (uiState.shouldAutomaticallyAnalyzeSharedUrl(networkAccess.canUseInternet)) {
+            focusManager.clearFocus()
+            onResultPaneVisibilityChange(true)
+            viewModel.analyzeSharedUrl()
+        }
+    }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         if (uiState.clipboardSuggestionEnabled) {
@@ -140,7 +149,7 @@ internal fun HomeScreen(
     if (uiState.showClipboardConsent) {
         ClipboardConsentDialog(onClipboardConsent)
     }
-    uiState.sharedUrl?.let {
+    uiState.sharedUrl?.takeUnless { uiState.sharedLinkAutoDownload }?.let {
         SharedUrlDialog(
             url = it,
             onAnalyze = onAnalyzeSharedUrl,

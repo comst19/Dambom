@@ -5,6 +5,7 @@ import android.os.SystemClock
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.comst19.dambom.core.common.net.hasVideoFileExtension
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.database.download.DownloadTaskDao
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
@@ -157,7 +158,7 @@ internal class DownloadQueueWorker
         ): Unit =
             coroutineScope {
                 val recoveredFile = fileStore.completedFile(task.id, task.url, task.mimeType)
-                if (recoveredFile.isFile) {
+                if (recoveredFile.isFile && recoveredFile.length() > 0L) {
                     complete(task, recoveredFile, recoveredFile.length())
                     return@coroutineScope
                 }
@@ -251,6 +252,10 @@ internal class DownloadQueueWorker
                 storageOperation { output.fd.sync() }
                 checkpoint(task, downloadedBytes, totalBytes)
                 if (totalBytes != null && downloadedBytes < totalBytes) throw IOException("Download ended early")
+                if (downloadedBytes == 0L) {
+                    requireActiveTask(task.id)
+                    throw DownloadFailureException(DownloadFailureReason.SERVER)
+                }
                 complete(task, partialFile, downloadedBytes)
             }
         }
@@ -274,7 +279,7 @@ internal class DownloadQueueWorker
             if (contentType?.startsWith("text/") == true || contentType?.contains("json") == true) {
                 throw DownloadFailureException(DownloadFailureReason.UNSUPPORTED_FORMAT)
             }
-            if (contentType?.startsWith("video/") != true && !task.url.hasVideoExtension()) {
+            if (contentType?.startsWith("video/") != true && !task.url.hasVideoFileExtension()) {
                 throw DownloadFailureException(DownloadFailureReason.UNSUPPORTED_FORMAT)
             }
             if (response.code != HTTP_PARTIAL_CONTENT) {
@@ -478,10 +483,6 @@ internal fun shouldCheckpoint(
     bytesSinceLastCheckpoint > 0L &&
         millisSinceLastCheckpoint >= CHECKPOINT_INTERVAL_MILLIS
 
-private fun String.hasVideoExtension(): Boolean =
-    VIDEO_EXTENSIONS.any { extension -> substringBefore('?').endsWith(extension, ignoreCase = true) }
-
-private val VIDEO_EXTENSIONS = setOf(".mp4", ".webm", ".mov", ".m4v")
 private const val MAX_CONCURRENT_DOWNLOADS = 3
 private const val MAX_CONCURRENT_PER_HOST = 2
 private const val MAX_NETWORK_RETRIES = 2

@@ -6,6 +6,10 @@ import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -20,6 +24,100 @@ import java.io.IOException
 @Config(sdk = [35])
 class LibraryFileManagerTest {
     @Test
+    fun `successful copy preserves bytes across buffer boundaries`() =
+        runBlocking {
+            val data = ByteArray(32_769) { it.toByte() }
+            val output = ByteArrayOutputStream()
+            copyStreams({ ByteArrayInputStream(data) }, { output })
+            org.junit.Assert.assertArrayEquals(data, output.toByteArray())
+        }
+
+    @Test
+    fun `cancelled copy stops reading and closes both streams`() =
+        runBlocking {
+            var reads = 0
+            var inputClosed = false
+            var outputClosed = false
+            val copy =
+                launch {
+                    val owner = checkNotNull(currentCoroutineContext()[Job])
+                    copyStreams(
+                        openInput = {
+                            object : ByteArrayInputStream(ByteArray(32_768)) {
+                                override fun read(
+                                    bytes: ByteArray,
+                                    offset: Int,
+                                    length: Int,
+                                ): Int {
+                                    reads++
+                                    return super.read(bytes, offset, length)
+                                }
+
+                                override fun close() {
+                                    inputClosed = true
+                                }
+                            }
+                        },
+                        openOutput = {
+                            object : ByteArrayOutputStream() {
+                                override fun write(
+                                    bytes: ByteArray,
+                                    offset: Int,
+                                    length: Int,
+                                ) {
+                                    super.write(bytes, offset, length)
+                                    owner.cancel()
+                                }
+
+                                override fun close() {
+                                    outputClosed = true
+                                }
+                            }
+                        },
+                    )
+                }
+            copy.join()
+            assertEquals(1, reads)
+            assertEquals(true, inputClosed)
+            assertEquals(true, outputClosed)
+        }
+
+    @Test
+    fun `cancelled file copy removes partial destination and keeps source`() =
+        runBlocking {
+            val directory =
+                java.nio.file.Files
+                    .createTempDirectory("cancelled-export")
+                    .toFile()
+            val source = directory.resolve("source.mp4").apply { writeBytes(ByteArray(32_768) { 7 }) }
+            val destination = directory.resolve("new.mp4")
+            try {
+                val copy =
+                    launch {
+                        val owner = checkNotNull(currentCoroutineContext()[Job])
+                        copyToNewFile(destination) {
+                            object : ByteArrayInputStream(source.readBytes()) {
+                                override fun read(
+                                    bytes: ByteArray,
+                                    offset: Int,
+                                    length: Int,
+                                ): Int {
+                                    val count = super.read(bytes, offset, length)
+                                    owner.cancel()
+                                    return count
+                                }
+                            }
+                        }
+                    }
+                copy.join()
+                assertEquals(false, destination.exists())
+                assertEquals(32_768L, source.length())
+            } finally {
+                directory.deleteRecursively()
+            }
+        }
+
+    @Test
     fun `partial copy failure removes only the new destination and preserves original error`() {
         val directory =
             java.nio.file.Files
@@ -33,19 +131,21 @@ class LibraryFileManagerTest {
         try {
             val thrown =
                 org.junit.Assert.assertThrows(IOException::class.java) {
-                    copyToNewFile(destination) {
-                        object : java.io.InputStream() {
-                            override fun read(): Int = throw failure
+                    runBlocking {
+                        copyToNewFile(destination) {
+                            object : java.io.InputStream() {
+                                override fun read(): Int = throw failure
 
-                            override fun read(
-                                bytes: ByteArray,
-                                offset: Int,
-                                length: Int,
-                            ): Int {
-                                if (read) throw failure
-                                read = true
-                                bytes[offset] = 1
-                                return 1
+                                override fun read(
+                                    bytes: ByteArray,
+                                    offset: Int,
+                                    length: Int,
+                                ): Int {
+                                    if (read) throw failure
+                                    read = true
+                                    bytes[offset] = 1
+                                    return 1
+                                }
                             }
                         }
                     }
@@ -55,7 +155,7 @@ class LibraryFileManagerTest {
             org.junit.Assert.assertArrayEquals(byteArrayOf(1, 2, 3), source.readBytes())
             assertEquals("existing", existing.readText())
             org.junit.Assert.assertThrows(IllegalStateException::class.java) {
-                copyToNewFile(existing, source::inputStream)
+                runBlocking { copyToNewFile(existing, source::inputStream) }
             }
             assertEquals("existing", existing.readText())
         } finally {
@@ -110,54 +210,57 @@ class LibraryFileManagerTest {
     }
 
     @Test
-    fun `input open failure does not open the output stream`() {
-        var outputOpenCount = 0
+    fun `input open failure does not open the output stream`() =
+        runBlocking {
+            var outputOpenCount = 0
 
-        try {
-            copyStreams(
-                openInput = { throw IOException("source disappeared") },
-                openOutput = {
-                    outputOpenCount++
-                    ByteArrayOutputStream()
-                },
-            )
-        } catch (_: IOException) {
+            try {
+                copyStreams(
+                    openInput = { throw IOException("source disappeared") },
+                    openOutput = {
+                        outputOpenCount++
+                        ByteArrayOutputStream()
+                    },
+                )
+            } catch (_: IOException) {
+            }
+
+            assertEquals(0, outputOpenCount)
         }
-
-        assertEquals(0, outputOpenCount)
-    }
 
     @Test
-    fun `output open failure closes the input stream`() {
-        val input = CloseTrackingInputStream()
+    fun `output open failure closes the input stream`() =
+        runBlocking {
+            val input = CloseTrackingInputStream()
 
-        try {
-            copyStreams(
-                openInput = { input },
-                openOutput = { throw IOException("destination unavailable") },
-            )
-        } catch (_: IOException) {
+            try {
+                copyStreams(
+                    openInput = { input },
+                    openOutput = { throw IOException("destination unavailable") },
+                )
+            } catch (_: IOException) {
+            }
+
+            assertEquals(1, input.closeCount)
         }
-
-        assertEquals(1, input.closeCount)
-    }
 
     @Test
-    fun `copy failure closes both streams`() {
-        val input = CloseTrackingInputStream()
-        val output = FailingOutputStream()
+    fun `copy failure closes both streams`() =
+        runBlocking {
+            val input = CloseTrackingInputStream()
+            val output = FailingOutputStream()
 
-        try {
-            copyStreams(
-                openInput = { input },
-                openOutput = { output },
-            )
-        } catch (_: IOException) {
+            try {
+                copyStreams(
+                    openInput = { input },
+                    openOutput = { output },
+                )
+            } catch (_: IOException) {
+            }
+
+            assertEquals(1, input.closeCount)
+            assertEquals(1, output.closeCount)
         }
-
-        assertEquals(1, input.closeCount)
-        assertEquals(1, output.closeCount)
-    }
 }
 
 private class CloseTrackingInputStream : ByteArrayInputStream(byteArrayOf(1)) {

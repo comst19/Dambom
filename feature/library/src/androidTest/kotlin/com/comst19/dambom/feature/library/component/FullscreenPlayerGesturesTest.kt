@@ -20,7 +20,9 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.pinch
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.up
+import com.comst19.dambom.feature.library.player.PlayerInteractionState
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -100,7 +102,46 @@ class FullscreenPlayerGesturesTest {
         assertEquals(0, toggleCount)
     }
 
-    private fun setGestureLayer() {
+    @Test
+    fun continuous_pinch_and_zoomed_pan_update_transform_without_toggling_controls() {
+        val interaction = PlayerInteractionState()
+        setGestureLayer(interaction)
+        composeRule.onNodeWithTag(GESTURE_LAYER_TAG).performTouchInput {
+            pinch(Offset(170f, 200f), Offset(80f, 200f), Offset(230f, 200f), Offset(320f, 200f))
+        }
+        composeRule.runOnIdle { assertTrue(interaction.scale > 1f) }
+        composeRule.onNodeWithTag(GESTURE_LAYER_TAG).performTouchInput {
+            swipe(Offset(150f, 200f), Offset(250f, 240f))
+        }
+        composeRule.runOnIdle {
+            assertTrue(interaction.panX > 0f)
+            assertEquals(0, toggleCount)
+            assertEquals(null, contentMode)
+        }
+    }
+
+    @Test
+    fun restored_lock_blocks_input_and_explicit_unlock_restores_gestures() {
+        val interaction = PlayerInteractionState(locked = true)
+        setGestureLayer(interaction)
+        composeRule.onNodeWithTag(GESTURE_LAYER_TAG).performTouchInput { click(center) }
+        composeRule.onNodeWithTag(GESTURE_LAYER_TAG).performTouchInput {
+            pinch(Offset(170f, 200f), Offset(80f, 200f), Offset(230f, 200f), Offset(320f, 200f))
+        }
+        composeRule.runOnIdle {
+            assertEquals(1f, interaction.scale)
+            assertEquals(0, toggleCount)
+            interaction.locked = false
+        }
+        composeRule.onNodeWithTag(GESTURE_LAYER_TAG).performTouchInput { click(center) }
+        composeRule.runOnIdle { assertEquals(1, toggleCount) }
+        composeRule.onNodeWithTag(GESTURE_LAYER_TAG).performTouchInput {
+            pinch(Offset(170f, 200f), Offset(80f, 200f), Offset(230f, 200f), Offset(320f, 200f))
+        }
+        composeRule.runOnIdle { assertTrue(interaction.scale > 1f) }
+    }
+
+    private fun setGestureLayer(interaction: PlayerInteractionState? = null) {
         toggleCount = 0
         contentMode = null
         composeRule.setContent {
@@ -111,6 +152,7 @@ class FullscreenPlayerGesturesTest {
                         .background(Color.Black)
                         .testTag(GESTURE_LAYER_TAG)
                         .fullscreenPlayerGestures(
+                            interaction = interaction,
                             toggleControlsLabel = "Toggle playback controls",
                             onToggleControls = { toggleCount++ },
                             onContentModeChanged = { contentMode = it },

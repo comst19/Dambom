@@ -149,9 +149,9 @@ internal class LibraryViewModel
             selection.update { it.toggle(id) }
         }
 
-        fun selectAllVisible() {
+        fun selectAllVisible(ids: List<String> = uiState.value.videos.map(DownloadTask::id)) {
             if (deletingSelection) return
-            selection.update { it.selectAll(uiState.value.videos.map(DownloadTask::id)) }
+            selection.update { it.selectAll(ids) }
         }
 
         fun clearSelection() {

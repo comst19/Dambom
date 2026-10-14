@@ -24,8 +24,10 @@ import com.comst19.dambom.feature.downloads.R
 internal fun DownloadTask.thumbnailSource(): String? = localFilePath
 
 @Composable
+@Suppress("LongParameterList")
 internal fun DownloadActions(
-    task: DownloadTask,
+    status: DownloadStatus,
+    deletePending: Boolean,
     canDownload: Boolean,
     onPause: () -> Unit,
     onResume: () -> Unit,
@@ -39,21 +41,21 @@ internal fun DownloadActions(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         when {
-            task.deletePending -> {
+            deletePending -> {
                 DownloadActionButton(R.string.downloads_delete_retry, onCancel)
             }
 
-            task.status == DownloadStatus.DOWNLOADING || task.status == DownloadStatus.QUEUED -> {
+            status == DownloadStatus.DOWNLOADING || status == DownloadStatus.QUEUED -> {
                 DownloadActionButton(R.string.downloads_cancel, onCancel, secondary = true)
                 DownloadActionButton(R.string.downloads_pause, onPause)
             }
 
-            task.status == DownloadStatus.PAUSED -> {
+            status == DownloadStatus.PAUSED -> {
                 DownloadActionButton(R.string.downloads_cancel, onCancel, secondary = true)
                 DownloadActionButton(R.string.downloads_resume, onResume, enabled = canDownload)
             }
 
-            task.status == DownloadStatus.FAILED -> {
+            status == DownloadStatus.FAILED -> {
                 DownloadActionButton(R.string.downloads_remove, onCancel, secondary = true)
                 DownloadActionButton(R.string.downloads_retry, onRetry, enabled = canDownload)
             }

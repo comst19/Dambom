@@ -35,6 +35,8 @@ import com.comst19.dambom.feature.library.tag.LibraryTagViewModel
 import com.comst19.dambom.feature.library.tag.component.LibraryTagControls
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 @Composable
 internal fun LibraryRoute(
@@ -169,9 +171,11 @@ internal fun LibraryScreen(
 @Composable
 internal fun LibraryDetailPlaceholderRoute() {
     val viewModel: LibraryViewModel = hiltViewModel()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val hasVideosFlow = remember(viewModel) { viewModel.uiState.map { it.hasVideos }.distinctUntilChanged() }
+    val initialHasVideos = remember(viewModel) { viewModel.uiState.value.hasVideos }
+    val hasVideos by hasVideosFlow.collectAsStateWithLifecycle(initialValue = initialHasVideos)
 
-    if (uiState.hasVideos) {
+    if (hasVideos) {
         EmptyLibraryDetail()
     } else {
         EmptyLibrary(Modifier.fillMaxSize())

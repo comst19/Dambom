@@ -20,10 +20,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -49,7 +47,7 @@ internal fun VideoTrimScreen(
     onCancel: () -> Unit,
     onShare: () -> Unit,
 ) {
-    var positionMillis by remember(state.task?.id) { mutableLongStateOf(state.selection.startMillis) }
+    val positionMillis = remember(state.task?.id) { mutableLongStateOf(state.selection.startMillis) }
     AppScreen(
         maxWidth = 720.dp,
         topBar = {
@@ -89,9 +87,9 @@ internal fun VideoTrimScreen(
                     ) {
                         Text(state.task?.title.orEmpty(), style = MaterialTheme.typography.titleLarge)
                         TrimPreview(checkNotNull(state.task?.localFilePath), state.selection, !state.exporting) {
-                            positionMillis = it
+                            positionMillis.longValue = it
                         }
-                        TrimRange(state, onSelect, positionMillis)
+                        TrimRange(state, onSelect) { positionMillis.longValue }
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         when {

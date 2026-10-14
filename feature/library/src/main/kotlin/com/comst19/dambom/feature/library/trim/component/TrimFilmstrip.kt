@@ -38,7 +38,7 @@ internal fun TrimFilmstrip(
     path: String,
     durationMillis: Long,
     range: ClosedFloatingPointRange<Float>,
-    positionMillis: Long,
+    positionMillis: () -> Long,
 ) {
     val frames by produceState<List<ImageBitmap?>>(emptyList(), path, durationMillis) {
         value = loadTrimFrames(path, durationMillis)
@@ -73,7 +73,7 @@ internal fun TrimFilmstrip(
             )
         }
         Canvas(Modifier.fillMaxSize()) {
-            val current = positionMillis.toFloat().coerceIn(range.start, range.endInclusive)
+            val current = positionMillis().toFloat().coerceIn(range.start, range.endInclusive)
             val playhead = size.width * current / durationMillis
             drawLine(
                 Color.Black.copy(alpha = 0.3f),

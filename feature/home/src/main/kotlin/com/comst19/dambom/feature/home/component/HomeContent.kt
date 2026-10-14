@@ -39,11 +39,13 @@ import com.comst19.dambom.core.designsystem.DambomLinearProgressIndicator
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.feature.home.R
 import com.comst19.dambom.feature.home.contract.HomeDownloadSummary
-import com.comst19.dambom.feature.home.contract.HomeUiState
 
 @Composable
+@Suppress("LongParameterList")
 internal fun HomePrimarySection(
-    uiState: HomeUiState,
+    url: String,
+    isUrlValid: Boolean,
+    clipboardUrl: String?,
     canUseInternet: Boolean,
     onUrlChange: (String) -> Unit,
     onPaste: () -> Unit,
@@ -54,7 +56,7 @@ internal fun HomePrimarySection(
     modifier: Modifier = Modifier,
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
-    val canAnalyze = uiState.isUrlValid && canUseInternet
+    val canAnalyze = isUrlValid && canUseInternet
     val descriptionSpacing = if (compactHeight) 4.dp else 8.dp
     val inputSpacing = if (compactHeight) 12.dp else 24.dp
     val actionSpacing = if (compactHeight) 8.dp else 12.dp
@@ -73,7 +75,8 @@ internal fun HomePrimarySection(
         )
         Spacer(Modifier.height(inputSpacing))
         HomeUrlField(
-            uiState = uiState,
+            url = url,
+            isUrlValid = isUrlValid,
             onUrlChange = onUrlChange,
             onPaste = onPaste,
             onSubmit = {
@@ -96,7 +99,7 @@ internal fun HomePrimarySection(
         ) {
             Text(stringResource(R.string.home_analyze), style = MaterialTheme.typography.labelLarge)
         }
-        uiState.clipboardUrl?.let {
+        clipboardUrl?.let {
             Spacer(Modifier.height(20.dp))
             ClipboardSuggestion(
                 url = it,
@@ -109,21 +112,22 @@ internal fun HomePrimarySection(
 
 @Composable
 private fun HomeUrlField(
-    uiState: HomeUiState,
+    url: String,
+    isUrlValid: Boolean,
     onUrlChange: (String) -> Unit,
     onPaste: () -> Unit,
     onSubmit: () -> Unit,
 ) {
     TextField(
-        value = uiState.url,
+        value = url,
         onValueChange = onUrlChange,
         modifier = Modifier.fillMaxWidth(),
         label = { Text(stringResource(R.string.home_url_label)) },
         placeholder = { Text(stringResource(R.string.home_url_placeholder)) },
         singleLine = true,
-        isError = uiState.url.isNotBlank() && !uiState.isUrlValid,
+        isError = url.isNotBlank() && !isUrlValid,
         supportingText =
-            if (uiState.url.isNotBlank() && !uiState.isUrlValid) {
+            if (url.isNotBlank() && !isUrlValid) {
                 { Text(stringResource(R.string.home_invalid_url)) }
             } else {
                 null

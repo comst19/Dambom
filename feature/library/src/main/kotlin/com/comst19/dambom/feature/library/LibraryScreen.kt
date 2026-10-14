@@ -172,7 +172,8 @@ internal fun LibraryScreen(
 internal fun LibraryDetailPlaceholderRoute() {
     val viewModel: LibraryViewModel = hiltViewModel()
     val hasVideosFlow = remember(viewModel) { viewModel.uiState.map { it.hasVideos }.distinctUntilChanged() }
-    val hasVideos by hasVideosFlow.collectAsStateWithLifecycle(initialValue = viewModel.uiState.value.hasVideos)
+    val initialHasVideos = remember(viewModel) { viewModel.uiState.value.hasVideos }
+    val hasVideos by hasVideosFlow.collectAsStateWithLifecycle(initialValue = initialHasVideos)
 
     if (hasVideos) {
         EmptyLibraryDetail()

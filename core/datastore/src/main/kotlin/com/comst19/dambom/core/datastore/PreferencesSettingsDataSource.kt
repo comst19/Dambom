@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.delay
@@ -44,8 +45,13 @@ class PreferencesSettingsDataSource
                     wifiOnlyDownloads = values[WIFI_ONLY_DOWNLOADS] ?: false,
                     useConfiguredDownloadLocation = values[USE_CONFIGURED_DOWNLOAD_LOCATION] ?: true,
                     downloadTreeUri = values[DOWNLOAD_TREE_URI],
+                    playbackSpeed = values[PLAYBACK_SPEED] ?: 1f,
                 )
             }
+
+        override suspend fun setPlaybackSpeed(speed: Float) {
+            dataStore.edit { it[PLAYBACK_SPEED] = speed }
+        }
 
         override suspend fun setThemeMode(value: String) {
             dataStore.edit { preferences -> preferences[THEME_MODE] = value }
@@ -97,6 +103,7 @@ class PreferencesSettingsDataSource
             val SHARED_AUTO_DOWNLOAD = booleanPreferencesKey("shared_link_auto_download")
             val SHARED_QUALITY = stringPreferencesKey("shared_link_quality")
             val SHARED_RESOLUTION = intPreferencesKey("shared_link_resolution")
+            val PLAYBACK_SPEED = floatPreferencesKey("playback_speed")
             val THEME_MODE = stringPreferencesKey("theme_mode")
             val CLIPBOARD_PROMPT_SHOWN = booleanPreferencesKey("clipboard_prompt_shown")
             val CLIPBOARD_SUGGESTION_ENABLED = booleanPreferencesKey("clipboard_suggestion_enabled")

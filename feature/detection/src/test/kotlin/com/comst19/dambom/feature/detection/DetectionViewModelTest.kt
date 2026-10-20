@@ -477,6 +477,8 @@ private class DetectionSettingsRepository(
 ) : SettingsRepository {
     override val settings = flowOf(value)
 
+    override suspend fun setPlaybackSpeed(speed: Float) = Unit
+
     override suspend fun setThemeMode(mode: ThemeMode) = Unit
 
     override suspend fun setClipboardSuggestion(

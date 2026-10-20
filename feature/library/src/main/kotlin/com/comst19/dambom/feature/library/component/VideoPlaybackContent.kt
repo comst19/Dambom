@@ -47,6 +47,7 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.media.rememberLocalVideoMetadata
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
+import com.comst19.dambom.feature.library.player.component.PlaybackOptionsButton
 import kotlinx.coroutines.delay
 
 @Composable
@@ -71,6 +72,7 @@ internal fun VideoPlayerPanel(
     onCopyLink: () -> Unit,
     onShareLink: () -> Unit,
     modifier: Modifier = Modifier,
+    onPlayPauseRequest: (() -> Unit)? = null,
 ) {
     val playPauseState = rememberPlayPauseButtonState(player)
     val metadata by rememberLocalVideoMetadata(task.localFilePath)
@@ -114,7 +116,7 @@ internal fun VideoPlayerPanel(
             controlsVisible = controlsVisible,
             showPlay = playPauseState.showPlay,
             playEnabled = playPauseState.isEnabled,
-            onPlayPause = playPauseState::onClick,
+            onPlayPause = onPlayPauseRequest ?: playPauseState::onClick,
             onToggleControls = { controlsVisible = !controlsVisible },
             onControlsInteraction = {
                 controlsVisible = true
@@ -122,6 +124,7 @@ internal fun VideoPlayerPanel(
             },
             onControlsInteractionChanged = { controlsInteracting = it },
         )
+        PlaybackOptionsButton(player)
         Text(
             text = task.title,
             style = MaterialTheme.typography.headlineSmall,

@@ -10,6 +10,7 @@ data class AppSettings(
     val wifiOnlyDownloads: Boolean = false,
     val useConfiguredDownloadLocation: Boolean = true,
     val downloadTreeUri: String? = null,
+    val playbackSpeed: Float = 1f,
 )
 
 enum class ThemeMode {

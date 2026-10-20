@@ -5,17 +5,14 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
-import android.os.FileObserver
 import android.util.LruCache
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.LocalContext
 import com.comst19.dambom.core.common.ui.loadOrCreateVideoThumbnailFile
+import com.comst19.dambom.feature.library.file.observeLocalVideoChanges
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -60,27 +57,7 @@ internal fun rememberLocalVideoMetadata(path: String?): State<LocalVideoMetadata
     }
 
 internal fun observeLocalVideoCacheKey(path: String) =
-    callbackFlow {
-        val file = File(path)
-        val parent = checkNotNull(file.absoluteFile.parentFile)
-
-        @Suppress("DEPRECATION")
-        val observer =
-            object : FileObserver(
-                parent.path,
-                DELETE or MOVED_FROM or CREATE or MOVED_TO or CLOSE_WRITE or MODIFY or ATTRIB,
-            ) {
-                override fun onEvent(
-                    event: Int,
-                    changedPath: String?,
-                ) {
-                    if (changedPath == file.name) trySend(Unit)
-                }
-            }
-        observer.startWatching()
-        trySend(Unit)
-        awaitClose { observer.stopWatching() }
-    }.conflate().map { localVideoCacheKey(path) }.distinctUntilChanged().flowOn(Dispatchers.IO)
+    observeLocalVideoChanges(path).map { localVideoCacheKey(path) }.distinctUntilChanged().flowOn(Dispatchers.IO)
 
 internal object LocalVideoMetadataLoader {
     private val readMutex = Mutex()

@@ -11,9 +11,11 @@ import com.comst19.dambom.core.database.DambomDatabase
 import com.comst19.dambom.core.database.download.DownloadTaskDao
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadStatus
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -37,6 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
+@Suppress("LargeClass")
 class DownloadQueueWorkerTest {
     private lateinit var context: Context
     private lateinit var database: DambomDatabase
@@ -664,19 +667,53 @@ class DownloadQueueWorkerTest {
             val task = entity("quick-resume", successfulServer.url("/quick-resume.mp4").toString())
             val dao = database.downloadTaskDao()
             dao.insert(task)
-            val work = async(Dispatchers.IO) { createWorker().doWork() }
-            awaitCondition {
-                dao.getById(task.id)?.status == DownloadStatus.DOWNLOADING.name &&
-                    fileStore.partialFile(task.id).length() >= 128 * 1024L
+            val pauseObserved = CompletableDeferred<Unit>()
+            val resumeQueued = CompletableDeferred<Unit>()
+            val observingDao =
+                object : DownloadTaskDao by dao {
+                    override suspend fun getById(id: String): DownloadTaskEntity? =
+                        dao.getById(id).also { row ->
+                            if (row?.status == DownloadStatus.PAUSED.name) {
+                                pauseObserved.complete(Unit)
+                                resumeQueued.await()
+                            }
+                        }
+
+                    override fun observeTransferStatus(id: String) =
+                        dao.observeTransferStatus(id).onEach { status ->
+                            if (status == DownloadStatus.PAUSED.name) {
+                                pauseObserved.complete(Unit)
+                                resumeQueued.await()
+                            }
+                        }
+                }
+            val work = async(Dispatchers.IO) { createWorker(dao = observingDao).doWork() }
+            try {
+                awaitCondition {
+                    dao.getById(task.id)?.status == DownloadStatus.DOWNLOADING.name &&
+                        fileStore.partialFile(task.id).length() >= 128 * 1024L
+                }
+                assertNotNull(successfulServer.takeRequest(2L, TimeUnit.SECONDS))
+
+                dao.pause(task.id, 2L)
+                withContext(Dispatchers.IO) { withTimeout(2_000L) { pauseObserved.await() } }
+                dao.queueAgain(task.id, 3L)
+                resumeQueued.complete(Unit)
+                withContext(Dispatchers.IO) { withTimeout(5_000L) { work.await() } }
+
+                val resumedRequest = successfulServer.takeRequest(2L, TimeUnit.SECONDS)
+                assertNotNull("Pause and resume must issue another request", resumedRequest)
+                val range = requireNotNull(resumedRequest).getHeader("Range")
+                assertNotNull(range)
+                val resumedAt = requireNotNull(range).removePrefix("bytes=").removeSuffix("-").toLong()
+                assertEquals(true, resumedAt in 1 until 2 * 1024 * 1024L)
+                assertEquals("\"v1\"", resumedRequest.getHeader("If-Range"))
+                assertEquals(DownloadStatus.COMPLETED.name, dao.getById(task.id)?.status)
+                assertEquals("resumed", fileStore.completedFile(task.id, task.url, task.mimeType).readText())
+            } finally {
+                resumeQueued.complete(Unit)
+                work.cancel()
             }
-
-            dao.pause(task.id, 2L)
-            dao.queueAgain(task.id, 3L)
-            work.await()
-
-            successfulServer.takeRequest()
-            val resumedRequest = successfulServer.takeRequest()
-            assertNotNull(resumedRequest.getHeader("Range"))
         }
 
     @Test

@@ -22,12 +22,15 @@ import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 
 @Composable
+@Suppress("LongParameterList")
 internal fun LibrarySourceFilters(
     selected: LibrarySourceFilter,
     onSelected: (LibrarySourceFilter) -> Unit,
     favoritesOnly: Boolean,
     onFavoritesOnlyChange: (Boolean) -> Unit,
     tagControls: @Composable () -> Unit = {},
+    recentlyPlayedOnly: Boolean = false,
+    onRecentlyPlayedOnlyChange: (Boolean) -> Unit = {},
 ) {
     FlowRow(
         modifier =
@@ -37,6 +40,11 @@ internal fun LibrarySourceFilters(
     ) {
         SourceChips(selected, onSelected)
         FavoritesFilterButton(favoritesOnly, onFavoritesOnlyChange)
+        FilterChip(
+            selected = recentlyPlayedOnly,
+            onClick = { onRecentlyPlayedOnlyChange(!recentlyPlayedOnly) },
+            label = { Text(stringResource(R.string.library_recently_played)) },
+        )
         tagControls()
     }
 }

@@ -80,6 +80,7 @@ internal fun FullscreenVideoPlayer(
     showRotationControl: Boolean,
     isPipContentOnly: Boolean,
     onVideoBoundsChanged: (IntRect?) -> Unit,
+    onPlayPauseRequest: (() -> Unit)? = null,
 ) {
     val playPauseState = rememberPlayPauseButtonState(player)
     KeepScreenOnWhilePlaying(player, enabled = !isPipContentOnly)
@@ -163,7 +164,7 @@ internal fun FullscreenVideoPlayer(
                             },
                             playPauseState.showPlay,
                             playPauseState.isEnabled,
-                            playPauseState::onClick,
+                            onPlayPauseRequest ?: playPauseState::onClick,
                             {
                                 controlsVisible = true
                                 controlsInteractionRevision++
@@ -216,6 +217,7 @@ private fun BoxScope.FullscreenOverlayControls(
                 overflow = TextOverflow.Ellipsis,
             )
             PlayerSettingsButton(
+                player = player,
                 interaction = interaction,
                 contentMode = contentMode,
                 onContentModeToggle = onContentModeToggle,

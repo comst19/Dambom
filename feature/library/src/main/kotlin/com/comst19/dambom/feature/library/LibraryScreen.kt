@@ -82,6 +82,7 @@ internal fun LibraryRoute(
         onQueryChange = viewModel::updateQuery,
         onViewModeChange = viewModel::setViewMode,
         onSourceFilterChange = viewModel::setSourceFilter,
+        onRecentlyPlayedOnlyChange = viewModel::setRecentlyPlayedOnly,
         onStartSelection = viewModel::startSelection,
         onToggleSelection = viewModel::toggleSelection,
         onSelectAll = { viewModel.selectAllVisible(visibleVideos.map(DownloadTask::id)) },
@@ -89,7 +90,9 @@ internal fun LibraryRoute(
         onDeleteSelected = viewModel::deleteSelected,
         onVideoClick = { task ->
             if (multiplePanes && !isDetailPaneVisible) onDetailPaneVisibilityChange(true)
-            viewModel.openVideo(task.id)
+            if (task.id != activeVideoId) {
+                viewModel.openVideo(task.id, replaceDetail = activeVideoId != null)
+            }
         },
         showInlineEmptyState = !multiplePanes || !isDetailPaneVisible,
         showDetailPaneControl = multiplePanes,
@@ -106,6 +109,7 @@ internal fun LibraryScreen(
     onQueryChange: (String) -> Unit,
     onViewModeChange: (LibraryViewMode) -> Unit,
     onSourceFilterChange: (LibrarySourceFilter) -> Unit = {},
+    onRecentlyPlayedOnlyChange: (Boolean) -> Unit = {},
     onVideoClick: (DownloadTask) -> Unit,
     onStartSelection: () -> Unit = {},
     onToggleSelection: (String) -> Unit = {},
@@ -144,6 +148,7 @@ internal fun LibraryScreen(
             fileActions = fileActions,
             onQueryChange = onQueryChange,
             onSourceFilterChange = onSourceFilterChange,
+            onRecentlyPlayedOnlyChange = onRecentlyPlayedOnlyChange,
             onVideoClick = onVideoClick,
             onToggleSelection = onToggleSelection,
             showInlineEmptyState = showInlineEmptyState,

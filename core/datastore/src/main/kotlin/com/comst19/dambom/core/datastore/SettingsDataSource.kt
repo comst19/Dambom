@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.Flow
 interface SettingsDataSource {
     val settings: Flow<StoredSettings>
 
+    suspend fun setPlaybackSpeed(speed: Float)
+
     suspend fun setThemeMode(value: String)
 
     suspend fun setClipboardSuggestion(
@@ -37,4 +39,5 @@ data class StoredSettings(
     val wifiOnlyDownloads: Boolean = false,
     val useConfiguredDownloadLocation: Boolean = true,
     val downloadTreeUri: String? = null,
+    val playbackSpeed: Float = 1f,
 )

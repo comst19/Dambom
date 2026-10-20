@@ -156,5 +156,6 @@ class LibraryFavoritesTest {
         state,
         LibraryFileManager(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
         events,
+        LibraryTestPlaybackHistory(),
     )
 }

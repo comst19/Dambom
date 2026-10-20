@@ -6,13 +6,20 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.comst19.dambom.core.database.download.DownloadTaskDao
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
+import com.comst19.dambom.core.database.playback.PlaybackHistoryDao
+import com.comst19.dambom.core.database.playback.PlaybackHistoryEntity
 import com.comst19.dambom.core.database.tag.VideoTagAssignmentEntity
 import com.comst19.dambom.core.database.tag.VideoTagDao
 import com.comst19.dambom.core.database.tag.VideoTagEntity
 
 @Database(
-    entities = [DownloadTaskEntity::class, VideoTagEntity::class, VideoTagAssignmentEntity::class],
-    version = TAG_DATABASE_VERSION,
+    entities = [
+        DownloadTaskEntity::class,
+        VideoTagEntity::class,
+        VideoTagAssignmentEntity::class,
+        PlaybackHistoryEntity::class,
+    ],
+    version = PLAYBACK_DATABASE_VERSION,
     exportSchema = true,
 )
 abstract class DambomDatabase : RoomDatabase() {
@@ -20,7 +27,22 @@ abstract class DambomDatabase : RoomDatabase() {
 
     abstract fun videoTagDao(): VideoTagDao
 
+    abstract fun playbackHistoryDao(): PlaybackHistoryDao
+
     internal companion object {
+        val MIGRATION_5_6 =
+            object : Migration(TAG_DATABASE_VERSION, PLAYBACK_DATABASE_VERSION) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "CREATE TABLE IF NOT EXISTS playback_history " +
+                            "(downloadId TEXT NOT NULL, positionMillis INTEGER NOT NULL, " +
+                            "durationMillis INTEGER NOT NULL, lastPlayedAtMillis INTEGER NOT NULL, " +
+                            "PRIMARY KEY(downloadId), FOREIGN KEY(downloadId) REFERENCES download_tasks(id) " +
+                            "ON UPDATE NO ACTION ON DELETE CASCADE)",
+                    )
+                }
+            }
+
         val MIGRATION_4_5 =
             object : Migration(DOWNLOAD_INDEX_DATABASE_VERSION, TAG_DATABASE_VERSION) {
                 override fun migrate(db: SupportSQLiteDatabase) {
@@ -74,3 +96,5 @@ abstract class DambomDatabase : RoomDatabase() {
 private const val FAVORITES_DATABASE_VERSION = 3
 private const val DOWNLOAD_INDEX_DATABASE_VERSION = 4
 private const val TAG_DATABASE_VERSION = 5
+
+private const val PLAYBACK_DATABASE_VERSION = 6

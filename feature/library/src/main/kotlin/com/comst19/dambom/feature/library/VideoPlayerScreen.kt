@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -92,6 +93,24 @@ internal fun VideoPlayerRoute(
     }
     LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) { playerViewModel.onUiPaused() }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { playerViewModel.onUiStopped() }
+    val resumePromptPosition by playerViewModel.resumePromptPosition.collectAsStateWithLifecycle()
+    resumePromptPosition?.let { position ->
+        AlertDialog(
+            onDismissRequest = playerViewModel::dismissResumePrompt,
+            title = { Text(stringResource(R.string.player_resume_title)) },
+            text = { Text(stringResource(R.string.player_resume_message, position.toTimeText())) },
+            confirmButton = {
+                TextButton(onClick = { playerViewModel.answerResume(true) }) {
+                    Text(stringResource(R.string.player_resume_continue))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { playerViewModel.answerResume(false) }) {
+                    Text(stringResource(R.string.player_resume_restart))
+                }
+            },
+        )
+    }
     VideoPlayerMediaSessionEffect(playerViewModel.player)
     LaunchedEffect(detailState, task?.id, task?.localFilePath, isLocalVideoAvailable) {
         if (detailState == VideoDetailState.Loading) return@LaunchedEffect
@@ -133,6 +152,7 @@ internal fun VideoPlayerRoute(
             isVideoFullscreen = isVideoFullscreen,
             onVideoFullscreenChange = onVideoFullscreenChange,
             onVideoRotate = onVideoRotate,
+            onPlayPauseRequest = playerViewModel::requestPlayPause,
             isPipContentOnly = pipContentOnly,
             onVideoBoundsChanged = onVideoBoundsChanged,
         )
@@ -154,6 +174,7 @@ internal fun VideoPlayerScreen(
     isPipContentOnly: Boolean = false,
     onVideoBoundsChanged: (androidx.compose.ui.unit.IntRect?) -> Unit = {},
     detailState: VideoDetailState = VideoDetailState.NotFound,
+    onPlayPauseRequest: (() -> Unit)? = null,
 ) {
     val interaction = rememberSaveable(task?.id, saver = PlayerInteractionState.Saver) { PlayerInteractionState() }
     LaunchedEffect(isVideoFullscreen) {
@@ -175,6 +196,7 @@ internal fun VideoPlayerScreen(
             showRotationControl = showRotationControl,
             isPipContentOnly = isPipContentOnly,
             onVideoBoundsChanged = onVideoBoundsChanged,
+            onPlayPauseRequest = onPlayPauseRequest,
         )
     } else {
         AppScreen(
@@ -240,6 +262,7 @@ internal fun VideoPlayerScreen(
                     task = task,
                     player = player,
                     interaction = interaction,
+                    onPlayPauseRequest = onPlayPauseRequest,
                     onOpenOriginal = { fileActions.onOpenOriginal(task) },
                     onCopyLink = { fileActions.onCopyLink(task) },
                     onShareLink = { fileActions.onShareLink(task) },

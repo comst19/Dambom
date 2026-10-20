@@ -13,7 +13,7 @@ import org.robolectric.annotation.Config
 class VideoPlayerSeekIncrementTest {
     @Test
     fun `player moves backward and forward by ten seconds`() {
-        val viewModel = VideoPlayerViewModel(ApplicationProvider.getApplicationContext<Context>())
+        val viewModel = testVideoPlayerViewModel(ApplicationProvider.getApplicationContext<Context>())
 
         try {
             assertEquals(
@@ -21,7 +21,7 @@ class VideoPlayerSeekIncrementTest {
                 listOf(viewModel.player.seekBackIncrement, viewModel.player.seekForwardIncrement),
             )
         } finally {
-            viewModel.player.release()
+            viewModel.closeForTest()
         }
     }
 }

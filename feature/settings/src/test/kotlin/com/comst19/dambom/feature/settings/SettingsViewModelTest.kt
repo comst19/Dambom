@@ -452,6 +452,10 @@ private class RecordingSettingsRepository(
     var downloadTreeUri: String? = null
     private var downloadLocationCallCount = 0
 
+    override suspend fun setPlaybackSpeed(speed: Float) {
+        mutableSettings.value = mutableSettings.value.copy(playbackSpeed = speed)
+    }
+
     override suspend fun setThemeMode(mode: ThemeMode) {
         themeFailure?.let { throw it }
         mutableSettings.value = mutableSettings.value.copy(themeMode = mode)

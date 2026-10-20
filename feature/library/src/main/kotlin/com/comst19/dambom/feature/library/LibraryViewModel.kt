@@ -122,11 +122,17 @@ internal class LibraryViewModel
 
         fun observeVideo(id: String) = repository.observeDownload(id).asVideoDetailState()
 
-        fun openVideo(id: String) {
+        fun openVideo(
+            id: String,
+            replaceDetail: Boolean = false,
+        ) {
             val task = uiState.value.videos.firstOrNull { it.id == id }
             if (task?.deletePending != false || task.localFilePath == null) return
             savedStateHandle[SELECTED_ID_KEY] = id
-            viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoDetailKey(id))) }
+            viewModelScope.launch {
+                val key = VideoDetailKey(id)
+                navigation.dispatch(if (replaceDetail) NavigationEvent.Replace(key) else NavigationEvent.Navigate(key))
+            }
         }
 
         fun trimVideo(task: DownloadTask) {

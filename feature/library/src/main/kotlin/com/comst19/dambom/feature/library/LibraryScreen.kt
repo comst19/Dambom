@@ -90,7 +90,9 @@ internal fun LibraryRoute(
         onDeleteSelected = viewModel::deleteSelected,
         onVideoClick = { task ->
             if (multiplePanes && !isDetailPaneVisible) onDetailPaneVisibilityChange(true)
-            viewModel.openVideo(task.id)
+            if (task.id != activeVideoId) {
+                viewModel.openVideo(task.id, replaceDetail = activeVideoId != null)
+            }
         },
         showInlineEmptyState = !multiplePanes || !isDetailPaneVisible,
         showDetailPaneControl = multiplePanes,

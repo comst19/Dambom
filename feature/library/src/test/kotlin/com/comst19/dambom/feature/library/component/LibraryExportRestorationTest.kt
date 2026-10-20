@@ -17,6 +17,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.library.LibraryTestDownloads
+import com.comst19.dambom.feature.library.LibraryTestPlaybackHistory
 import com.comst19.dambom.feature.library.LibraryTestSettings
 import com.comst19.dambom.feature.library.LibraryViewModel
 import com.comst19.dambom.feature.library.file.LibraryFileManager
@@ -65,6 +66,7 @@ class LibraryExportRestorationTest {
                                 SavedStateHandle(),
                                 LibraryFileManager(context, Dispatchers.Unconfined),
                                 AppEventBus(),
+                                LibraryTestPlaybackHistory(),
                             )
                         },
                     )

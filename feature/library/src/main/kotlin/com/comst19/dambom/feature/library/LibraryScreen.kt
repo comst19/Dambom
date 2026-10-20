@@ -35,6 +35,8 @@ import com.comst19.dambom.feature.library.tag.LibraryTagViewModel
 import com.comst19.dambom.feature.library.tag.component.LibraryTagControls
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 @Composable
 internal fun LibraryRoute(
@@ -80,6 +82,7 @@ internal fun LibraryRoute(
         onQueryChange = viewModel::updateQuery,
         onViewModeChange = viewModel::setViewMode,
         onSourceFilterChange = viewModel::setSourceFilter,
+        onRecentlyPlayedOnlyChange = viewModel::setRecentlyPlayedOnly,
         onStartSelection = viewModel::startSelection,
         onToggleSelection = viewModel::toggleSelection,
         onSelectAll = { viewModel.selectAllVisible(visibleVideos.map(DownloadTask::id)) },
@@ -87,7 +90,9 @@ internal fun LibraryRoute(
         onDeleteSelected = viewModel::deleteSelected,
         onVideoClick = { task ->
             if (multiplePanes && !isDetailPaneVisible) onDetailPaneVisibilityChange(true)
-            viewModel.openVideo(task.id)
+            if (task.id != activeVideoId) {
+                viewModel.openVideo(task.id, replaceDetail = activeVideoId != null)
+            }
         },
         showInlineEmptyState = !multiplePanes || !isDetailPaneVisible,
         showDetailPaneControl = multiplePanes,
@@ -104,6 +109,7 @@ internal fun LibraryScreen(
     onQueryChange: (String) -> Unit,
     onViewModeChange: (LibraryViewMode) -> Unit,
     onSourceFilterChange: (LibrarySourceFilter) -> Unit = {},
+    onRecentlyPlayedOnlyChange: (Boolean) -> Unit = {},
     onVideoClick: (DownloadTask) -> Unit,
     onStartSelection: () -> Unit = {},
     onToggleSelection: (String) -> Unit = {},
@@ -142,6 +148,7 @@ internal fun LibraryScreen(
             fileActions = fileActions,
             onQueryChange = onQueryChange,
             onSourceFilterChange = onSourceFilterChange,
+            onRecentlyPlayedOnlyChange = onRecentlyPlayedOnlyChange,
             onVideoClick = onVideoClick,
             onToggleSelection = onToggleSelection,
             showInlineEmptyState = showInlineEmptyState,
@@ -169,9 +176,11 @@ internal fun LibraryScreen(
 @Composable
 internal fun LibraryDetailPlaceholderRoute() {
     val viewModel: LibraryViewModel = hiltViewModel()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val hasVideosFlow = remember(viewModel) { viewModel.uiState.map { it.hasVideos }.distinctUntilChanged() }
+    val initialHasVideos = remember(viewModel) { viewModel.uiState.value.hasVideos }
+    val hasVideos by hasVideosFlow.collectAsStateWithLifecycle(initialValue = initialHasVideos)
 
-    if (uiState.hasVideos) {
+    if (hasVideos) {
         EmptyLibraryDetail()
     } else {
         EmptyLibrary(Modifier.fillMaxSize())

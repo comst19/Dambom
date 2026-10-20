@@ -2,6 +2,7 @@ package com.comst19.dambom.core.data.repository
 
 import com.comst19.dambom.core.datastore.SettingsDataSource
 import com.comst19.dambom.core.domain.model.AppSettings
+import com.comst19.dambom.core.domain.model.SUPPORTED_PLAYBACK_SPEEDS
 import com.comst19.dambom.core.domain.model.SharedLinkQuality
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.domain.repository.SettingsRepository
@@ -28,8 +29,14 @@ class DefaultSettingsRepository
                     wifiOnlyDownloads = settings.wifiOnlyDownloads,
                     useConfiguredDownloadLocation = settings.useConfiguredDownloadLocation,
                     downloadTreeUri = settings.downloadTreeUri,
+                    playbackSpeed = settings.playbackSpeed.takeIf { it in SUPPORTED_PLAYBACK_SPEEDS } ?: 1f,
                 )
             }
+
+        override suspend fun setPlaybackSpeed(speed: Float) {
+            require(speed in SUPPORTED_PLAYBACK_SPEEDS)
+            dataSource.setPlaybackSpeed(speed)
+        }
 
         override suspend fun setThemeMode(mode: ThemeMode) = dataSource.setThemeMode(mode.name)
 

@@ -80,10 +80,10 @@ internal fun FullscreenVideoPlayer(
     showRotationControl: Boolean,
     isPipContentOnly: Boolean,
     onVideoBoundsChanged: (IntRect?) -> Unit,
+    onPlayPauseRequest: (() -> Unit)? = null,
 ) {
     val playPauseState = rememberPlayPauseButtonState(player)
     KeepScreenOnWhilePlaying(player, enabled = !isPipContentOnly)
-    val progressState = rememberProgressStateWithTickInterval(player, PROGRESS_TICK_MILLIS)
     val surfaceDescription = stringResource(R.string.player_surface_description, task.title)
     val toggleControlsLabel = stringResource(R.string.player_toggle_controls)
     var selectedContentMode by rememberSaveable(task.id) { mutableStateOf(FullscreenContentMode.Fit) }
@@ -164,9 +164,7 @@ internal fun FullscreenVideoPlayer(
                             },
                             playPauseState.showPlay,
                             playPauseState.isEnabled,
-                            playPauseState::onClick,
-                            progressState.currentPositionMs,
-                            progressState.durationMs,
+                            onPlayPauseRequest ?: playPauseState::onClick,
                             {
                                 controlsVisible = true
                                 controlsInteractionRevision++
@@ -181,6 +179,7 @@ internal fun FullscreenVideoPlayer(
 }
 
 @Composable
+@androidx.annotation.OptIn(markerClass = [UnstableApi::class])
 @Suppress("LongParameterList", "LongMethod")
 private fun BoxScope.FullscreenOverlayControls(
     task: DownloadTask,
@@ -195,11 +194,10 @@ private fun BoxScope.FullscreenOverlayControls(
     showPlay: Boolean,
     playEnabled: Boolean,
     onPlayPause: () -> Unit,
-    progressPositionMillis: Long,
-    progressDurationMillis: Long,
     onInteraction: () -> Unit,
     onInteractionChanged: (Boolean) -> Unit,
 ) {
+    val progressState = rememberProgressStateWithTickInterval(player, PROGRESS_TICK_MILLIS)
     Surface(
         modifier =
             Modifier.align(Alignment.TopStart).fillMaxWidth().windowInsetsPadding(
@@ -219,6 +217,7 @@ private fun BoxScope.FullscreenOverlayControls(
                 overflow = TextOverflow.Ellipsis,
             )
             PlayerSettingsButton(
+                player = player,
                 interaction = interaction,
                 contentMode = contentMode,
                 onContentModeToggle = onContentModeToggle,
@@ -233,8 +232,8 @@ private fun BoxScope.FullscreenOverlayControls(
         showPlay = showPlay,
         playEnabled = playEnabled,
         onPlayPause = onPlayPause,
-        positionMillis = progressPositionMillis,
-        durationMillis = progressDurationMillis,
+        positionMillis = { progressState.currentPositionMs },
+        durationMillis = { progressState.durationMs },
         contentColor = Color.White,
         onInteraction = onInteraction,
         onInteractionChanged = onInteractionChanged,

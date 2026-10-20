@@ -57,6 +57,7 @@ class LibraryDeletionTest {
                     SavedStateHandle(),
                     LibraryFileManager(context, dispatcherRule.dispatcher),
                     events,
+                    LibraryTestPlaybackHistory(),
                 )
             backgroundScope.launch { viewModel.uiState.collect() }
             runCurrent()
@@ -112,6 +113,7 @@ class LibraryDeletionTest {
                     SavedStateHandle(),
                     LibraryFileManager(context, dispatcherRule.dispatcher),
                     AppEventBus(),
+                    LibraryTestPlaybackHistory(),
                 )
             backgroundScope.launch { viewModel.uiState.collect() }
             runCurrent()
@@ -163,6 +165,7 @@ class LibraryDeletionTest {
                     SavedStateHandle(),
                     LibraryFileManager(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
                     AppEventBus(),
+                    LibraryTestPlaybackHistory(),
                 )
             backgroundScope.launch { viewModel.uiState.collect() }
             runCurrent()
@@ -219,6 +222,8 @@ private object DeletionSettings : SettingsRepository {
     override val settings = flowOf(AppSettings())
 
     override suspend fun setThemeMode(mode: ThemeMode) = Unit
+
+    override suspend fun setPlaybackSpeed(speed: Float) = Unit
 
     override suspend fun setClipboardSuggestion(
         promptShown: Boolean,

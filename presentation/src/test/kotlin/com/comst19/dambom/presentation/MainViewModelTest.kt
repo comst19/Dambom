@@ -134,6 +134,8 @@ private object FailingStartupCoordinator : StartupCoordinator {
 private class FakeSettingsRepository : SettingsRepository {
     override val settings: Flow<AppSettings> = flowOf(AppSettings())
 
+    override suspend fun setPlaybackSpeed(speed: Float) = Unit
+
     override suspend fun setThemeMode(mode: ThemeMode) = Unit
 
     override suspend fun setClipboardSuggestion(

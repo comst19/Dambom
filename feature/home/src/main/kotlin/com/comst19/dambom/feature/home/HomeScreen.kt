@@ -44,6 +44,7 @@ internal fun HomeRoute(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val clipboardUrl = uiState.clipboardUrl
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
@@ -75,7 +76,7 @@ internal fun HomeRoute(
         onOpenDownloads = viewModel::openDownloads,
         onOpenSettings = viewModel::openSettings,
         onClipboardConsent = viewModel::setClipboardSuggestionEnabled,
-        onUseClipboardSuggestion = { viewModel.useClipboardText(uiState.clipboardUrl) },
+        onUseClipboardSuggestion = { viewModel.useClipboardText(clipboardUrl) },
         onDismissClipboardSuggestion = viewModel::dismissClipboardSuggestion,
         onAnalyzeSharedUrl = {
             focusManager.clearFocus()
@@ -127,7 +128,9 @@ internal fun HomeScreen(
                     .padding(start = 16.dp, end = 16.dp, bottom = screenVerticalPadding),
         ) {
             HomePrimarySection(
-                uiState = uiState,
+                url = uiState.url,
+                isUrlValid = uiState.isUrlValid,
+                clipboardUrl = uiState.clipboardUrl,
                 canUseInternet = canUseInternet,
                 onUrlChange = onUrlChange,
                 onPaste = onPaste,

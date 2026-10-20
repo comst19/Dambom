@@ -47,6 +47,7 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.media.rememberLocalVideoMetadata
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
+import com.comst19.dambom.feature.library.player.component.PlaybackOptionsButton
 import kotlinx.coroutines.delay
 
 @Composable
@@ -71,9 +72,9 @@ internal fun VideoPlayerPanel(
     onCopyLink: () -> Unit,
     onShareLink: () -> Unit,
     modifier: Modifier = Modifier,
+    onPlayPauseRequest: (() -> Unit)? = null,
 ) {
     val playPauseState = rememberPlayPauseButtonState(player)
-    val progressState = rememberProgressStateWithTickInterval(player, PROGRESS_TICK_MILLIS)
     val metadata by rememberLocalVideoMetadata(task.localFilePath)
     var playbackError by remember(player) { mutableStateOf<PlaybackException?>(player.playerError) }
     var controlsVisible by remember(task.id) { mutableStateOf(true) }
@@ -115,9 +116,7 @@ internal fun VideoPlayerPanel(
             controlsVisible = controlsVisible,
             showPlay = playPauseState.showPlay,
             playEnabled = playPauseState.isEnabled,
-            onPlayPause = playPauseState::onClick,
-            positionMillis = progressState.currentPositionMs,
-            durationMillis = progressState.durationMs,
+            onPlayPause = onPlayPauseRequest ?: playPauseState::onClick,
             onToggleControls = { controlsVisible = !controlsVisible },
             onControlsInteraction = {
                 controlsVisible = true
@@ -125,6 +124,7 @@ internal fun VideoPlayerPanel(
             },
             onControlsInteractionChanged = { controlsInteracting = it },
         )
+        PlaybackOptionsButton(player)
         Text(
             text = task.title,
             style = MaterialTheme.typography.headlineSmall,
@@ -158,8 +158,6 @@ private fun InlineVideoSurface(
     showPlay: Boolean,
     playEnabled: Boolean,
     onPlayPause: () -> Unit,
-    positionMillis: Long,
-    durationMillis: Long,
     onToggleControls: () -> Unit,
     onControlsInteraction: () -> Unit,
     onControlsInteractionChanged: (Boolean) -> Unit,
@@ -205,22 +203,44 @@ private fun InlineVideoSurface(
             modifier = Modifier.matchParentSize(),
         ) {
             Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = INLINE_CONTROLS_SCRIM_ALPHA))) {
-                DambomPlayerControls(
+                InlineVideoControls(
                     player = player,
                     showPlay = showPlay,
                     playEnabled = playEnabled,
                     onPlayPause = onPlayPause,
-                    positionMillis = positionMillis,
-                    durationMillis = durationMillis,
-                    contentColor = Color.White,
                     onInteraction = onControlsInteraction,
                     onInteractionChanged = onControlsInteractionChanged,
-                    modifier = Modifier.fillMaxSize(),
-                    timelineModifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                 )
             }
         }
     }
+}
+
+@Composable
+@androidx.annotation.OptIn(markerClass = [UnstableApi::class])
+@Suppress("LongParameterList")
+private fun InlineVideoControls(
+    player: Player,
+    showPlay: Boolean,
+    playEnabled: Boolean,
+    onPlayPause: () -> Unit,
+    onInteraction: () -> Unit,
+    onInteractionChanged: (Boolean) -> Unit,
+) {
+    val progressState = rememberProgressStateWithTickInterval(player, PROGRESS_TICK_MILLIS)
+    DambomPlayerControls(
+        player = player,
+        showPlay = showPlay,
+        playEnabled = playEnabled,
+        onPlayPause = onPlayPause,
+        positionMillis = { progressState.currentPositionMs },
+        durationMillis = { progressState.durationMs },
+        contentColor = Color.White,
+        onInteraction = onInteraction,
+        onInteractionChanged = onInteractionChanged,
+        modifier = Modifier.fillMaxSize(),
+        timelineModifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+    )
 }
 
 private const val VIDEO_ASPECT_RATIO = 16f / 9f

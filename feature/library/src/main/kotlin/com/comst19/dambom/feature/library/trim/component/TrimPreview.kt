@@ -21,11 +21,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableLongState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,7 +71,8 @@ internal fun TrimPreview(
         }
     var isPlaying by remember { mutableStateOf(false) }
     KeepScreenOnWhilePlaying(player, enabled)
-    var position by remember { mutableLongStateOf(0L) }
+    val position = remember { mutableLongStateOf(0L) }
+    val currentOnPositionChanged by rememberUpdatedState(onPositionChanged)
     var failed by remember { mutableStateOf(false) }
     DisposableEffect(player) {
         val listener =
@@ -85,7 +89,7 @@ internal fun TrimPreview(
         onDispose { player.release() }
     }
     LaunchedEffect(path, selection) {
-        position = 0L
+        position.longValue = 0L
         failed = false
         player.pause()
         player.setMediaItem(clippedMediaItem(path, selection))
@@ -95,11 +99,13 @@ internal fun TrimPreview(
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { player.pause() }
     LaunchedEffect(player, isPlaying) {
         do {
-            position = player.currentPosition.coerceAtLeast(0L)
+            position.longValue = player.currentPosition.coerceAtLeast(0L)
             if (isPlaying) delay(POSITION_UPDATE_MILLIS)
         } while (isPlaying)
     }
-    LaunchedEffect(position, selection) { onPositionChanged(selection.startMillis + position) }
+    LaunchedEffect(position, selection) {
+        snapshotFlow { position.longValue }.collect { currentOnPositionChanged(selection.startMillis + it) }
+    }
     val duration = selection.endMillis - selection.startMillis
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -137,21 +143,34 @@ internal fun TrimPreview(
             }
         }
         if (failed) Text(stringResource(R.string.player_error), color = MaterialTheme.colorScheme.error)
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text("${position.toTimeText()} / ${duration.toTimeText()}", style = MaterialTheme.typography.labelMedium)
-            DambomSeekBar(
-                value = if (duration > 0L) position.toFloat() / duration else 0f,
-                enabled = enabled && !failed && duration > 0L,
-                contentDescription = stringResource(R.string.trim_seek),
-                stateDescription = position.toTimeText(),
-                onValueChange = { value ->
-                    position = (duration * value).toLong()
-                    player.seekTo(position)
-                },
-                onInteractionChanged = { interacting -> if (interacting) player.pause() },
-                modifier = Modifier.weight(1f),
-            )
-        }
+        TrimPreviewTimeline(player, position, duration, enabled && !failed)
+    }
+}
+
+@Composable
+private fun TrimPreviewTimeline(
+    player: Player,
+    position: MutableLongState,
+    duration: Long,
+    enabled: Boolean,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text(
+            "${position.longValue.toTimeText()} / ${duration.toTimeText()}",
+            style = MaterialTheme.typography.labelMedium,
+        )
+        DambomSeekBar(
+            value = if (duration > 0L) position.longValue.toFloat() / duration else 0f,
+            enabled = enabled && duration > 0L,
+            contentDescription = stringResource(R.string.trim_seek),
+            stateDescription = position.longValue.toTimeText(),
+            onValueChange = { value ->
+                position.longValue = (duration * value).toLong()
+                player.seekTo(position.longValue)
+            },
+            onInteractionChanged = { interacting -> if (interacting) player.pause() },
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 

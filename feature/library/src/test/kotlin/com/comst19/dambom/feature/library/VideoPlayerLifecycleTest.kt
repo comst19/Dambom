@@ -45,7 +45,7 @@ class VideoPlayerLifecycleTest {
 
     @After
     fun tearDown() {
-        if (::playerViewModel.isInitialized) playerViewModel.player.release()
+        if (::playerViewModel.isInitialized) playerViewModel.closeForTest()
         File("${videoFile.path}.thumbnail.unavailable").delete()
         videoFile.delete()
     }
@@ -63,8 +63,9 @@ class VideoPlayerLifecycleTest {
                 SavedStateHandle(),
                 LibraryFileManager(context, Dispatchers.IO),
                 AppEventBus(),
+                LibraryTestPlaybackHistory(),
             )
-        playerViewModel = VideoPlayerViewModel(context)
+        playerViewModel = testVideoPlayerViewModel(context)
         val owner =
             object : LifecycleOwner {
                 override val lifecycle = LifecycleRegistry(this)
@@ -167,6 +168,8 @@ private class LifecycleDownloadRepository : DownloadRepository {
 
 private object LifecycleSettings : SettingsRepository {
     override val settings = flowOf(AppSettings())
+
+    override suspend fun setPlaybackSpeed(speed: Float) = Unit
 
     override suspend fun setThemeMode(mode: ThemeMode) = Unit
 

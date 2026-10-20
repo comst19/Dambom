@@ -9,9 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,18 +51,13 @@ internal fun ColumnScope.WebContent(
 ) {
     val backgroundColor = MaterialTheme.colorScheme.background.toArgb()
     var webView by remember(tab.id) { mutableStateOf<WebView?>(null) }
-    var loadingProgress by remember(tab.id) { mutableStateOf(0) }
+    val loadingProgress = remember(tab.id) { mutableIntStateOf(0) }
     var webViewGeneration by remember(tab.id) { androidx.compose.runtime.mutableIntStateOf(0) }
 
     LifecycleEventEffect(Lifecycle.Event.ON_START) { webView?.onResume() }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { webView?.onPause() }
 
-    if (navigationFailureState.value == null && loadingProgress in 1..99) {
-        DambomLinearProgressIndicator(
-            progress = loadingProgress / WEB_PROGRESS_SCALE,
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
+    WebLoadingProgress(loadingProgress, navigationFailureState)
     key(webViewGeneration) {
         val rendererGone = remember { AtomicBoolean(false) }
         Box(
@@ -72,13 +70,13 @@ internal fun ColumnScope.WebContent(
                         tab = tab,
                         savedState = savedState,
                         onPageStarted = { id, url, title, generation ->
-                            loadingProgress = 0
+                            loadingProgress.intValue = 0
                             onPageStarted(id, url, title, generation)
                         },
                         onPageFinished = onPageFinished,
                         onPageChanged = onPageChanged,
                         onMediaRequest = onMediaRequest,
-                        onProgress = { loadingProgress = it },
+                        onProgress = { loadingProgress.intValue = it },
                         onNavigationFailure = { navigationFailureState.value = it },
                         onRendererGone = { failedWebView ->
                             rendererGone.set(true)
@@ -137,6 +135,19 @@ internal fun ColumnScope.WebContent(
         detectionState = tab.detectionState,
         onOpenDetectedMedia = onOpenDetectedMedia,
     )
+}
+
+@Composable
+private fun WebLoadingProgress(
+    progress: MutableIntState,
+    navigationFailure: State<WebNavigationFailure?>,
+) {
+    if (navigationFailure.value == null && progress.intValue in 1..99) {
+        DambomLinearProgressIndicator(
+            progress = progress.intValue / WEB_PROGRESS_SCALE,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 private const val WEB_PROGRESS_SCALE = 100f

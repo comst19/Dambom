@@ -156,13 +156,14 @@ private fun DownloadGrid(
                     key = DownloadTask::id,
                     contentType = { DOWNLOAD_ITEM_CONTENT_TYPE },
                 ) { task ->
+                    val taskId = task.id
                     DownloadGridCard(
                         task = task,
                         canDownload = canDownload,
-                        onPause = { onPause(task.id) },
-                        onResume = { onResume(task.id) },
-                        onCancel = { onCancel(task.id) },
-                        onRetry = { onRetry(task.id) },
+                        onPause = { onPause(taskId) },
+                        onResume = { onResume(taskId) },
+                        onCancel = { onCancel(taskId) },
+                        onRetry = { onRetry(taskId) },
                     )
                 }
             }
@@ -177,13 +178,14 @@ private fun DownloadGrid(
                 key = DownloadTask::id,
                 contentType = { DOWNLOAD_ITEM_CONTENT_TYPE },
             ) { task ->
+                val taskId = task.id
                 DownloadGridCard(
                     task = task,
                     canDownload = canDownload,
-                    onPause = { onPause(task.id) },
-                    onResume = { onResume(task.id) },
-                    onCancel = { onCancel(task.id) },
-                    onRetry = { onRetry(task.id) },
+                    onPause = { onPause(taskId) },
+                    onResume = { onResume(taskId) },
+                    onCancel = { onCancel(taskId) },
+                    onRetry = { onRetry(taskId) },
                 )
             }
         }
@@ -219,13 +221,14 @@ private fun DownloadList(
                     key = DownloadTask::id,
                     contentType = { DOWNLOAD_ITEM_CONTENT_TYPE },
                 ) { task ->
+                    val taskId = task.id
                     DownloadListCard(
                         task = task,
                         canDownload = canDownload,
-                        onPause = { onPause(task.id) },
-                        onResume = { onResume(task.id) },
-                        onCancel = { onCancel(task.id) },
-                        onRetry = { onRetry(task.id) },
+                        onPause = { onPause(taskId) },
+                        onResume = { onResume(taskId) },
+                        onCancel = { onCancel(taskId) },
+                        onRetry = { onRetry(taskId) },
                     )
                 }
             }
@@ -238,13 +241,14 @@ private fun DownloadList(
                 key = DownloadTask::id,
                 contentType = { DOWNLOAD_ITEM_CONTENT_TYPE },
             ) { task ->
+                val taskId = task.id
                 DownloadListCard(
                     task = task,
                     canDownload = canDownload,
-                    onPause = { onPause(task.id) },
-                    onResume = { onResume(task.id) },
-                    onCancel = { onCancel(task.id) },
-                    onRetry = { onRetry(task.id) },
+                    onPause = { onPause(taskId) },
+                    onResume = { onResume(taskId) },
+                    onCancel = { onCancel(taskId) },
+                    onRetry = { onRetry(taskId) },
                 )
             }
         }

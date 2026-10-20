@@ -46,9 +46,9 @@ internal fun DownloadGridCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            DownloadTaskHeader(task)
+            DownloadTaskHeader(task.status, task.deletePending)
             DownloadTaskDetails(task)
-            DownloadActions(task, canDownload, onPause, onResume, onCancel, onRetry)
+            DownloadActions(task.status, task.deletePending, canDownload, onPause, onResume, onCancel, onRetry)
         }
     }
 }
@@ -80,25 +80,28 @@ internal fun DownloadListCard(
                     DownloadTaskDetails(task, maxLines = 2, showStatus = true)
                 }
             }
-            DownloadActions(task, canDownload, onPause, onResume, onCancel, onRetry)
+            DownloadActions(task.status, task.deletePending, canDownload, onPause, onResume, onCancel, onRetry)
         }
     }
 }
 
 @Composable
-private fun DownloadTaskHeader(task: DownloadTask) {
+private fun DownloadTaskHeader(
+    status: DownloadStatus,
+    deletePending: Boolean,
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         DownloadStatusIcon()
         Text(
-            if (task.deletePending) {
+            if (deletePending) {
                 stringResource(R.string.downloads_delete_pending)
             } else {
-                task.status.statusText()
+                status.statusText()
             },
-            color = task.status.statusColor(),
+            color = status.statusColor(),
             style = MaterialTheme.typography.labelLarge,
         )
     }

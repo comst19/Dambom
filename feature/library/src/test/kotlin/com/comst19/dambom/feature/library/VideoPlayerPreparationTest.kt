@@ -15,7 +15,7 @@ import org.robolectric.annotation.Config
 class VideoPlayerPreparationTest {
     @Test
     fun `new detail waits for play and switching videos clears pending resume`() {
-        val viewModel = VideoPlayerViewModel(ApplicationProvider.getApplicationContext<Context>())
+        val viewModel = testVideoPlayerViewModel(ApplicationProvider.getApplicationContext<Context>())
         val first = savedVideo("first").copy(localFilePath = "/files/first.mp4")
         val second = savedVideo("second").copy(localFilePath = "/files/second.mp4")
         try {
@@ -34,7 +34,7 @@ class VideoPlayerPreparationTest {
             assertEquals("second", viewModel.player.currentMediaItem?.mediaId)
             assertFalse(viewModel.player.playWhenReady)
         } finally {
-            viewModel.player.release()
+            viewModel.closeForTest()
         }
     }
 }

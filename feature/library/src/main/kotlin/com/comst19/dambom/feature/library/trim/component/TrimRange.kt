@@ -39,7 +39,7 @@ import com.comst19.dambom.feature.library.trim.contract.VideoTrimState
 internal fun TrimRange(
     state: VideoTrimState,
     onSelect: (TrimSelection) -> Unit,
-    positionMillis: Long,
+    positionMillis: () -> Long,
 ) {
     var range by remember(state.selection) {
         mutableStateOf(state.selection.startMillis.toFloat()..state.selection.endMillis.toFloat())

@@ -38,14 +38,23 @@ internal fun LibraryPane(
     showInlineEmptyState: Boolean,
     modifier: Modifier,
     tagControls: @Composable () -> Unit = {},
+    onRecentlyPlayedOnlyChange: (Boolean) -> Unit = {},
 ) {
     val header: @Composable () -> Unit = {
-        LibraryPaneHeader(uiState, onQueryChange, onSourceFilterChange, fileActions.onFavoritesOnlyChange, tagControls)
+        LibraryPaneHeader(
+            uiState,
+            onQueryChange,
+            onSourceFilterChange,
+            fileActions.onFavoritesOnlyChange,
+            onRecentlyPlayedOnlyChange,
+            tagControls,
+        )
     }
     val emptyContent: @Composable () -> Unit = {
         when {
             !uiState.hasVideos -> if (showInlineEmptyState) EmptyLibrary()
             uiState.query.isNotBlank() -> EmptySearchResults(uiState.query)
+            uiState.recentlyPlayedOnly -> EmptyRecentlyPlayed()
             uiState.favoritesOnly -> EmptyFavorites()
             else -> EmptySourceResults(hasTagFilter = uiState.hasTagFilter)
         }
@@ -76,11 +85,13 @@ internal fun LibraryPane(
 }
 
 @Composable
+@Suppress("LongParameterList")
 private fun LibraryPaneHeader(
     uiState: LibraryUiState,
     onQueryChange: (String) -> Unit,
     onSourceFilterChange: (LibrarySourceFilter) -> Unit,
     onFavoritesOnlyChange: (Boolean) -> Unit,
+    onRecentlyPlayedOnlyChange: (Boolean) -> Unit,
     tagControls: @Composable () -> Unit,
 ) {
     Column {
@@ -104,6 +115,8 @@ private fun LibraryPaneHeader(
             favoritesOnly = uiState.favoritesOnly,
             onFavoritesOnlyChange = onFavoritesOnlyChange,
             tagControls = tagControls,
+            recentlyPlayedOnly = uiState.recentlyPlayedOnly,
+            onRecentlyPlayedOnlyChange = onRecentlyPlayedOnlyChange,
         )
     }
 }

@@ -2,6 +2,7 @@ package com.comst19.dambom.feature.library
 
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.core.domain.model.PlaybackHistory
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
 import com.comst19.dambom.feature.library.file.suggestedFileName
@@ -12,6 +13,59 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class LibraryUiStateTest {
+    @Test
+    fun `recently played uses playback time and excludes downloaded but never played videos`() {
+        val oldDownload = task("old", DownloadStatus.COMPLETED, "/old.mp4").copy(updatedAtMillis = 1L)
+        val newDownload = oldDownload.copy(id = "new", updatedAtMillis = 100L)
+        val unplayed = newDownload.copy(id = "unplayed", updatedAtMillis = 200L)
+        val snapshot = LibrarySnapshot(listOf(newDownload, oldDownload, unplayed))
+        val history =
+            mapOf(
+                "old" to PlaybackHistory("old", 10L, 100L, 300L),
+                "new" to PlaybackHistory("new", 50L, 100L, 200L),
+                "deleted" to PlaybackHistory("deleted", 10L, 100L, 400L),
+            )
+        val state = toLibraryUiState(snapshot, null, recentlyPlayedOnly = true, playbackHistory = history)
+        val progressUpdate = history + ("new" to history.getValue("new").copy(positionMillis = 80L))
+
+        assertEquals(listOf(oldDownload, newDownload), state.videos)
+        assertEquals(
+            state.videos,
+            toLibraryUiState(snapshot, null, recentlyPlayedOnly = true, playbackHistory = progressUpdate).videos,
+        )
+        assertEquals(
+            listOf(unplayed, newDownload, oldDownload),
+            toLibraryUiState(snapshot, null, playbackHistory = history).videos,
+        )
+        assertEquals(3, state.totalVideoCount)
+    }
+
+    @Test
+    fun `recently played intersects search source and favorites while preserving detail`() {
+        val matching =
+            task("match", DownloadStatus.COMPLETED, "/match.mp4")
+                .copy(title = "Travel", isFavorite = true, sourcePageUrl = "https://x.com/user/status/1")
+        val ordinary = matching.copy(id = "ordinary", isFavorite = false)
+        val web = matching.copy(id = "web", sourcePageUrl = "https://example.com")
+        val other = matching.copy(id = "other", title = "Other")
+        val videos = listOf(matching, ordinary, web, other)
+        val history = videos.associate { it.id to PlaybackHistory(it.id, 10L, 100L, 100L) }
+        val state =
+            toLibraryUiState(
+                LibrarySnapshot(videos),
+                ordinary.id,
+                query = " travel ",
+                sourceFilter = LibrarySourceFilter.X,
+                favoritesOnly = true,
+                recentlyPlayedOnly = true,
+                playbackHistory = history,
+            )
+
+        assertEquals(listOf(matching), state.videos)
+        assertEquals(ordinary, state.selectedVideo)
+        assertTrue(state.recentlyPlayedOnly)
+    }
+
     @Test
     fun `favorites intersect source and search without changing totals or selected detail`() {
         val web = task("web", DownloadStatus.COMPLETED, "/video/web.mp4").copy(isFavorite = true, title = "Travel")

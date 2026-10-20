@@ -6,18 +6,35 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.test.platform.app.InstrumentationRegistry
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.component.FullscreenContentMode
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 class PlayerSettingsTest {
     @get:Rule val composeRule = createComposeRule()
+
+    private lateinit var player: ExoPlayer
+
+    @Before
+    fun setUp() {
+        composeRule.runOnUiThread {
+            player = ExoPlayer.Builder(InstrumentationRegistry.getInstrumentation().targetContext).build()
+        }
+    }
+
+    @After
+    fun tearDown() {
+        composeRule.runOnIdle { player.release() }
+    }
 
     private fun label(id: Int) = InstrumentationRegistry.getInstrumentation().targetContext.getString(id)
 
@@ -30,7 +47,7 @@ class PlayerSettingsTest {
                 if (interaction.locked) {
                     PlayerLockButton(interaction)
                 } else {
-                    PlayerSettingsButton(interaction, FullscreenContentMode.Fit, {}, null, { expanded = it })
+                    PlayerSettingsButton(player, interaction, FullscreenContentMode.Fit, {}, null, { expanded = it })
                 }
             }
         }
@@ -51,7 +68,7 @@ class PlayerSettingsTest {
     @Test
     fun reset_zoom_is_hidden_until_zoomed() {
         composeRule.setContent {
-            MaterialTheme { PlayerSettingsButton(PlayerInteractionState(), FullscreenContentMode.Fit, {}, null, {}) }
+            MaterialTheme { PlayerSettingsButton(player, PlayerInteractionState(), FullscreenContentMode.Fit, {}, null, {}) }
         }
         composeRule.onNodeWithContentDescription(label(R.string.player_settings)).performClick()
         composeRule.onNodeWithText(label(R.string.player_zoom_reset)).assertDoesNotExist()
@@ -63,7 +80,7 @@ class PlayerSettingsTest {
         val interaction = PlayerInteractionState(scale = 3f, panX = 100f, panY = -50f)
         var expanded = false
         composeRule.setContent {
-            MaterialTheme { PlayerSettingsButton(interaction, FullscreenContentMode.Fit, {}, null, { expanded = it }) }
+            MaterialTheme { PlayerSettingsButton(player, interaction, FullscreenContentMode.Fit, {}, null, { expanded = it }) }
         }
         composeRule.onNodeWithContentDescription(label(R.string.player_settings)).performClick()
         composeRule.onNodeWithText(label(R.string.player_zoom_reset)).performClick()
@@ -81,7 +98,7 @@ class PlayerSettingsTest {
         var rotations = 0
         composeRule.setContent {
             MaterialTheme {
-                PlayerSettingsButton(PlayerInteractionState(), FullscreenContentMode.Fit, { modeChanges++ }, { rotations++ }, {})
+                PlayerSettingsButton(player, PlayerInteractionState(), FullscreenContentMode.Fit, { modeChanges++ }, { rotations++ }, {})
             }
         }
         composeRule.onNodeWithContentDescription(label(R.string.player_settings)).performClick()

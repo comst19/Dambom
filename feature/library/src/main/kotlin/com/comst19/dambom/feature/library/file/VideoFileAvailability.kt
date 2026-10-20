@@ -1,10 +1,7 @@
 package com.comst19.dambom.feature.library.file
 
-import android.os.FileObserver
-import android.os.Handler
-import android.os.Looper
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,23 +21,11 @@ internal fun rememberLocalVideoAvailable(task: DownloadTask?): MutableState<Bool
             mutableStateOf(isLocalVideoAvailable(task))
         }
     val latestTask by rememberUpdatedState(task)
-    DisposableEffect(task?.id, task?.status, task?.localFilePath) {
-        val file = task?.localFilePath?.let(::File)
-        val parent = file?.parentFile
-        if (file == null || parent == null) return@DisposableEffect onDispose {}
-        val mainHandler = Handler(Looper.getMainLooper())
-        val observer =
-            object : FileObserver(parent.path, DELETE or MOVED_FROM or CREATE or MOVED_TO or CLOSE_WRITE or ATTRIB) {
-                override fun onEvent(
-                    event: Int,
-                    path: String?,
-                ) {
-                    if (!isTargetFileEvent(path, file.name)) return
-                    mainHandler.post { availability.value = isLocalVideoAvailable(latestTask) }
-                }
-            }
-        observer.startWatching()
-        onDispose { observer.stopWatching() }
+    LaunchedEffect(task?.id, task?.status, task?.localFilePath) {
+        val path = task?.localFilePath ?: return@LaunchedEffect
+        observeLocalVideoChanges(path).collect {
+            availability.value = isLocalVideoAvailable(latestTask)
+        }
     }
     return availability
 }

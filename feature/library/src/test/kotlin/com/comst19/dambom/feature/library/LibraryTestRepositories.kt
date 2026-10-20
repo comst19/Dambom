@@ -49,6 +49,8 @@ internal object LibraryTestSettings : SettingsRepository {
 
     override suspend fun setThemeMode(mode: ThemeMode) = Unit
 
+    override suspend fun setPlaybackSpeed(speed: Float) = Unit
+
     override suspend fun setClipboardSuggestion(
         promptShown: Boolean,
         enabled: Boolean,

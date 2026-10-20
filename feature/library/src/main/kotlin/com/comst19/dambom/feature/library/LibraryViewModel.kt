@@ -13,6 +13,7 @@ import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.repository.DownloadRepository
+import com.comst19.dambom.core.domain.repository.PlaybackHistoryRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -37,6 +39,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class LibraryViewModel
     @Inject
+    @Suppress("LongParameterList")
     constructor(
         private val repository: DownloadRepository,
         private val settingsRepository: SettingsRepository,
@@ -44,20 +47,28 @@ internal class LibraryViewModel
         private val savedStateHandle: SavedStateHandle,
         private val fileManager: LibraryFileManager,
         private val appEventBus: AppEventBus,
+        private val playbackHistoryRepository: PlaybackHistoryRepository,
     ) : ViewModel() {
         private val selectedId = savedStateHandle.getStateFlow<String?>(SELECTED_ID_KEY, null)
         private val query = savedStateHandle.getStateFlow(QUERY_KEY, "")
         private val viewMode = savedStateHandle.getStateFlow(VIEW_MODE_KEY, LibraryViewMode.GRID.name)
         private val sourceFilter = savedStateHandle.getStateFlow(SOURCE_FILTER_KEY, LibrarySourceFilter.ALL.name)
         private val favoritesOnly = savedStateHandle.getStateFlow(FAVORITES_ONLY_KEY, false)
+        private val recentlyPlayedOnly = savedStateHandle.getStateFlow(RECENTLY_PLAYED_ONLY_KEY, false)
         private val selection = MutableStateFlow(LibrarySelectionState())
         private var deletingSelection = false
         private val displayPreferences =
-            combine(viewMode, sourceFilter, favoritesOnly) { viewMode, sourceFilter, favoritesOnly ->
+            combine(
+                viewMode,
+                sourceFilter,
+                favoritesOnly,
+                recentlyPlayedOnly,
+            ) { viewMode, sourceFilter, favoritesOnly, recentlyPlayedOnly ->
                 LibraryDisplayPreferences(
                     viewMode = LibraryViewMode.entries.firstOrNull { it.name == viewMode } ?: LibraryViewMode.GRID,
                     sourceFilter = LibrarySourceFilter.entries.firstOrNull { it.name == sourceFilter } ?: LibrarySourceFilter.ALL,
                     favoritesOnly = favoritesOnly,
+                    recentlyPlayedOnly = recentlyPlayedOnly,
                 )
             }
         private val libraryDownloads =
@@ -75,22 +86,33 @@ internal class LibraryViewModel
                 initialValue = AppSettings(),
             )
 
-        val uiState: StateFlow<LibraryUiState> =
+        private val libraryWithHistory =
             combine(
                 libraryDownloads,
+                playbackHistoryRepository.observeHistory().distinctUntilChanged { old, new ->
+                    old.size == new.size &&
+                        old.all { (id, item) -> new[id]?.lastPlayedAtMillis == item.lastPlayedAtMillis }
+                },
+            ) { tasks, history -> tasks to history }
+
+        val uiState: StateFlow<LibraryUiState> =
+            combine(
+                libraryWithHistory,
                 selectedId,
                 query,
                 displayPreferences,
                 selection,
             ) { tasks, selectedId, query, preferences, selection ->
                 toLibraryUiState(
-                    tasks = tasks,
+                    tasks = tasks.first,
+                    playbackHistory = tasks.second,
                     selectedId = selectedId,
                     query = query,
                     viewMode = preferences.viewMode,
                     sourceFilter = preferences.sourceFilter,
                     selection = selection,
                     favoritesOnly = preferences.favoritesOnly,
+                    recentlyPlayedOnly = preferences.recentlyPlayedOnly,
                 )
             }.stateIn(
                 scope = viewModelScope,
@@ -134,6 +156,10 @@ internal class LibraryViewModel
 
         fun setFavoritesOnly(enabled: Boolean) {
             savedStateHandle[FAVORITES_ONLY_KEY] = enabled
+        }
+
+        fun setRecentlyPlayedOnly(enabled: Boolean) {
+            savedStateHandle[RECENTLY_PLAYED_ONLY_KEY] = enabled
         }
 
         fun toggleFavorite(task: DownloadTask) {
@@ -326,6 +352,7 @@ private data class LibraryDisplayPreferences(
     val viewMode: LibraryViewMode,
     val sourceFilter: LibrarySourceFilter,
     val favoritesOnly: Boolean,
+    val recentlyPlayedOnly: Boolean,
 )
 
 private const val SELECTED_ID_KEY = "library-selected-video-id"
@@ -333,4 +360,5 @@ private const val QUERY_KEY = "library-search-query"
 private const val VIEW_MODE_KEY = "library-view-mode"
 private const val SOURCE_FILTER_KEY = "library-source-filter"
 private const val FAVORITES_ONLY_KEY = "library-favorites-only"
+private const val RECENTLY_PLAYED_ONLY_KEY = "library-recently-played-only"
 private const val STOP_TIMEOUT_MILLIS = 5_000L

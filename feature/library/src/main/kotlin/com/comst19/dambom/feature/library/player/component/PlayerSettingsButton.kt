@@ -26,13 +26,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.Player
 import com.comst19.dambom.core.designsystem.DambomIconTooltip
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.component.FullscreenContentMode
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
 
 @Composable
+@Suppress("LongParameterList")
 internal fun PlayerSettingsButton(
+    player: Player,
     interaction: PlayerInteractionState,
     contentMode: FullscreenContentMode,
     onContentModeToggle: () -> Unit,
@@ -55,6 +58,7 @@ internal fun PlayerSettingsButton(
             }
         }
         DropdownMenu(expanded = expanded, onDismissRequest = ::close, modifier = Modifier.width(220.dp)) {
+            PlaybackOptionsMenuItems(player)
             val isFit = contentMode == FullscreenContentMode.Fit
             PlaybackMenuItem(
                 if (isFit) Icons.Outlined.CropFree else Icons.Outlined.ZoomOutMap,

@@ -90,6 +90,7 @@ class PreferencesSettingsDataSourceTest {
             val path = temporaryFolder.root.resolve("shared.preferences_pb")
             val firstScope = CoroutineScope(StandardTestDispatcher(testScheduler) + SupervisorJob())
             val source = PreferencesSettingsDataSource(PreferenceDataStoreFactory.create(scope = firstScope) { path })
+            source.setPlaybackSpeed(1.5f)
             source.setSharedLinkAutoDownload(true)
             source.setSharedLinkQuality("PREFERRED_RESOLUTION", 720)
             firstScope.cancel()
@@ -99,6 +100,7 @@ class PreferencesSettingsDataSourceTest {
                 PreferencesSettingsDataSource(PreferenceDataStoreFactory.create(scope = reopenedScope) { path })
             reopened.settings.test {
                 val settings = awaitItem()
+                assertEquals(1.5f, settings.playbackSpeed)
                 assertEquals(true, settings.sharedLinkAutoDownload)
                 assertEquals("PREFERRED_RESOLUTION", settings.sharedLinkQuality)
                 assertEquals(720, settings.sharedLinkResolution)

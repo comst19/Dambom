@@ -1,5 +1,6 @@
 package com.comst19.dambom.feature.library
 
+import com.comst19.dambom.core.domain.model.PlaybackHistory
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
@@ -15,11 +16,14 @@ internal fun toLibraryUiState(
     sourceFilter: LibrarySourceFilter = LibrarySourceFilter.ALL,
     selection: LibrarySelectionState = LibrarySelectionState(),
     favoritesOnly: Boolean = false,
+    recentlyPlayedOnly: Boolean = false,
+    playbackHistory: Map<String, PlaybackHistory> = emptyMap(),
 ): LibraryUiState {
     val savedVideos = tasks.videos
     val sourceVideos =
         savedVideos.filter { task ->
-            (!favoritesOnly || task.isFavorite) &&
+            (!recentlyPlayedOnly || task.id in playbackHistory) &&
+                (!favoritesOnly || task.isFavorite) &&
                 when (sourceFilter) {
                     LibrarySourceFilter.ALL -> {
                         true
@@ -42,7 +46,14 @@ internal fun toLibraryUiState(
             sourceVideos.filter { it.title.contains(trimmedQuery, ignoreCase = true) }
         }
     return LibraryUiState(
-        videos = videos.toPersistentList(),
+        videos =
+            (
+                if (recentlyPlayedOnly) {
+                    videos.sortedByDescending { playbackHistory[it.id]?.lastPlayedAtMillis }
+                } else {
+                    videos
+                }
+            ).toPersistentList(),
         selectedVideo = savedVideos.firstOrNull { it.id == selectedId },
         query = query,
         hasVideos = savedVideos.isNotEmpty(),
@@ -53,5 +64,6 @@ internal fun toLibraryUiState(
         totalVideoCount = tasks.totalVideoCount,
         sourceFilter = sourceFilter,
         favoritesOnly = favoritesOnly,
+        recentlyPlayedOnly = recentlyPlayedOnly,
     )
 }

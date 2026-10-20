@@ -12,6 +12,21 @@ import org.junit.Test
 
 class DefaultSettingsRepositoryTest {
     @Test
+    fun `supported playback speeds persist and unsupported speeds are rejected`() =
+        runTest {
+            val repository = DefaultSettingsRepository(FakeSettingsDataSource())
+            repository.settings.test {
+                assertEquals(1f, awaitItem().playbackSpeed)
+                repository.setPlaybackSpeed(1.75f)
+                assertEquals(1.75f, awaitItem().playbackSpeed)
+                org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
+                    kotlinx.coroutines.runBlocking { repository.setPlaybackSpeed(1.1f) }
+                }
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
     fun `settings map DataStore values to domain and persist updates`() =
         runTest {
             val dataSource = FakeSettingsDataSource()
@@ -48,6 +63,10 @@ private class FakeSettingsDataSource : SettingsDataSource {
     private val settingsState = MutableStateFlow(StoredSettings())
 
     override val settings: Flow<StoredSettings> = settingsState
+
+    override suspend fun setPlaybackSpeed(speed: Float) {
+        settingsState.value = settingsState.value.copy(playbackSpeed = speed)
+    }
 
     override suspend fun setThemeMode(value: String) {
         settingsState.value = settingsState.value.copy(themeMode = value)

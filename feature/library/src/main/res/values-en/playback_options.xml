@@ -1,0 +1,13 @@
+<resources>
+    <string name="player_resume_title">Continue watching?</string>
+    <string name="player_resume_message">You watched up to %1$s.</string>
+    <string name="player_resume_continue">Continue</string>
+    <string name="player_resume_restart">Start over</string>
+    <string name="player_history_failure">Could not load or save playback history.</string>
+    <string name="player_settings_failure">Could not save playback settings.</string>
+    <string name="player_speed">Playback speed</string>
+    <string name="player_speed_value">Playback speed · %1$s×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Repeat this video</string>
+    <string name="player_options_close">Close</string>
+</resources>

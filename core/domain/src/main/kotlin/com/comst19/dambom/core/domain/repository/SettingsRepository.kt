@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.Flow
 interface SettingsRepository {
     val settings: Flow<AppSettings>
 
+    suspend fun setPlaybackSpeed(speed: Float)
+
     suspend fun setThemeMode(mode: ThemeMode)
 
     suspend fun setClipboardSuggestion(

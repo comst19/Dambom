@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="library_recently_played">최근 본 영상</string>
+    <string name="library_recently_played_empty_title">최근 본 영상이 없어요</string>
+    <string name="library_recently_played_empty_description">영상을 재생하면 여기에 표시돼요. 필터를 적용했다면 다른 조건도 확인해 주세요.</string>
+</resources>

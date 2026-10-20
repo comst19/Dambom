@@ -144,6 +144,8 @@ private class TestOperation : Operation {
 private object TestSettingsRepository : SettingsRepository {
     override val settings = flowOf(AppSettings())
 
+    override suspend fun setPlaybackSpeed(speed: Float) = Unit
+
     override suspend fun setThemeMode(mode: ThemeMode) = Unit
 
     override suspend fun setClipboardSuggestion(

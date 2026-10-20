@@ -347,6 +347,8 @@ private object EnabledClipboardSettingsRepository : SettingsRepository {
             ),
         )
 
+    override suspend fun setPlaybackSpeed(speed: Float) = Unit
+
     override suspend fun setThemeMode(mode: ThemeMode) = Unit
 
     override suspend fun setClipboardSuggestion(

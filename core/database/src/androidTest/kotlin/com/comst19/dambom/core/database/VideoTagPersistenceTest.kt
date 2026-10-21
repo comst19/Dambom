@@ -49,7 +49,7 @@ class VideoTagPersistenceTest {
             val first =
                 Room
                     .databaseBuilder(context, DambomDatabase::class.java, name)
-                    .addMigrations(DambomDatabase.MIGRATION_5_6)
+                    .addMigrations(DambomDatabase.MIGRATION_5_6, DambomDatabase.MIGRATION_6_7)
                     .build()
             try {
                 val tags = first.videoTagDao()
@@ -62,7 +62,7 @@ class VideoTagPersistenceTest {
             val reopened =
                 Room
                     .databaseBuilder(context, DambomDatabase::class.java, name)
-                    .addMigrations(DambomDatabase.MIGRATION_5_6)
+                    .addMigrations(DambomDatabase.MIGRATION_5_6, DambomDatabase.MIGRATION_6_7)
                     .build()
             try {
                 val tags = reopened.videoTagDao()

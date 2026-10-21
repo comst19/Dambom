@@ -65,14 +65,20 @@ import kotlinx.coroutines.delay
 internal fun CandidatePreviewDialog(
     candidate: MediaCandidate,
     onDismiss: () -> Unit,
-    playerFactory: (Context) -> Player = ::createCandidatePreviewPlayer,
+    playerFactory: ((Context) -> Player)? = null,
 ) {
     val context = LocalContext.current
     val player =
-        remember(candidate.url) {
-            playerFactory(context).apply {
+        remember(candidate.url, candidate.requestHeaders, candidate.videoHeight) {
+            (playerFactory?.invoke(context) ?: createCandidatePreviewPlayer(context, candidate)).apply {
                 repeatMode = Player.REPEAT_MODE_ONE
-                setMediaItem(MediaItem.fromUri(candidate.url))
+                setMediaItem(
+                    MediaItem
+                        .Builder()
+                        .setUri(candidate.url)
+                        .setMimeType(candidate.mimeType)
+                        .build(),
+                )
                 prepare()
                 playWhenReady = true
             }

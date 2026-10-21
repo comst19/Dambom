@@ -102,7 +102,7 @@ internal fun DetectionQualitySheet(
             }
             Spacer(Modifier.height(16.dp))
             candidate.downloadVariants.forEach { variant ->
-                val selected = variant.url == selectedVariant.url
+                val selected = variant.selectionId == selectedVariant.selectionId
                 Row(
                     modifier =
                         Modifier

@@ -33,7 +33,9 @@ internal fun MediaCandidate.preferredSharedVariant(settings: AppSettings): Media
 private val MediaVariant.resolution: Int?
     get() {
         val dimensions = DIMENSIONS.find(quality)
-        if (dimensions != null) return minOf(dimensions.groupValues[1].toInt(), dimensions.groupValues[2].toInt())
+        val width = dimensions?.groupValues?.get(1)?.toIntOrNull()
+        val height = dimensions?.groupValues?.get(2)?.toIntOrNull()
+        if (width != null && height != null) return minOf(width, height)
         return RESOLUTION
             .find(quality)
             ?.groupValues

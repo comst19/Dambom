@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.core.common.ui.appScaffoldPadding
+import com.comst19.dambom.core.domain.model.MediaResourceRequest
 import com.comst19.dambom.feature.web.component.WebAddressBar
 import com.comst19.dambom.feature.web.component.WebStartPage
 import com.comst19.dambom.feature.web.component.WebTabsSheet
@@ -66,7 +67,7 @@ internal fun WebScreen(
     onPageStarted: (Long, String?, String?, Long) -> Unit,
     onPageFinished: (Long, String?, String?, Long) -> Unit,
     onPageChanged: (Long, String?, String?) -> Unit,
-    onMediaRequest: (Long, Long, String) -> Unit,
+    onMediaRequest: (Long, Long, MediaResourceRequest) -> Unit,
     onScan: () -> Unit,
     onOpenDetectedMedia: () -> Unit,
     onCreateTab: (String?) -> Unit,

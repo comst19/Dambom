@@ -4,8 +4,9 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.comst19.dambom.core.domain.model.MediaCandidate
+import com.comst19.dambom.core.common.net.hasVideoFileExtension
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
+import com.comst19.dambom.core.domain.model.MediaResourceRequest
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionSnapshots
 import com.comst19.dambom.core.navigation.NavigationDispatcher
@@ -24,7 +25,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,9 +43,11 @@ internal class WebViewModel
         private val mutableUiState = MutableStateFlow(savedStateHandle.restoreWebUiState())
         val uiState: StateFlow<WebUiState> = mutableUiState.asStateFlow()
         private val savedWebStates = LinkedHashMap<Long, Bundle>()
-        private val detectedMedia = mutableMapOf<Long, LinkedHashMap<String, MediaCandidate>>()
+        private val mediaByTab = mutableMapOf<Long, WebMediaCandidates>()
         private val pageGenerations = mutableMapOf<Long, Long>()
         private val scanJobs = mutableMapOf<Long, Job>()
+        private val probeJobs = mutableMapOf<Long, MutableList<Job>>()
+        private val probeSlots = Semaphore(2)
         private var nextTabId =
             savedStateHandle[NEXT_TAB_ID_KEY] ?: (
                 (
@@ -205,20 +211,14 @@ internal class WebViewModel
                     when (val result = mediaDetectionRepository.detect(url)) {
                         is MediaDetectionResult.Success -> {
                             updateTabIfCurrentPage(tab.id, url, generation) {
-                                val candidates = detectedMedia.getOrPut(tab.id, ::linkedMapOf)
-                                result.candidates.take(MAX_DETECTED_MEDIA).forEach { candidate ->
-                                    val key = candidate.url.detectedVideoKey()
-                                    if (key in candidates || candidates.size < MAX_DETECTED_MEDIA) {
-                                        candidates[key] = candidate
-                                    }
-                                }
-                                it.copy(detectionState = WebDetectionState.Found(candidates.size))
+                                val count = mediaByTab.getOrPut(tab.id, ::WebMediaCandidates).merge(result.candidates)
+                                it.copy(detectionState = WebDetectionState.Found(count))
                             }
                         }
 
                         is MediaDetectionResult.Unsupported -> {
                             updateTabIfCurrentPage(tab.id, url, generation) {
-                                val count = detectedMedia[tab.id]?.size ?: 0
+                                val count = mediaByTab[tab.id]?.count ?: 0
                                 val detectionState =
                                     if (count > 0) {
                                         WebDetectionState.Found(count)
@@ -234,7 +234,7 @@ internal class WebViewModel
 
         fun openDetectedMedia() {
             val tab = uiState.value.currentTab?.takeIf { it.detectionState is WebDetectionState.Found }
-            val candidates = tab?.let { detectedMedia[it.id]?.values?.toList() }.orEmpty()
+            val candidates = tab?.let { mediaByTab[it.id]?.candidates }.orEmpty()
             val url = tab?.url ?: return
             if (candidates.isEmpty()) return
             val snapshotId = snapshots.save(url, MediaDetectionResult.Success(tab.title, candidates))
@@ -258,28 +258,34 @@ internal class WebViewModel
             tabId: Long,
             generation: Long,
             url: String,
+        ) = onMediaRequest(tabId, generation, MediaResourceRequest(url))
+
+        fun onMediaRequest(
+            tabId: Long,
+            generation: Long,
+            request: MediaResourceRequest,
         ) {
-            if (!url.hasVideoExtension()) return
+            if (!request.method.equals("GET", true) || !shouldProbeMedia(request.url)) return
             viewModelScope.launch {
                 if (pageGenerations[tabId] != generation) return@launch
+                probeJobs.getOrPut(tabId, ::mutableListOf).apply {
+                    removeAll { it.isCompleted }
+                    add(coroutineContext.job)
+                }
                 val tab = uiState.value.tabs.firstOrNull { it.id == tabId } ?: return@launch
-                val candidates = detectedMedia.getOrPut(tabId, ::linkedMapOf)
-                val key = url.detectedVideoKey()
-                if (key in candidates || candidates.size >= MAX_DETECTED_MEDIA) return@launch
-                candidates[key] =
-                    MediaCandidate(
-                        id = key,
-                        url = url,
-                        title =
-                            url
-                                .substringBefore('?')
-                                .substringAfterLast('/')
-                                .substringBeforeLast('.')
-                                .ifBlank { tab.title },
-                        mimeType = null,
-                        contentLength = null,
-                    )
-                updateCurrentTabIf(tabId) { it.copy(detectionState = WebDetectionState.Found(candidates.size)) }
+                val media = mediaByTab.getOrPut(tabId, ::WebMediaCandidates)
+                if (!media.claim(request)) return@launch
+                val result =
+                    if (request.url.hasVideoFileExtension()) {
+                        directMediaResult(request, tab.title)
+                    } else {
+                        probeSlots.withPermit { mediaDetectionRepository.detectRequest(request.url, request.headers) }
+                    }
+                if (pageGenerations[tabId] != generation || result !is MediaDetectionResult.Success) return@launch
+                val count = media.merge(result.candidates)
+                if (count > 0) {
+                    updateCurrentTabIf(tabId) { it.copy(detectionState = WebDetectionState.Found(count)) }
+                }
             }
         }
 
@@ -338,7 +344,8 @@ internal class WebViewModel
 
         private fun invalidatePage(tabId: Long) {
             scanJobs.remove(tabId)?.cancel()
-            detectedMedia.remove(tabId)
+            probeJobs.remove(tabId)?.forEach(Job::cancel)
+            mediaByTab.remove(tabId)
             pageGenerations.remove(tabId)
         }
 
@@ -349,7 +356,6 @@ internal class WebViewModel
     }
 
 private const val MAX_RECENT_PAGES = 8
-private const val MAX_DETECTED_MEDIA = 100
 private const val MAX_RETAINED_WEB_STATES = 3
 private const val NEXT_TAB_ID_KEY = "web-next-tab-id"
 private const val INITIAL_URL_APPLIED_KEY = "web-initial-url-applied"

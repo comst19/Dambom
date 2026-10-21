@@ -43,6 +43,9 @@ object NetworkModule {
             .addInterceptor(headerInterceptor)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
+                    redactHeader("Cookie")
+                    redactHeader("Authorization")
+                    redactHeader("Referer")
                     level = networkConfig.logLevel
                 },
             ).connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)

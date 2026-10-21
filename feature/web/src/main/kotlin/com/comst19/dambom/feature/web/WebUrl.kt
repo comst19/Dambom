@@ -1,6 +1,6 @@
 package com.comst19.dambom.feature.web
 
-import com.comst19.dambom.core.common.net.hasVideoFileExtension
+import com.comst19.dambom.core.common.net.hasMediaExtension
 import com.comst19.dambom.core.common.net.isHttpUrl
 import java.net.URI
 
@@ -13,7 +13,7 @@ internal fun String.normalizeAddress(): String? =
 
 internal fun String.hostLabel(): String = runCatching { URI(this).host.removePrefix("www.") }.getOrDefault(this)
 
-internal fun String.hasVideoExtension(): Boolean = hasVideoFileExtension()
+internal fun String.hasVideoExtension(): Boolean = hasMediaExtension()
 
 internal fun String.detectedVideoKey(): String =
     runCatching {

@@ -1,7 +1,11 @@
+@file:androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+
 package com.comst19.dambom.core.data.download
 
 import android.content.Context
 import android.os.StatFs
+import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.cache.SimpleCache
 import com.comst19.dambom.core.common.io.videoThumbnailFile
 import com.comst19.dambom.core.common.io.videoThumbnailTemporaryFile
 import com.comst19.dambom.core.common.io.videoThumbnailUnavailableFile
@@ -18,10 +22,34 @@ internal open class DownloadFileStore
     ) {
         private val partialDirectory = context.filesDir.resolve("download-parts").apply(File::mkdirs)
         private val videoDirectory = context.filesDir.resolve("videos").apply(File::mkdirs)
+        private val streamRoot = context.filesDir.resolve("download-streams")
+        val streamDatabaseProvider by lazy { StandaloneDatabaseProvider(context) }
+
+        fun streamDirectory(id: String): File = streamRoot.resolve(id)
+
+        fun clearStream(id: String): Boolean {
+            val directory = streamDirectory(id)
+            return when {
+                SimpleCache.isCacheFolderLocked(directory) -> {
+                    false
+                }
+
+                !directory.exists() -> {
+                    true
+                }
+
+                else -> {
+                    SimpleCache.delete(directory, streamDatabaseProvider)
+                    !directory.exists()
+                }
+            }
+        }
 
         fun partialFile(id: String): File = partialDirectory.resolve("$id.part")
 
-        fun hasSpaceFor(byteCount: Int): Boolean {
+        fun hasSpaceFor(byteCount: Int): Boolean = hasSpaceFor(byteCount.toLong())
+
+        fun hasSpaceFor(byteCount: Long): Boolean {
             val availableBytes = StatFs(partialDirectory.path).availableBytes
             return availableBytes - MIN_FREE_BYTES >= byteCount
         }
@@ -62,16 +90,11 @@ internal open class DownloadFileStore
                     }
                 }
             var allDeleted = true
+            if (!clearStream(id)) allDeleted = false
             files.forEach { file ->
                 if (!deleteIfPresent(file)) allDeleted = false
             }
             return allDeleted
-        }
-
-        private fun deleteIfPresent(file: File): Boolean {
-            if (!file.exists()) return true
-            file.delete()
-            return !file.exists()
         }
     }
 
@@ -79,14 +102,14 @@ private fun fileExtension(
     url: String,
     mimeType: String?,
 ): String {
+    if (streamMimeType(url, mimeType) != null) return ".mp4"
     val urlExtension =
         url
             .substringBefore('?')
             .substringAfterLast('/', missingDelimiterValue = "")
             .substringAfterLast('.', missingDelimiterValue = "")
             .takeIf { it.length in 2..5 && it.all(Char::isLetterOrDigit) }
-    if (urlExtension != null) return ".$urlExtension"
-    return when (mimeType?.substringBefore(';')) {
+    return urlExtension?.let { ".$it" } ?: when (mimeType?.substringBefore(';')) {
         "video/webm" -> ".webm"
         "video/quicktime" -> ".mov"
         "video/x-m4v" -> ".m4v"
@@ -95,3 +118,9 @@ private fun fileExtension(
 }
 
 private const val MIN_FREE_BYTES = 16L * 1024 * 1024
+
+private fun deleteIfPresent(file: File): Boolean {
+    if (!file.exists()) return true
+    file.delete()
+    return !file.exists()
+}

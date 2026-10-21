@@ -1,7 +1,9 @@
 package com.comst19.dambom.feature.web
 
 import androidx.lifecycle.SavedStateHandle
+import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
+import com.comst19.dambom.core.domain.model.MediaResourceRequest
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionSnapshots
@@ -29,6 +31,49 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class WebViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
+
+    @Test
+    fun `rescanning preserves captured headers in the result snapshot`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val mediaUrl = "https://example.com/video.mp4"
+            val candidate = MediaCandidate("video", mediaUrl, "Video", "video/mp4", null)
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String) = MediaDetectionResult.Success("Page", listOf(candidate))
+                }
+            val navigation = SpyNavigationDispatcher()
+            val snapshots = MediaDetectionSnapshots()
+            val viewModel = WebViewModel(repository, navigation, SavedStateHandle(), snapshots)
+            val id = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(id, FIRST_PAGE_URL, "Page", 1L)
+            val headers = mapOf("Cookie" to "session=test")
+            viewModel.onMediaRequest(id, 1L, MediaResourceRequest(mediaUrl, headers))
+            advanceUntilIdle()
+            viewModel.scanCurrentTab()
+            advanceUntilIdle()
+            viewModel.openDetectedMedia()
+            advanceUntilIdle()
+            val key = (navigation.dispatched.single() as NavigationEvent.Navigate).key as DetectionResultKey
+            val result = snapshots.get(checkNotNull(key.snapshotId), key.url)
+            assertEquals(headers, result?.candidates?.single()?.requestHeaders)
+        }
+
+    @Test
+    fun `unknown resource probe budget does not hide later video requests`() =
+        runTest {
+            val viewModel = createViewModel()
+            val id = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(id, FIRST_PAGE_URL, "Page", 1L)
+            repeat(140) { viewModel.onMediaRequest(id, 1L, "https://example.com/api/$it") }
+            advanceUntilIdle()
+            viewModel.onMediaRequest(id, 1L, "https://example.com/video.mp4")
+            advanceUntilIdle()
+            assertEquals(
+                WebDetectionState.Found(1),
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+        }
 
     @Test
     fun `web accepts uppercase explicit schemes and still supplies a missing scheme`() {

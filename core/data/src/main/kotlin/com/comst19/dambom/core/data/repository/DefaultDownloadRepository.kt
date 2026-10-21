@@ -13,6 +13,7 @@ import com.comst19.dambom.core.domain.model.DownloadStatusSnapshot
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.repository.DownloadRepository
+import com.comst19.dambom.core.network.header.encodeMediaHeaders
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -200,6 +201,8 @@ class DefaultDownloadRepository
 private fun DownloadRequest.toEntity(now: Long): DownloadTaskEntity =
     DownloadTaskEntity(
         id = id,
+        requestHeaders = encodeMediaHeaders(requestHeaders),
+        videoHeight = videoHeight,
         url = url,
         sourcePageUrl = sourcePageUrl,
         host = URI(url).host.orEmpty().lowercase(),
@@ -223,7 +226,7 @@ private fun DownloadTaskEntity.toDomain(localFilePath: String?): DownloadTask =
         url = url,
         sourcePageUrl = sourcePageUrl,
         title = title,
-        mimeType = mimeType,
+        mimeType = completedMimeType(),
         expectedBytes = expectedBytes,
         downloadedBytes = downloadedBytes,
         quality = quality,
@@ -243,3 +246,10 @@ private inline fun <reified T : Enum<T>> enumValueOrDefault(
 ): T = enumValues<T>().firstOrNull { it.name == value } ?: default
 
 private const val INSERT_IGNORED = -1L
+
+private fun DownloadTaskEntity.completedMimeType(): String? =
+    if (status == DownloadStatus.COMPLETED.name && localFileName?.endsWith(".mp4") == true) {
+        "video/mp4"
+    } else {
+        mimeType
+    }

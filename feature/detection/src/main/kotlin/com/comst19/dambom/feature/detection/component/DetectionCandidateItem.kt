@@ -208,7 +208,7 @@ internal fun DetectionCandidateItem(
             onDismiss = { showQualitySheet = false },
             onSelect = { variant ->
                 showQualitySheet = false
-                onSelectVariant(variant.url)
+                onSelectVariant(variant.selectionId)
             },
         )
     }

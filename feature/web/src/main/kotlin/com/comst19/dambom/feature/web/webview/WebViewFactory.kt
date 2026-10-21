@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
+import android.webkit.CookieManager
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SafeBrowsingResponse
 import android.webkit.SslErrorHandler
@@ -18,6 +19,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import com.comst19.dambom.core.domain.model.MediaResourceRequest
 import com.comst19.dambom.feature.web.contract.WebTab
 import java.util.concurrent.atomic.AtomicLong
 
@@ -29,13 +31,14 @@ internal fun createWebView(
     onPageStarted: (Long, String?, String?, Long) -> Unit,
     onPageFinished: (Long, String?, String?, Long) -> Unit,
     onPageChanged: (Long, String?, String?) -> Unit,
-    onMediaRequest: (Long, Long, String) -> Unit,
+    onMediaRequest: (Long, Long, MediaResourceRequest) -> Unit,
     onProgress: (Int) -> Unit,
     onNavigationFailure: (WebNavigationFailure?) -> Unit,
     onRendererGone: (WebView) -> Unit,
 ): WebView =
     WebView(context).apply {
         val pageGeneration = AtomicLong()
+        val mediaUserAgent = settings.userAgentString
         var pageStarted = false
         var failureBeforePageStart = false
         settings.javaScriptEnabled = true
@@ -48,6 +51,14 @@ internal fun createWebView(
         val mediaGuardInstalled = WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
         if (mediaGuardInstalled) {
             WebViewCompat.addDocumentStartJavaScript(this, WEB_MEDIA_GUARD_SCRIPT, setOf("*"))
+        }
+        installWebMediaObserver(this, tab.id, pageGeneration) { tabId, generation, request ->
+            val enriched =
+                request.withBrowserContext(
+                    mediaUserAgent,
+                    CookieManager.getInstance().getCookie(request.url),
+                )
+            onMediaRequest(tabId, generation, enriched)
         }
         webViewClient =
             object : WebViewClient() {
@@ -80,7 +91,12 @@ internal fun createWebView(
                     request: WebResourceRequest?,
                 ): WebResourceResponse? {
                     val url = request?.url?.toString() ?: return null
-                    onMediaRequest(tab.id, pageGeneration.get(), url)
+                    if (request.method.equals("GET", true)) {
+                        val mediaRequest =
+                            MediaResourceRequest(url, request.requestHeaders, request.method)
+                                .withBrowserContext(mediaUserAgent, CookieManager.getInstance().getCookie(url))
+                        onMediaRequest(tab.id, pageGeneration.get(), mediaRequest)
+                    }
                     return if (shouldBlockWebVideo(url, mediaGuardInstalled)) blockedVideoResponse() else null
                 }
 

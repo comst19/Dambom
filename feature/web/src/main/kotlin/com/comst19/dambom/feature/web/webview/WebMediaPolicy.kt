@@ -38,7 +38,7 @@ internal const val WEB_MEDIA_GUARD_SCRIPT =
       HTMLMediaElement.prototype.play = function() {
         this.autoplay = false;
         this.removeAttribute('autoplay');
-        if (!userStartedVideos.delete(this)) {
+        if (!userStartedVideos.delete(this) && !(navigator.userActivation && navigator.userActivation.isActive)) {
           this.pause();
           this.preload = 'none';
           return Promise.resolve();

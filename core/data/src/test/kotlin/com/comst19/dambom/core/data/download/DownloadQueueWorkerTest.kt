@@ -71,6 +71,39 @@ class DownloadQueueWorkerTest {
     }
 
     @Test
+    fun `extensionless binary MP4 is identified by its file type box`() =
+        runTest {
+            val payload = byteArrayOf(0, 0, 0, 24) + "ftypisom".toByteArray() + ByteArray(12)
+            successfulServer.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "application/octet-stream")
+                    .setBody(okio.Buffer().write(payload)),
+            )
+            val task = entity("signed-mp4", successfulServer.url("/signed?token=example").toString())
+            database.downloadTaskDao().insert(task)
+
+            assertEquals(ListenableWorker.Result.success(), createWorker().doWork())
+
+            assertEquals(DownloadStatus.COMPLETED.name, database.downloadTaskDao().getById(task.id)?.status)
+            assertEquals(payload.size.toLong(), fileStore.completedFile(task.id, task.url, task.mimeType).length())
+        }
+
+    @Test
+    fun `extensionless binary error document is not saved as MP4`() =
+        runTest {
+            successfulServer.enqueue(
+                MockResponse().setHeader("Content-Type", "application/octet-stream").setBody("<html>denied</html>"),
+            )
+            val task = entity("binary-error", successfulServer.url("/signed").toString())
+            database.downloadTaskDao().insert(task)
+
+            createWorker().doWork()
+
+            assertEquals("UNSUPPORTED_FORMAT", database.downloadTaskDao().getById(task.id)?.failureReason)
+            assertNull(database.downloadTaskDao().getById(task.id)?.localFileName)
+        }
+
+    @Test
     fun `no content response fails without completing a file`() =
         runTest {
             assertEmptyResponseRejected("empty-204", MockResponse().setResponseCode(204))

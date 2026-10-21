@@ -15,3 +15,11 @@ fun String.hasVideoFileExtension(): Boolean =
     }.getOrDefault(false)
 
 private val VIDEO_EXTENSIONS = setOf(".mp4", ".webm", ".mov", ".m4v")
+
+fun String.hasStreamManifestExtension(): Boolean =
+    runCatching {
+        val path = URI(this).path.orEmpty()
+        path.endsWith(".m3u8", true) || path.endsWith(".mpd", true)
+    }.getOrDefault(false)
+
+fun String.hasMediaExtension(): Boolean = hasVideoFileExtension() || hasStreamManifestExtension()

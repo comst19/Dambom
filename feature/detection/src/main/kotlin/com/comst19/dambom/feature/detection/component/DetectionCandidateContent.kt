@@ -38,6 +38,7 @@ import com.comst19.dambom.core.designsystem.DambomButton
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.model.NetworkRestriction
+import com.comst19.dambom.core.network.header.mediaHeadersForUrl
 import com.comst19.dambom.feature.detection.R
 import com.comst19.dambom.feature.detection.contract.DetectionUiState
 
@@ -113,7 +114,7 @@ internal fun DetectionCandidateContent(
             ) { index, candidate ->
                 val selectedVariant =
                     candidate.downloadVariants.firstOrNull {
-                        it.url == state.selectedVariantUrls[candidate.id]
+                        it.selectionId == state.selectedVariantUrls[candidate.id]
                     } ?: candidate.downloadVariants.first()
                 val previewTitle = candidate.displayTitle(index + 1)
                 DetectionCandidateItem(
@@ -124,10 +125,20 @@ internal fun DetectionCandidateContent(
                     onClick = { onToggleCandidate(candidate.id) },
                     onSelectVariant = { onSelectVariant(candidate.id, it) },
                     onPreview = {
+                        val hasOwnHeaders = selectedVariant.requestHeaders.isNotEmpty()
+                        val headerSource = if (hasOwnHeaders) selectedVariant.url else candidate.url
                         previewCandidate =
                             candidate.copy(
                                 url = selectedVariant.url,
                                 title = previewTitle,
+                                mimeType = selectedVariant.mimeType,
+                                videoHeight = selectedVariant.videoHeight,
+                                requestHeaders =
+                                    mediaHeadersForUrl(
+                                        selectedVariant.requestHeaders.ifEmpty { candidate.requestHeaders },
+                                        headerSource,
+                                        selectedVariant.url,
+                                    ),
                             )
                     },
                 )
@@ -158,7 +169,7 @@ internal fun DetectionCandidateContent(
     pendingDownloadQuality?.let { candidate ->
         val selectedVariant =
             candidate.downloadVariants.firstOrNull {
-                it.url == state.selectedVariantUrls[candidate.id]
+                it.selectionId == state.selectedVariantUrls[candidate.id]
             } ?: candidate.downloadVariants.first()
         DetectionQualitySheet(
             candidate = candidate,
@@ -166,7 +177,7 @@ internal fun DetectionCandidateContent(
             title = candidate.displayTitle(state.candidates.indexOf(candidate) + 1),
             onDismiss = { pendingDownloadQualityIds = emptyList() },
             onSelect = { variant ->
-                onSelectVariant(candidate.id, variant.url)
+                onSelectVariant(candidate.id, variant.selectionId)
                 pendingDownloadQualityIds = pendingDownloadQualityIds.drop(1)
                 if (pendingDownloadQualityIds.isEmpty()) onDownload()
             },

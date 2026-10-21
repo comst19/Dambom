@@ -27,6 +27,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.comst19.dambom.core.designsystem.DambomLinearProgressIndicator
+import com.comst19.dambom.core.domain.model.MediaResourceRequest
 import com.comst19.dambom.feature.web.component.WebNavigationErrorContent
 import com.comst19.dambom.feature.web.component.WebRescanButton
 import com.comst19.dambom.feature.web.component.WebToolbar
@@ -43,7 +44,7 @@ internal fun ColumnScope.WebContent(
     onPageStarted: (Long, String?, String?, Long) -> Unit,
     onPageFinished: (Long, String?, String?, Long) -> Unit,
     onPageChanged: (Long, String?, String?) -> Unit,
-    onMediaRequest: (Long, Long, String) -> Unit,
+    onMediaRequest: (Long, Long, MediaResourceRequest) -> Unit,
     onSaveWebState: (Long, Bundle) -> Unit,
     onScan: () -> Unit,
     onOpenDetectedMedia: () -> Unit,

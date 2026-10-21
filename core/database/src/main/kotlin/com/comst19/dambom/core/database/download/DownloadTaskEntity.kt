@@ -30,4 +30,6 @@ data class DownloadTaskEntity(
     val createdAtMillis: Long,
     val updatedAtMillis: Long,
     @ColumnInfo(defaultValue = "0") val isFavorite: Boolean = false,
+    @ColumnInfo(defaultValue = "'{}'") val requestHeaders: String = "{}",
+    val videoHeight: Int? = null,
 )

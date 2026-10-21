@@ -4,4 +4,9 @@ import com.comst19.dambom.core.domain.model.MediaDetectionResult
 
 interface MediaDetectionRepository {
     suspend fun detect(url: String): MediaDetectionResult
+
+    suspend fun detectRequest(
+        url: String,
+        headers: Map<String, String>,
+    ): MediaDetectionResult = detect(url)
 }

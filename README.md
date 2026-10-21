@@ -12,20 +12,14 @@
 
 ## 화면 둘러보기
 
-<table align="center">
-  <tr>
-    <th align="center">링크로 찾기</th>
-    <th align="center">영상 선택</th>
-    <th align="center">보관함 정리</th>
-    <th align="center">이어보기</th>
-  </tr>
-  <tr>
-    <td align="center"><a href="docs/images/1.3.0/01-find-from-link.jpg"><img src="docs/images/1.3.0/01-find-from-link.jpg" width="200" alt="링크를 붙여넣거나 공유해 시작하는 홈 화면" /></a></td>
-    <td align="center"><a href="docs/images/1.3.0/02-choose-video.jpg"><img src="docs/images/1.3.0/02-choose-video.jpg" width="200" alt="영상과 화질을 골라 저장하는 화면" /></a></td>
-    <td align="center"><a href="docs/images/1.3.0/03-organize-library.jpg"><img src="docs/images/1.3.0/03-organize-library.jpg" width="200" alt="즐겨찾기와 태그로 정리하는 보관함" /></a></td>
-    <td align="center"><a href="docs/images/1.3.0/04-resume-playback.jpg"><img src="docs/images/1.3.0/04-resume-playback.jpg" width="200" alt="보던 위치부터 이어보는 재생 화면" /></a></td>
-  </tr>
-</table>
+<p align="center">
+  <a href="docs/images/1.3.0/01-find-from-link.jpg"><img src="docs/images/1.3.0/01-find-from-link.jpg" width="48%" alt="링크를 붙여넣거나 공유해 시작하는 홈 화면" /></a>
+  <a href="docs/images/1.3.0/02-choose-video.jpg"><img src="docs/images/1.3.0/02-choose-video.jpg" width="48%" alt="영상 선택과 저장 전 미리보기 화면" /></a>
+</p>
+<p align="center">
+  <a href="docs/images/1.3.0/03-organize-library.jpg"><img src="docs/images/1.3.0/03-organize-library.jpg" width="48%" alt="즐겨찾기와 태그로 정리하는 보관함" /></a>
+  <a href="docs/images/1.3.0/04-resume-playback.jpg"><img src="docs/images/1.3.0/04-resume-playback.jpg" width="48%" alt="영상 재생과 이어보기 선택 화면" /></a>
+</p>
 
 이미지를 누르면 크게 볼 수 있습니다.
 
@@ -67,7 +61,7 @@
 - 원본 페이지 열기, 링크 복사와 공유, 영상 파일 공유와 내보내기
 - 시작과 끝을 지정해 선택 구간을 별도 파일로 저장, 원본 유지
 
-이미지는 1.3.0 실제 앱 화면에 설명을 더한 소개 이미지입니다. 보관함의 영상 제목과 태그는 사용 예시입니다.
+이미지는 1.3.0 실제 앱 화면에 설명과 일부 화면 확대를 더한 소개 이미지입니다. 보관함의 영상 제목과 태그는 사용 예시입니다.
 
 화면 속 샘플 영상: Sintel, (c) copyright Blender Foundation | [durian.blender.org](https://durian.blender.org/about/), [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
 

@@ -4,9 +4,30 @@
 
 웹과 X(트위터)에서 찾은 영상을 저장하고, 나만의 보관함에서 다시 보는 Android 앱입니다.
 
-<img src="docs/images/1.3.0/feature-graphic.jpg" width="800" alt="담봄 소개: 웹 영상을 찾고, 담고, 보관함에서 다시 보기" />
+<p align="center">
+  <img src="docs/images/1.3.0/feature-graphic.jpg" width="880" alt="담봄 소개: 웹 영상을 찾고, 담고, 보관함에서 다시 보기" />
+</p>
 
 이 문서는 **1.3.0**의 기능과 화면을 기준으로 설명합니다.
+
+## 화면 둘러보기
+
+<table align="center">
+  <tr>
+    <th align="center">링크로 찾기</th>
+    <th align="center">영상 선택</th>
+    <th align="center">보관함 정리</th>
+    <th align="center">이어보기</th>
+  </tr>
+  <tr>
+    <td align="center"><a href="docs/images/1.3.0/01-find-from-link.jpg"><img src="docs/images/1.3.0/01-find-from-link.jpg" width="200" alt="링크를 붙여넣거나 공유해 시작하는 홈 화면" /></a></td>
+    <td align="center"><a href="docs/images/1.3.0/02-choose-video.jpg"><img src="docs/images/1.3.0/02-choose-video.jpg" width="200" alt="영상과 화질을 골라 저장하는 화면" /></a></td>
+    <td align="center"><a href="docs/images/1.3.0/03-organize-library.jpg"><img src="docs/images/1.3.0/03-organize-library.jpg" width="200" alt="즐겨찾기와 태그로 정리하는 보관함" /></a></td>
+    <td align="center"><a href="docs/images/1.3.0/04-resume-playback.jpg"><img src="docs/images/1.3.0/04-resume-playback.jpg" width="200" alt="보던 위치부터 이어보는 재생 화면" /></a></td>
+  </tr>
+</table>
+
+이미지를 누르면 크게 볼 수 있습니다.
 
 ## 주요 기능
 
@@ -21,17 +42,6 @@
 찾은 영상의 썸네일과 미리보기를 확인하고 저장할 영상을 골라보세요. 여러 영상을 함께 선택할 수 있고, 여러 화질이 제공되는 영상은 원하는 화질을 선택해 내려받을 수 있어요.
 
 지원되는 HLS·DASH 주문형 스트림도 MP4 파일로 저장합니다. 설정에서 공유 링크 자동 다운로드를 켜면 다른 앱에서 공유한 링크는 지정한 화질로 다운로드하고, 영상이 여러 개라면 먼저 저장할 항목을 선택합니다.
-
-<table>
-  <tr>
-    <th>링크 입력</th>
-    <th>영상 선택</th>
-  </tr>
-  <tr>
-    <td><img src="docs/images/1.3.0/01-find-from-link.jpg" width="320" alt="웹 주소를 붙여넣어 영상을 찾는 담봄 홈 화면" /></td>
-    <td><img src="docs/images/1.3.0/02-choose-video.jpg" width="320" alt="찾은 영상을 미리 보고 다운로드할 항목을 선택하는 화면" /></td>
-  </tr>
-</table>
 
 ### 다운로드를 한눈에 관리
 
@@ -56,17 +66,6 @@
 - 전체화면에서 재생 중 다른 앱으로 이동할 때 작은 창으로 이어 보는 PiP
 - 원본 페이지 열기, 링크 복사와 공유, 영상 파일 공유와 내보내기
 - 시작과 끝을 지정해 선택 구간을 별도 파일로 저장, 원본 유지
-
-<table>
-  <tr>
-    <th>보관함 정리</th>
-    <th>이어보기</th>
-  </tr>
-  <tr>
-    <td><img src="docs/images/1.3.0/03-organize-library.jpg" width="320" alt="즐겨찾기, 태그, 최근 본 영상 필터가 있는 1.3.0 보관함 화면" /></td>
-    <td><img src="docs/images/1.3.0/04-resume-playback.jpg" width="320" alt="저장된 재생 위치에서 이어보거나 처음부터 볼 수 있는 1.3.0 화면" /></td>
-  </tr>
-</table>
 
 이미지는 1.3.0 실제 앱 화면에 설명을 더한 소개 이미지입니다. 보관함의 영상 제목과 태그는 사용 예시입니다.
 

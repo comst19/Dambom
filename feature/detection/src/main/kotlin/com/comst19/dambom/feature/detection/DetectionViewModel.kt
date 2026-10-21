@@ -2,6 +2,7 @@ package com.comst19.dambom.feature.detection
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.comst19.dambom.core.common.net.hasVideoFileExtension
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
@@ -9,6 +10,7 @@ import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
+import com.comst19.dambom.core.domain.model.MediaVariant
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
@@ -18,6 +20,7 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
+import com.comst19.dambom.core.network.header.mediaHeadersForUrl
 import com.comst19.dambom.feature.detection.contract.DetectionUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.mutate
@@ -129,7 +132,7 @@ internal class DetectionViewModel
                                     .associate { candidate ->
                                         candidate.id to
                                             if (autoDownload) {
-                                                candidate.preferredSharedVariant(settings).url
+                                                candidate.preferredSharedVariant(settings).selectionId
                                             } else {
                                                 candidate.url
                                             }
@@ -166,7 +169,7 @@ internal class DetectionViewModel
             mutableUiState.update { state ->
                 if (state !is DetectionUiState.Content) return@update state
                 val candidate = state.candidates.firstOrNull { it.id == candidateId } ?: return@update state
-                if (candidate.downloadVariants.none { it.url == url }) return@update state
+                if (candidate.downloadVariants.none { it.selectionId == url }) return@update state
                 state.copy(selectedVariantUrls = state.selectedVariantUrls.putting(candidateId, url))
             }
         }
@@ -184,42 +187,52 @@ internal class DetectionViewModel
             if (state.isSubmitting || state.selectedIds.isEmpty()) return
             mutableUiState.value = state.copy(isSubmitting = true)
             viewModelScope.launch {
-                val requests =
-                    state.candidates
-                        .filter { it.id in state.selectedIds }
-                        .map { candidate ->
-                            val selectedUrl = state.selectedVariantUrls[candidate.id]
-                            val variant =
-                                candidate.downloadVariants.firstOrNull { it.url == selectedUrl }
-                                    ?: candidate.downloadVariants.first()
-                            DownloadRequest(
-                                id = UUID.randomUUID().toString(),
-                                url = variant.url,
-                                sourcePageUrl = sourcePageUrl,
-                                title =
-                                    candidate.displayTitle(
-                                        fallbackTitle,
-                                        state.candidates.indexOf(candidate),
-                                        state.candidates.size,
-                                    ),
-                                mimeType = variant.mimeType,
-                                expectedBytes = variant.contentLength,
-                                quality = variant.quality,
-                            )
-                        }
-                suspendRunCatching { downloadRepository.enqueue(requests) }
-                    .onSuccess { result ->
-                        appEventBus.send(AppEvent.ShowSnackbar(result.feedbackMessage))
-                        navigation.dispatch(NavigationEvent.Replace(DownloadsKey))
-                    }.onFailure {
-                        mutableUiState.update { current ->
-                            if (current is DetectionUiState.Content) {
-                                current.copy(isSubmitting = false, enqueueFailed = true)
-                            } else {
-                                current
+                suspendRunCatching {
+                    val requests =
+                        state.candidates
+                            .filter { it.id in state.selectedIds }
+                            .map { candidate ->
+                                val selectedUrl = state.selectedVariantUrls[candidate.id]
+                                val selected =
+                                    candidate.downloadVariants.firstOrNull { it.selectionId == selectedUrl }
+                                        ?: candidate.downloadVariants.first()
+                                val headers =
+                                    mediaHeadersForUrl(
+                                        selected.requestHeaders.ifEmpty { candidate.requestHeaders },
+                                        if (selected.requestHeaders.isEmpty()) candidate.url else selected.url,
+                                        selected.url,
+                                    )
+                                val variant = repository.resolveDownloadVariant(selected.copy(requestHeaders = headers))
+                                DownloadRequest(
+                                    id = UUID.randomUUID().toString(),
+                                    url = variant.url,
+                                    sourcePageUrl = sourcePageUrl,
+                                    title =
+                                        candidate.displayTitle(
+                                            fallbackTitle,
+                                            state.candidates.indexOf(candidate),
+                                            state.candidates.size,
+                                        ),
+                                    mimeType = variant.mimeType,
+                                    expectedBytes = variant.contentLength,
+                                    quality = variant.quality,
+                                    videoHeight = variant.videoHeight,
+                                    requestHeaders = variant.requestHeaders,
+                                )
                             }
+                    downloadRepository.enqueue(requests)
+                }.onSuccess { result ->
+                    appEventBus.send(AppEvent.ShowSnackbar(result.feedbackMessage))
+                    navigation.dispatch(NavigationEvent.Replace(DownloadsKey))
+                }.onFailure {
+                    mutableUiState.update { current ->
+                        if (current is DetectionUiState.Content) {
+                            current.copy(isSubmitting = false, enqueueFailed = true)
+                        } else {
+                            current
                         }
                     }
+                }
             }
         }
 
@@ -227,6 +240,26 @@ internal class DetectionViewModel
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Back) }
         }
     }
+
+private suspend fun MediaDetectionRepository.resolveDownloadVariant(variant: MediaVariant): MediaVariant {
+    if (variant.mimeType != null || variant.url.hasVideoFileExtension()) return variant
+    val result = detectRequest(variant.url, variant.requestHeaders) as? MediaDetectionResult.Success
+    val resolved =
+        result
+            ?.candidates
+            ?.firstOrNull()
+            ?.downloadVariants
+            ?.firstOrNull()
+    val headers =
+        resolved?.let {
+            it.requestHeaders.ifEmpty { mediaHeadersForUrl(variant.requestHeaders, variant.url, it.url) }
+        }
+    return resolved?.copy(
+        quality = variant.quality,
+        videoHeight = variant.videoHeight ?: resolved.videoHeight,
+        requestHeaders = headers.orEmpty(),
+    ) ?: variant
+}
 
 private val EnqueueDownloadsResult.feedbackMessage: UiText
     get() =

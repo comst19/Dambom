@@ -61,6 +61,12 @@ class SharedDownloadQualityTest {
         assertEquals(single.url, single.preferredSharedVariant(preferred(1080)).url)
     }
 
+    @Test
+    fun `oversized dimensions are ignored instead of crashing automatic selection`() {
+        val malformed = candidate.copy(variants = listOf(variant("999999999999x720"), variant("360p")))
+        assertEquals("360p", malformed.preferredSharedVariant(AppSettings()).quality)
+    }
+
     private fun preferred(resolution: Int) =
         AppSettings(sharedLinkQuality = SharedLinkQuality.PREFERRED_RESOLUTION, sharedLinkResolution = resolution)
 

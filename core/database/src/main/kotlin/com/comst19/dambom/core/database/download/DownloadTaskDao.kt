@@ -108,7 +108,7 @@ interface DownloadTaskDao {
         UPDATE download_tasks
         SET status = 'COMPLETED', downloadedBytes = :downloadedBytes,
             expectedBytes = :downloadedBytes, localFileName = :localFileName,
-            failureReason = NULL, retryCount = 0, updatedAtMillis = :updatedAtMillis
+            failureReason = NULL, retryCount = 0, requestHeaders = '{}', updatedAtMillis = :updatedAtMillis
         WHERE id = :id AND status = 'DOWNLOADING' AND deletePending = 0
         """,
     )

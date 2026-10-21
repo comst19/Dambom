@@ -46,6 +46,64 @@ class DetectionViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
     @Test
+    fun `failed format resolution restores submission state and permits retry`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val candidate = MediaCandidate("stream", "https://example.com/stream", "Video", null, null)
+            var failProbe = true
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String) = MediaDetectionResult.Success("Page", listOf(candidate))
+
+                    override suspend fun detectRequest(
+                        url: String,
+                        headers: Map<String, String>,
+                    ): MediaDetectionResult {
+                        check(!failProbe) { "Resolution failed" }
+                        return MediaDetectionResult.Success("Page", listOf(candidate.copy(mimeType = "video/mp4")))
+                    }
+                }
+            val downloads = RecordingDownloadRepository()
+            val viewModel = testDetectionViewModel(repository, downloads, SpyNavigationDispatcher(), AppEventBus())
+            viewModel.detect(SOURCE_URL)
+            advanceUntilIdle()
+            viewModel.downloadSelected("Video")
+            advanceUntilIdle()
+            val failed = viewModel.uiState.value as DetectionUiState.Content
+            assertEquals(false, failed.isSubmitting)
+            assertEquals(true, failed.enqueueFailed)
+            assertTrue(downloads.enqueued.isEmpty())
+            failProbe = false
+            viewModel.downloadSelected("Video")
+            advanceUntilIdle()
+            assertEquals(1, downloads.enqueued.size)
+        }
+
+    @Test
+    fun `untyped extensionless HTML media is classified before enqueue`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val mediaUrl = "https://example.com/signed-stream"
+            val candidate = MediaCandidate("stream", mediaUrl, "Video", null, null)
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String) = MediaDetectionResult.Success("Page", listOf(candidate))
+
+                    override suspend fun detectRequest(
+                        url: String,
+                        headers: Map<String, String>,
+                    ) = MediaDetectionResult.Success("Page", listOf(candidate.copy(mimeType = "application/x-mpegURL")))
+                }
+            val downloads = RecordingDownloadRepository()
+            val viewModel = testDetectionViewModel(repository, downloads, SpyNavigationDispatcher(), AppEventBus())
+            viewModel.detect(SOURCE_URL)
+            advanceUntilIdle()
+            viewModel.downloadSelected("Video")
+            advanceUntilIdle()
+            val request = downloads.enqueued.single().single()
+            assertEquals("application/x-mpegURL", request.mimeType)
+            assertEquals(mediaUrl, request.url)
+        }
+
+    @Test
     fun `only opted in shared links request automatic download`() =
         runTest(mainDispatcherRule.dispatcher) {
             for ((shared, enabled) in listOf(false to true, true to true, true to false)) {

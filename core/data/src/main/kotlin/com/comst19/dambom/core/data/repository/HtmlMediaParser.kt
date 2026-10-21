@@ -1,6 +1,6 @@
 package com.comst19.dambom.core.data.repository
 
-import com.comst19.dambom.core.common.net.hasVideoFileExtension
+import com.comst19.dambom.core.common.net.hasMediaExtension
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
@@ -30,7 +30,6 @@ internal fun parseHtmlMedia(
         sources
             .filterNotNull()
             .mapNotNull { resolveUrl(documentBaseUrl, it) }
-            .filter(String::hasVideoFileExtension)
             .forEach { mediaUrl ->
                 candidates.putIfAbsent(
                     mediaUrl,
@@ -38,14 +37,16 @@ internal fun parseHtmlMedia(
                 )
             }
     }
+    val embeddedText = html.replace("\\/", "/").replace("\\u002F", "/", ignoreCase = true)
     (
         MEDIA_TAG_REGEX.findAll(html).map { it.groupValues[1] } +
-            DIRECT_VIDEO_REGEX.findAll(html).map { it.value }
+            DIRECT_VIDEO_REGEX.findAll(embeddedText).map { it.value }
     ).mapNotNull { source -> resolveUrl(documentBaseUrl, source) }
-        .filter(String::hasVideoFileExtension)
+        .filter(String::hasMediaExtension)
         .forEach { mediaUrl ->
             candidates.putIfAbsent(mediaUrl, mediaUrl.toCandidate(mediaUrl.fileTitle(), null, null))
         }
+    metadataCandidates(documentBaseUrl, html).forEach { candidate -> candidates.putIfAbsent(candidate.url, candidate) }
     return if (candidates.isEmpty()) {
         unsupported(UnsupportedReason.NO_MEDIA)
     } else {
@@ -158,9 +159,31 @@ private val SOURCE_TAG_REGEX =
         setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL),
     )
 private val DIRECT_VIDEO_REGEX =
-    Regex("https?://[^\\s\"'<>]+\\.(?:mp4|webm|mov|m4v)(?:[?#][^\\s\"'<>]*)?", RegexOption.IGNORE_CASE)
+    Regex("https?://[^\\s\"'<>]+\\.(?:mp4|webm|mov|m4v|m3u8|mpd)(?:[?#][^\\s\"'<>]*)?", RegexOption.IGNORE_CASE)
 private val HTML_TAG_REGEX = Regex("<[^<>]+>")
 private val OPAQUE_MEDIA_TITLE_REGEX = Regex("[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}")
 private val LEADING_RESULT_COUNT_REGEX = Regex("^[\\d,+]+개의\\s+(?:최고의\\s+)?")
 private const val MAX_CANDIDATE_PAGE_TITLE_LENGTH = 48
 private const val HTML_HEX_RADIX = 16
+
+private fun metadataCandidates(
+    baseUrl: String,
+    html: String,
+): List<MediaCandidate> =
+    META_TAG_REGEX
+        .findAll(html)
+        .mapNotNull { match ->
+            val attributes = match.groupValues[1]
+            val property = attributes.attribute(META_PROPERTY_REGEX)?.lowercase()
+            val content = attributes.attribute(META_CONTENT_REGEX)
+            if (property in VIDEO_META_PROPERTIES && content != null) {
+                resolveUrl(baseUrl, content)?.let { it.toCandidate(it.fileTitle(), null, null) }
+            } else {
+                null
+            }
+        }.toList()
+
+private val META_TAG_REGEX = Regex("<meta\\b([^<>]*)>", RegexOption.IGNORE_CASE)
+private val META_PROPERTY_REGEX = Regex("""\b(?:property|name)\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+private val META_CONTENT_REGEX = Regex("""\bcontent\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+private val VIDEO_META_PROPERTIES = setOf("og:video", "og:video:url", "og:video:secure_url", "twitter:player:stream")

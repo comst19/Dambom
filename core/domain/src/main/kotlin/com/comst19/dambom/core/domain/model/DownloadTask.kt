@@ -8,6 +8,8 @@ data class DownloadRequest(
     val mimeType: String?,
     val expectedBytes: Long?,
     val quality: String = ORIGINAL_QUALITY,
+    val requestHeaders: Map<String, String> = emptyMap(),
+    val videoHeight: Int? = null,
 )
 
 data class DownloadTask(

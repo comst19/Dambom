@@ -11,6 +11,7 @@ import com.comst19.dambom.core.database.download.DownloadTaskDao
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadFailureReason
 import com.comst19.dambom.core.domain.model.DownloadStatus
+import com.comst19.dambom.core.network.header.mediaRequestClient
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException
@@ -142,6 +143,9 @@ internal class DownloadQueueWorker
                 }
             } catch (cancellation: CancellationException) {
                 throw cancellation
+            } catch (failure: StreamDownloadException) {
+                markFailed(task, failure.reason)
+                DownloadOutcome.PERMANENT_FAILURE
             } catch (_: IOException) {
                 handleNetworkFailure(task)
             } catch (failure: DownloadFailureException) {
@@ -150,7 +154,17 @@ internal class DownloadQueueWorker
             } catch (_: Exception) {
                 markFailed(task, DownloadFailureReason.UNKNOWN)
                 DownloadOutcome.PERMANENT_FAILURE
+            } finally {
+                withContext(NonCancellable) { cleanupDeletedStream(task) }
             }
+
+        private suspend fun cleanupDeletedStream(task: DownloadTaskEntity) {
+            val current = dao.getById(task.id)
+            if ((current == null || current.deletePending) && streamMimeType(task.url, task.mimeType) != null) {
+                val localName = current?.localFileName ?: fileStore.completedFile(task.id, task.url, task.mimeType).name
+                if (fileStore.delete(task.id, localName) && current != null) dao.deleteClaimed(task.id)
+            }
+        }
 
         private suspend fun download(
             task: DownloadTaskEntity,
@@ -160,6 +174,11 @@ internal class DownloadQueueWorker
                 val recoveredFile = fileStore.completedFile(task.id, task.url, task.mimeType)
                 if (recoveredFile.isFile && recoveredFile.length() > 0L) {
                     complete(task, recoveredFile, recoveredFile.length())
+                    return@coroutineScope
+                }
+                val streamMime = streamMimeType(task.url, task.mimeType)
+                if (streamMime != null) {
+                    downloadStream(task, streamMime)
                     return@coroutineScope
                 }
                 val partialFile = fileStore.partialFile(task.id)
@@ -172,17 +191,9 @@ internal class DownloadQueueWorker
                     fileStore.clearPartial(task.id)
                     return@coroutineScope download(task, allowRestart = false)
                 }
-                val request =
-                    Request
-                        .Builder()
-                        .url(task.url)
-                        .apply {
-                            if (rangeStart > 0L) {
-                                header("Range", "bytes=$rangeStart-")
-                                header("If-Range", checkNotNull(validator))
-                            }
-                        }.build()
-                val call = client.newCall(request)
+                val request = buildDownloadRequest(task.url, rangeStart, validator)
+                val requestClient = mediaRequestClient(client, task.url, decodeDownloadHeaders(task.requestHeaders))
+                val call = requestClient.newCall(request)
                 val stopWatcher =
                     launch(start = CoroutineStart.UNDISPATCHED) {
                         try {
@@ -212,6 +223,44 @@ internal class DownloadQueueWorker
                     stopWatcher.cancel()
                 }
             }
+
+        private suspend fun downloadStream(
+            task: DownloadTaskEntity,
+            mimeType: String,
+        ) = coroutineScope {
+            val partial = fileStore.partialFile(task.id)
+            val transfer =
+                async {
+                    StreamDownloadEngine(applicationContext, client, fileStore).download(
+                        id = task.id,
+                        url = task.url,
+                        mimeType = mimeType,
+                        headers = decodeDownloadHeaders(task.requestHeaders),
+                        output = partial,
+                        videoHeight = task.videoHeight,
+                    ) { bytes, total -> checkpoint(task, bytes, total) }
+                }
+            val stopWatcher =
+                launch(start = CoroutineStart.UNDISPATCHED) {
+                    dao
+                        .observeTransferStatus(task.id)
+                        .distinctUntilChanged()
+                        .first { it != DownloadStatus.DOWNLOADING.name }
+                    transfer.cancel()
+                }
+            try {
+                requireActiveTask(task.id)
+                try {
+                    transfer.await()
+                } catch (cancellation: CancellationException) {
+                    requireActiveTask(task.id)
+                    throw cancellation
+                }
+                complete(task, partial, partial.length())
+            } finally {
+                stopWatcher.cancel()
+            }
+        }
 
         private suspend fun saveResponse(
             task: DownloadTaskEntity,
@@ -271,15 +320,22 @@ internal class DownloadQueueWorker
             response: Response,
         ) {
             when (response.code) {
-                HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> throw DownloadFailureException(DownloadFailureReason.ACCESS_RESTRICTED)
-                HTTP_RANGE_NOT_SATISFIABLE -> throw DownloadFailureException(DownloadFailureReason.SERVER)
+                HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> {
+                    throw DownloadFailureException(DownloadFailureReason.ACCESS_RESTRICTED)
+                }
+
+                HTTP_RANGE_NOT_SATISFIABLE -> {
+                    throw DownloadFailureException(DownloadFailureReason.SERVER)
+                }
             }
             if (!response.isSuccessful) throw DownloadFailureException(DownloadFailureReason.SERVER)
             val contentType = response.body.contentType()?.toString()
             if (contentType?.startsWith("text/") == true || contentType?.contains("json") == true) {
                 throw DownloadFailureException(DownloadFailureReason.UNSUPPORTED_FORMAT)
             }
-            if (contentType?.startsWith("video/") != true && !task.url.hasVideoFileExtension()) {
+            val hasVideoType = contentType?.startsWith("video/") == true || task.url.hasVideoFileExtension()
+            val hasMp4Signature = !hasVideoType && hasMp4Signature(task.id, response)
+            if (!hasVideoType && !hasMp4Signature) {
                 throw DownloadFailureException(DownloadFailureReason.UNSUPPORTED_FORMAT)
             }
             if (response.code != HTTP_PARTIAL_CONTENT) {
@@ -295,6 +351,22 @@ internal class DownloadQueueWorker
                 }
             }
         }
+
+        private fun hasMp4Signature(
+            id: String,
+            response: Response,
+        ): Boolean =
+            if (response.contentRangeStart()?.let { it > 0L } == true) {
+                storageOperation {
+                    fileStore.partialFile(id).inputStream().use { input ->
+                        val prefix = ByteArray(MP4_SIGNATURE_BYTES.toInt())
+                        input.read(prefix)
+                        prefix.hasMp4FileTypeBox()
+                    }
+                }
+            } else {
+                response.peekBody(MP4_SIGNATURE_BYTES).bytes().hasMp4FileTypeBox()
+            }
 
         private suspend fun checkpoint(
             task: DownloadTaskEntity,
@@ -344,6 +416,7 @@ internal class DownloadQueueWorker
                 throw DownloadStoppedException(DownloadStopReason.OWNERSHIP_LOST)
             }
             fileStore.partialValidatorFile(task.id).delete()
+            fileStore.clearStream(task.id)
             notifier.completed(task.id, task.title)
         }
 
@@ -461,6 +534,30 @@ private fun Response.contentRangeStart(): Long? =
         ?.toLongOrNull()
 
 private const val ERROR_DOCUMENT_PREFIX_BYTES = 512L
+private const val MP4_SIGNATURE_BYTES = 12L
+private val MP4_FILE_TYPE_BOX = byteArrayOf('f'.code.toByte(), 't'.code.toByte(), 'y'.code.toByte(), 'p'.code.toByte())
+
+private const val MP4_FILE_TYPE_OFFSET = 4
+private const val MP4_FILE_TYPE_END = 8
+
+private fun ByteArray.hasMp4FileTypeBox(): Boolean =
+    size >= MP4_SIGNATURE_BYTES &&
+        copyOfRange(MP4_FILE_TYPE_OFFSET, MP4_FILE_TYPE_END).contentEquals(MP4_FILE_TYPE_BOX)
+
+private fun buildDownloadRequest(
+    url: String,
+    rangeStart: Long,
+    validator: String?,
+): Request =
+    Request
+        .Builder()
+        .url(url)
+        .apply {
+            if (rangeStart > 0L) {
+                header("Range", "bytes=$rangeStart-")
+                header("If-Range", checkNotNull(validator))
+            }
+        }.build()
 
 private inline fun <T> storageOperation(block: () -> T): T =
     try {

@@ -9,6 +9,8 @@ data class MediaCandidate(
     val quality: String = ORIGINAL_QUALITY,
     val thumbnailUrl: String? = null,
     val variants: List<MediaVariant> = emptyList(),
+    val requestHeaders: Map<String, String> = emptyMap(),
+    val videoHeight: Int? = null,
 ) {
     val downloadVariants: List<MediaVariant>
         get() =
@@ -19,6 +21,8 @@ data class MediaCandidate(
                         mimeType = mimeType,
                         contentLength = contentLength,
                         quality = quality,
+                        requestHeaders = requestHeaders,
+                        videoHeight = videoHeight,
                     ),
                 )
             }
@@ -29,7 +33,11 @@ data class MediaVariant(
     val mimeType: String?,
     val contentLength: Long?,
     val quality: String,
-)
+    val requestHeaders: Map<String, String> = emptyMap(),
+    val videoHeight: Int? = null,
+) {
+    val selectionId: String get() = videoHeight?.let { "$url#dambom-height=$it" } ?: url
+}
 
 sealed interface MediaDetectionResult {
     data class Success(

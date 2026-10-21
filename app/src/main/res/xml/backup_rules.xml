@@ -2,5 +2,6 @@
 <full-backup-content>
     <exclude domain="database" path="." />
     <exclude domain="file" path="download-parts/" />
+    <exclude domain="file" path="download-streams/" />
     <exclude domain="file" path="videos/" />
 </full-backup-content>

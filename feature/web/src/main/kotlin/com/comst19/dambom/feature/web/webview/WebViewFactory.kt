@@ -22,6 +22,7 @@ import androidx.webkit.WebViewFeature
 import com.comst19.dambom.core.domain.model.MediaResourceRequest
 import com.comst19.dambom.feature.web.contract.WebTab
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 
 @SuppressLint("SetJavaScriptEnabled")
 internal fun createWebView(
@@ -38,7 +39,8 @@ internal fun createWebView(
 ): WebView =
     WebView(context).apply {
         val pageGeneration = AtomicLong()
-        val mediaUserAgent = settings.userAgentString
+        val defaultUserAgent = settings.userAgentString
+        val mediaUserAgent = AtomicReference(defaultUserAgent)
         var pageStarted = false
         var failureBeforePageStart = false
         settings.javaScriptEnabled = true
@@ -55,7 +57,7 @@ internal fun createWebView(
         installWebMediaObserver(this, tab.id, pageGeneration) { tabId, generation, request ->
             val enriched =
                 request.withBrowserContext(
-                    mediaUserAgent,
+                    mediaUserAgent.get(),
                     CookieManager.getInstance().getCookie(request.url),
                 )
             onMediaRequest(tabId, generation, enriched)
@@ -67,6 +69,11 @@ internal fun createWebView(
                     url: String?,
                     favicon: Bitmap?,
                 ) {
+                    val desiredUserAgent = siteMediaUserAgent(url.orEmpty(), defaultUserAgent)
+                    mediaUserAgent.set(desiredUserAgent)
+                    if (view != null && url != null && view.settings.userAgentString != desiredUserAgent) {
+                        view.settings.userAgentString = desiredUserAgent
+                    }
                     if (failureBeforePageStart) {
                         failureBeforePageStart = false
                     } else {
@@ -94,7 +101,7 @@ internal fun createWebView(
                     if (request.method.equals("GET", true)) {
                         val mediaRequest =
                             MediaResourceRequest(url, request.requestHeaders, request.method)
-                                .withBrowserContext(mediaUserAgent, CookieManager.getInstance().getCookie(url))
+                                .withBrowserContext(mediaUserAgent.get(), CookieManager.getInstance().getCookie(url))
                         onMediaRequest(tab.id, pageGeneration.get(), mediaRequest)
                     }
                     return if (shouldBlockWebVideo(url, mediaGuardInstalled)) blockedVideoResponse() else null
@@ -180,7 +187,12 @@ internal fun createWebView(
                 }
             }
         if (savedState == null || restoreState(savedState) == null) {
-            tab.url?.let(::loadUrl)
+            tab.url?.let { url ->
+                val userAgent = siteMediaUserAgent(url, defaultUserAgent)
+                mediaUserAgent.set(userAgent)
+                settings.userAgentString = userAgent
+                loadUrl(url)
+            }
         }
     }
 

@@ -88,7 +88,7 @@ private fun resolveUrl(
     source: String,
 ): String? = runCatching { URI(baseUrl).resolve(source.decodeHtmlAttribute().trim()).toHttpUrlOrNull() }.getOrNull()
 
-private fun String.documentBaseUrl(responseUrl: String): String =
+internal fun String.documentBaseUrl(responseUrl: String): String =
     BASE_TAG_REGEX
         .findAll(this)
         .mapNotNull { match -> match.groupValues[1].attribute(HREF_ATTRIBUTE_REGEX) }
@@ -96,7 +96,7 @@ private fun String.documentBaseUrl(responseUrl: String): String =
         .firstOrNull()
         ?: responseUrl
 
-private fun String.decodeHtmlAttribute(): String =
+internal fun String.decodeHtmlAttribute(): String =
     HTML_ENTITY_REGEX.replace(this) { match ->
         when (val entity = match.groupValues[1]) {
             "#39" -> {

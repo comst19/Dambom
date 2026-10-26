@@ -42,14 +42,18 @@ internal class WebMediaCandidates {
         }
     }
 
-    fun merge(incoming: List<MediaCandidate>): Int {
+    fun merge(
+        incoming: List<MediaCandidate>,
+        preserveExistingTitle: Boolean = false,
+    ): Int {
         incoming.take(MAX_DETECTED_MEDIA).forEach { candidate ->
             val key = candidate.url.detectedVideoKey()
             val previous = detected[key]
+            val existingTitle = previous?.title?.takeIf { preserveExistingTitle }
             if (previous != null || detected.size < MAX_DETECTED_MEDIA) {
                 detected[key] =
                     candidate.copy(
-                        title = metadata[key]?.title ?: candidate.title,
+                        title = metadata[key]?.title ?: existingTitle ?: candidate.title,
                         requestHeaders = candidate.requestHeaders.ifEmpty { previous?.requestHeaders.orEmpty() },
                         variants = candidate.variants.ifEmpty { previous?.variants.orEmpty() },
                         thumbnailUrl = metadata[key]?.thumbnailUrl ?: candidate.thumbnailUrl ?: previous?.thumbnailUrl,

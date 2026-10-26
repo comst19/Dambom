@@ -26,7 +26,7 @@ class WebMediaObserverRuntimeTest {
         assumeTrue(baseUrl != null)
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val found = CopyOnWriteArrayList<MediaResourceRequest>()
-        val ready = CountDownLatch(3)
+        val ready = CountDownLatch(4)
         val completed = mutableSetOf<String>()
         lateinit var view: WebView
         instrumentation.runOnMainSync {
@@ -37,7 +37,8 @@ class WebMediaObserverRuntimeTest {
                 val expected =
                     (request.thumbnailUrl == "$baseUrl/late.jpg" && request.title == "Updated video title") ||
                         (request.url == "$baseUrl/invalid.mp4" && request.thumbnailUrl == null && request.title == "Valid video") ||
-                        (request.url == "$baseUrl/nested.mp4" && request.title == "Nested source")
+                        (request.url == "$baseUrl/nested.mp4" && request.title == "Nested source") ||
+                        (request.url == "$baseUrl/bare.mp4" && request.title == null)
                 if (expected && completed.add(request.url)) ready.countDown()
             }
             view.webViewClient =
@@ -62,6 +63,10 @@ class WebMediaObserverRuntimeTest {
                             invalidPoster.poster = 'https://[';
                             invalidPoster.title = 'Valid video';
                             document.body.append(invalidPoster);
+                            const bare = document.createElement('video');
+                            bare.preload = 'none';
+                            bare.src = '/bare.mp4';
+                            document.body.append(bare);
                             const nested = document.createElement('video');
                             nested.preload = 'none';
                             nested.setAttribute('aria-label', 'Nested source');

@@ -296,7 +296,7 @@ internal class WebViewModel
                         probeSlots.withPermit { mediaDetectionRepository.detectRequest(request.url, request.headers) }
                     }
                 if (pageGenerations[tabId] != generation || result !is MediaDetectionResult.Success) return@launch
-                val count = media.merge(result.candidates)
+                val count = media.merge(result.candidates, preserveExistingTitle = true)
                 if (count > 0) {
                     updateCurrentTabIf(tabId) { it.copy(detectionState = WebDetectionState.Found(count)) }
                 }

@@ -17,10 +17,10 @@ internal fun parseHtmlMedia(
     videoElements(html).forEach { (attributes, body) ->
         val thumbnailUrl = attributes.attribute(POSTER_ATTRIBUTE_REGEX)?.let { resolveUrl(documentBaseUrl, it) }
         val title =
-            (attributes.attribute(VIDEO_TITLE_ATTRIBUTE_REGEX) ?: attributes.attribute(ARIA_LABEL_ATTRIBUTE_REGEX))
-                ?.decodeHtmlAttribute()
-                ?.trim()
-                ?.takeIf(String::isNotBlank)
+            sequenceOf(VIDEO_TITLE_ATTRIBUTE_REGEX, ARIA_LABEL_ATTRIBUTE_REGEX)
+                .mapNotNull { attributes.attribute(it) }
+                .map { it.decodeHtmlAttribute().trim() }
+                .firstOrNull(String::isNotBlank)
                 .orEmpty()
         val sources =
             sequenceOf(attributes.attribute(SRC_ATTRIBUTE_REGEX)) +
@@ -119,12 +119,14 @@ internal fun String.decodeHtmlAttribute(): String =
         }
     }
 
-private fun String.attribute(pattern: Regex): String? = pattern.find(this)?.groupValues?.get(1)
+private fun String.attribute(pattern: Regex): String? = pattern.find(this)?.groupValues?.last()
 
 private fun unsupported(reason: UnsupportedReason) = MediaDetectionResult.Unsupported(reason)
 
-private val VIDEO_TITLE_ATTRIBUTE_REGEX = Regex("""(?:^|\s)title\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
-private val ARIA_LABEL_ATTRIBUTE_REGEX = Regex("""(?:^|\s)aria-label\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+private val VIDEO_TITLE_ATTRIBUTE_REGEX =
+    Regex("""(?:^|\s)title\s*=\s*(["'])(.*?)\1""", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+private val ARIA_LABEL_ATTRIBUTE_REGEX =
+    Regex("""(?:^|\s)aria-label\s*=\s*(["'])(.*?)\1""", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
 private val POSTER_ATTRIBUTE_REGEX = Regex("""\bposter\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
 private val SRC_ATTRIBUTE_REGEX = Regex("""\bsrc\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)
 private val HREF_ATTRIBUTE_REGEX = Regex("""\bhref\s*=\s*["']([^"']+)["']""", RegexOption.IGNORE_CASE)

@@ -57,7 +57,7 @@ internal const val WEB_MEDIA_OBSERVER_SCRIPT = """
   const inspect = (element) => {
     if (element instanceof HTMLMediaElement) {
       const poster = element instanceof HTMLVideoElement ? element.poster : '';
-      const title = element.getAttribute('title') || element.getAttribute('aria-label') || document.title;
+      const title = [element.getAttribute('title'), element.getAttribute('aria-label')].find(value => value && value.trim()) || '';
       if (element.currentSrc) report(element.currentSrc, poster, title);
       if (element.getAttribute('src')) report(element.src, poster, title);
       element.querySelectorAll('source[src]').forEach((source) => report(source.src, poster, title));

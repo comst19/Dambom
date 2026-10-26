@@ -10,6 +10,19 @@ import org.junit.Test
 
 class WebMediaCandidatesTest {
     @Test
+    fun `poster only observation cannot overwrite a normalized page title`() {
+        val media = WebMediaCandidates()
+        val normalized = candidate(0).copy(title = "샘플 동영상 · 1")
+        media.merge(listOf(normalized))
+        media.claim(MediaResourceRequest(normalized.url, thumbnailUrl = "https://example.com/poster.jpg"))
+        media.merge(listOf(normalized.copy(title = "3,000+개의 최고의 샘플 동영상 · Pexels")), preserveExistingTitle = true)
+        assertEquals("샘플 동영상 · 1", media.candidates.single().title)
+        assertEquals("https://example.com/poster.jpg", media.candidates.single().thumbnailUrl)
+        media.claim(MediaResourceRequest(normalized.url, title = "Actual video title"))
+        assertEquals("Actual video title", media.candidates.single().title)
+    }
+
+    @Test
     fun `late video title replaces filename and survives a rescan`() {
         val media = WebMediaCandidates()
         val request = MediaResourceRequest(candidate(0).url)

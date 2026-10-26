@@ -6,6 +6,20 @@ import org.junit.Test
 
 class HtmlMediaParserTest {
     @Test
+    fun `quoted titles retain apostrophes embedded double quotes and aria fallback`() {
+        val result =
+            parseHtmlMedia(
+                "https://example.com/page",
+                """
+                <video title="Bob's clip" src="/first.mp4"></video>
+                <video aria-label='Say "hello"' src="/second.mp4"></video>
+                <video title=" " aria-label="Fallback label" src="/third.mp4"></video>
+                """.trimIndent(),
+            ) as MediaDetectionResult.Success
+        assertEquals(listOf("Bob's clip", "Say \"hello\"", "Fallback label"), result.candidates.map { it.title })
+    }
+
+    @Test
     fun `video labels take precedence over page title and opaque filenames`() {
         val result =
             parseHtmlMedia(

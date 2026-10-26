@@ -6,6 +6,31 @@ import org.junit.Test
 
 class HtmlMediaParserTest {
     @Test
+    fun `quoted titles retain apostrophes embedded double quotes and aria fallback`() {
+        val result =
+            parseHtmlMedia(
+                "https://example.com/page",
+                """
+                <video title="Bob's clip" src="/first.mp4"></video>
+                <video aria-label='Say "hello"' src="/second.mp4"></video>
+                <video title=" " aria-label="Fallback label" src="/third.mp4"></video>
+                """.trimIndent(),
+            ) as MediaDetectionResult.Success
+        assertEquals(listOf("Bob's clip", "Say \"hello\"", "Fallback label"), result.candidates.map { it.title })
+    }
+
+    @Test
+    fun `video labels take precedence over page title and opaque filenames`() {
+        val result =
+            parseHtmlMedia(
+                "https://example.com/page",
+                "<title>Page</title><video title='First &amp; best' src='/a12bc34.mp4'></video>" +
+                    "<video aria-label='Second clip' src='/9f7d8.mp4'></video>",
+            ) as MediaDetectionResult.Success
+        assertEquals(listOf("First & best", "Second clip"), result.candidates.map { it.title })
+    }
+
+    @Test
     fun `unclosed video retains its own poster without consuming the next video`() {
         val result =
             parseHtmlMedia(
@@ -36,7 +61,7 @@ class HtmlMediaParserTest {
                 "<TITLE>Road <b>&amp;</b>\ntrip</TITLE><video src='/trip.mp4'></video>",
             ) as MediaDetectionResult.Success
 
-        assertEquals("Road &amp;\ntrip", result.pageTitle)
+        assertEquals("Road &\ntrip", result.pageTitle)
     }
 
     @Test(timeout = 5_000)
@@ -85,7 +110,7 @@ class HtmlMediaParserTest {
             ) as MediaDetectionResult.Success
 
         assertEquals("Trip", result.pageTitle)
-        assertEquals("trip", result.candidates.single().title)
+        assertEquals("Trip", result.candidates.single().title)
         assertEquals("https://example.com/media/trip.mp4?a=1&b=2", result.candidates.single().url)
     }
 }

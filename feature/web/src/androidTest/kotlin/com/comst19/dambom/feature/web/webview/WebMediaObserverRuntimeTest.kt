@@ -21,6 +21,88 @@ import java.util.concurrent.atomic.AtomicReference
 @RunWith(AndroidJUnit4::class)
 class WebMediaObserverRuntimeTest {
     @Test
+    fun posterUpdatesReachNativeWithoutPlayback() {
+        val baseUrl = InstrumentationRegistry.getArguments().getString("streamFixtureBaseUrl")
+        assumeTrue(baseUrl != null)
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val found = CopyOnWriteArrayList<MediaResourceRequest>()
+        val ready = CountDownLatch(4)
+        val completed = mutableSetOf<String>()
+        lateinit var view: WebView
+        instrumentation.runOnMainSync {
+            view = WebView(instrumentation.targetContext)
+            view.settings.javaScriptEnabled = true
+            installWebMediaObserver(view, 1L, AtomicLong(7L)) { _, _, request ->
+                found.add(request)
+                val expected =
+                    (request.thumbnailUrl == "$baseUrl/late.jpg" && request.title == "Updated video title") ||
+                        (request.url == "$baseUrl/invalid.mp4" && request.thumbnailUrl == null && request.title == "Valid video") ||
+                        (request.url == "$baseUrl/nested.mp4" && request.title == "Nested source") ||
+                        (request.url == "$baseUrl/bare.mp4" && request.title == null)
+                if (expected && completed.add(request.url)) ready.countDown()
+            }
+            view.webViewClient =
+                object : WebViewClient() {
+                    override fun onPageFinished(
+                        view: WebView,
+                        url: String?,
+                    ) {
+                        view.evaluateJavascript(
+                            """
+                            $WEB_MEDIA_OBSERVER_SCRIPT
+                            const video = document.createElement('video');
+                            video.preload = 'none';
+                            video.src = '/source.mp4';
+                            video.poster = '/first.jpg';
+                            video.title = 'First video title';
+                            document.body.append(video);
+                            setTimeout(() => { video.poster = '/late.jpg'; video.title = 'Updated video title'; }, 50);
+                            const invalidPoster = document.createElement('video');
+                            invalidPoster.preload = 'none';
+                            invalidPoster.src = '/invalid.mp4';
+                            invalidPoster.poster = 'https://[';
+                            invalidPoster.title = 'Valid video';
+                            document.body.append(invalidPoster);
+                            const bare = document.createElement('video');
+                            bare.preload = 'none';
+                            bare.src = '/bare.mp4';
+                            document.body.append(bare);
+                            const nested = document.createElement('video');
+                            nested.preload = 'none';
+                            nested.setAttribute('aria-label', 'Nested source');
+                            document.body.append(nested);
+                            setTimeout(() => {
+                              const source = document.createElement('source');
+                              source.src = '/nested.mp4';
+                              nested.append(source);
+                            }, 10);
+                            """.trimIndent(),
+                            null,
+                        )
+                    }
+                }
+            view.loadUrl("$baseUrl/poster.html")
+        }
+        try {
+            assertTrue("Observed: $found", ready.await(10, TimeUnit.SECONDS))
+            assertTrue(found.any { it.url == "$baseUrl/source.mp4" && it.thumbnailUrl?.endsWith("first.jpg") == true })
+            assertTrue(found.any { it.title == "First video title" })
+            val paused = AtomicReference("")
+            val checked = CountDownLatch(1)
+            instrumentation.runOnMainSync {
+                view.evaluateJavascript("Array.from(document.querySelectorAll('video')).every(video => video.paused)") {
+                    paused.set(it)
+                    checked.countDown()
+                }
+            }
+            assertTrue(checked.await(5, TimeUnit.SECONDS))
+            org.junit.Assert.assertEquals("true", paused.get())
+        } finally {
+            instrumentation.runOnMainSync { view.destroy() }
+        }
+    }
+
+    @Test
     fun reusedXhrDoesNotReportPostResponsesAsGetMedia() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val ready = CountDownLatch(1)

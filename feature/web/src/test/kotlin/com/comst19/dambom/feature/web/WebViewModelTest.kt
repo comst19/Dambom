@@ -33,6 +33,117 @@ class WebViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
     @Test
+    fun `automatic result belongs to its original tab and is cancelled on navigation`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val repository = ControllableMediaDetectionRepository()
+            val viewModel = WebViewModel(repository, FakeNavigationDispatcher, SavedStateHandle())
+            val firstTab = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(firstTab, FIRST_PAGE_URL, "First", 1L)
+            viewModel.onPageFinished(firstTab, FIRST_PAGE_URL, "First", 1L)
+            runCurrent()
+            viewModel.createTab(SECOND_PAGE_URL)
+            val secondTab = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(secondTab, SECOND_PAGE_URL, "Second", 2L)
+            viewModel.onPageFinished(secondTab, SECOND_PAGE_URL, "Second", 2L)
+            runCurrent()
+            viewModel.updatePage(secondTab, "https://example.com/third", "Third")
+            repository.complete(
+                MediaDetectionResult.Success(
+                    "First",
+                    listOf(MediaCandidate("video", "https://example.com/video.mp4", "Video", "video/mp4", null)),
+                ),
+            )
+            advanceUntilIdle()
+            assertEquals(
+                WebDetectionState.Found(1),
+                viewModel.uiState.value.tabs
+                    .first { it.id == firstTab }
+                    .detectionState,
+            )
+            assertEquals(
+                WebDetectionState.Idle,
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+        }
+
+    @Test
+    fun `page finish automatically scans once without playback and refreshes on reload`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val calls = mutableListOf<String>()
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String): MediaDetectionResult {
+                        calls.add(url)
+                        return MediaDetectionResult.Success(
+                            "Page",
+                            listOf(
+                                MediaCandidate("video", "https://example.com/video.mp4", "Video", "video/mp4", null),
+                            ),
+                        )
+                    }
+                }
+            val viewModel = WebViewModel(repository, FakeNavigationDispatcher, SavedStateHandle())
+            val id = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(id, FIRST_PAGE_URL, "Page", 1L)
+            viewModel.onPageFinished(id, FIRST_PAGE_URL, "Page", 1L)
+            viewModel.onPageFinished(id, FIRST_PAGE_URL, "Page", 1L)
+            advanceUntilIdle()
+            assertEquals(listOf(FIRST_PAGE_URL), calls)
+            assertEquals(
+                WebDetectionState.Found(1),
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+
+            viewModel.onPageStarted(id, FIRST_PAGE_URL, "Page", 2L)
+            viewModel.onPageFinished(id, FIRST_PAGE_URL, "Page", 2L)
+            advanceUntilIdle()
+            assertEquals(listOf(FIRST_PAGE_URL, FIRST_PAGE_URL), calls)
+        }
+
+    @Test
+    fun `automatic scan failure stays idle and does not interrupt another tab`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = createViewModel()
+            val id = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(id, FIRST_PAGE_URL, "Page", 1L)
+            viewModel.createTab(SECOND_PAGE_URL)
+            viewModel.onPageFinished(id, FIRST_PAGE_URL, "Page", 1L)
+            advanceUntilIdle()
+            assertTrue(
+                viewModel.uiState.value.tabs
+                    .all { it.detectionState is WebDetectionState.Idle },
+            )
+        }
+
+    @Test
+    fun `late poster is included in detected snapshot without another probe`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val snapshots = MediaDetectionSnapshots()
+            val viewModel = WebViewModel(FakeMediaDetectionRepository, navigation, SavedStateHandle(), snapshots)
+            val id = viewModel.uiState.value.currentTabId
+            val request = MediaResourceRequest("https://example.com/video.mp4")
+            viewModel.onPageStarted(id, FIRST_PAGE_URL, "Page", 1L)
+            viewModel.onMediaRequest(id, 1L, request)
+            advanceUntilIdle()
+            viewModel.onMediaRequest(id, 1L, request.copy(thumbnailUrl = "https://example.com/poster.jpg"))
+            advanceUntilIdle()
+            viewModel.openDetectedMedia()
+            advanceUntilIdle()
+            val key = (navigation.dispatched.single() as NavigationEvent.Navigate).key as DetectionResultKey
+            assertEquals(
+                "https://example.com/poster.jpg",
+                snapshots
+                    .get(checkNotNull(key.snapshotId), key.url)
+                    ?.candidates
+                    ?.single()
+                    ?.thumbnailUrl,
+            )
+        }
+
+    @Test
     fun `rescanning preserves captured headers in the result snapshot`() =
         runTest(mainDispatcherRule.dispatcher) {
             val mediaUrl = "https://example.com/video.mp4"

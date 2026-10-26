@@ -4,9 +4,7 @@ import android.webkit.WebView
 import androidx.webkit.WebMessageCompat
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
-import com.comst19.dambom.core.common.net.isHttpUrl
 import com.comst19.dambom.core.domain.model.MediaResourceRequest
-import org.json.JSONObject
 import java.util.concurrent.atomic.AtomicLong
 
 internal fun installWebMediaObserver(
@@ -27,40 +25,42 @@ internal fun installWebMediaObserver(
     ) { webView, message, sourceOrigin, isMainFrame, _ ->
         if (sourceOrigin.scheme !in setOf("http", "https")) return@addWebMessageListener
         if (message.type != WebMessageCompat.TYPE_STRING) return@addWebMessageListener
-        val data = message.data?.takeIf { it.length <= MAX_MEDIA_MESSAGE_LENGTH } ?: return@addWebMessageListener
-        val parsed = runCatching { JSONObject(data) }.getOrNull() ?: return@addWebMessageListener
-        if (isMainFrame && parsed.optString("pageUrl").substringBefore('#') != webView.url?.substringBefore('#')) {
-            return@addWebMessageListener
-        }
-        val url =
-            parsed.optString("url").takeIf { it.length <= MAX_MEDIA_URL_LENGTH && it.isHttpUrl() }
-                ?: return@addWebMessageListener
-        onMediaRequest(tabId, generation.get(), MediaResourceRequest(url))
+        val request = parseWebMediaMessage(message.data, webView.url, isMainFrame) ?: return@addWebMessageListener
+        onMediaRequest(tabId, generation.get(), request)
     }
     WebViewCompat.addDocumentStartJavaScript(view, WEB_MEDIA_OBSERVER_SCRIPT, setOf("*"))
 }
-
-private const val MAX_MEDIA_URL_LENGTH = 8_192
-private const val MAX_MEDIA_MESSAGE_LENGTH = 16_384
 
 internal const val WEB_MEDIA_OBSERVER_SCRIPT = """
 (() => {
   if (window.__dambomMediaObserver || !window.dambomMedia) return;
   window.__dambomMediaObserver = true;
-  const sent = new Set();
-  const report = (value) => {
+  const sent = new Map();
+  const httpUrl = (value) => {
     try {
       const url = new URL(value, document.baseURI);
-      if (!/^https?:$/.test(url.protocol) || sent.has(url.href) || sent.size >= 128) return;
-      sent.add(url.href);
-      window.dambomMedia.postMessage(JSON.stringify({url: url.href, pageUrl: location.href}));
+      return /^https?:$/.test(url.protocol) && !url.username && !url.password ? url.href : '';
+    } catch (_) { return ''; }
+  };
+  const report = (value, poster = '', title = '') => {
+    try {
+      const url = httpUrl(value);
+      const thumbnail = poster ? httpUrl(poster) : '';
+      const label = title.trim().slice(0, 512);
+      const metadata = JSON.stringify([thumbnail, label]);
+      if (!url || (sent.has(url) && ((!thumbnail && !label) || sent.get(url) === metadata))) return;
+      if (!sent.has(url) && sent.size >= 128) return;
+      sent.set(url, metadata);
+      window.dambomMedia.postMessage(JSON.stringify({url: url, poster: thumbnail, title: label, pageUrl: location.href}));
     } catch (_) {}
   };
   const inspect = (element) => {
     if (element instanceof HTMLMediaElement) {
-      if (element.currentSrc) report(element.currentSrc);
-      if (element.getAttribute('src')) report(element.src);
-      element.querySelectorAll('source[src]').forEach((source) => report(source.src));
+      const poster = element instanceof HTMLVideoElement ? element.poster : '';
+      const title = [element.getAttribute('title'), element.getAttribute('aria-label')].find(value => value && value.trim()) || '';
+      if (element.currentSrc) report(element.currentSrc, poster, title);
+      if (element.getAttribute('src')) report(element.src, poster, title);
+      element.querySelectorAll('source[src]').forEach((source) => report(source.src, poster, title));
     }
     if (element.querySelectorAll) element.querySelectorAll('video,audio').forEach(inspect);
   };
@@ -71,9 +71,9 @@ internal const val WEB_MEDIA_OBSERVER_SCRIPT = """
     if (mutation.type === 'attributes') {
       inspect(mutation.target.closest('video,audio') || mutation.target);
     } else {
-      mutation.addedNodes.forEach((node) => { if (node.nodeType === 1) inspect(node); });
+      mutation.addedNodes.forEach((node) => { if (node.nodeType === 1) inspect(node.closest('video,audio') || node); });
     }
-  })).observe(document, {childList: true, subtree: true, attributes: true, attributeFilter: ['src']});
+  })).observe(document, {childList: true, subtree: true, attributes: true, attributeFilter: ['src', 'poster', 'title', 'aria-label']});
   const mediaType = (value) => /^(video\/|audio\/(x-)?mpegurl|application\/(vnd\.apple\.mpegurl|x-mpegurl|dash\+xml))/i.test(value || '');
   if (window.fetch) {
     const originalFetch = window.fetch;

@@ -8,11 +8,13 @@ import com.comst19.dambom.core.domain.model.MediaResourceRequest
 
 internal class WebMediaCandidates {
     private val attempted = mutableMapOf<String, Map<String, String>>()
+    private val metadata = mutableMapOf<String, Metadata>()
     private val detected = linkedMapOf<String, MediaCandidate>()
     val count: Int get() = detected.size
     val candidates: List<MediaCandidate> get() = detected.values.toList()
 
     fun claim(request: MediaResourceRequest): Boolean {
+        updateMetadata(request)
         val knownMedia = request.url.hasVideoFileExtension() || request.url.hasStreamManifestExtension()
         val budgetExhausted = attempted.size >= MAX_MEDIA_PROBES && request.url !in attempted
         val claimed = attempted[request.url] != request.headers && (knownMedia || !budgetExhausted)
@@ -20,22 +22,52 @@ internal class WebMediaCandidates {
         return claimed
     }
 
-    fun merge(incoming: List<MediaCandidate>): Int {
+    private fun updateMetadata(request: MediaResourceRequest) {
+        val key = request.url.detectedVideoKey()
+        if (request.thumbnailUrl != null || request.title != null) {
+            val previous = metadata[key]
+            val updated =
+                Metadata(
+                    thumbnailUrl = request.thumbnailUrl ?: previous?.thumbnailUrl,
+                    title = request.title ?: previous?.title,
+                )
+            if (key in metadata || metadata.size < MAX_DETECTED_MEDIA) metadata[key] = updated
+            detected[key]?.let {
+                detected[key] =
+                    it.copy(
+                        thumbnailUrl = updated.thumbnailUrl ?: it.thumbnailUrl,
+                        title = updated.title ?: it.title,
+                    )
+            }
+        }
+    }
+
+    fun merge(
+        incoming: List<MediaCandidate>,
+        preserveExistingTitle: Boolean = false,
+    ): Int {
         incoming.take(MAX_DETECTED_MEDIA).forEach { candidate ->
             val key = candidate.url.detectedVideoKey()
             val previous = detected[key]
+            val existingTitle = previous?.title?.takeIf { preserveExistingTitle }
             if (previous != null || detected.size < MAX_DETECTED_MEDIA) {
                 detected[key] =
                     candidate.copy(
+                        title = metadata[key]?.title ?: existingTitle ?: candidate.title,
                         requestHeaders = candidate.requestHeaders.ifEmpty { previous?.requestHeaders.orEmpty() },
                         variants = candidate.variants.ifEmpty { previous?.variants.orEmpty() },
-                        thumbnailUrl = candidate.thumbnailUrl ?: previous?.thumbnailUrl,
+                        thumbnailUrl = metadata[key]?.thumbnailUrl ?: candidate.thumbnailUrl ?: previous?.thumbnailUrl,
                         mimeType = candidate.mimeType ?: previous?.mimeType,
                     )
             }
         }
         return count
     }
+
+    private data class Metadata(
+        val thumbnailUrl: String?,
+        val title: String?,
+    )
 }
 
 private const val MAX_DETECTED_MEDIA = 100
@@ -86,14 +118,16 @@ internal fun directMediaResult(
                 id = request.url.detectedVideoKey(),
                 url = request.url,
                 title =
-                    request.url
-                        .substringBefore('?')
-                        .substringAfterLast('/')
-                        .substringBeforeLast('.')
-                        .ifBlank { title },
+                    request.title ?: title.ifBlank {
+                        request.url
+                            .substringBefore('?')
+                            .substringAfterLast('/')
+                            .substringBeforeLast('.')
+                    },
                 mimeType = null,
                 contentLength = null,
                 requestHeaders = request.headers,
+                thumbnailUrl = request.thumbnailUrl,
             ),
         ),
     )

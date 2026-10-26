@@ -27,8 +27,8 @@ android {
     namespace = "com.comst19.dambom"
     defaultConfig {
         applicationId = "com.comst19.dambom"
-        versionCode = 8
-        versionName = "1.3.0"
+        versionCode = 9
+        versionName = "1.3.1"
         manifestPlaceholders["crashlyticsCollectionEnabled"] = false
     }
 

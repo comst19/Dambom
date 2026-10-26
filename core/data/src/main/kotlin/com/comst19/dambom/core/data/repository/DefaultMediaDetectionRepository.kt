@@ -46,20 +46,15 @@ internal class DefaultMediaDetectionRepository
             useSiteMetadata: Boolean,
         ): MediaDetectionResult =
             withContext(ioDispatcher) {
-                val normalizedUrl = normalizeUrl(url) ?: return@withContext unsupported(UnsupportedReason.INVALID_URL)
+                val inputUrl = normalizeUrl(url) ?: return@withContext unsupported(UnsupportedReason.INVALID_URL)
+                val normalizedUrl = if (useSiteMetadata) siteDetectionUrl(inputUrl) else inputUrl
                 try {
                     if (useSiteMetadata) {
                         fxTwitterNetworkDataSource.detect(normalizedUrl)?.let { result ->
                             return@withContext result.toDomain()
                         }
                     }
-                    val requestClient = mediaRequestClient(client, normalizedUrl, headers)
-                    requestClient.newCall(buildRequest(normalizedUrl)).executeCancellable { response ->
-                        when (response.code) {
-                            HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> unsupported(UnsupportedReason.ACCESS_RESTRICTED)
-                            else -> detectResponse(response).withHeaders(headers, normalizedUrl)
-                        }
-                    }
+                    detectWithPlayers(normalizedUrl, headers)
                 } catch (_: IOException) {
                     unsupported(UnsupportedReason.NETWORK_ERROR)
                 } catch (_: IllegalArgumentException) {
@@ -67,50 +62,105 @@ internal class DefaultMediaDetectionRepository
                 }
             }
 
-        private fun detectResponse(response: okhttp3.Response): MediaDetectionResult {
-            if (!response.isSuccessful) return unsupported(UnsupportedReason.NETWORK_ERROR)
+        private suspend fun detectWithPlayers(
+            url: String,
+            headers: Map<String, String>,
+        ): MediaDetectionResult {
+            val page = fetchPage(url, headers)
+            var result = page.result
+            val pending = ArrayDeque(page.followUpUrls)
+            val visited = mutableSetOf(url)
+            var attempts = 0
+            while (result !is MediaDetectionResult.Success && pending.isNotEmpty() && attempts < MAX_SITE_REQUESTS) {
+                val target = pending.removeFirst()
+                if (visited.add(target)) {
+                    attempts++
+                    val targetHeaders = mediaHeadersForUrl(headers, url, target)
+                    val next =
+                        try {
+                            fetchPage(target, targetHeaders)
+                        } catch (_: IOException) {
+                            MediaPageDetection(unsupported(UnsupportedReason.NETWORK_ERROR))
+                        }
+                    if (next.result is MediaDetectionResult.Success) result = next.result
+                    next.followUpUrls.asReversed().forEach(pending::addFirst)
+                }
+            }
+            return result
+        }
+
+        private suspend fun fetchPage(
+            url: String,
+            headers: Map<String, String>,
+        ): MediaPageDetection =
+            mediaRequestClient(client, url, headers).newCall(buildRequest(url)).executeCancellable { response ->
+                val page =
+                    when (response.code) {
+                        HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> {
+                            MediaPageDetection(unsupported(UnsupportedReason.ACCESS_RESTRICTED))
+                        }
+
+                        else -> {
+                            detectResponse(response)
+                        }
+                    }
+                page.copy(result = page.result.withHeaders(headers, url))
+            }
+
+        private fun detectResponse(response: okhttp3.Response): MediaPageDetection {
+            if (!response.isSuccessful) return MediaPageDetection(unsupported(UnsupportedReason.NETWORK_ERROR))
             val requestUrl = response.request.url.toString()
             val body = response.body
             val contentType = body.contentType()?.toString()
             val prefix = response.peekBody(MEDIA_PREFIX_BYTES).bytes()
             val streamMime = streamManifestMime(contentType, prefix)
-            return when {
-                streamMime != null -> {
-                    detectStreamManifest(requestUrl, streamMime, body)
-                }
+            val result =
+                when {
+                    streamMime != null -> {
+                        MediaPageDetection(detectStreamManifest(requestUrl, streamMime, body))
+                    }
 
-                contentType?.startsWith("video/") == true ||
-                    (requestUrl.hasVideoFileExtension() && contentType?.contains("html") != true) ||
-                    isMp4Header(prefix) -> {
-                    MediaDetectionResult.Success(
-                        pageTitle = requestUrl.fileTitle(),
-                        candidates =
-                            listOf(
-                                requestUrl.toCandidate(
-                                    title = requestUrl.fileTitle(),
-                                    mimeType = contentType,
-                                    contentLength = body.contentLength().takeIf { it >= 0L },
-                                ),
+                    contentType?.startsWith("video/") == true ||
+                        (requestUrl.hasVideoFileExtension() && contentType?.contains("html") != true) ||
+                        isMp4Header(prefix) -> {
+                        MediaPageDetection(
+                            MediaDetectionResult.Success(
+                                pageTitle = requestUrl.fileTitle(),
+                                candidates =
+                                    listOf(
+                                        requestUrl.toCandidate(
+                                            title = requestUrl.fileTitle(),
+                                            mimeType = contentType,
+                                            contentLength = body.contentLength().takeIf { it >= 0L },
+                                        ),
+                                    ),
                             ),
-                    )
-                }
+                        )
+                    }
 
-                contentType?.contains("html") == true || contentType?.contains("json") == true -> {
-                    detectHtmlResponse(requestUrl, body)
-                }
+                    contentType?.contains("html") == true || contentType?.contains("json") == true -> {
+                        detectHtmlResponse(requestUrl, body)
+                    }
 
-                else -> {
-                    unsupported(UnsupportedReason.UNSUPPORTED_FORMAT)
+                    else -> {
+                        MediaPageDetection(unsupported(UnsupportedReason.UNSUPPORTED_FORMAT))
+                    }
                 }
-            }
+            return result
         }
 
         private fun detectHtmlResponse(
             requestUrl: String,
             body: ResponseBody,
-        ): MediaDetectionResult {
-            val html = body.readUtf8UpTo(MAX_HTML_BYTES) ?: return unsupported(UnsupportedReason.UNSUPPORTED_FORMAT)
-            return parsePlayerConfig(requestUrl, html) ?: parseHtmlMedia(requestUrl, html)
+        ): MediaPageDetection {
+            val html =
+                body.readUtf8UpTo(MAX_HTML_BYTES)
+                    ?: return MediaPageDetection(unsupported(UnsupportedReason.UNSUPPORTED_FORMAT))
+            val result =
+                parsePlayerConfig(requestUrl, html)
+                    ?: parseSproutDownloads(requestUrl, html)
+                    ?: parseHtmlMedia(requestUrl, html)
+            return MediaPageDetection(result, playerFollowUpUrls(requestUrl, html))
         }
     }
 
@@ -175,3 +225,10 @@ private const val MEDIA_PREFIX_BYTES = 512L
 private const val MP4_HEADER_MIN_BYTES = 12
 private const val MP4_BRAND_OFFSET = 4
 private const val MP4_BRAND_END = 8
+
+private data class MediaPageDetection(
+    val result: MediaDetectionResult,
+    val followUpUrls: List<String> = emptyList(),
+)
+
+private const val MAX_SITE_REQUESTS = 4

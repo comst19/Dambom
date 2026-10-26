@@ -45,6 +45,7 @@ internal class WebViewModel
         private val savedWebStates = LinkedHashMap<Long, Bundle>()
         private val mediaByTab = mutableMapOf<Long, WebMediaCandidates>()
         private val pageGenerations = mutableMapOf<Long, Long>()
+        private val automaticallyScannedTabs = mutableSetOf<Long>()
         private val scanJobs = mutableMapOf<Long, Job>()
         private val probeJobs = mutableMapOf<Long, MutableList<Job>>()
         private val probeSlots = Semaphore(2)
@@ -197,15 +198,26 @@ internal class WebViewModel
                 return
             }
             updatePage(tabId, safeUrl, title)
-            if (safeUrl.hasVideoExtension()) onMediaRequest(tabId, generation, safeUrl)
+            if (safeUrl.hasVideoExtension()) {
+                onMediaRequest(tabId, generation, safeUrl)
+            } else if (automaticallyScannedTabs.add(tabId) && scanJobs[tabId]?.isActive != true) {
+                scanTab(tabId, automatic = true)
+            }
         }
 
         fun scanCurrentTab() {
-            val tab = uiState.value.currentTab ?: return
+            scanTab(uiState.value.currentTabId, automatic = false)
+        }
+
+        private fun scanTab(
+            tabId: Long,
+            automatic: Boolean,
+        ) {
+            val tab = uiState.value.tabs.firstOrNull { it.id == tabId } ?: return
             val url = tab.url ?: return
             val generation = pageGenerations[tab.id]
             scanJobs.remove(tab.id)?.cancel()
-            updateCurrentTab { it.copy(detectionState = WebDetectionState.Scanning) }
+            if (!automatic) updateCurrentTabIf(tabId) { it.copy(detectionState = WebDetectionState.Scanning) }
             scanJobs[tab.id] =
                 viewModelScope.launch {
                     when (val result = mediaDetectionRepository.detect(url)) {
@@ -222,6 +234,8 @@ internal class WebViewModel
                                 val detectionState =
                                     if (count > 0) {
                                         WebDetectionState.Found(count)
+                                    } else if (automatic) {
+                                        it.detectionState
                                     } else {
                                         WebDetectionState.NotFound(result.reason)
                                     }
@@ -344,6 +358,7 @@ internal class WebViewModel
 
         private fun invalidatePage(tabId: Long) {
             scanJobs.remove(tabId)?.cancel()
+            automaticallyScannedTabs.remove(tabId)
             probeJobs.remove(tabId)?.forEach(Job::cancel)
             mediaByTab.remove(tabId)
             pageGenerations.remove(tabId)

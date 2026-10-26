@@ -10,6 +10,30 @@ import org.junit.Test
 
 class WebMediaCandidatesTest {
     @Test
+    fun `late video title replaces filename and survives a rescan`() {
+        val media = WebMediaCandidates()
+        val request = MediaResourceRequest(candidate(0).url)
+        assertTrue(media.claim(request))
+        media.merge(listOf(candidate(0)))
+        assertFalse(media.claim(request.copy(title = "A real video title")))
+        media.merge(listOf(candidate(0)))
+        assertEquals("A real video title", media.candidates.single().title)
+        val direct = directMediaResult(MediaResourceRequest("https://example.com/123abc.mp4"), "Page title")
+        assertEquals("Page title", direct.candidates.single().title)
+    }
+
+    @Test
+    fun `poster arriving during a probe survives its completion and rescans`() {
+        val media = WebMediaCandidates()
+        val request = MediaResourceRequest(candidate(0).url)
+        assertTrue(media.claim(request))
+        assertFalse(media.claim(request.copy(thumbnailUrl = "https://example.com/poster.jpg")))
+        media.merge(listOf(candidate(0)))
+        media.merge(listOf(candidate(0)))
+        assertEquals("https://example.com/poster.jpg", media.candidates.single().thumbnailUrl)
+    }
+
+    @Test
     fun `same URL is probed again only when request context changes`() {
         val media = WebMediaCandidates()
         val request = MediaResourceRequest("https://example.com/stream", mapOf("Cookie" to "first"))

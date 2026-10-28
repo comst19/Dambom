@@ -148,4 +148,20 @@
     <string name="player_zoom_hint">Pinch with two fingers to zoom in or out.</string>
     <string name="player_fill_hint">Fill the screen. Video edges may be cropped.</string>
     <string name="player_fit_hint">Show the entire video without cropping.</string>
+    <string name="compress_title">Reduce file size</string>
+    <string name="compress_back">Close file size reduction</string>
+    <string name="compress_original_size">Original size: %1$s</string>
+    <string name="compress_choose">Choose an output quality</string>
+    <string name="compress_small">Smaller file</string>
+    <string name="compress_balanced">Balanced</string>
+    <string name="compress_quality">Higher quality</string>
+    <string name="compress_estimate">%1$d × %2$d · About %3$s</string>
+    <string name="compress_estimate_hint">Estimates vary by video. Resolution never increases above the original. Reducing size may lower image quality.</string>
+    <string name="compress_exporting">Reducing the video size. Please stay on this screen.</string>
+    <string name="compress_original_kept">Keep the original and save a smaller MP4 separately.</string>
+    <string name="compress_saved">Saved a %1$s file.</string>
+    <string name="compress_not_smaller">This setting did not produce a smaller file, so nothing was saved. The original may already be compressed.</string>
+    <string name="compress_failed">Could not save. Check storage and video format, then try again.</string>
+    <string name="compress_save">Save smaller file</string>
+    <string name="compress_cancel_description">Stop saving? The original and selected quality will be kept.</string>
 </resources>

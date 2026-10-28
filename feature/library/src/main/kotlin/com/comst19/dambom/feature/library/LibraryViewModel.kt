@@ -17,6 +17,7 @@ import com.comst19.dambom.core.domain.repository.PlaybackHistoryRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoCompressionKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoTrimKey
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
@@ -133,6 +134,11 @@ internal class LibraryViewModel
                 val key = VideoDetailKey(id)
                 navigation.dispatch(if (replaceDetail) NavigationEvent.Replace(key) else NavigationEvent.Navigate(key))
             }
+        }
+
+        fun compressVideo(task: DownloadTask) {
+            if (task.deletePending || task.localFilePath == null || task.status != DownloadStatus.COMPLETED) return
+            viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoCompressionKey(task.id))) }
         }
 
         fun trimVideo(task: DownloadTask) {

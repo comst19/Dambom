@@ -12,6 +12,7 @@ dependencies {
     implementation(libs.androidx.compose.material3.adaptive.navigation3)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.transformer)
+    implementation(libs.androidx.media3.effect)
     implementation(libs.androidx.media3.session)
     implementation(libs.androidx.media3.ui.compose)
 }

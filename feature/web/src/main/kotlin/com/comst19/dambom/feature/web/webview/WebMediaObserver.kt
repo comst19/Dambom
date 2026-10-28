@@ -54,6 +54,15 @@ internal const val WEB_MEDIA_OBSERVER_SCRIPT = """
       window.dambomMedia.postMessage(JSON.stringify({url: url, poster: thumbnail, title: label, pageUrl: location.href}));
     } catch (_) {}
   };
+  const protectedSources = new Set();
+  const reportProtection = (element) => {
+    if (!(element instanceof HTMLMediaElement)) return;
+    const source = httpUrl(element.currentSrc || element.getAttribute('src') || '') || location.href;
+    if (protectedSources.has(source) || protectedSources.size >= 128) return;
+    protectedSources.add(source);
+    window.dambomMedia.postMessage(JSON.stringify({url: source, pageUrl: location.href, protected: true}));
+  };
+  document.addEventListener('encrypted', (event) => reportProtection(event.target), true);
   const inspect = (element) => {
     if (element instanceof HTMLMediaElement) {
       const poster = element instanceof HTMLVideoElement ? element.poster : '';

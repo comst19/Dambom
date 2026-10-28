@@ -97,6 +97,7 @@ internal fun DetectionCandidateContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                    if (state.hasProtectedMedia) ProtectedMediaNotice()
                     if (state.candidates.size > 1) {
                         Text(
                             stringResource(R.string.detection_choose_videos),

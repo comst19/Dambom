@@ -49,6 +49,19 @@ internal fun WebToolbar(
     detectionState: WebDetectionState,
     onOpenDetectedMedia: () -> Unit,
 ) {
+    Column {
+        WebDownloadNotice(detectionState)
+        WebToolbarActions(webView, canRefresh, detectionState, onOpenDetectedMedia)
+    }
+}
+
+@Composable
+private fun WebToolbarActions(
+    webView: WebView?,
+    canRefresh: Boolean,
+    detectionState: WebDetectionState,
+    onOpenDetectedMedia: () -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,

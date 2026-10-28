@@ -12,6 +12,7 @@ import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.MediaVariant
 import com.comst19.dambom.core.domain.model.SharedLinkQuality
 import com.comst19.dambom.core.domain.model.ThemeMode
+import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionSnapshots
@@ -44,6 +45,93 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class DetectionViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
+
+    @Test
+    fun `mixed results preserve clear downloads`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val clear = MediaCandidate("clear", MEDIA_URL, "Clear video", "video/mp4", null)
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String) =
+                        MediaDetectionResult.Success("Mixed", listOf(clear), hasProtectedMedia = true)
+                }
+            val downloads = RecordingDownloadRepository()
+            val viewModel = testDetectionViewModel(repository, downloads, SpyNavigationDispatcher(), AppEventBus())
+            viewModel.detect(SOURCE_URL)
+            advanceUntilIdle()
+            val state = viewModel.uiState.value as DetectionUiState.Content
+            assertTrue(state.hasProtectedMedia)
+            assertEquals(listOf(clear), state.candidates)
+            viewModel.downloadSelected("Video")
+            advanceUntilIdle()
+            assertEquals(
+                MEDIA_URL,
+                downloads.enqueued
+                    .single()
+                    .single()
+                    .url,
+            )
+        }
+
+    @Test
+    fun `final DRM resolution prevents enqueue`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String) =
+                        MediaDetectionResult.Success(
+                            "Page",
+                            listOf(MediaCandidate("stream", "https://example.com/stream", "Video", null, null)),
+                        )
+
+                    override suspend fun detectRequest(
+                        url: String,
+                        headers: Map<String, String>,
+                    ): MediaDetectionResult = MediaDetectionResult.Unsupported(UnsupportedReason.DRM_PROTECTED)
+                }
+            val downloads = RecordingDownloadRepository()
+            val viewModel = testDetectionViewModel(repository, downloads, SpyNavigationDispatcher(), AppEventBus())
+            viewModel.detect(SOURCE_URL)
+            advanceUntilIdle()
+            viewModel.downloadSelected("Video")
+            advanceUntilIdle()
+            assertEquals(
+                DetectionUiState.Unsupported(UnsupportedReason.DRM_PROTECTED),
+                viewModel.uiState.value,
+            )
+            assertTrue(downloads.enqueued.isEmpty())
+        }
+
+    @Test
+    fun `DRM and unsupported service stay on a terminal explanation without auto download or browser fallback`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            for (reason in listOf(
+                UnsupportedReason.DRM_PROTECTED,
+                UnsupportedReason.UNSUPPORTED_SERVICE,
+            )) {
+                val repository =
+                    object : MediaDetectionRepository {
+                        override suspend fun detect(url: String) = MediaDetectionResult.Unsupported(reason)
+                    }
+                val navigation = SpyNavigationDispatcher()
+                val downloads = RecordingDownloadRepository()
+                val viewModel =
+                    testDetectionViewModel(
+                        repository,
+                        downloads,
+                        navigation,
+                        AppEventBus(),
+                        settings = AppSettings(sharedLinkAutoDownload = true),
+                    )
+                viewModel.detect(SOURCE_URL, sharedLink = true)
+                advanceUntilIdle()
+                viewModel.downloadSelected("Video")
+                advanceUntilIdle()
+                assertEquals(DetectionUiState.Unsupported(reason), viewModel.uiState.value)
+                assertTrue(navigation.dispatched.isEmpty())
+                assertTrue(downloads.enqueued.isEmpty())
+            }
+        }
 
     @Test
     fun `failed format resolution restores submission state and permits retry`() =

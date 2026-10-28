@@ -40,6 +40,7 @@ internal sealed interface WebDetectionState {
 
     data class Found(
         val count: Int,
+        val hasProtectedMedia: Boolean = false,
     ) : WebDetectionState
 
     data class NotFound(

@@ -118,6 +118,7 @@ internal class DetectionViewModel
                     mutableUiState.value =
                         DetectionUiState.Content(
                             pageTitle = result.pageTitle,
+                            hasProtectedMedia = result.hasProtectedMedia,
                             automaticQuality = autoDownload,
                             automaticDownloadPending = autoDownload && result.candidates.size == 1,
                             candidates = result.candidates.toPersistentList(),
@@ -141,7 +142,7 @@ internal class DetectionViewModel
                 }
 
                 is MediaDetectionResult.Unsupported -> {
-                    if (result.reason == UnsupportedReason.INVALID_URL) {
+                    if (result.reason == UnsupportedReason.INVALID_URL || result.reason.blocksDownload) {
                         mutableUiState.value = DetectionUiState.Unsupported(result.reason)
                     } else {
                         appEventBus.send(AppEvent.ShowSnackbar(UiText.Resource(result.reason.messageRes())))
@@ -224,15 +225,7 @@ internal class DetectionViewModel
                 }.onSuccess { result ->
                     appEventBus.send(AppEvent.ShowSnackbar(result.feedbackMessage))
                     navigation.dispatch(NavigationEvent.Replace(DownloadsKey))
-                }.onFailure {
-                    mutableUiState.update { current ->
-                        if (current is DetectionUiState.Content) {
-                            current.copy(isSubmitting = false, enqueueFailed = true)
-                        } else {
-                            current
-                        }
-                    }
-                }
+                }.onFailure { failure -> mutableUiState.update { it.withDownloadFailure(failure) } }
             }
         }
 
@@ -243,9 +236,10 @@ internal class DetectionViewModel
 
 private suspend fun MediaDetectionRepository.resolveDownloadVariant(variant: MediaVariant): MediaVariant {
     if (variant.mimeType != null || variant.url.hasVideoFileExtension()) return variant
-    val result = detectRequest(variant.url, variant.requestHeaders) as? MediaDetectionResult.Success
+    val result = detectRequest(variant.url, variant.requestHeaders)
+    if (result is MediaDetectionResult.Unsupported) throw MediaDownloadUnavailable(result.reason)
     val resolved =
-        result
+        (result as? MediaDetectionResult.Success)
             ?.candidates
             ?.firstOrNull()
             ?.downloadVariants
@@ -279,3 +273,16 @@ private val EnqueueDownloadsResult.feedbackMessage: UiText
                 UiText.Resource(R.string.detection_enqueue_duplicates)
             }
         }
+
+private class MediaDownloadUnavailable(
+    val reason: UnsupportedReason,
+) : Exception()
+
+private fun DetectionUiState.withDownloadFailure(failure: Throwable): DetectionUiState {
+    val reason = (failure as? MediaDownloadUnavailable)?.reason
+    return when {
+        reason?.blocksDownload == true -> DetectionUiState.Unsupported(reason)
+        this is DetectionUiState.Content -> copy(isSubmitting = false, enqueueFailed = true)
+        else -> this
+    }
+}

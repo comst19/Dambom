@@ -10,6 +10,9 @@ internal class WebMediaCandidates {
     private val attempted = mutableMapOf<String, Map<String, String>>()
     private val metadata = mutableMapOf<String, Metadata>()
     private val detected = linkedMapOf<String, MediaCandidate>()
+    private val protectedKeys = mutableSetOf<String>()
+    var hasProtectedMedia: Boolean = false
+        private set
     val count: Int get() = detected.size
     val candidates: List<MediaCandidate> get() = detected.values.toList()
 
@@ -42,12 +45,22 @@ internal class WebMediaCandidates {
         }
     }
 
+    fun rejectProtected(url: String) {
+        hasProtectedMedia = true
+        val key = url.detectedVideoKey()
+        if (protectedKeys.size < MAX_DETECTED_MEDIA) protectedKeys.add(key)
+        detected.remove(key)
+    }
+
     fun merge(
         incoming: List<MediaCandidate>,
         preserveExistingTitle: Boolean = false,
+        containsProtectedMedia: Boolean = false,
     ): Int {
+        hasProtectedMedia = hasProtectedMedia || containsProtectedMedia
         incoming.take(MAX_DETECTED_MEDIA).forEach { candidate ->
             val key = candidate.url.detectedVideoKey()
+            if (key in protectedKeys) return@forEach
             val previous = detected[key]
             val existingTitle = previous?.title?.takeIf { preserveExistingTitle }
             if (previous != null || detected.size < MAX_DETECTED_MEDIA) {

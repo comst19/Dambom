@@ -21,6 +21,52 @@ import java.util.concurrent.atomic.AtomicReference
 @RunWith(AndroidJUnit4::class)
 class WebMediaObserverRuntimeTest {
     @Test
+    fun encryptedMediaEventReachesNativeOnceEvenWithBlobSource() {
+        val baseUrl = InstrumentationRegistry.getArguments().getString("streamFixtureBaseUrl")
+        assumeTrue(baseUrl != null)
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val ready = CountDownLatch(1)
+        val found = CopyOnWriteArrayList<MediaResourceRequest>()
+        lateinit var view: WebView
+        instrumentation.runOnMainSync {
+            view = WebView(instrumentation.targetContext)
+            view.settings.javaScriptEnabled = true
+            installWebMediaObserver(view, 1L, AtomicLong(7L)) { _, _, request ->
+                found.add(request)
+                if (request.isProtected) ready.countDown()
+            }
+            view.webViewClient =
+                object : WebViewClient() {
+                    override fun onPageFinished(
+                        view: WebView,
+                        url: String?,
+                    ) {
+                        view.evaluateJavascript(
+                            """
+                            $WEB_MEDIA_OBSERVER_SCRIPT
+                            const video = document.createElement('video');
+                            video.preload = 'none';
+                            video.src = URL.createObjectURL(new Blob([]));
+                            document.body.append(video);
+                            video.dispatchEvent(new Event('encrypted'));
+                            video.dispatchEvent(new Event('encrypted'));
+                            """.trimIndent(),
+                            null,
+                        )
+                    }
+                }
+            view.loadUrl("$baseUrl/protected.html")
+        }
+        try {
+            assertTrue("DRM event did not reach native", ready.await(10, TimeUnit.SECONDS))
+            org.junit.Assert.assertEquals(1, found.count { it.isProtected })
+            org.junit.Assert.assertEquals("$baseUrl/protected.html", found.single { it.isProtected }.url)
+        } finally {
+            instrumentation.runOnMainSync { view.destroy() }
+        }
+    }
+
+    @Test
     fun posterUpdatesReachNativeWithoutPlayback() {
         val baseUrl = InstrumentationRegistry.getArguments().getString("streamFixtureBaseUrl")
         assumeTrue(baseUrl != null)

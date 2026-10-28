@@ -4,7 +4,6 @@ package com.comst19.dambom.core.data.download
 
 import android.content.Context
 import android.net.Uri
-import android.os.SystemClock
 import android.system.ErrnoException
 import android.system.OsConstants
 import androidx.media3.common.C
@@ -20,7 +19,6 @@ import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultRenderersFactory
-import androidx.media3.exoplayer.offline.DefaultDownloaderFactory
 import androidx.media3.exoplayer.offline.DownloadHelper
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -35,19 +33,14 @@ import com.comst19.dambom.core.domain.model.DownloadFailureReason
 import com.comst19.dambom.core.network.header.mediaRequestClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import java.io.File
 import java.io.IOException
-import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -81,7 +74,12 @@ internal class StreamDownloadEngine(
                     .setMimeType(streamMimeType(url, mimeType) ?: mimeType)
                     .build()
             val request = prepareRequest(id, item, downloadSource, videoHeight)
-            cacheMedia(request, downloadSource, onProgress)
+            downloadStreamSegments(
+                request,
+                downloadSource,
+                { requireSpaceFor(STREAM_SPACE_CHECK_BYTES) },
+                onProgress = onProgress,
+            )
             requireSpaceFor(cache.cacheSpace)
             onProgress(cache.cacheSpace, null)
             val cachedSource =
@@ -203,45 +201,6 @@ internal class StreamDownloadEngine(
 
     private fun requireClearFormat(format: androidx.media3.common.Format) {
         if (format.drmInitData != null) throw StreamDownloadException(DownloadFailureReason.UNSUPPORTED_FORMAT)
-    }
-
-    private suspend fun cacheMedia(
-        request: DownloadRequest,
-        source: CacheDataSource.Factory,
-        onProgress: suspend (Long, Long?) -> Unit,
-    ) = coroutineScope {
-        val downloader = DefaultDownloaderFactory(source, Executor(Runnable::run)).createDownloader(request)
-        val updates = Channel<Pair<Long, Long?>>(Channel.CONFLATED)
-        val progress = launch { for ((bytes, total) in updates) onProgress(bytes, total) }
-        val transfer =
-            async(Dispatchers.IO) {
-                runInterruptible {
-                    var lastUpdate = 0L
-                    downloader.download { length, bytes, _ ->
-                        requireSpaceFor(STREAM_SPACE_CHECK_BYTES)
-                        val now = SystemClock.elapsedRealtime()
-                        if (now - lastUpdate >= STREAM_CHECKPOINT_INTERVAL_MILLIS) {
-                            updates.trySend(bytes to length.takeIf { it > 0L })
-                            lastUpdate = now
-                        }
-                    }
-                }
-            }
-        val cancellation =
-            launch {
-                try {
-                    awaitCancellation()
-                } finally {
-                    downloader.cancel()
-                }
-            }
-        try {
-            transfer.await()
-        } finally {
-            cancellation.cancel()
-            updates.close()
-            progress.join()
-        }
     }
 
     private suspend fun export(

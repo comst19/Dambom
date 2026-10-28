@@ -148,4 +148,20 @@
     <string name="player_zoom_hint">두 손가락으로 확대하거나 줄일 수 있어요.</string>
     <string name="player_fill_hint">화면을 채워요. 영상 가장자리가 잘릴 수 있어요.</string>
     <string name="player_fit_hint">영상 전체를 잘림 없이 보여줘요.</string>
+    <string name="compress_title">용량 줄이기</string>
+    <string name="compress_back">용량 줄이기 닫기</string>
+    <string name="compress_original_size">원본 크기 %1$s</string>
+    <string name="compress_choose">저장할 화질을 골라주세요</string>
+    <string name="compress_small">작은 파일</string>
+    <string name="compress_balanced">균형</string>
+    <string name="compress_quality">화질 우선</string>
+    <string name="compress_estimate">%1$d × %2$d · 약 %3$s</string>
+    <string name="compress_estimate_hint">예상 크기는 영상에 따라 달라져요. 해상도는 원본보다 키우지 않으며, 용량을 줄이면 화질이 낮아질 수 있어요.</string>
+    <string name="compress_exporting">영상을 줄이고 있어요. 이 화면에서 기다려 주세요.</string>
+    <string name="compress_original_kept">원본은 보존하고, 더 작은 MP4 파일을 따로 저장해요.</string>
+    <string name="compress_saved">%1$s 파일로 저장했어요.</string>
+    <string name="compress_not_smaller">원본이 이미 작거나 이 설정으로는 더 줄일 수 없어 저장하지 않았어요.</string>
+    <string name="compress_failed">저장하지 못했어요. 저장 공간과 영상 형식을 확인하고 다시 시도해 주세요.</string>
+    <string name="compress_save">작은 파일로 저장</string>
+    <string name="compress_cancel_description">저장을 중단해요. 원본과 선택한 화질은 유지돼요.</string>
 </resources>

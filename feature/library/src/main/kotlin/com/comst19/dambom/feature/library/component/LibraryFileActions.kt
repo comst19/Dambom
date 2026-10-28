@@ -40,6 +40,7 @@ internal data class LibraryFileActions(
     val onFavoritesOnlyChange: (Boolean) -> Unit = {},
     val onDelete: (DownloadTask) -> Unit,
     val onTrim: ((DownloadTask) -> Unit)? = null,
+    val onCompress: ((DownloadTask) -> Unit)? = null,
 )
 
 @Composable
@@ -135,6 +136,7 @@ internal fun rememberLibraryFileActions(
             },
             onDelete = { task -> currentOnDelete.value?.invoke(task) ?: viewModel.delete(task) },
             onTrim = viewModel::trimVideo,
+            onCompress = viewModel::compressVideo,
         )
     }
 }

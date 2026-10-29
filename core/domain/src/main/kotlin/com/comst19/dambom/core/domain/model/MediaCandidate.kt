@@ -43,6 +43,7 @@ sealed interface MediaDetectionResult {
     data class Success(
         val pageTitle: String,
         val candidates: List<MediaCandidate>,
+        val hasProtectedMedia: Boolean = false,
     ) : MediaDetectionResult
 
     data class Unsupported(
@@ -56,4 +57,10 @@ enum class UnsupportedReason {
     NO_MEDIA,
     NETWORK_ERROR,
     UNSUPPORTED_FORMAT,
+    DRM_PROTECTED,
+    UNSUPPORTED_SERVICE,
+    ;
+
+    val blocksDownload: Boolean
+        get() = this == DRM_PROTECTED || this == UNSUPPORTED_SERVICE
 }

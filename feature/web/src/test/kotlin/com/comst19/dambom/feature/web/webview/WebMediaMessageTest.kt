@@ -12,6 +12,15 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35])
 class WebMediaMessageTest {
     @Test
+    fun `protection messages require a boolean and still reject a stale page`() {
+        val protected = JSONObject(message()).put("protected", true).toString()
+        assertEquals(true, parseWebMediaMessage(protected, PAGE_URL, true)?.isProtected)
+        assertNull(parseWebMediaMessage(protected, "https://example.com/other", true))
+        val nonBoolean = JSONObject(message()).put("protected", "true").toString()
+        assertEquals(false, parseWebMediaMessage(nonBoolean, PAGE_URL, true)?.isProtected)
+    }
+
+    @Test
     fun `valid metadata preserves the media URL and bounds the title`() {
         val request = parseWebMediaMessage(message(title = "x".repeat(600)), PAGE_URL, true)
         assertEquals(MEDIA_URL, request?.url)

@@ -200,7 +200,7 @@ internal class StreamDownloadEngine(
     }
 
     private fun requireClearFormat(format: androidx.media3.common.Format) {
-        if (format.drmInitData != null) throw StreamDownloadException(DownloadFailureReason.UNSUPPORTED_FORMAT)
+        if (format.drmInitData != null) throw StreamDownloadException(DownloadFailureReason.DRM_PROTECTED)
     }
 
     private suspend fun export(

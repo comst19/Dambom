@@ -41,4 +41,5 @@
     <string name="downloads_delete_pending">Deletion cleanup needed</string>
     <string name="downloads_delete_retry">Retry deletion</string>
     <string name="downloads_delete_group_count">Deletion cleanup %1$d</string>
+    <string name="downloads_error_drm">Protected videos cannot be downloaded.</string>
 </resources>

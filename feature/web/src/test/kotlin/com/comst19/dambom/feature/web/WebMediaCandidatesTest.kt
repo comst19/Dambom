@@ -10,6 +10,19 @@ import org.junit.Test
 
 class WebMediaCandidatesTest {
     @Test
+    fun `page fallback does not replace provided or normalized video titles`() {
+        val media = WebMediaCandidates()
+        media.merge(listOf(candidate(0)), pageTitle = "Page title")
+        assertEquals("Video 0", media.candidates.single().title)
+        media.merge(
+            listOf(candidate(0).copy(title = "Filename")),
+            preserveExistingTitle = true,
+            pageTitle = "Other page",
+        )
+        assertEquals("Video 0", media.candidates.single().title)
+    }
+
+    @Test
     fun `poster only observation cannot overwrite a normalized page title`() {
         val media = WebMediaCandidates()
         val normalized = candidate(0).copy(title = "샘플 동영상 · 1")

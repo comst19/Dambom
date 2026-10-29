@@ -326,6 +326,11 @@ internal class WebViewModel
                     media.merge(
                         result.candidates,
                         preserveExistingTitle = true,
+                        pageTitle =
+                            uiState.value.tabs
+                                .firstOrNull { it.id == tabId }
+                                ?.title
+                                .orEmpty(),
                         containsProtectedMedia = result.hasProtectedMedia,
                     )
                 }

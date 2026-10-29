@@ -44,6 +44,11 @@ sealed interface LibraryGraph : AppNavKey {
     ) : LibraryGraph
 
     @Serializable
+    data class VideoCompressionKey(
+        val id: String,
+    ) : LibraryGraph
+
+    @Serializable
     data class VideoTrimKey(
         val id: String,
     ) : LibraryGraph

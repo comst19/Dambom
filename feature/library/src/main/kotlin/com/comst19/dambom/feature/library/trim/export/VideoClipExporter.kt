@@ -2,8 +2,6 @@ package com.comst19.dambom.feature.library.trim.export
 
 import android.content.Context
 import android.media.MediaMetadataRetriever
-import android.net.Uri
-import android.provider.DocumentsContract
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.transformer.Composition
@@ -12,22 +10,18 @@ import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
 import androidx.media3.transformer.ProgressHolder
 import androidx.media3.transformer.Transformer
-import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.coroutine.IoDispatcher
+import com.comst19.dambom.feature.library.export.VideoExportFiles
 import com.comst19.dambom.feature.library.trim.contract.TrimSelection
 import com.comst19.dambom.feature.library.trim.media.clippedMediaItem
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.util.UUID
 import javax.inject.Inject
 
 @UnstableApi
@@ -36,6 +30,7 @@ internal class VideoClipExporter
     constructor(
         @ApplicationContext private val context: Context,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+        private val files: VideoExportFiles,
     ) : ClipExporter {
         override suspend fun durationMillis(path: String): Long =
             withContext(ioDispatcher) {
@@ -56,43 +51,14 @@ internal class VideoClipExporter
             destination: String,
             onProgress: (Int?) -> Unit,
         ) {
-            val temporary = File(context.cacheDir, "trim-${UUID.randomUUID()}.mp4")
-            val targetUri = Uri.parse(destination)
-            var saved = false
-            try {
+            files.save(destination, "trim") { output ->
                 require(selection.isValidFor(durationMillis(path)))
-                transform(path, selection, temporary, onProgress)
+                transform(path, selection, output, onProgress)
                 onProgress(null)
-                withContext(ioDispatcher) {
-                    temporary.inputStream().use { input ->
-                        val stream = checkNotNull(context.contentResolver.openOutputStream(targetUri, "wt"))
-                        stream.use { output ->
-                            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-                            var count = input.read(buffer)
-                            while (count >= 0) {
-                                currentCoroutineContext().ensureActive()
-                                output.write(buffer, 0, count)
-                                count = input.read(buffer)
-                            }
-                        }
-                    }
-                }
-                saved = true
-            } finally {
-                withContext(NonCancellable) {
-                    withContext(ioDispatcher) { temporary.delete() }
-                    if (!saved) {
-                        discard(destination)
-                    }
-                }
             }
         }
 
-        override suspend fun discard(destination: String) {
-            withContext(ioDispatcher) {
-                suspendRunCatching { DocumentsContract.deleteDocument(context.contentResolver, Uri.parse(destination)) }
-            }
-        }
+        override suspend fun discard(destination: String) = files.discard(destination)
 
         private suspend fun transform(
             path: String,

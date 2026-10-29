@@ -38,7 +38,17 @@ internal fun UnsupportedDetectionContent(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(Modifier.weight(1f))
-        Text(stringResource(R.string.detection_not_found), style = MaterialTheme.typography.headlineSmall)
+        Text(
+            stringResource(
+                if (reason == UnsupportedReason.DRM_PROTECTED || reason == UnsupportedReason.UNSUPPORTED_SERVICE) {
+                    R.string.detection_download_unavailable
+                } else {
+                    R.string.detection_not_found
+                },
+            ),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+        )
         Spacer(Modifier.height(12.dp))
         Text(
             reason.description(),

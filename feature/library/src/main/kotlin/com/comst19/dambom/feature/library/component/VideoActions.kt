@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Compress
 import androidx.compose.material.icons.outlined.ContentCut
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Download
@@ -75,6 +76,16 @@ internal fun VideoActionsButton(
                             onClick = {
                                 menuExpanded = false
                                 actions.onToggleFavorite(task)
+                            },
+                        )
+                    }
+                    actions.onCompress?.takeIf { task.localFilePath != null }?.let { onCompress ->
+                        ActionMenuItem(
+                            label = stringResource(R.string.compress_title),
+                            icon = { Icon(Icons.Outlined.Compress, contentDescription = null) },
+                            onClick = {
+                                menuExpanded = false
+                                onCompress(task)
                             },
                         )
                     }

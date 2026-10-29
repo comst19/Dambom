@@ -24,6 +24,7 @@ internal sealed interface DetectionUiState {
         val enqueueFailed: Boolean = false,
         val automaticQuality: Boolean = false,
         val automaticDownloadPending: Boolean = false,
+        val hasProtectedMedia: Boolean = false,
     ) : DetectionUiState
 
     @Immutable

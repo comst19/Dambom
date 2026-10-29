@@ -1,8 +1,11 @@
 package com.comst19.dambom.core.data.repository
 
+import com.comst19.dambom.core.common.net.hasStreamManifestExtension
 import com.comst19.dambom.core.common.net.hasVideoFileExtension
+import com.comst19.dambom.core.common.net.isUnsupportedVideoService
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.data.mapper.toDomain
+import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
@@ -47,6 +50,9 @@ internal class DefaultMediaDetectionRepository
         ): MediaDetectionResult =
             withContext(ioDispatcher) {
                 val inputUrl = normalizeUrl(url) ?: return@withContext unsupported(UnsupportedReason.INVALID_URL)
+                if (inputUrl.isUnsupportedVideoService()) {
+                    return@withContext unsupported(UnsupportedReason.UNSUPPORTED_SERVICE)
+                }
                 val normalizedUrl = if (useSiteMetadata) siteDetectionUrl(inputUrl) else inputUrl
                 try {
                     if (useSiteMetadata) {
@@ -67,8 +73,10 @@ internal class DefaultMediaDetectionRepository
             headers: Map<String, String>,
         ): MediaDetectionResult {
             val page = fetchPage(url, headers)
-            var result = page.result
+            var result = validateStreamPlaylists(page, headers, url)
+            var streamInspected = page.isStreamManifest
             val pending = ArrayDeque(page.followUpUrls)
+            if (result == unsupported(UnsupportedReason.DRM_PROTECTED)) pending.clear()
             val visited = mutableSetOf(url)
             var attempts = 0
             while (result !is MediaDetectionResult.Success && pending.isNotEmpty() && attempts < MAX_SITE_REQUESTS) {
@@ -82,11 +90,99 @@ internal class DefaultMediaDetectionRepository
                         } catch (_: IOException) {
                             MediaPageDetection(unsupported(UnsupportedReason.NETWORK_ERROR))
                         }
-                    if (next.result is MediaDetectionResult.Success) result = next.result
-                    next.followUpUrls.asReversed().forEach(pending::addFirst)
+                    val checked = validateStreamPlaylists(next, targetHeaders, target)
+                    val protected = checked == unsupported(UnsupportedReason.DRM_PROTECTED)
+                    if (checked is MediaDetectionResult.Success || protected) {
+                        result = checked
+                        streamInspected = next.isStreamManifest
+                    }
+                    if (checked == unsupported(UnsupportedReason.DRM_PROTECTED)) {
+                        pending.clear()
+                    } else {
+                        next.followUpUrls.asReversed().forEach(pending::addFirst)
+                    }
                 }
             }
+            return if (streamInspected) result else validateCandidateStreams(result, headers, url)
+        }
+
+        private suspend fun validateStreamPlaylists(
+            page: MediaPageDetection,
+            headers: Map<String, String>,
+            sourceUrl: String,
+        ): MediaDetectionResult {
+            if (page.childPlaylistUrls.size > MAX_STREAM_PLAYLISTS) {
+                return unsupported(UnsupportedReason.UNSUPPORTED_FORMAT)
+            }
+            var result = page.result
+            for (url in page.childPlaylistUrls) {
+                val child = fetchPage(url, mediaHeadersForUrl(headers, sourceUrl, url))
+                result =
+                    when {
+                        child.result is MediaDetectionResult.Unsupported -> {
+                            child.result
+                        }
+
+                        !child.isStreamManifest || child.childPlaylistUrls.isNotEmpty() -> {
+                            unsupported(UnsupportedReason.UNSUPPORTED_FORMAT)
+                        }
+
+                        else -> {
+                            result
+                        }
+                    }
+                if (result is MediaDetectionResult.Unsupported) break
+            }
             return result
+        }
+
+        private suspend fun validateCandidateStreams(
+            result: MediaDetectionResult,
+            headers: Map<String, String>,
+            sourceUrl: String,
+        ): MediaDetectionResult {
+            if (result !is MediaDetectionResult.Success) return result
+            val pending = result.candidates.filter(MediaCandidate::requiresPreflight)
+            val candidates = result.candidates.toMutableList()
+            var failure: MediaDetectionResult.Unsupported? = null
+            var remainingProbes = MAX_STREAM_PLAYLISTS
+            for (candidate in pending) {
+                val targetHeaders = mediaHeadersForUrl(headers, sourceUrl, candidate.url)
+                val page = if (remainingProbes-- > 0) fetchPage(candidate.url, targetHeaders) else null
+                remainingProbes -= page?.childPlaylistUrls?.size ?: 0
+                val checked =
+                    if (page == null || remainingProbes < 0) {
+                        unsupported(UnsupportedReason.UNSUPPORTED_FORMAT)
+                    } else {
+                        validateStreamPlaylists(page, targetHeaders, candidate.url)
+                    }
+                when (checked) {
+                    is MediaDetectionResult.Unsupported -> {
+                        candidates.remove(candidate)
+                        if (failure?.reason != UnsupportedReason.DRM_PROTECTED) failure = checked
+                    }
+
+                    is MediaDetectionResult.Success -> {
+                        val resolved = checked.candidates.firstOrNull()
+                        if (resolved != null) {
+                            candidates[candidates.indexOf(candidate)] =
+                                resolved.copy(
+                                    id = candidate.id,
+                                    title = candidate.title,
+                                    thumbnailUrl = candidate.thumbnailUrl,
+                                )
+                        }
+                    }
+                }
+            }
+            return if (candidates.isEmpty()) {
+                failure ?: unsupported(UnsupportedReason.NO_MEDIA)
+            } else {
+                result.copy(
+                    candidates = candidates,
+                    hasProtectedMedia = result.hasProtectedMedia || failure?.reason == UnsupportedReason.DRM_PROTECTED,
+                )
+            }
         }
 
         private suspend fun fetchPage(
@@ -108,8 +204,14 @@ internal class DefaultMediaDetectionRepository
             }
 
         private fun detectResponse(response: okhttp3.Response): MediaPageDetection {
-            if (!response.isSuccessful) return MediaPageDetection(unsupported(UnsupportedReason.NETWORK_ERROR))
             val requestUrl = response.request.url.toString()
+            val failure =
+                when {
+                    requestUrl.isUnsupportedVideoService() -> UnsupportedReason.UNSUPPORTED_SERVICE
+                    !response.isSuccessful -> UnsupportedReason.NETWORK_ERROR
+                    else -> null
+                }
+            if (failure != null) return MediaPageDetection(unsupported(failure))
             val body = response.body
             val contentType = body.contentType()?.toString()
             val prefix = response.peekBody(MEDIA_PREFIX_BYTES).bytes()
@@ -117,7 +219,12 @@ internal class DefaultMediaDetectionRepository
             val result =
                 when {
                     streamMime != null -> {
-                        MediaPageDetection(detectStreamManifest(requestUrl, streamMime, body))
+                        val inspection = inspectStreamManifest(requestUrl, streamMime, body)
+                        MediaPageDetection(
+                            inspection.result,
+                            childPlaylistUrls = inspection.childPlaylistUrls,
+                            isStreamManifest = true,
+                        )
                     }
 
                     contentType?.startsWith("video/") == true ||
@@ -229,6 +336,16 @@ private const val MP4_BRAND_END = 8
 private data class MediaPageDetection(
     val result: MediaDetectionResult,
     val followUpUrls: List<String> = emptyList(),
+    val childPlaylistUrls: List<String> = emptyList(),
+    val isStreamManifest: Boolean = false,
 )
 
 private const val MAX_SITE_REQUESTS = 4
+
+private const val MAX_STREAM_PLAYLISTS = 16
+
+private val STREAM_MIME_TYPES = setOf("application/x-mpegurl", "application/vnd.apple.mpegurl", "application/dash+xml")
+
+private fun MediaCandidate.requiresPreflight(): Boolean =
+    url.hasStreamManifestExtension() || mimeType?.lowercase() in STREAM_MIME_TYPES ||
+        (mimeType == null && !url.hasVideoFileExtension())

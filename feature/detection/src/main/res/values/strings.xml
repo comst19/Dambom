@@ -10,7 +10,7 @@
     <string name="detection_back">뒤로</string>
     <string name="detection_loading">영상을 찾고 있어요</string>
     <string name="detection_loading_description">페이지에 따라 잠시 걸릴 수 있어요.</string>
-    <string name="detection_found_count">저장할 수 있는 영상 %1$d개를 찾았어요.</string>
+    <string name="detection_found_count">다운로드 가능한 영상 %1$d개</string>
     <string name="detection_choose_videos">썸네일을 보거나 선택한 화질로 재생한 뒤 저장할 영상을 골라 주세요.</string>
     <string name="detection_video_number">영상 %1$d</string>
     <string name="detection_thumbnail">영상 %1$d 썸네일</string>
@@ -41,4 +41,8 @@
     <string name="detection_network_error">페이지에 연결하지 못했어요. 네트워크 상태를 확인해 주세요.</string>
     <string name="detection_unsupported_format">담봄이 아직 지원하지 않는 형식이에요.</string>
     <string name="detection_default_video_title">웹 영상</string>
+    <string name="detection_drm_protected">콘텐츠 보호가 적용된 영상이에요.</string>
+    <string name="detection_unsupported_service">YouTube 영상 다운로드는 지원하지 않아요.</string>
+    <string name="detection_download_unavailable">다운로드할 수 없어요</string>
+    <string name="detection_drm_excluded">보호된 영상은 목록에서 제외했어요.</string>
 </resources>

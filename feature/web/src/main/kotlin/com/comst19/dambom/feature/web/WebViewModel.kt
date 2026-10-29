@@ -5,8 +5,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.comst19.dambom.core.common.net.hasVideoFileExtension
+import com.comst19.dambom.core.common.net.isUnsupportedVideoService
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.MediaResourceRequest
+import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionSnapshots
 import com.comst19.dambom.core.navigation.NavigationDispatcher
@@ -44,6 +46,7 @@ internal class WebViewModel
         val uiState: StateFlow<WebUiState> = mutableUiState.asStateFlow()
         private val savedWebStates = LinkedHashMap<Long, Bundle>()
         private val mediaByTab = mutableMapOf<Long, WebMediaCandidates>()
+        private val blockedTabs = mutableMapOf<Long, UnsupportedReason>()
         private val pageGenerations = mutableMapOf<Long, Long>()
         private val automaticallyScannedTabs = mutableSetOf<Long>()
         private val scanJobs = mutableMapOf<Long, Job>()
@@ -181,6 +184,7 @@ internal class WebViewModel
             pageGenerations[tabId] = generation
             updatePage(tabId, url, title)
             pageGenerations[tabId] = generation
+            if (url?.isUnsupportedVideoService() == true) blockDownloads(tabId, UnsupportedReason.UNSUPPORTED_SERVICE)
         }
 
         fun onPageFinished(
@@ -190,7 +194,7 @@ internal class WebViewModel
             generation: Long,
         ) {
             val safeUrl = url?.takeIf { it.startsWith("http://") || it.startsWith("https://") } ?: return
-            if (pageGenerations[tabId] != generation) return
+            if (pageGenerations[tabId] != generation || tabId in blockedTabs) return
             if (uiState.value.tabs
                     .firstOrNull { it.id == tabId }
                     ?.url != safeUrl
@@ -213,7 +217,7 @@ internal class WebViewModel
             tabId: Long,
             automatic: Boolean,
         ) {
-            val tab = uiState.value.tabs.firstOrNull { it.id == tabId } ?: return
+            val tab = uiState.value.tabs.firstOrNull { it.id == tabId && tabId !in blockedTabs } ?: return
             val url = tab.url ?: return
             val generation = pageGenerations[tab.id]
             scanJobs.remove(tab.id)?.cancel()
@@ -223,17 +227,19 @@ internal class WebViewModel
                     when (val result = mediaDetectionRepository.detect(url)) {
                         is MediaDetectionResult.Success -> {
                             updateTabIfCurrentPage(tab.id, url, generation) {
-                                val count = mediaByTab.getOrPut(tab.id, ::WebMediaCandidates).merge(result.candidates)
-                                it.copy(detectionState = WebDetectionState.Found(count))
+                                val media = mediaByTab.getOrPut(tab.id, ::WebMediaCandidates)
+                                media.merge(result.candidates, containsProtectedMedia = result.hasProtectedMedia)
+                                it.copy(detectionState = media.detectionState())
                             }
                         }
 
                         is MediaDetectionResult.Unsupported -> {
                             updateTabIfCurrentPage(tab.id, url, generation) {
-                                val count = mediaByTab[tab.id]?.count ?: 0
+                                val media = mediaByTab.getOrPut(tab.id, ::WebMediaCandidates)
+                                if (result.reason == UnsupportedReason.DRM_PROTECTED) media.rejectProtected(url)
                                 val detectionState =
-                                    if (count > 0) {
-                                        WebDetectionState.Found(count)
+                                    if (media.count > 0 || media.hasProtectedMedia) {
+                                        media.detectionState()
                                     } else if (automatic) {
                                         it.detectionState
                                     } else {
@@ -251,7 +257,11 @@ internal class WebViewModel
             val candidates = tab?.let { mediaByTab[it.id]?.candidates }.orEmpty()
             val url = tab?.url ?: return
             if (candidates.isEmpty()) return
-            val snapshotId = snapshots.save(url, MediaDetectionResult.Success(tab.title, candidates))
+            val snapshotId =
+                snapshots.save(
+                    url,
+                    MediaDetectionResult.Success(tab.title, candidates, mediaByTab[tab.id]?.hasProtectedMedia == true),
+                )
             val sharedLink =
                 savedStateHandle.get<Long>(SHARED_ORIGIN_TAB_ID) == tab.id &&
                     savedStateHandle.get<String>(SHARED_ORIGIN_URL) == url
@@ -279,9 +289,15 @@ internal class WebViewModel
             generation: Long,
             request: MediaResourceRequest,
         ) {
-            if (!request.method.equals("GET", true) || !shouldProbeMedia(request.url)) return
             viewModelScope.launch {
-                if (pageGenerations[tabId] != generation) return@launch
+                if (pageGenerations[tabId] != generation || tabId in blockedTabs) return@launch
+                if (request.isProtected) {
+                    val media = mediaByTab.getOrPut(tabId, ::WebMediaCandidates)
+                    media.rejectProtected(request.url)
+                    updateCurrentTabIf(tabId) { it.copy(detectionState = media.detectionState()) }
+                    return@launch
+                }
+                if (!request.method.equals("GET", true) || !shouldProbeMedia(request.url)) return@launch
                 probeJobs.getOrPut(tabId, ::mutableListOf).apply {
                     removeAll { it.isCompleted }
                     add(coroutineContext.job)
@@ -295,10 +311,32 @@ internal class WebViewModel
                     } else {
                         probeSlots.withPermit { mediaDetectionRepository.detectRequest(request.url, request.headers) }
                     }
-                if (pageGenerations[tabId] != generation || result !is MediaDetectionResult.Success) return@launch
-                val count = media.merge(result.candidates, preserveExistingTitle = true)
-                if (count > 0) {
-                    updateCurrentTabIf(tabId) { it.copy(detectionState = WebDetectionState.Found(count)) }
+                if (pageGenerations[tabId] != generation || tabId in blockedTabs) return@launch
+                applyMediaProbe(tabId, request.url, media, result)
+            }
+        }
+
+        private fun applyMediaProbe(
+            tabId: Long,
+            sourceUrl: String,
+            media: WebMediaCandidates,
+            result: MediaDetectionResult,
+        ) {
+            when (result) {
+                is MediaDetectionResult.Unsupported -> {
+                    if (result.reason == UnsupportedReason.DRM_PROTECTED) {
+                        media.rejectProtected(sourceUrl)
+                        updateCurrentTabIf(tabId) { it.copy(detectionState = media.detectionState()) }
+                    }
+                }
+
+                is MediaDetectionResult.Success -> {
+                    media.merge(
+                        result.candidates,
+                        preserveExistingTitle = true,
+                        containsProtectedMedia = result.hasProtectedMedia,
+                    )
+                    updateCurrentTabIf(tabId) { it.copy(detectionState = media.detectionState()) }
                 }
             }
         }
@@ -340,7 +378,7 @@ internal class WebViewModel
             generation: Long?,
             transform: (WebTab) -> WebTab,
         ) {
-            if (pageGenerations[tabId] != generation) return
+            if (pageGenerations[tabId] != generation || tabId in blockedTabs) return
             if (uiState.value.tabs
                     .firstOrNull { it.id == tabId }
                     ?.url != url
@@ -356,7 +394,19 @@ internal class WebViewModel
             savedStateHandle.remove<String>(SHARED_ORIGIN_URL)
         }
 
+        private fun blockDownloads(
+            tabId: Long,
+            reason: UnsupportedReason,
+        ) {
+            blockedTabs[tabId] = reason
+            scanJobs.remove(tabId)?.cancel()
+            probeJobs.remove(tabId)?.forEach(Job::cancel)
+            mediaByTab.remove(tabId)
+            updateCurrentTabIf(tabId) { it.copy(detectionState = WebDetectionState.NotFound(reason)) }
+        }
+
         private fun invalidatePage(tabId: Long) {
+            blockedTabs.remove(tabId)
             scanJobs.remove(tabId)?.cancel()
             automaticallyScannedTabs.remove(tabId)
             probeJobs.remove(tabId)?.forEach(Job::cancel)
@@ -377,3 +427,10 @@ private const val INITIAL_URL_APPLIED_KEY = "web-initial-url-applied"
 
 private const val SHARED_ORIGIN_TAB_ID = "sharedOriginTabId"
 private const val SHARED_ORIGIN_URL = "sharedOriginUrl"
+
+private fun WebMediaCandidates.detectionState(): WebDetectionState =
+    when {
+        count > 0 -> WebDetectionState.Found(count, hasProtectedMedia)
+        hasProtectedMedia -> WebDetectionState.NotFound(UnsupportedReason.DRM_PROTECTED)
+        else -> WebDetectionState.Idle
+    }

@@ -43,4 +43,7 @@
     <string name="web_link_copied">링크를 복사했어요.</string>
     <string name="web_action_failure">요청을 처리할 앱을 찾지 못했어요.</string>
     <string name="web_share_chooser">링크 공유</string>
+    <string name="web_drm_protected">콘텐츠 보호가 적용된 영상이에요. 다운로드할 수 없어요.</string>
+    <string name="web_unsupported_service">YouTube 영상 다운로드는 지원하지 않아요.</string>
+    <string name="web_drm_excluded">보호된 영상은 목록에서 제외했어요.</string>
 </resources>

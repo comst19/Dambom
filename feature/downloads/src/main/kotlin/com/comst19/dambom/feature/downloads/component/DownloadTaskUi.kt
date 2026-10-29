@@ -126,6 +126,7 @@ internal fun DownloadFailureReason.failureText(): String =
     stringResource(
         when (this) {
             DownloadFailureReason.ACCESS_RESTRICTED -> R.string.downloads_error_access
+            DownloadFailureReason.DRM_PROTECTED -> R.string.downloads_error_drm
             DownloadFailureReason.UNSUPPORTED_FORMAT -> R.string.downloads_error_format
             DownloadFailureReason.NETWORK -> R.string.downloads_error_network
             DownloadFailureReason.STORAGE -> R.string.downloads_error_storage

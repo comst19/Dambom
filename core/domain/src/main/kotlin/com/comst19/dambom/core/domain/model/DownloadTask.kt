@@ -47,6 +47,7 @@ enum class DownloadStatus {
 }
 
 enum class DownloadFailureReason {
+    DRM_PROTECTED,
     ACCESS_RESTRICTED,
     UNSUPPORTED_FORMAT,
     NETWORK,

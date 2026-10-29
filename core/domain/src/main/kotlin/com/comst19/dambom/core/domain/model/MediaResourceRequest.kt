@@ -6,4 +6,5 @@ data class MediaResourceRequest(
     val method: String = "GET",
     val thumbnailUrl: String? = null,
     val title: String? = null,
+    val isProtected: Boolean = false,
 )

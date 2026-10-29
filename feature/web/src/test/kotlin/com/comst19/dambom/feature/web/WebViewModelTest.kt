@@ -33,6 +33,123 @@ class WebViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
     @Test
+    fun `mixed page preserves clear downloads and the exclusion notice`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val snapshots = MediaDetectionSnapshots()
+            val viewModel = WebViewModel(FakeMediaDetectionRepository, navigation, SavedStateHandle(), snapshots)
+            val id = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(id, FIRST_PAGE_URL, "Mixed", 1L)
+            viewModel.onMediaRequest(id, 1L, "https://example.com/clear.mp4")
+            viewModel.onMediaRequest(id, 1L, "https://example.com/protected.mp4")
+            val protected = MediaResourceRequest("https://example.com/protected.mp4", isProtected = true)
+            viewModel.onMediaRequest(id, 1L, protected)
+            viewModel.onMediaRequest(id, 1L, "https://example.com/protected.mp4")
+            advanceUntilIdle()
+            assertEquals(
+                WebDetectionState.Found(1, true),
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+            viewModel.openDetectedMedia()
+            advanceUntilIdle()
+            val key = (navigation.dispatched.single() as NavigationEvent.Navigate).key as DetectionResultKey
+            val snapshot = snapshots.get(checkNotNull(key.snapshotId), key.url)
+            assertEquals(true, snapshot?.hasProtectedMedia)
+            assertEquals("https://example.com/clear.mp4", snapshot?.candidates?.single()?.url)
+        }
+
+    @Test
+    fun `blob protection signal does not discard a separate clear video`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = createViewModel()
+            val id = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(id, FIRST_PAGE_URL, "Mixed", 1L)
+            viewModel.onMediaRequest(id, 1L, MediaResourceRequest(FIRST_PAGE_URL, isProtected = true))
+            viewModel.onMediaRequest(id, 1L, "https://example.com/clear.mp4")
+            advanceUntilIdle()
+            assertEquals(
+                WebDetectionState.Found(1, true),
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+        }
+
+    @Test
+    fun `protected source is removed and cannot return through late metadata or rescan`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val navigation = SpyNavigationDispatcher()
+            val viewModel = WebViewModel(FakeMediaDetectionRepository, navigation, SavedStateHandle())
+            val id = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(id, FIRST_PAGE_URL, "Page", 1L)
+            viewModel.onMediaRequest(id, 1L, "https://example.com/video.mp4")
+            advanceUntilIdle()
+            assertEquals(
+                WebDetectionState.Found(1),
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+            viewModel.onMediaRequest(id, 1L, MediaResourceRequest("https://example.com/video.mp4", isProtected = true))
+            viewModel.onMediaRequest(id, 1L, "https://example.com/video.mp4")
+            viewModel.scanCurrentTab()
+            viewModel.openDetectedMedia()
+            advanceUntilIdle()
+            assertEquals(
+                WebDetectionState.NotFound(UnsupportedReason.DRM_PROTECTED),
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+            assertTrue(navigation.dispatched.isEmpty())
+            viewModel.onPageStarted(id, SECOND_PAGE_URL, "Other", 2L)
+            viewModel.onMediaRequest(id, 1L, MediaResourceRequest(FIRST_PAGE_URL, isProtected = true))
+            viewModel.onMediaRequest(id, 2L, "https://example.com/clear.mp4")
+            advanceUntilIdle()
+            assertEquals(
+                WebDetectionState.Found(1),
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+        }
+
+    @Test
+    fun `YouTube page warns before playback and cannot collect preview or ad files`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val viewModel = createViewModel()
+            val id = viewModel.uiState.value.currentTabId
+            val url = "https://m.youtube.com/watch?v=123"
+            viewModel.onPageStarted(id, url, "YouTube", 1L)
+            viewModel.onPageFinished(id, url, "YouTube", 1L)
+            viewModel.onMediaRequest(id, 1L, "https://example.com/ad.mp4")
+            viewModel.scanCurrentTab()
+            advanceUntilIdle()
+            assertEquals(
+                WebDetectionState.NotFound(UnsupportedReason.UNSUPPORTED_SERVICE),
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+        }
+
+    @Test
+    fun `DRM manifest probe is shown without requiring a manual rescan`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String): MediaDetectionResult =
+                        MediaDetectionResult.Unsupported(UnsupportedReason.DRM_PROTECTED)
+                }
+            val viewModel = WebViewModel(repository, FakeNavigationDispatcher, SavedStateHandle())
+            val id = viewModel.uiState.value.currentTabId
+            viewModel.onPageStarted(id, FIRST_PAGE_URL, "Page", 1L)
+            viewModel.onMediaRequest(id, 1L, "https://example.com/protected.mpd")
+            advanceUntilIdle()
+            assertEquals(
+                WebDetectionState.NotFound(UnsupportedReason.DRM_PROTECTED),
+                viewModel.uiState.value.currentTab
+                    ?.detectionState,
+            )
+        }
+
+    @Test
     fun `automatic result belongs to its original tab and is cancelled on navigation`() =
         runTest(mainDispatcherRule.dispatcher) {
             val repository = ControllableMediaDetectionRepository()

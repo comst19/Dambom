@@ -10,7 +10,7 @@
     <string name="detection_back">Back</string>
     <string name="detection_loading">Finding videos</string>
     <string name="detection_loading_description">Some pages may take a moment.</string>
-    <string name="detection_found_count">Videos ready to save: %1$d</string>
+    <string name="detection_found_count">%1$d videos available to download</string>
     <string name="detection_choose_videos">Check a thumbnail or play the selected quality, then choose videos to save.</string>
     <string name="detection_video_number">Video %1$d</string>
     <string name="detection_thumbnail">Video %1$d thumbnail</string>
@@ -41,4 +41,8 @@
     <string name="detection_network_error">Couldn’t connect to the page. Check your network.</string>
     <string name="detection_unsupported_format">Dambom doesn’t support this format yet.</string>
     <string name="detection_default_video_title">Web video</string>
+    <string name="detection_drm_protected">This video is protected.</string>
+    <string name="detection_unsupported_service">YouTube video downloads are not supported.</string>
+    <string name="detection_download_unavailable">Download unavailable</string>
+    <string name="detection_drm_excluded">Protected videos are hidden from this list.</string>
 </resources>

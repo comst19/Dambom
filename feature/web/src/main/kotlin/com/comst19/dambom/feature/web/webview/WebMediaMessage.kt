@@ -21,7 +21,7 @@ internal fun parseWebMediaMessage(
     return if (belongsToPage && url != null) {
         val poster = (parsed.opt("poster") as? String)?.validatedMediaUrl()
         val title = (parsed.opt("title") as? String)?.trim()?.take(MAX_MEDIA_TITLE_LENGTH)?.takeIf(String::isNotBlank)
-        MediaResourceRequest(url, thumbnailUrl = poster, title = title)
+        MediaResourceRequest(url, thumbnailUrl = poster, title = title, isProtected = parsed.opt("protected") == true)
     } else {
         null
     }

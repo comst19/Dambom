@@ -275,6 +275,44 @@ class SubtitleScreenTest {
         compose.onNodeWithText(cues.last().text).assertIsDisplayed()
     }
 
+    @Test fun videoActionMenuIsBoundedAndReopensAtTheTopAfterScrolling() {
+        var copied = 0
+        val actions =
+            LibraryFileActions(
+                { _, _ -> },
+                {},
+                {},
+                {},
+                { copied++ },
+                {},
+                onDelete = {},
+                onTrim = {},
+                onCompress = {},
+                onTranslate = {},
+            )
+        compose.setContent {
+            MaterialTheme {
+                com.comst19.dambom.feature.library.component
+                    .VideoActionsButton(task, actions)
+            }
+        }
+        val more = context.getString(R.string.library_more_actions, task.title)
+        val first = context.getString(R.string.subtitle_title)
+        val copy = context.getString(R.string.library_copy_link)
+        compose.onNodeWithContentDescription(more).performClick()
+        compose.onNodeWithText(first).assertIsDisplayed()
+        val viewport = compose.onNode(hasScrollAction()).fetchSemanticsNode().boundsInRoot
+        val density = context.resources.displayMetrics.density
+        assertTrue(viewport.height <= 360 * density)
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText(context.getString(R.string.library_delete)))
+        compose.onNodeWithText(context.getString(R.string.library_delete)).assertIsDisplayed()
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText(copy))
+        compose.onNodeWithText(copy).performClick()
+        assertEquals(1, copied)
+        compose.onNodeWithContentDescription(more).performClick()
+        compose.onNodeWithText(first).assertIsDisplayed()
+    }
+
     @Test fun captionToggleSurvivesPlayerItemResetAndFullscreenSwitch() {
         val video = File(context.cacheDir, "subtitle-toggle.mp4").apply { writeText("test") }
         video.videoSubtitleFile().writeText(listOf(SubtitleCue(0, 8_000, "저장된 자막")).toSrt())

@@ -2,6 +2,7 @@ package com.comst19.dambom.feature.library.component
 
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Compress
@@ -20,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +46,9 @@ internal fun VideoActionsButton(
     showFavoriteAction: Boolean = false,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
+    val menuScroll = rememberScrollState()
+    val menuModifier = actionMenuViewport(menuScroll)
+    LaunchedEffect(menuExpanded) { if (menuExpanded) menuScroll.scrollTo(0) }
     var renameOpen by remember { mutableStateOf(false) }
     var deleteOpen by remember { mutableStateOf(false) }
     val sourceKind = videoSourcePresentation(task.sourcePageUrl).kind
@@ -60,6 +65,8 @@ internal fun VideoActionsButton(
             )
             DropdownMenu(
                 expanded = menuExpanded,
+                modifier = menuModifier,
+                scrollState = menuScroll,
                 onDismissRequest = { menuExpanded = false },
             ) {
                 if (!task.deletePending) {

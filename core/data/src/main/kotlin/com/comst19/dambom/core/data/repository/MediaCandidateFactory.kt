@@ -1,8 +1,8 @@
 package com.comst19.dambom.core.data.repository
 
+import com.comst19.dambom.core.data.media.mediaCandidateId
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import java.net.URI
-import java.security.MessageDigest
 
 internal fun URI.toHttpUrlOrNull(): String? =
     if (scheme.equals("http", true) || scheme.equals("https", true)) {
@@ -26,7 +26,7 @@ internal fun String.toCandidate(
     thumbnailUrl: String? = null,
 ): MediaCandidate =
     MediaCandidate(
-        id = MessageDigest.getInstance("SHA-256").digest(toByteArray()).joinToString("") { "%02x".format(it) },
+        id = mediaCandidateId(),
         url = this,
         title = title,
         mimeType = mimeType,

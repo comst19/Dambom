@@ -2,6 +2,7 @@ package com.comst19.dambom.feature.web
 
 import com.comst19.dambom.core.common.net.hasStreamManifestExtension
 import com.comst19.dambom.core.common.net.hasVideoFileExtension
+import com.comst19.dambom.core.common.net.readableMediaTitle
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.MediaResourceRequest
@@ -55,6 +56,7 @@ internal class WebMediaCandidates {
     fun merge(
         incoming: List<MediaCandidate>,
         preserveExistingTitle: Boolean = false,
+        pageTitle: String = "",
         containsProtectedMedia: Boolean = false,
     ): Int {
         hasProtectedMedia = hasProtectedMedia || containsProtectedMedia
@@ -62,11 +64,12 @@ internal class WebMediaCandidates {
             val key = candidate.url.detectedVideoKey()
             if (key in protectedKeys) return@forEach
             val previous = detected[key]
-            val existingTitle = previous?.title?.takeIf { preserveExistingTitle }
+            val incomingTitle = candidate.title.readableMediaTitle() ?: pageTitle.readableMediaTitle().orEmpty()
+            val existingTitle = previous?.title?.readableMediaTitle()?.takeIf { preserveExistingTitle }
             if (previous != null || detected.size < MAX_DETECTED_MEDIA) {
                 detected[key] =
                     candidate.copy(
-                        title = metadata[key]?.title ?: existingTitle ?: candidate.title,
+                        title = metadata[key]?.title?.readableMediaTitle() ?: existingTitle ?: incomingTitle,
                         requestHeaders = candidate.requestHeaders.ifEmpty { previous?.requestHeaders.orEmpty() },
                         variants = candidate.variants.ifEmpty { previous?.variants.orEmpty() },
                         thumbnailUrl = metadata[key]?.thumbnailUrl ?: candidate.thumbnailUrl ?: previous?.thumbnailUrl,

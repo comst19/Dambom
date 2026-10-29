@@ -235,6 +235,8 @@ class SubtitleScreenTest {
             }
         }
         compose.onNodeWithText(paragraph).assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.subtitle_auto_saved)).assertIsDisplayed()
+        compose.onNodeWithText(context.getString(R.string.subtitle_generate)).assertDoesNotExist()
         compose.onNodeWithText(context.getString(R.string.subtitle_view)).performScrollTo().performClick()
         assertEquals(1, opened)
     }

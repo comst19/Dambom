@@ -156,15 +156,26 @@ internal fun SubtitleResult(
     onView: () -> Unit,
 ) {
     if (state.cues.isEmpty()) return
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(R.string.subtitle_ready, state.cues.size))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(onClick = onView, enabled = !state.busy) { Text(stringResource(R.string.subtitle_view)) }
+    OutlinedCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.subtitle_auto_saved), style = MaterialTheme.typography.titleMedium)
+            }
+            Text(stringResource(R.string.subtitle_ready, state.cues.size), style = MaterialTheme.typography.bodyMedium)
+            Button(onClick = onView, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.subtitle_view))
+            }
             TextButton(onClick = onExport, enabled = !state.busy && state.operation != SubtitleOperation.CHECKING) {
                 Text(stringResource(R.string.subtitle_export))
             }
+            Text(
+                stringResource(R.string.subtitle_export_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (state.exported) Text(stringResource(R.string.subtitle_exported))
         }
-        if (state.exported) Text(stringResource(R.string.subtitle_exported))
     }
 }
 
@@ -177,8 +188,19 @@ internal fun SubtitleModelActions(
 ) {
     when (state.model) {
         SubtitleModelStatus.AVAILABLE -> {
-            Button(onClick = onGenerate, enabled = state.task != null, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.subtitle_generate))
+            if (state.cues.isEmpty()) {
+                Button(onClick = onGenerate, enabled = state.task != null, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.subtitle_generate))
+                }
+            } else {
+                OutlinedButton(onClick = onGenerate, enabled = state.task != null, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.subtitle_regenerate))
+                }
+                Text(
+                    stringResource(R.string.subtitle_regenerate_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
 

@@ -38,8 +38,10 @@ import com.comst19.dambom.feature.library.subtitle.component.SubtitleResult
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleModelStatus
 import com.comst19.dambom.feature.library.subtitle.model.ModelDownloadProgress
 import com.comst19.dambom.feature.library.subtitle.model.ModelDownloadStage
+import com.comst19.dambom.feature.library.subtitle.model.SubtitleCue
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleLanguagePair
 import com.comst19.dambom.feature.library.subtitle.work.SubtitleModelDownload
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,11 +76,10 @@ internal fun SubtitleScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(state.task?.title.orEmpty(), style = MaterialTheme.typography.titleLarge)
-            Text(
-                stringResource(R.string.subtitle_experimental),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            SubtitleResult(state, onExport, onViewSubtitles)
+            if (state.cues.isNotEmpty()) {
+                Text(stringResource(R.string.subtitle_new_generation), style = MaterialTheme.typography.titleSmall)
+            }
             SubtitleLanguageSelector(state.pair, !state.busy && state.task != null, onSelect)
             when {
                 state.loadFailed -> {
@@ -99,7 +100,11 @@ internal fun SubtitleScreen(
                 }
             }
             if (state.failed) SubtitleError(state)
-            SubtitleResult(state, onExport, onViewSubtitles)
+            Text(
+                stringResource(R.string.subtitle_experimental),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             if (state.model == SubtitleModelStatus.AVAILABLE && !state.busy) {
                 SubtitleModelManagement(onDownload, onDeleteModel)
             }
@@ -111,6 +116,18 @@ internal fun SubtitleScreen(
 @Composable
 private fun SubtitleReadyPreview() {
     SubtitlePreview(SubtitleState(model = SubtitleModelStatus.AVAILABLE, localOperation = SubtitleOperation.IDLE))
+}
+
+@Preview(name = "Subtitle saved", widthDp = 360, heightDp = 800, locale = "ko")
+@Composable
+private fun SubtitleSavedPreview() {
+    SubtitlePreview(
+        SubtitleState(
+            model = SubtitleModelStatus.AVAILABLE,
+            localOperation = SubtitleOperation.IDLE,
+            cues = persistentListOf(SubtitleCue(0, 8_000, "저장된 번역 자막")),
+        ),
+    )
 }
 
 @Preview(name = "Model download", widthDp = 360, heightDp = 800, locale = "ko")

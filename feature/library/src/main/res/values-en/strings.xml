@@ -184,9 +184,9 @@
     <string name="subtitle_cancel">Stop task</string>
     <string name="subtitle_cancel_description">Stop this task? Existing subtitles and the original video will be kept. An interrupted LLM download must be restarted. System speech model downloads may continue.</string>
     <string name="subtitle_failed">Could not generate subtitles. Try again shortly.</string>
-    <string name="subtitle_ready">Saved %1$d subtitles on this device.</string>
-    <string name="subtitle_export">Save SRT subtitle file</string>
-    <string name="subtitle_exported">Subtitle file saved. Some gallery apps do not support separate subtitles.</string>
+    <string name="subtitle_ready">%1$d segments · Applied automatically during playback.</string>
+    <string name="subtitle_export">Export SRT</string>
+    <string name="subtitle_exported">An SRT copy was exported to your selected location.</string>
     <string name="subtitle_delete_model">Delete translation model</string>
     <string name="subtitle_update_model">Update translation model</string>
     <string name="subtitle_runtime_title">Translation runtime</string>
@@ -197,7 +197,7 @@
     <string name="subtitle_notification_progress">%1$s · %2$d seconds processed</string>
     <string name="subtitle_notification_complete">Translated subtitles are ready</string>
     <string name="subtitle_notification_failed">Could not generate translated subtitles</string>
-    <string name="subtitle_exporting">Saving the subtitle file.</string>
+    <string name="subtitle_exporting">Exporting an SRT copy.</string>
     <string name="subtitle_deleting_model">Deleting the translation LLM.</string>
     <string name="subtitle_background_hint">Processing continues after you leave this screen. Allow notifications to be notified when it finishes.</string>
     <string name="subtitle_delete_model_description">Delete the translation model? Translating again will require a download of about 2.6 GB. Your videos and subtitles will be kept.</string>
@@ -221,4 +221,9 @@
     <string name="subtitle_transcript_back">Close subtitles</string>
     <string name="subtitle_transcript_count">%1$d subtitles · Organized by time.</string>
     <string name="subtitle_transcript_empty">No saved subtitles.</string>
+    <string name="subtitle_auto_saved">Subtitles saved automatically</string>
+    <string name="subtitle_export_hint">Export a copy only to use subtitles in another app. No extra saving is needed in Dambom.</string>
+    <string name="subtitle_regenerate">Regenerate subtitles</string>
+    <string name="subtitle_regenerate_hint">Generating again replaces the saved subtitles.</string>
+    <string name="subtitle_new_generation">Generate again</string>
 </resources>

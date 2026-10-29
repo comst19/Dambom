@@ -189,7 +189,11 @@ private fun InlineVideoSurface(
                     }
                 }.fullscreenPlayerGestures(toggleControlsLabel, onToggleControls, {}, interaction),
         )
-        TranslatedSubtitleOverlay(player, interaction.subtitlesEnabled) { interaction.hasSubtitles = it }
+        TranslatedSubtitleOverlay(
+            player,
+            interaction.subtitlesEnabled,
+            bottomPadding = if (controlsVisible) 52.dp else 8.dp,
+        ) { interaction.hasSubtitles = it }
         AnimatedVisibility(
             visible = controlsVisible,
             enter = fadeIn(tween(INLINE_CONTROLS_FADE_MILLIS)),

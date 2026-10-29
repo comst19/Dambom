@@ -1,8 +1,12 @@
 package com.comst19.dambom.feature.library.subtitle.playback
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -15,8 +19,14 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -27,10 +37,13 @@ import androidx.media3.common.Player
 import kotlinx.coroutines.delay
 
 @Composable
+@Suppress("LongParameterList")
 internal fun BoxScope.TranslatedSubtitleOverlay(
     player: Player,
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
+    bottomPadding: Dp = 8.dp,
+    fontSize: TextUnit = 14.sp,
     onAvailability: (Boolean) -> Unit = {},
 ) {
     val currentOnAvailability by rememberUpdatedState(onAvailability)
@@ -78,21 +91,53 @@ internal fun BoxScope.TranslatedSubtitleOverlay(
             }
         }
     }
-    if (text.isNotBlank()) {
-        Text(
-            text,
-            modifier =
-                modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(horizontal = 12.dp, vertical = 64.dp)
-                    .background(Color.Black.copy(alpha = SUBTITLE_BACKGROUND_ALPHA))
-                    .padding(4.dp),
-            color = Color.White,
-            fontSize = 16.sp,
-            textAlign = TextAlign.Center,
-        )
+    if (text.isNotBlank()) SubtitleCaption(text, modifier, bottomPadding, fontSize)
+}
+
+@Composable
+internal fun BoxScope.SubtitleCaption(
+    text: String,
+    modifier: Modifier = Modifier,
+    bottomPadding: Dp = 8.dp,
+    fontSize: TextUnit = 14.sp,
+) {
+    Text(
+        text = text,
+        modifier =
+            modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(start = 12.dp, end = 12.dp, bottom = bottomPadding),
+        color = Color.White,
+        fontSize = fontSize,
+        lineHeight = fontSize * SUBTITLE_LINE_HEIGHT,
+        fontWeight = FontWeight.Medium,
+        textAlign = TextAlign.Center,
+        maxLines = 2,
+        style =
+            MaterialTheme.typography.bodyMedium.copy(
+                shadow =
+                    Shadow(
+                        color = Color.Black,
+                        offset = Offset.Zero,
+                        blurRadius = SUBTITLE_SHADOW_RADIUS,
+                    ),
+            ),
+    )
+}
+
+@Preview(name = "Inline subtitle", widthDp = 360, heightDp = 203)
+@Preview(name = "Wide subtitle", widthDp = 800, heightDp = 450)
+@Composable
+private fun SubtitleCaptionPreview() {
+    Box(Modifier.fillMaxWidth().aspectRatio(SUBTITLE_PREVIEW_ASPECT).background(Color(SUBTITLE_PREVIEW_COLOR))) {
+        SubtitleCaption("안녕하세요, 이것은 자막 번역 테스트입니다.")
     }
 }
 
 private const val SUBTITLE_TICK_MILLIS = 100L
-private const val SUBTITLE_BACKGROUND_ALPHA = 0.75f
+
+private const val SUBTITLE_LINE_HEIGHT = 1.3f
+private const val SUBTITLE_SHADOW_RADIUS = 4f
+private const val SUBTITLE_PREVIEW_ASPECT = 16f / 9f
+private const val SUBTITLE_PREVIEW_COLOR = 0xFF124F76

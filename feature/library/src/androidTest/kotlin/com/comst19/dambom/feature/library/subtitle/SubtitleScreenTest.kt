@@ -2,21 +2,30 @@ package com.comst19.dambom.feature.library.subtitle
 
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -31,10 +40,12 @@ import com.comst19.dambom.feature.library.subtitle.model.SubtitleCue
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleLanguagePair
 import com.comst19.dambom.feature.library.subtitle.model.subtitleTranscriptSections
 import com.comst19.dambom.feature.library.subtitle.model.toSrt
+import com.comst19.dambom.feature.library.subtitle.playback.SubtitleCaption
 import com.comst19.dambom.feature.library.subtitle.playback.SubtitleToggleButton
 import com.comst19.dambom.feature.library.subtitle.playback.TranslatedSubtitleOverlay
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -257,6 +268,47 @@ class SubtitleScreenTest {
         compose.onNodeWithText(cues.first().text).assertIsDisplayed()
         compose.onNode(hasScrollAction()).performScrollToNode(hasText(cues.last().text))
         compose.onNodeWithText(cues.last().text).assertIsDisplayed()
+    }
+
+    @Test fun captionStaysAtTheVideoBottomWithoutAnOpaqueTextBox() {
+        val videoColor = Color(0xFF124F76)
+        compose.setContent {
+            Box(Modifier.size(320.dp, 180.dp).background(videoColor).testTag("subtitle-video")) {
+                SubtitleCaption("짧은 자막")
+            }
+        }
+        val video = compose.onNodeWithTag("subtitle-video").fetchSemanticsNode().boundsInRoot
+        val caption = compose.onNodeWithText("짧은 자막").fetchSemanticsNode().boundsInRoot
+        assertTrue(caption.top > video.center.y)
+        assertTrue(caption.bottom < video.bottom)
+        val pixels = compose.onNodeWithTag("subtitle-video").captureToImage().toPixelMap()
+        val x = (caption.left - video.left + 2).toInt()
+        val y = (caption.top - video.top + 2).toInt()
+        assertEquals(videoColor.toArgb(), pixels[x, y].toArgb())
+        capture("subtitle-caption-bottom.png")
+    }
+
+    @Test fun legacyParagraphAdvancesOnSeekWithoutRewritingTheSavedSrt() {
+        val video = File(context.cacheDir, "subtitle-segments.mp4").apply { writeText("test") }
+        val original = listOf(SubtitleCue(0, 8_000, "첫 문장입니다. 다음 문장입니다. 마지막 문장입니다.")).toSrt()
+        video.videoSubtitleFile().writeText(original)
+        lateinit var player: ExoPlayer
+        compose.runOnUiThread {
+            player = ExoPlayer.Builder(context).build()
+            player.setMediaItem(MediaItem.fromUri(Uri.fromFile(video)))
+        }
+        try {
+            compose.setContent { Box(Modifier.fillMaxSize()) { TranslatedSubtitleOverlay(player) } }
+            compose.waitUntil(5_000) { compose.onAllNodesWithText("첫 문장입니다.").fetchSemanticsNodes().isNotEmpty() }
+            compose.runOnUiThread { player.seekTo(7_500) }
+            compose.waitUntil(5_000) { compose.onAllNodesWithText("마지막 문장입니다.").fetchSemanticsNodes().isNotEmpty() }
+            compose.onNodeWithText("첫 문장입니다.").assertDoesNotExist()
+            assertEquals(original, video.videoSubtitleFile().readText())
+        } finally {
+            compose.runOnUiThread { player.release() }
+            video.videoSubtitleFile().delete()
+            video.delete()
+        }
     }
 
     private fun capture(name: String) {

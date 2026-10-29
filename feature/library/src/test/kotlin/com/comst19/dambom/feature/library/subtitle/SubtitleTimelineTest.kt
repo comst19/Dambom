@@ -28,4 +28,14 @@ class SubtitleTimelineTest {
             assertNull(timeline.at(index * 1000L + 900))
         }
     }
+
+    @Test fun `legacy paragraph cues show short sentences in sequence without regeneration`() {
+        val first = "안녕하세요, 이것은 자막 번역 테스트입니다."
+        val second = "오늘은 날씨가 맑습니다."
+        val third = "밖에 나갈 때 물 한 병을 가져가 주세요."
+        val timeline = SubtitleTimeline(listOf(SubtitleCue(0, 8_000, "$first $second $third")))
+        assertEquals(first, timeline.at(0)?.text)
+        assertEquals(third, timeline.at(7_999)?.text)
+        assertNull(timeline.at(8_000))
+    }
 }

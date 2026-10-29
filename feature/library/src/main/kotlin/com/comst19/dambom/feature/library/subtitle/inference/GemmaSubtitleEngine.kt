@@ -10,6 +10,7 @@ import com.comst19.dambom.feature.library.subtitle.model.NoSubtitleSpeechExcepti
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleCue
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleFailure
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleLanguagePair
+import com.comst19.dambom.feature.library.subtitle.model.splitSubtitleCue
 import com.comst19.dambom.feature.library.subtitle.model.subtitleFailure
 import com.comst19.dambom.feature.library.subtitle.runtime.SubtitleRuntimeDelivery
 import com.google.mlkit.genai.common.DownloadStatus
@@ -159,7 +160,9 @@ internal class GemmaSubtitleEngine
                                 val text = recognizer(pair).use { speech -> transcribe(speech, chunk) }
                                 if (text.isNotBlank()) {
                                     val translated = session.translate(translationPrompt(pair, text))
-                                    cues.add(SubtitleCue(chunk.startMillis, chunk.endMillis, translated))
+                                    cues.addAll(
+                                        splitSubtitleCue(SubtitleCue(chunk.startMillis, chunk.endMillis, translated)),
+                                    )
                                 }
                             }
                             onProgress(chunk.endMillis)

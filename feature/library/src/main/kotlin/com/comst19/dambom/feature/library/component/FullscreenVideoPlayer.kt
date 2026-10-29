@@ -47,6 +47,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -113,7 +114,12 @@ internal fun FullscreenVideoPlayer(
                     onVideoBoundsChanged,
                     contentMode,
                 )
-                TranslatedSubtitleOverlay(player, interaction.subtitlesEnabled) { interaction.hasSubtitles = it }
+                TranslatedSubtitleOverlay(
+                    player,
+                    interaction.subtitlesEnabled,
+                    bottomPadding = if (controls.isVisible && !interaction.locked) 72.dp else 16.dp,
+                    fontSize = 18.sp,
+                ) { interaction.hasSubtitles = it }
                 Box(
                     Modifier
                         .fillMaxSize()

@@ -24,6 +24,13 @@ class TimedSpeechCuesTest {
         assertEquals(8_000L, cues.last().endMillis)
     }
 
+    @Test fun `brief pause after please keeps the request together`() {
+        val words = listOf(TimedSpeechWord("Please", 4_860), TimedSpeechWord("bring water.", 5_640))
+        val cue = timedSpeechCues(words, 0, 8_000).single()
+        assertEquals("Please bring water.", cue.text)
+        assertEquals(4_860L, cue.startMillis)
+    }
+
     @Test fun `absent or invalid timestamps never fabricate captions`() {
         assertTrue(timedSpeechCues(emptyList(), 100, 200).isEmpty())
         val invalid = listOf(TimedSpeechWord("bad", -1), TimedSpeechWord("late", 200))

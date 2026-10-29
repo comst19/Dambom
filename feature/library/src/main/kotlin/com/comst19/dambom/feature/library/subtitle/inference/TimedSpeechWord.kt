@@ -41,6 +41,6 @@ internal fun timedSpeechCues(
     return cues
 }
 
-private const val SPEECH_PAUSE_MILLIS = 700L
+private const val SPEECH_PAUSE_MILLIS = 1_000L
 private const val MAX_SPEECH_CUE_MILLIS = 3_000L
 private const val LAST_WORD_HOLD_MILLIS = 700L

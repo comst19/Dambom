@@ -11,7 +11,7 @@
     <string name="detection_loading">영상을 찾고 있어요</string>
     <string name="detection_loading_description">페이지에 따라 잠시 걸릴 수 있어요.</string>
     <string name="detection_found_count">다운로드 가능한 영상 %1$d개</string>
-    <string name="detection_choose_videos">썸네일을 보거나 선택한 화질로 재생한 뒤 저장할 영상을 골라 주세요.</string>
+    <string name="detection_choose_videos">제목과 출처를 확인하고, 필요하면 재생한 뒤 저장할 영상을 골라 주세요.</string>
     <string name="detection_video_number">영상 %1$d</string>
     <string name="detection_thumbnail">영상 %1$d 썸네일</string>
     <string name="detection_play">재생</string>

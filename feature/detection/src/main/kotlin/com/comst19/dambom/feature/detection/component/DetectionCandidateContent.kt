@@ -20,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +32,6 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.comst19.dambom.core.common.ui.PreloadVideoThumbnails
 import com.comst19.dambom.core.designsystem.DambomButton
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.NetworkAccessState
@@ -53,24 +51,6 @@ internal fun DetectionCandidateContent(
     var previewCandidate by remember { mutableStateOf<MediaCandidate?>(null) }
     var pendingDownloadQualityIds by remember { mutableStateOf(emptyList<String>()) }
     val gridState = rememberLazyGridState()
-    val preloadUrls by
-        remember(gridState, state.candidates) {
-            derivedStateOf {
-                val lastVisibleItemIndex =
-                    gridState.layoutInfo.visibleItemsInfo
-                        .lastOrNull()
-                        ?.index
-                if (lastVisibleItemIndex == null) {
-                    emptyList()
-                } else {
-                    state.candidates
-                        .drop(lastVisibleItemIndex.coerceIn(0, state.candidates.size))
-                        .take(PRELOAD_CANDIDATE_COUNT)
-                        .mapNotNull(MediaCandidate::thumbnailUrl)
-                }
-            }
-        }
-    PreloadVideoThumbnails(preloadUrls)
     Column(Modifier.fillMaxSize()) {
         LazyVerticalGrid(
             columns = GridCells.Adaptive(MIN_CANDIDATE_WIDTH),
@@ -265,4 +245,3 @@ private fun DetectionActions(
 private val MIN_CANDIDATE_WIDTH = 320.dp
 private val SCREEN_HORIZONTAL_PADDING = 16.dp
 private const val CANDIDATE_CONTENT_TYPE = "candidate"
-private const val PRELOAD_CANDIDATE_COUNT = 2

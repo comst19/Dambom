@@ -25,6 +25,7 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toPersistentSet
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,6 +36,34 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35], qualifiers = "en")
 class DetectionCandidateContentTest {
     @get:Rule val composeRule = createComposeRule()
+
+    @Test
+    fun `thumbnail free card keeps actions visible in a compact viewport`() {
+        val candidate =
+            candidate("video-1", "Video title", "High", "Low").copy(
+                thumbnailUrl = "https://example.com/poster.jpg",
+                requestHeaders = mapOf("Referer" to "https://source.example/watch/1"),
+            )
+        composeRule.setContent {
+            DambomTheme {
+                Box(Modifier.width(360.dp)) {
+                    DetectionCandidateItem(
+                        candidate = candidate,
+                        selectedVariant = candidate.downloadVariants.first(),
+                        index = 1,
+                        selected = true,
+                        onClick = {},
+                        onSelectVariant = {},
+                        onPreview = {},
+                    )
+                }
+            }
+        }
+        composeRule.onNodeWithText("source.example", useUnmergedTree = true).assertExists()
+        val bounds = composeRule.onNodeWithText("Video title").getUnclippedBoundsInRoot()
+        assertTrue("An empty poster area must not precede the title", bounds.top < 48.dp)
+        assertTrue(composeRule.onNodeWithText("Play").getUnclippedBoundsInRoot().bottom < 180.dp)
+    }
 
     @Test
     fun `card exposes its title and selection once while play stays independent`() {

@@ -1,15 +1,11 @@
 package com.comst19.dambom.feature.detection.component
 
 import android.net.Uri
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
@@ -20,7 +16,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -40,7 +35,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.comst19.dambom.core.common.ui.VideoThumbnail
+import com.comst19.dambom.core.common.net.readableMediaTitle
 import com.comst19.dambom.core.common.ui.format.formatFileSize
 import com.comst19.dambom.core.designsystem.DambomShapes
 import com.comst19.dambom.core.domain.model.MediaCandidate
@@ -74,128 +69,104 @@ internal fun DetectionCandidateItem(
             ),
         shape = DambomShapes.Card,
     ) {
-        Column {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(VIDEO_ASPECT_RATIO)
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center,
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.VideoLibrary,
-                    contentDescription = null,
-                    modifier = Modifier.size(44.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                Text(
+                    candidate.displayTitle(index),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
-                candidate.thumbnailUrl?.let { thumbnailUrl ->
-                    VideoThumbnail(
-                        data = thumbnailUrl,
-                        contentDescription = stringResource(R.string.detection_thumbnail, index),
-                        modifier = Modifier.fillMaxSize(),
+                Checkbox(
+                    checked = selected,
+                    onCheckedChange = null,
+                    // Align the visible box after Material's internal 2dp padding.
+                    modifier = Modifier.size(24.dp).offset(x = 2.dp).testTag("detection-selection-checkbox"),
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    candidate.sourceLabel(),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                selectedVariant.contentLength?.let {
+                    Text(
+                        it.formatFileSize(),
+                        modifier = Modifier.testTag("detection-candidate-size"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
-            Column(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        candidate.displayTitle(index),
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Checkbox(
-                        checked = selected,
-                        onCheckedChange = null,
-                        // Align the visible box after Material's internal 2dp padding.
-                        modifier = Modifier.size(24.dp).offset(x = 2.dp).testTag("detection-selection-checkbox"),
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        candidate.sourceLabel(),
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    selectedVariant.contentLength?.let {
-                        Text(
-                            it.formatFileSize(),
-                            modifier = Modifier.testTag("detection-candidate-size"),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Row(
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .heightIn(min = 48.dp)
-                                .clickable(
-                                    role = Role.Button,
-                                    onClick = { showQualitySheet = true },
-                                ),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text =
-                                if (selectedVariant.quality == ORIGINAL_QUALITY) {
-                                    stringResource(R.string.detection_quality_original)
-                                } else {
-                                    selectedVariant.quality
-                                },
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                        Spacer(Modifier.width(2.dp))
-                        Icon(
-                            imageVector = Icons.Outlined.ExpandMore,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                    Row(
-                        modifier =
-                            Modifier.weight(1f).heightIn(min = 48.dp).clickable(
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .heightIn(min = 48.dp)
+                            .clickable(
                                 role = Role.Button,
-                                onClick = onPreview,
+                                onClick = { showQualitySheet = true },
                             ),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier.size(22.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(R.string.detection_play),
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                    }
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text =
+                            if (selectedVariant.quality == ORIGINAL_QUALITY) {
+                                stringResource(R.string.detection_quality_original)
+                            } else {
+                                selectedVariant.quality
+                            },
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                    Spacer(Modifier.width(2.dp))
+                    Icon(
+                        imageVector = Icons.Outlined.ExpandMore,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                Row(
+                    modifier =
+                        Modifier.weight(1f).heightIn(min = 48.dp).clickable(
+                            role = Role.Button,
+                            onClick = onPreview,
+                        ),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = stringResource(R.string.detection_play),
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelLarge,
+                    )
                 }
             }
         }
@@ -216,13 +187,11 @@ internal fun DetectionCandidateItem(
 
 @Composable
 internal fun MediaCandidate.displayTitle(index: Int): String =
-    if (title.isBlank() || UUID_TITLE_REGEX.matches(title)) {
-        stringResource(R.string.detection_video_number, index)
-    } else {
-        title
-    }
+    title.readableMediaTitle() ?: stringResource(R.string.detection_video_number, index)
 
-private fun MediaCandidate.sourceLabel(): String = Uri.parse(url).host?.removePrefix("www.") ?: url
-
-private val UUID_TITLE_REGEX = Regex("[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}")
-private const val VIDEO_ASPECT_RATIO = 16f / 9f
+private fun MediaCandidate.sourceLabel(): String =
+    Uri
+        .parse(requestHeaders["Referer"] ?: url)
+        .host
+        ?.removePrefix("www.")
+        .orEmpty()

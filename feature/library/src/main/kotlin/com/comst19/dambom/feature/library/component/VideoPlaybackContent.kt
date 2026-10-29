@@ -192,8 +192,8 @@ private fun InlineVideoSurface(
         TranslatedSubtitleOverlay(
             player,
             interaction.subtitlesEnabled,
-            bottomPadding = if (controlsVisible) 52.dp else 8.dp,
-        ) { interaction.hasSubtitles = it }
+            bottomPadding = if (controlsVisible) 64.dp else 20.dp,
+        )
         AnimatedVisibility(
             visible = controlsVisible,
             enter = fadeIn(tween(INLINE_CONTROLS_FADE_MILLIS)),

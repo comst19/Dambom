@@ -2,6 +2,7 @@ package com.comst19.dambom.feature.library.subtitle.inference
 
 import android.content.Context
 import android.os.Build
+import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.feature.library.subtitle.data.GemmaModelStore
@@ -10,7 +11,6 @@ import com.comst19.dambom.feature.library.subtitle.model.NoSubtitleSpeechExcepti
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleCue
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleFailure
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleLanguagePair
-import com.comst19.dambom.feature.library.subtitle.model.splitSubtitleCue
 import com.comst19.dambom.feature.library.subtitle.model.subtitleFailure
 import com.comst19.dambom.feature.library.subtitle.runtime.SubtitleRuntimeDelivery
 import com.google.mlkit.genai.common.DownloadStatus
@@ -24,13 +24,15 @@ import com.google.mlkit.genai.speechrecognition.SpeechRecognizerRequest
 import com.google.mlkit.genai.speechrecognition.SpeechRecognizerResponse
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import java.io.File
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -157,12 +159,10 @@ internal class GemmaSubtitleEngine
                         val cues = mutableListOf<SubtitleCue>()
                         decoder.decode(path) { chunk ->
                             if (chunk.bytes.any { it != 0.toByte() }) {
-                                val text = recognizer(pair).use { speech -> transcribe(speech, chunk) }
-                                if (text.isNotBlank()) {
-                                    val translated = session.translate(translationPrompt(pair, text))
-                                    cues.addAll(
-                                        splitSubtitleCue(SubtitleCue(chunk.startMillis, chunk.endMillis, translated)),
-                                    )
+                                val segments = recognizer(pair).use { speech -> transcribe(speech, chunk) }
+                                for (segment in segments) {
+                                    val translated = session.translate(translationPrompt(pair, segment.text))
+                                    cues.add(segment.copy(text = translated))
                                 }
                             }
                             onProgress(chunk.endMillis)
@@ -173,42 +173,83 @@ internal class GemmaSubtitleEngine
                 }
             }
 
-        private suspend fun transcribe(
+        internal suspend fun transcribe(
             speech: SpeechRecognizer,
             chunk: PcmChunk,
-        ): String {
-            val audio = File.createTempFile("subtitle-audio-", ".pcm", context.cacheDir)
-            val text = StringBuilder()
-            try {
-                audio.writeBytes(chunk.bytes)
-                AudioSource.fromFile(audio).use { source ->
-                    val request = SpeechRecognizerRequest.Builder().apply { audioSource = source }.build()
-                    val completed =
-                        withTimeoutOrNull(INFERENCE_TIMEOUT_MILLIS) {
-                            speech.startRecognition(request).collect { response ->
-                                when (response) {
-                                    is SpeechRecognizerResponse.FinalTextResponse -> {
-                                        text.append(response.text)
-                                    }
-
-                                    is SpeechRecognizerResponse.ErrorResponse -> {
-                                        throw response.e
-                                    }
-
-                                    else -> {}
-                                }
+        ): List<SubtitleCue> =
+            coroutineScope {
+                val pipe = ParcelFileDescriptor.createPipe()
+                val words = mutableListOf<TimedSpeechWord>()
+                try {
+                    AudioSource.fromPfd(pipe[0], AudioSource.Mode.STREAMING).use { source ->
+                        val request =
+                            SpeechRecognizerRequest
+                                .Builder()
+                                .apply {
+                                    audioSource = source
+                                    recognitionOptions { enableWordTiming = true }
+                                }.build()
+                        val writer =
+                            launch(io) {
+                                streamAudio(pipe[1], chunk.bytes)
                             }
-                            true
+                        try {
+                            val completed =
+                                withTimeoutOrNull(INFERENCE_TIMEOUT_MILLIS) {
+                                    speech.startRecognition(request).collect { response ->
+                                        when (response) {
+                                            is SpeechRecognizerResponse.FinalTextResponse -> {
+                                                check(response.text.isBlank() || response.wordTimings.isNotEmpty()) {
+                                                    "Speech recognition did not return word timing"
+                                                }
+                                                words.addAll(
+                                                    response.wordTimings.map { word ->
+                                                        TimedSpeechWord(word.text, word.timestampMs)
+                                                    },
+                                                )
+                                            }
+
+                                            is SpeechRecognizerResponse.ErrorResponse -> {
+                                                throw response.e
+                                            }
+
+                                            else -> {}
+                                        }
+                                    }
+                                    true
+                                }
+                            check(completed == true) { "Speech recognition timed out" }
+                        } finally {
+                            writer.cancel()
+                            source.close()
+                            pipe[1].close()
+                            writer.join()
                         }
-                    check(completed == true) { "Speech recognition timed out" }
+                    }
+                } catch (failure: GenAiException) {
+                    if (subtitleFailure(failure) != SubtitleFailure.NO_SPEECH) throw failure
+                } finally {
+                    pipe.forEach { it.close() }
                 }
-            } catch (failure: GenAiException) {
-                if (subtitleFailure(failure) != SubtitleFailure.NO_SPEECH) throw failure
-                return ""
-            } finally {
-                audio.delete()
+                timedSpeechCues(words, chunk.startMillis, chunk.endMillis)
             }
-            return text.toString()
+
+        private suspend fun streamAudio(
+            descriptor: ParcelFileDescriptor,
+            bytes: ByteArray,
+        ) {
+            ParcelFileDescriptor.AutoCloseOutputStream(descriptor).use { output ->
+                val started = SystemClock.elapsedRealtime()
+                var offset = 0
+                while (offset < bytes.size) {
+                    val size = minOf(STREAM_FRAME_BYTES, bytes.size - offset)
+                    output.write(bytes, offset, size)
+                    offset += size
+                    val expected = started + offset / PCM_BYTES_PER_MILLISECOND
+                    val remaining = expected - SystemClock.elapsedRealtime()
+                    if (remaining > 0) delay(remaining)
+                }
+            }
         }
 
         private fun recognizer(pair: SubtitleLanguagePair) =
@@ -246,3 +287,6 @@ private data class CheckedSubtitleStatus(
 )
 
 private const val STATUS_CACHE_MILLIS = 300_000L
+
+private const val STREAM_FRAME_BYTES = 640
+private const val PCM_BYTES_PER_MILLISECOND = 32L

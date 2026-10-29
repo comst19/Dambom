@@ -7,6 +7,8 @@ import com.comst19.dambom.feature.library.subtitle.inference.GemmaSubtitleEngine
 import com.comst19.dambom.feature.library.subtitle.inference.VideoAudioDecoder
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleLanguagePair
 import com.comst19.dambom.feature.library.subtitle.runtime.SubtitleRuntimeDelivery
+import com.google.mlkit.genai.speechrecognition.SpeechRecognition
+import com.google.mlkit.genai.speechrecognition.SpeechRecognizerOptions
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -17,9 +19,43 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
 import java.security.MessageDigest
+import java.util.Locale
 
 @RunWith(AndroidJUnit4::class)
 class SubtitleAudioRuntimeTest {
+    @Test fun streamingFileReturnsMeasuredSpeechTiming() =
+        runBlocking {
+            val context = InstrumentationRegistry.getInstrumentation().context
+            val path = checkNotNull(InstrumentationRegistry.getArguments().getString("subtitleFixturePath"))
+            val decoder = VideoAudioDecoder(Dispatchers.IO)
+            val engine =
+                GemmaSubtitleEngine(
+                    context,
+                    Dispatchers.IO,
+                    decoder,
+                    GemmaModelStore(context, Dispatchers.IO),
+                    SubtitleRuntimeDelivery(context),
+                )
+            val cues = mutableListOf<com.comst19.dambom.feature.library.subtitle.model.SubtitleCue>()
+            decoder.decode(path) { chunk ->
+                if (chunk.bytes.any { it != 0.toByte() }) {
+                    SpeechRecognition
+                        .getClient(
+                            SpeechRecognizerOptions
+                                .Builder()
+                                .apply {
+                                    locale = Locale.US
+                                    preferredMode = SpeechRecognizerOptions.Mode.MODE_BASIC
+                                }.build(),
+                        ).use { cues.addAll(engine.transcribe(it, chunk)) }
+                }
+            }
+            println("MEASURED_SPEECH_CUES=$cues")
+            assertTrue(cues.isNotEmpty())
+            assertTrue(cues.all { it.endMillis > it.startMillis })
+            assertTrue(cues.last().text.contains("water", ignoreCase = true))
+        }
+
     @Test fun checkingAllThreePairsDoesNotDownloadTheLlm() =
         runBlocking {
             val context = InstrumentationRegistry.getInstrumentation().context

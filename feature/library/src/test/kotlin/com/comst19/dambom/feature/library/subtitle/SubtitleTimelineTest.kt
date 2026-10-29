@@ -29,13 +29,11 @@ class SubtitleTimelineTest {
         }
     }
 
-    @Test fun `legacy paragraph cues show short sentences in sequence without regeneration`() {
-        val first = "안녕하세요, 이것은 자막 번역 테스트입니다."
-        val second = "오늘은 날씨가 맑습니다."
-        val third = "밖에 나갈 때 물 한 병을 가져가 주세요."
-        val timeline = SubtitleTimeline(listOf(SubtitleCue(0, 8_000, "$first $second $third")))
-        assertEquals(first, timeline.at(0)?.text)
-        assertEquals(third, timeline.at(7_999)?.text)
+    @Test fun `playback never invents timing by splitting translated text`() {
+        val cue = SubtitleCue(200, 8_000, "첫 문장입니다. 다음 문장입니다.")
+        val timeline = SubtitleTimeline(listOf(cue))
+        assertEquals(cue, timeline.at(200))
+        assertEquals(cue, timeline.at(7_999))
         assertNull(timeline.at(8_000))
     }
 }

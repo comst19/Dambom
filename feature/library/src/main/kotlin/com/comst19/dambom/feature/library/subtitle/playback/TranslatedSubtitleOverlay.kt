@@ -42,7 +42,7 @@ internal fun BoxScope.TranslatedSubtitleOverlay(
     player: Player,
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
-    bottomPadding: Dp = 8.dp,
+    bottomPadding: Dp = 20.dp,
     fontSize: TextUnit = 14.sp,
     onAvailability: (Boolean) -> Unit = {},
 ) {
@@ -98,7 +98,7 @@ internal fun BoxScope.TranslatedSubtitleOverlay(
 internal fun BoxScope.SubtitleCaption(
     text: String,
     modifier: Modifier = Modifier,
-    bottomPadding: Dp = 8.dp,
+    bottomPadding: Dp = 20.dp,
     fontSize: TextUnit = 14.sp,
 ) {
     Text(

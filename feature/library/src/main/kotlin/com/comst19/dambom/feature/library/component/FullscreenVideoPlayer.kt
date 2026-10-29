@@ -117,9 +117,9 @@ internal fun FullscreenVideoPlayer(
                 TranslatedSubtitleOverlay(
                     player,
                     interaction.subtitlesEnabled,
-                    bottomPadding = if (controls.isVisible && !interaction.locked) 72.dp else 16.dp,
+                    bottomPadding = if (controls.isVisible && !interaction.locked) 80.dp else 28.dp,
                     fontSize = 18.sp,
-                ) { interaction.hasSubtitles = it }
+                )
                 Box(
                     Modifier
                         .fillMaxSize()

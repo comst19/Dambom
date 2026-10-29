@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.platform.testTag
@@ -17,11 +19,12 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
@@ -34,6 +37,8 @@ import com.comst19.dambom.core.common.io.videoSubtitleFile
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
+import com.comst19.dambom.feature.library.VideoPlayerScreen
+import com.comst19.dambom.feature.library.component.LibraryFileActions
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleModelStatus
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleCue
@@ -270,6 +275,55 @@ class SubtitleScreenTest {
         compose.onNodeWithText(cues.last().text).assertIsDisplayed()
     }
 
+    @Test fun captionToggleSurvivesPlayerItemResetAndFullscreenSwitch() {
+        val video = File(context.cacheDir, "subtitle-toggle.mp4").apply { writeText("test") }
+        video.videoSubtitleFile().writeText(listOf(SubtitleCue(0, 8_000, "저장된 자막")).toSrt())
+        val fullscreen = mutableStateOf(false)
+        lateinit var player: ExoPlayer
+        compose.runOnUiThread {
+            player = ExoPlayer.Builder(context).build()
+            player.setMediaItem(MediaItem.fromUri(Uri.fromFile(video)))
+        }
+        val actions = LibraryFileActions({ _, _ -> }, {}, {}, {}, {}, {}, onDelete = {})
+        try {
+            compose.setContent {
+                MaterialTheme {
+                    VideoPlayerScreen(
+                        task.copy(localFilePath = video.path),
+                        player,
+                        actions,
+                        {},
+                        true,
+                        fullscreen.value,
+                        { fullscreen.value = it },
+                        {},
+                    )
+                }
+            }
+            val hide = context.getString(R.string.subtitle_hide)
+            val show = context.getString(R.string.subtitle_show)
+            compose.waitUntil(5_000) {
+                compose
+                    .onAllNodes(
+                        androidx.compose.ui.test
+                            .hasContentDescription(hide),
+                    ).fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            compose.runOnUiThread { player.clearMediaItems() }
+            compose.onNodeWithContentDescription(hide).assertIsDisplayed().performClick()
+            compose.onNodeWithContentDescription(show).assertIsDisplayed()
+            compose.runOnUiThread { fullscreen.value = true }
+            compose.onNodeWithContentDescription(show).assertIsDisplayed().performClick()
+            compose.runOnUiThread { fullscreen.value = false }
+            compose.onNodeWithContentDescription(hide).assertIsDisplayed()
+        } finally {
+            compose.runOnUiThread { player.release() }
+            video.videoSubtitleFile().delete()
+            video.delete()
+        }
+    }
+
     @Test fun captionStaysAtTheVideoBottomWithoutAnOpaqueTextBox() {
         val videoColor = Color(0xFF124F76)
         compose.setContent {
@@ -288,9 +342,9 @@ class SubtitleScreenTest {
         capture("subtitle-caption-bottom.png")
     }
 
-    @Test fun legacyParagraphAdvancesOnSeekWithoutRewritingTheSavedSrt() {
+    @Test fun timedCuesAdvanceOnSeekWithoutRewritingTheSavedSrt() {
         val video = File(context.cacheDir, "subtitle-segments.mp4").apply { writeText("test") }
-        val original = listOf(SubtitleCue(0, 8_000, "첫 문장입니다. 다음 문장입니다. 마지막 문장입니다.")).toSrt()
+        val original = listOf(SubtitleCue(0, 1_300, "첫 문장입니다."), SubtitleCue(6_200, 8_000, "마지막 문장입니다.")).toSrt()
         video.videoSubtitleFile().writeText(original)
         lateinit var player: ExoPlayer
         compose.runOnUiThread {
@@ -313,8 +367,7 @@ class SubtitleScreenTest {
 
     private fun capture(name: String) {
         compose.waitForIdle()
-        val bitmap = InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
+        val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
         File(context.cacheDir, name).outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-        bitmap.recycle()
     }
 }

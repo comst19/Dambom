@@ -248,16 +248,7 @@ internal class VideoPlayerViewModel
 
         fun stop(id: String) {
             if (player.currentMediaItem?.mediaId != id && requestedId != id) return
-            preparation?.cancel()
-            requestedId = null
-            playRequestedWhilePreparing = false
-            _resumePromptPosition.value = null
-            resumeCandidate = null
-            history.save(player)
-            history.reset()
-            visibilityState.onPlaybackStopped()
-            player.stop()
-            player.clearMediaItems()
+            stopUnavailableVideo()
         }
 
         fun stopUnavailableVideo() {

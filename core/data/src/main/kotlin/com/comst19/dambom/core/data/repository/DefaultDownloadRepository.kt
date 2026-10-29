@@ -72,9 +72,7 @@ class DefaultDownloadRepository
             dao
                 .observeAll()
                 .map { entities ->
-                    entities.filterNot(DownloadTaskEntity::deletePending).map { entity ->
-                        entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
-                    }
+                    entities.filterNot(DownloadTaskEntity::deletePending).map(::toDownloadTask)
                 }.distinctUntilChanged()
                 .flowOn(ioDispatcher)
 
@@ -83,7 +81,7 @@ class DefaultDownloadRepository
                 .observeById(id)
                 .distinctUntilChanged()
                 .map { entity ->
-                    entity?.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
+                    entity?.let(::toDownloadTask)
                 }.flowOn(ioDispatcher)
 
         override val completedDownloads: Flow<List<DownloadTask>> =
@@ -91,9 +89,7 @@ class DefaultDownloadRepository
                 .observeCompleted()
                 .distinctUntilChanged()
                 .map { entities ->
-                    entities.map { entity ->
-                        entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
-                    }
+                    entities.map(::toDownloadTask)
                 }.distinctUntilChanged()
                 .flowOn(ioDispatcher)
 
@@ -102,9 +98,7 @@ class DefaultDownloadRepository
                 .observePendingDeletions()
                 .distinctUntilChanged()
                 .map { entities ->
-                    entities.map { entity ->
-                        entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
-                    }
+                    entities.map(::toDownloadTask)
                 }.distinctUntilChanged()
                 .flowOn(ioDispatcher)
 
@@ -178,6 +172,9 @@ class DefaultDownloadRepository
         override suspend fun refreshNetworkPolicy() {
             if (dao.countSchedulable() > 0) scheduler.reschedule()
         }
+
+        private fun toDownloadTask(entity: DownloadTaskEntity): DownloadTask =
+            entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
 
         private suspend fun cleanupDeletion(
             id: String,

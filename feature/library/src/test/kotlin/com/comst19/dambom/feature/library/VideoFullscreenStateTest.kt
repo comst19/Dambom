@@ -20,7 +20,7 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.component.FullscreenContentMode
 import com.comst19.dambom.feature.library.component.LibraryFileActions
 import com.comst19.dambom.feature.library.component.fullscreenContentModeFor
-import com.comst19.dambom.feature.library.component.shouldAutoHideFullscreenControls
+import com.comst19.dambom.feature.library.component.shouldAutoHidePlayerControls
 import com.comst19.dambom.feature.library.file.isLocalVideoAvailable
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -232,28 +232,28 @@ class VideoFullscreenStateTest {
     @Test
     fun `fullscreen controls only auto hide while playing and idle`() {
         assertTrue(
-            shouldAutoHideFullscreenControls(
+            shouldAutoHidePlayerControls(
                 controlsVisible = true,
                 isPlaying = true,
                 isControlsInteracting = false,
             ),
         )
         assertFalse(
-            shouldAutoHideFullscreenControls(
+            shouldAutoHidePlayerControls(
                 controlsVisible = true,
                 isPlaying = false,
                 isControlsInteracting = false,
             ),
         )
         assertFalse(
-            shouldAutoHideFullscreenControls(
+            shouldAutoHidePlayerControls(
                 controlsVisible = true,
                 isPlaying = true,
                 isControlsInteracting = true,
             ),
         )
         assertFalse(
-            shouldAutoHideFullscreenControls(
+            shouldAutoHidePlayerControls(
                 controlsVisible = false,
                 isPlaying = true,
                 isControlsInteracting = false,

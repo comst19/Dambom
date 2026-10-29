@@ -19,7 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,7 +50,6 @@ import com.comst19.dambom.feature.library.player.PlayerInteractionState
 import com.comst19.dambom.feature.library.player.component.PlaybackOptionsButton
 import com.comst19.dambom.feature.library.subtitle.playback.SubtitleToggleButton
 import com.comst19.dambom.feature.library.subtitle.playback.TranslatedSubtitleOverlay
-import kotlinx.coroutines.delay
 
 @Composable
 internal fun MissingVideo(modifier: Modifier = Modifier) {
@@ -80,9 +78,7 @@ internal fun VideoPlayerPanel(
     val playPauseState = rememberPlayPauseButtonState(player)
     val metadata by rememberLocalVideoMetadata(task.localFilePath)
     var playbackError by remember(player) { mutableStateOf<PlaybackException?>(player.playerError) }
-    var controlsVisible by remember(task.id) { mutableStateOf(true) }
-    var controlsInteracting by remember(task.id) { mutableStateOf(false) }
-    var controlsInteractionRevision by remember(task.id) { mutableStateOf(0) }
+    val controls = rememberPlayerControlsState(task.id, isPlaying = !playPauseState.showPlay)
     val surfaceDescription = stringResource(R.string.player_surface_description, task.title)
 
     DisposableEffect(player) {
@@ -99,12 +95,6 @@ internal fun VideoPlayerPanel(
         player.addListener(listener)
         onDispose { player.removeListener(listener) }
     }
-    LaunchedEffect(controlsVisible, playPauseState.showPlay, controlsInteracting, controlsInteractionRevision) {
-        if (shouldAutoHideFullscreenControls(controlsVisible, !playPauseState.showPlay, controlsInteracting)) {
-            delay(INLINE_CONTROLS_AUTO_HIDE_MILLIS)
-            controlsVisible = false
-        }
-    }
     Column(
         modifier =
             modifier
@@ -116,16 +106,13 @@ internal fun VideoPlayerPanel(
             player = player,
             interaction = interaction,
             surfaceDescription = surfaceDescription,
-            controlsVisible = controlsVisible,
+            controlsVisible = controls.isVisible,
             showPlay = playPauseState.showPlay,
             playEnabled = playPauseState.isEnabled,
             onPlayPause = onPlayPauseRequest ?: playPauseState::onClick,
-            onToggleControls = { controlsVisible = !controlsVisible },
-            onControlsInteraction = {
-                controlsVisible = true
-                controlsInteractionRevision++
-            },
-            onControlsInteractionChanged = { controlsInteracting = it },
+            onToggleControls = controls::toggle,
+            onControlsInteraction = controls::onInteraction,
+            onControlsInteractionChanged = controls::onInteractionChanged,
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             PlaybackOptionsButton(player)
@@ -251,7 +238,6 @@ private fun InlineVideoControls(
 }
 
 private const val VIDEO_ASPECT_RATIO = 16f / 9f
-private const val INLINE_CONTROLS_AUTO_HIDE_MILLIS = 3_000L
 private const val INLINE_CONTROLS_FADE_MILLIS = 180
 private const val INLINE_CONTROLS_SCRIM_ALPHA = 0.48f
 internal const val PROGRESS_TICK_MILLIS = 500L

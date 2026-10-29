@@ -110,9 +110,3 @@ internal fun fullscreenContentModeFor(
     selected: FullscreenContentMode,
     isPipContentOnly: Boolean,
 ): FullscreenContentMode = if (isPipContentOnly) FullscreenContentMode.Fit else selected
-
-internal fun shouldAutoHideFullscreenControls(
-    controlsVisible: Boolean,
-    isPlaying: Boolean,
-    isControlsInteracting: Boolean,
-): Boolean = controlsVisible && isPlaying && !isControlsInteracting

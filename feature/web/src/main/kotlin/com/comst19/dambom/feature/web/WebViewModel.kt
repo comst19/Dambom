@@ -194,13 +194,7 @@ internal class WebViewModel
             generation: Long,
         ) {
             val safeUrl = url?.takeIf { it.startsWith("http://") || it.startsWith("https://") } ?: return
-            if (pageGenerations[tabId] != generation || tabId in blockedTabs) return
-            if (uiState.value.tabs
-                    .firstOrNull { it.id == tabId }
-                    ?.url != safeUrl
-            ) {
-                return
-            }
+            if (!isCurrentPage(tabId, safeUrl, generation)) return
             updatePage(tabId, safeUrl, title)
             if (safeUrl.hasVideoExtension()) {
                 onMediaRequest(tabId, generation, safeUrl)
@@ -324,10 +318,8 @@ internal class WebViewModel
         ) {
             when (result) {
                 is MediaDetectionResult.Unsupported -> {
-                    if (result.reason == UnsupportedReason.DRM_PROTECTED) {
-                        media.rejectProtected(sourceUrl)
-                        updateCurrentTabIf(tabId) { it.copy(detectionState = media.detectionState()) }
-                    }
+                    if (result.reason != UnsupportedReason.DRM_PROTECTED) return
+                    media.rejectProtected(sourceUrl)
                 }
 
                 is MediaDetectionResult.Success -> {
@@ -336,9 +328,9 @@ internal class WebViewModel
                         preserveExistingTitle = true,
                         containsProtectedMedia = result.hasProtectedMedia,
                     )
-                    updateCurrentTabIf(tabId) { it.copy(detectionState = media.detectionState()) }
                 }
             }
+            updateCurrentTabIf(tabId) { it.copy(detectionState = media.detectionState()) }
         }
 
         fun saveWebState(
@@ -378,15 +370,20 @@ internal class WebViewModel
             generation: Long?,
             transform: (WebTab) -> WebTab,
         ) {
-            if (pageGenerations[tabId] != generation || tabId in blockedTabs) return
-            if (uiState.value.tabs
-                    .firstOrNull { it.id == tabId }
-                    ?.url != url
-            ) {
-                return
-            }
+            if (!isCurrentPage(tabId, url, generation)) return
             updateCurrentTabIf(tabId, transform)
         }
+
+        private fun isCurrentPage(
+            tabId: Long,
+            url: String,
+            generation: Long?,
+        ): Boolean =
+            pageGenerations[tabId] == generation &&
+                tabId !in blockedTabs &&
+                uiState.value.tabs
+                    .firstOrNull { it.id == tabId }
+                    ?.url == url
 
         private fun clearSharedOrigin(tabId: Long) {
             if (savedStateHandle.get<Long>(SHARED_ORIGIN_TAB_ID) != tabId) return

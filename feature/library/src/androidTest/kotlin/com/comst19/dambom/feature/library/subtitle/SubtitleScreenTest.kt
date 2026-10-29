@@ -8,12 +8,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -26,9 +29,11 @@ import com.comst19.dambom.feature.library.player.PlayerInteractionState
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleModelStatus
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleCue
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleLanguagePair
+import com.comst19.dambom.feature.library.subtitle.model.subtitleTranscriptSections
 import com.comst19.dambom.feature.library.subtitle.model.toSrt
 import com.comst19.dambom.feature.library.subtitle.playback.SubtitleToggleButton
 import com.comst19.dambom.feature.library.subtitle.playback.TranslatedSubtitleOverlay
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -202,6 +207,54 @@ class SubtitleScreenTest {
         }
         compose.onNodeWithText(context.getString(R.string.subtitle_exporting)).assertIsDisplayed()
         compose.onNodeWithText(context.getString(R.string.subtitle_generating)).assertDoesNotExist()
+    }
+
+    @Test fun savedSubtitlesOfferAReaderWithoutExpandingTheTranscriptOnTheGenerator() {
+        val paragraph = "긴 자막 본문은 별도 화면에 표시합니다. ".repeat(80)
+        var opened = 0
+        compose.setContent {
+            MaterialTheme {
+                SubtitleScreen(
+                    state =
+                        SubtitleState(
+                            task = task,
+                            model = SubtitleModelStatus.AVAILABLE,
+                            localOperation = SubtitleOperation.IDLE,
+                            cues = persistentListOf(SubtitleCue(0, 8_000, paragraph)),
+                        ),
+                    onBack = {},
+                    onSelect = {},
+                    onDownload = {},
+                    onRefresh = {},
+                    onGenerate = {},
+                    onCancel = {},
+                    onExport = {},
+                    onDeleteModel = {},
+                    onViewSubtitles = { opened++ },
+                )
+            }
+        }
+        compose.onNodeWithText(paragraph).assertDoesNotExist()
+        compose.onNodeWithText(context.getString(R.string.subtitle_view)).performScrollTo().performClick()
+        assertEquals(1, opened)
+    }
+
+    @Test fun transcriptReaderScrollsToTheLastParagraphOfALongVideo() {
+        val cues =
+            (0 until 240).map { index ->
+                SubtitleCue(index * 30_000L, index * 30_000L + 8_000, "번역 문단 $index. 긴 영상의 자막도 시간 순서대로 읽을 수 있습니다.")
+            }
+        compose.setContent {
+            MaterialTheme {
+                SubtitleTranscriptScreen(
+                    SubtitleTranscriptState("긴 영상", subtitleTranscriptSections(cues), cues.size, loading = false),
+                    onBack = {},
+                )
+            }
+        }
+        compose.onNodeWithText(cues.first().text).assertIsDisplayed()
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText(cues.last().text))
+        compose.onNodeWithText(cues.last().text).assertIsDisplayed()
     }
 
     private fun capture(name: String) {

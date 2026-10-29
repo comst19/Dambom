@@ -14,12 +14,14 @@ import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.library.subtitle.data.SubtitleFiles
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleEngine
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleModelStatus
+import com.comst19.dambom.feature.library.subtitle.model.ModelDownloadProgress
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleCue
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleLanguagePair
 import com.comst19.dambom.feature.library.subtitle.model.parseGeneratedSrt
 import com.comst19.dambom.feature.library.subtitle.model.toSrt
 import com.comst19.dambom.feature.library.subtitle.work.SubtitleJob
 import com.comst19.dambom.feature.library.subtitle.work.SubtitleJobs
+import com.comst19.dambom.feature.library.subtitle.work.SubtitleModelDownload
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -224,6 +226,93 @@ class SubtitleViewModelTest {
             assertEquals(1, engine.generations)
         }
 
+    @Test fun `known model status remains visible while support is refreshed in the background`() =
+        runTest(main.dispatcher) {
+            engine.cached = SubtitleModelStatus.AVAILABLE
+            engine.available = SubtitleModelStatus.AVAILABLE
+            engine.statusGate = CompletableDeferred()
+            val model = model()
+            assertEquals(SubtitleModelStatus.AVAILABLE, model.state.value.model)
+            model.load("video")
+            runCurrent()
+            assertEquals(SubtitleModelStatus.AVAILABLE, model.state.value.model)
+            assertEquals(SubtitleOperation.IDLE, model.state.value.operation)
+            engine.statusGate?.complete(Unit)
+            runCurrent()
+        }
+
+    @Test fun `model download survives view model removal and reentry restores progress`() =
+        runTest(main.dispatcher) {
+            engine.downloadGate = CompletableDeferred()
+            val first = model()
+            first.load("video")
+            runCurrent()
+            first.download()
+            runCurrent()
+            store.clear()
+            val reopened = model("reopened")
+            reopened.load("video")
+            runCurrent()
+            assertEquals(SubtitleOperation.DOWNLOADING, reopened.state.value.operation)
+            assertEquals(1, engine.downloads)
+            engine.downloadGate?.complete(Unit)
+            runCurrent()
+            assertEquals(SubtitleOperation.IDLE, reopened.state.value.operation)
+            assertEquals(SubtitleModelStatus.AVAILABLE, reopened.state.value.model)
+        }
+
+    @Test fun `cancelling model download from reopened screen permits another request`() =
+        runTest(main.dispatcher) {
+            engine.downloadGate = CompletableDeferred()
+            val first = model()
+            first.load("video")
+            runCurrent()
+            first.download()
+            runCurrent()
+            val reopened = model("reopened")
+            reopened.load("video")
+            runCurrent()
+            reopened.cancel()
+            runCurrent()
+            assertEquals(SubtitleOperation.IDLE, reopened.state.value.operation)
+            assertFalse(reopened.state.value.failed)
+            engine.downloadGate = null
+            reopened.download()
+            runCurrent()
+            assertEquals(2, engine.downloads)
+        }
+
+    @Test fun `historical generation failure is not shown as a new error on reentry`() =
+        runTest(main.dispatcher) {
+            engine.available = SubtitleModelStatus.AVAILABLE
+            engine.cues = emptyList()
+            val first = model()
+            first.load("video")
+            runCurrent()
+            first.generate()
+            runCurrent()
+            assertTrue(first.state.value.failed)
+            val reopened = model("reopened")
+            reopened.load("video")
+            runCurrent()
+            assertFalse(reopened.state.value.failed)
+        }
+
+    @Test fun `historical model preparation failure does not flash an error on entry`() =
+        runTest(main.dispatcher) {
+            val first = model()
+            first.load("video")
+            runCurrent()
+            engine.downloadFailure = true
+            first.download()
+            runCurrent()
+            assertTrue(first.state.value.failed)
+            val reopened = model("reopened")
+            reopened.load("video")
+            runCurrent()
+            assertFalse(reopened.state.value.failed)
+        }
+
     private fun model(key: String = "model"): SubtitleViewModel {
         val task =
             DownloadTask(
@@ -267,6 +356,10 @@ private class FakeSubtitleEngine : SubtitleEngine {
     }
 
     var available = SubtitleModelStatus.DOWNLOADABLE
+    var cached: SubtitleModelStatus? = null
+
+    override fun cachedStatus(pair: SubtitleLanguagePair) = cached
+
     var downloadFailure = false
     var downloads = 0
     var generations = 0
@@ -276,19 +369,23 @@ private class FakeSubtitleEngine : SubtitleEngine {
     var generationGate: CompletableDeferred<Unit>? = null
     var cues = listOf(SubtitleCue(0, 800, "안녕하세요"))
 
-    override suspend fun status(pair: SubtitleLanguagePair): SubtitleModelStatus {
+    override suspend fun status(
+        pair: SubtitleLanguagePair,
+        forceRefresh: Boolean,
+    ): SubtitleModelStatus {
         statusGate?.await()
         return available
     }
 
     override suspend fun download(
         pair: SubtitleLanguagePair,
-        onBytes: (Long) -> Unit,
+        onBytes: (ModelDownloadProgress) -> Unit,
     ): SubtitleModelStatus {
         downloads++
         check(!downloadFailure)
         downloadGate?.await()
-        return SubtitleModelStatus.AVAILABLE
+        available = SubtitleModelStatus.AVAILABLE
+        return available
     }
 
     override suspend fun generate(
@@ -311,6 +408,31 @@ private class FakeSubtitleJobs(
 ) : SubtitleJobs {
     private val state = MutableStateFlow<SubtitleJob?>(null)
     private var pending: Job? = null
+    private val modelState = MutableStateFlow<SubtitleModelDownload?>(null)
+    private var modelPending: Job? = null
+
+    override fun observeModelDownload() = modelState
+
+    override suspend fun enqueueModelDownload(pair: SubtitleLanguagePair) {
+        if (modelPending?.isActive == true) return
+        modelPending =
+            scope.launch(start = CoroutineStart.UNDISPATCHED) {
+                modelState.value = SubtitleModelDownload(true, false, false)
+                try {
+                    engine.download(pair) { modelState.value = SubtitleModelDownload(true, false, false, it) }
+                    modelState.value = SubtitleModelDownload(false, true, false)
+                } catch (cancelled: CancellationException) {
+                    modelState.value = SubtitleModelDownload(false, false, false)
+                    throw cancelled
+                } catch (_: Exception) {
+                    modelState.value = SubtitleModelDownload(false, false, true)
+                }
+            }
+    }
+
+    override suspend fun cancelModelDownload() {
+        modelPending?.cancel()
+    }
 
     override fun observe(videoId: String) = state
 

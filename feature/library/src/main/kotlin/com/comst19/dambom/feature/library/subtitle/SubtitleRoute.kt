@@ -28,7 +28,7 @@ import com.comst19.dambom.feature.library.subtitle.runtime.SubtitleRuntimeEntryP
 import dagger.hilt.android.EntryPointAccessors
 
 @Composable
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 internal fun SubtitleRoute(
     id: String,
     viewModel: SubtitleViewModel = hiltViewModel(),
@@ -56,26 +56,57 @@ internal fun SubtitleRoute(
             picking = false
             if (uri != null) viewModel.export(uri)
         }
+    var permissionForDownload by rememberSaveable { mutableStateOf(false) }
     val notificationPermission =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-            viewModel.generate()
+            if (permissionForDownload) viewModel.download() else viewModel.generate()
+        }
+    val speechPermission =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (!granted) {
+                viewModel.speechPermissionDenied()
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionForDownload = false
+                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                viewModel.generate()
+            }
         }
     LaunchedEffect(id) { viewModel.load(id) }
     LaunchedEffect(state.busy) { if (!state.busy) confirmCancel = false }
-    val blocking = state.busy && state.operation != SubtitleOperation.GENERATING
+    val blocking = state.operation in setOf(SubtitleOperation.EXPORTING, SubtitleOperation.DELETING)
     BackHandler(blocking) { confirmCancel = true }
     SubtitleScreen(
         state = state,
         onBack = { if (blocking) confirmCancel = true else viewModel.goBack() },
         onSelect = viewModel::select,
-        onDownload = viewModel::download,
-        onDeleteModel = { confirmDelete = true },
-        onRefresh = viewModel::refresh,
-        onGenerate = {
+        onDownload = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
                 PackageManager.PERMISSION_GRANTED
             ) {
+                permissionForDownload = true
+                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                viewModel.download()
+            }
+        },
+        onDeleteModel = { confirmDelete = true },
+        onViewSubtitles = viewModel::viewSubtitles,
+        onRefresh = viewModel::refresh,
+        onGenerate = {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                speechPermission.launch(Manifest.permission.RECORD_AUDIO)
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionForDownload = false
                 notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
             } else {
                 viewModel.generate()

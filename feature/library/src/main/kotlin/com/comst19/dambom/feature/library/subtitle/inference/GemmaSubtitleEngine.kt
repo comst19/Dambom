@@ -2,13 +2,19 @@ package com.comst19.dambom.feature.library.subtitle.inference
 
 import android.content.Context
 import android.os.Build
+import android.os.SystemClock
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.feature.library.subtitle.data.GemmaModelStore
+import com.comst19.dambom.feature.library.subtitle.model.ModelDownloadProgress
+import com.comst19.dambom.feature.library.subtitle.model.NoSubtitleSpeechException
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleCue
+import com.comst19.dambom.feature.library.subtitle.model.SubtitleFailure
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleLanguagePair
+import com.comst19.dambom.feature.library.subtitle.model.subtitleFailure
 import com.comst19.dambom.feature.library.subtitle.runtime.SubtitleRuntimeDelivery
 import com.google.mlkit.genai.common.DownloadStatus
 import com.google.mlkit.genai.common.FeatureStatus
+import com.google.mlkit.genai.common.GenAiException
 import com.google.mlkit.genai.common.audio.AudioSource
 import com.google.mlkit.genai.speechrecognition.SpeechRecognition
 import com.google.mlkit.genai.speechrecognition.SpeechRecognizer
@@ -19,13 +25,17 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 internal class GemmaSubtitleEngine
     @Inject
     constructor(
@@ -35,7 +45,42 @@ internal class GemmaSubtitleEngine
         private val models: GemmaModelStore,
         private val delivery: SubtitleRuntimeDelivery,
     ) : SubtitleEngine {
-        override suspend fun status(pair: SubtitleLanguagePair): SubtitleModelStatus {
+        private val checked = ConcurrentHashMap<SubtitleLanguagePair, CheckedSubtitleStatus>()
+        private val checking = Mutex()
+
+        override fun cachedStatus(pair: SubtitleLanguagePair): SubtitleModelStatus? = checked[pair]?.status
+
+        override suspend fun status(
+            pair: SubtitleLanguagePair,
+            forceRefresh: Boolean,
+        ): SubtitleModelStatus =
+            checking.withLock {
+                val installed = models.installed()
+                val runtimeInstalled = delivery.installed()
+                val previous = checked[pair]
+                if (!forceRefresh && previous != null) {
+                    val sameModel = previous.installed == installed
+                    val sameRuntime = previous.runtimeInstalled == runtimeInstalled
+                    val matchesInstallation = sameModel && sameRuntime
+                    val age = SystemClock.elapsedRealtime() - previous.checkedAt
+                    if (matchesInstallation && age < STATUS_CACHE_MILLIS) return@withLock previous.status
+                }
+                val status = checkStatus(pair, installed, runtimeInstalled)
+                checked[pair] =
+                    CheckedSubtitleStatus(
+                        status,
+                        installed,
+                        runtimeInstalled,
+                        SystemClock.elapsedRealtime(),
+                    )
+                status
+            }
+
+        private suspend fun checkStatus(
+            pair: SubtitleLanguagePair,
+            installed: Boolean,
+            runtimeInstalled: Boolean,
+        ): SubtitleModelStatus {
             if (context.packageName.contains(".onestore") || Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
                 !Build.SUPPORTED_64_BIT_ABIS.any { it in MODEL_ABIS }
             ) {
@@ -54,15 +99,19 @@ internal class GemmaSubtitleEngine
                 }
 
                 FeatureStatus.AVAILABLE -> {
-                    if (models.installed() && delivery.installed()) {
-                        SubtitleModelStatus.AVAILABLE
-                    } else {
-                        SubtitleModelStatus.DOWNLOADABLE
+                    when {
+                        !installed -> SubtitleModelStatus.DOWNLOADABLE
+                        !runtimeInstalled -> SubtitleModelStatus.PREPARATION_REQUIRED
+                        else -> SubtitleModelStatus.AVAILABLE
                     }
                 }
 
                 FeatureStatus.DOWNLOADABLE -> {
-                    SubtitleModelStatus.DOWNLOADABLE
+                    if (installed) {
+                        SubtitleModelStatus.PREPARATION_REQUIRED
+                    } else {
+                        SubtitleModelStatus.DOWNLOADABLE
+                    }
                 }
 
                 else -> {
@@ -73,8 +122,9 @@ internal class GemmaSubtitleEngine
 
         override suspend fun download(
             pair: SubtitleLanguagePair,
-            onBytes: (Long) -> Unit,
+            onBytes: (ModelDownloadProgress) -> Unit,
         ): SubtitleModelStatus {
+            checked.clear()
             delivery.install()
             recognizer(pair).use { speech ->
                 if (speech.checkStatus() == FeatureStatus.DOWNLOADABLE) {
@@ -85,10 +135,13 @@ internal class GemmaSubtitleEngine
             models.download(onBytes) { candidate ->
                 withContext(io) { delivery.runtime().open(candidate.path).use { } }
             }
-            return status(pair)
+            return status(pair, forceRefresh = true)
         }
 
-        override suspend fun deleteModel() = models.delete()
+        override suspend fun deleteModel() {
+            models.delete()
+            checked.clear()
+        }
 
         override suspend fun generate(
             path: String,
@@ -96,25 +149,23 @@ internal class GemmaSubtitleEngine
             onProgress: (Long) -> Unit,
         ): List<SubtitleCue> =
             models.access.withLock {
-                check(status(pair) == SubtitleModelStatus.AVAILABLE)
+                check(status(pair, forceRefresh = true) == SubtitleModelStatus.AVAILABLE)
                 withContext(io) {
                     delivery.runtime().open(models.model.path).use { session ->
                         currentCoroutineContext().ensureActive()
-                        recognizer(pair).use { speech ->
-                            val cues = mutableListOf<SubtitleCue>()
-                            decoder.decode(path) { chunk ->
-                                if (chunk.bytes.any { it != 0.toByte() }) {
-                                    val text = transcribe(speech, chunk)
-                                    if (text.isNotBlank()) {
-                                        val translated = session.translate(translationPrompt(pair, text))
-                                        cues.add(SubtitleCue(chunk.startMillis, chunk.endMillis, translated))
-                                    }
+                        val cues = mutableListOf<SubtitleCue>()
+                        decoder.decode(path) { chunk ->
+                            if (chunk.bytes.any { it != 0.toByte() }) {
+                                val text = recognizer(pair).use { speech -> transcribe(speech, chunk) }
+                                if (text.isNotBlank()) {
+                                    val translated = session.translate(translationPrompt(pair, text))
+                                    cues.add(SubtitleCue(chunk.startMillis, chunk.endMillis, translated))
                                 }
-                                onProgress(chunk.endMillis)
                             }
-                            check(cues.isNotEmpty()) { "No translated speech" }
-                            cues
+                            onProgress(chunk.endMillis)
                         }
+                        if (cues.isEmpty()) throw NoSubtitleSpeechException()
+                        cues
                     }
                 }
             }
@@ -148,6 +199,9 @@ internal class GemmaSubtitleEngine
                         }
                     check(completed == true) { "Speech recognition timed out" }
                 }
+            } catch (failure: GenAiException) {
+                if (subtitleFailure(failure) != SubtitleFailure.NO_SPEECH) throw failure
+                return ""
             } finally {
                 audio.delete()
             }
@@ -180,3 +234,12 @@ internal fun translationPrompt(
 private val MODEL_ABIS = setOf("arm64-v8a", "x86_64")
 private const val STATUS_TIMEOUT_MILLIS = 15_000L
 private const val INFERENCE_TIMEOUT_MILLIS = 120_000L
+
+private data class CheckedSubtitleStatus(
+    val status: SubtitleModelStatus,
+    val installed: Boolean,
+    val runtimeInstalled: Boolean,
+    val checkedAt: Long,
+)
+
+private const val STATUS_CACHE_MILLIS = 300_000L

@@ -183,8 +183,8 @@
     <string name="subtitle_processed">음성 %1$d초까지 처리했어요.</string>
     <string name="subtitle_cancel">작업 중단</string>
     <string name="subtitle_cancel_description">현재 작업을 중단할까요? 이전 자막과 원본 영상은 유지돼요. 중단한 LLM 다운로드는 다시 시작해야 하며, 시스템 음성 모델 다운로드는 계속될 수 있어요.</string>
-    <string name="subtitle_failed">처리하지 못했어요. 음성이 있는 영상인지, 모델 준비가 끝났는지와 저장 공간을 확인해 주세요.</string>
-    <string name="subtitle_ready">자막 %1$d개가 저장됐어요. 돌아가서 재생하면 번역 자막을 볼 수 있어요. 새로 생성하면 이전 자막을 교체해요.</string>
+    <string name="subtitle_failed">자막 생성 중 오류가 발생했어요. 잠시 후 다시 시도해 주세요.</string>
+    <string name="subtitle_ready">자막 %1$d개가 기기에 저장됐어요.</string>
     <string name="subtitle_export">SRT 자막 파일 저장</string>
     <string name="subtitle_exported">자막 파일을 저장했어요. 갤러리 앱에 따라 별도 자막을 지원하지 않을 수 있어요.</string>
     <string name="subtitle_delete_model">번역 모델 삭제</string>
@@ -201,4 +201,24 @@
     <string name="subtitle_deleting_model">번역 LLM을 삭제하고 있어요.</string>
     <string name="subtitle_background_hint">화면을 나가도 계속 처리해요. 알림 권한이 있으면 완료 시 알려드려요.</string>
     <string name="subtitle_delete_model_description">번역 모델을 삭제할까요? 다시 번역하려면 약 2.6GB를 다운로드해야 해요. 기존 영상과 자막은 유지돼요.</string>
+    <string name="subtitle_language_label">번역 언어</string>
+    <string name="subtitle_model_preparing">번역 실행 모듈과 음성 인식 모델을 준비하고 있어요.</string>
+    <string name="subtitle_model_verifying">다운로드를 마쳤어요. 모델을 확인하고 준비하고 있어요.</string>
+    <string name="subtitle_model_bytes">%1$s / %2$s · %3$d%%</string>
+    <string name="subtitle_model_remaining">약 %1$d분 %2$d초 남음 · 네트워크에 따라 달라져요.</string>
+    <string name="subtitle_download_background_hint">화면을 나가도 다운로드는 계속돼요. 알림에서 진행 상태를 확인할 수 있어요.</string>
+    <string name="subtitle_model_ready">번역 모델 준비 완료</string>
+    <string name="subtitle_model_on_device">기기에 저장됨 · 모든 번역 언어에서 함께 사용</string>
+    <string name="subtitle_model_failed">번역 모델을 다운로드하지 못했어요. 네트워크 연결을 확인하고 다시 시도해 주세요.</string>
+    <string name="subtitle_model_manage">번역 모델 관리</string>
+    <string name="subtitle_speech_permission">음성 인식 권한이 필요해요. 자막 생성을 다시 누르고 권한을 허용해 주세요. 영상의 소리만 처리하며 마이크로 녹음하지 않아요.</string>
+    <string name="subtitle_no_speech">선택한 언어의 음성을 인식하지 못했어요. 영상의 음성과 번역 언어가 일치하는지 확인해 주세요.</string>
+    <string name="subtitle_speech_failed">기기의 음성 인식 서비스에서 오류가 발생했어요. 잠시 후 다시 시도해 주세요.</string>
+    <string name="subtitle_no_audio">이 영상에는 오디오 트랙이 없어 자막을 만들 수 없어요.</string>
+    <string name="subtitle_prepare">번역 기능 준비</string>
+    <string name="subtitle_prepare_description">저장된 번역 모델을 재사용해요. 실행 모듈과 음성 인식 준비만 확인할게요.</string>
+    <string name="subtitle_view">자막 보기</string>
+    <string name="subtitle_transcript_back">자막 보기 닫기</string>
+    <string name="subtitle_transcript_count">%1$d개 자막 · 시간별로 나눠 볼 수 있어요.</string>
+    <string name="subtitle_transcript_empty">저장된 자막이 없어요.</string>
 </resources>

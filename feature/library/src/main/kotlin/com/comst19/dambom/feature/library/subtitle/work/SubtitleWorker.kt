@@ -10,6 +10,7 @@ import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.feature.library.subtitle.data.SubtitleFiles
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleEngine
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleLanguagePair
+import com.comst19.dambom.feature.library.subtitle.model.subtitleFailure
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException
@@ -29,7 +30,7 @@ internal class SubtitleWorker
         private val files: SubtitleFiles,
         private val notifier: SubtitleNotifier,
     ) : CoroutineWorker(context, parameters) {
-        @Suppress("ReturnCount")
+        @Suppress("ReturnCount", "TooGenericExceptionCaught")
         override suspend fun doWork(): Result {
             val videoId = inputData.getString(SUBTITLE_VIDEO_ID) ?: return Result.failure()
             val pair =
@@ -66,9 +67,9 @@ internal class SubtitleWorker
                 Result.success()
             } catch (cancelled: CancellationException) {
                 throw cancelled
-            } catch (_: Exception) {
+            } catch (failure: Exception) {
                 notifier.finished(videoId, title, false)
-                Result.failure()
+                Result.failure(workDataOf(SUBTITLE_ERROR to subtitleFailure(failure).name))
             }
         }
     }

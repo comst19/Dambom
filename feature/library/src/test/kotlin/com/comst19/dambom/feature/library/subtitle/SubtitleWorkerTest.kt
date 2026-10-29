@@ -19,9 +19,12 @@ import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.feature.library.subtitle.data.SubtitleFiles
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleEngine
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleModelStatus
+import com.comst19.dambom.feature.library.subtitle.model.ModelDownloadProgress
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleCue
+import com.comst19.dambom.feature.library.subtitle.model.SubtitleFailure
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleLanguagePair
 import com.comst19.dambom.feature.library.subtitle.model.parseGeneratedSrt
+import com.comst19.dambom.feature.library.subtitle.work.SUBTITLE_ERROR
 import com.comst19.dambom.feature.library.subtitle.work.SUBTITLE_PAIR
 import com.comst19.dambom.feature.library.subtitle.work.SUBTITLE_VIDEO_ID
 import com.comst19.dambom.feature.library.subtitle.work.SubtitleNotifier
@@ -103,7 +106,8 @@ class SubtitleWorkerTest {
             entered.await()
             deletePending = true
             release.complete(Unit)
-            assertEquals(ListenableWorker.Result.failure(), result.await())
+            val expected = ListenableWorker.Result.failure(workDataOf(SUBTITLE_ERROR to SubtitleFailure.UNKNOWN.name))
+            assertEquals(expected, result.await())
             assertEquals("earlier", source.videoSubtitleFile().readText())
         }
 
@@ -135,11 +139,14 @@ class SubtitleWorkerTest {
             } as DownloadRepository
         val engine =
             object : SubtitleEngine {
-                override suspend fun status(pair: SubtitleLanguagePair) = SubtitleModelStatus.AVAILABLE
+                override suspend fun status(
+                    pair: SubtitleLanguagePair,
+                    forceRefresh: Boolean,
+                ) = SubtitleModelStatus.AVAILABLE
 
                 override suspend fun download(
                     pair: SubtitleLanguagePair,
-                    onBytes: (Long) -> Unit,
+                    onBytes: (ModelDownloadProgress) -> Unit,
                 ) = SubtitleModelStatus.AVAILABLE
 
                 override suspend fun deleteModel() = Unit

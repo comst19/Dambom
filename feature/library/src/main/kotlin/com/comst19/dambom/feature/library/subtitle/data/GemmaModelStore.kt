@@ -2,7 +2,11 @@ package com.comst19.dambom.feature.library.subtitle.data
 
 import android.content.Context
 import android.os.StatFs
+import android.os.SystemClock
 import com.comst19.dambom.core.coroutine.IoDispatcher
+import com.comst19.dambom.feature.library.subtitle.model.ModelDownloadProgress
+import com.comst19.dambom.feature.library.subtitle.model.ModelDownloadStage
+import com.comst19.dambom.feature.library.subtitle.model.modelDownloadProgress
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineStart
@@ -87,7 +91,7 @@ internal class GemmaModelStore
             }
 
         suspend fun download(
-            onBytes: (Long) -> Unit,
+            onBytes: (ModelDownloadProgress) -> Unit,
             validate: suspend (File) -> Unit,
         ) = access.withLock {
             val catalog =
@@ -102,7 +106,11 @@ internal class GemmaModelStore
             }
             val candidate = File(directory, "candidate.litertlm")
             try {
-                downloadVerifiedModel(client, catalog, candidate, onBytes)
+                val started = SystemClock.elapsedRealtime()
+                downloadVerifiedModel(client, catalog, candidate) { bytes ->
+                    onBytes(modelDownloadProgress(bytes, catalog.bytes, SystemClock.elapsedRealtime() - started))
+                }
+                onBytes(ModelDownloadProgress(catalog.bytes, catalog.bytes, stage = ModelDownloadStage.VERIFYING))
                 validate(candidate)
                 withContext(io) {
                     currentCoroutineContext().ensureActive()

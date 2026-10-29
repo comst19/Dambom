@@ -183,8 +183,8 @@
     <string name="subtitle_processed">Processed %1$d seconds of audio.</string>
     <string name="subtitle_cancel">Stop task</string>
     <string name="subtitle_cancel_description">Stop this task? Existing subtitles and the original video will be kept. An interrupted LLM download must be restarted. System speech model downloads may continue.</string>
-    <string name="subtitle_failed">Could not complete the task. Check that the video contains speech, the model is ready, and storage is available.</string>
-    <string name="subtitle_ready">Saved %1$d subtitles. Go back and play the video to view them. Generating again replaces existing subtitles.</string>
+    <string name="subtitle_failed">Could not generate subtitles. Try again shortly.</string>
+    <string name="subtitle_ready">Saved %1$d subtitles on this device.</string>
     <string name="subtitle_export">Save SRT subtitle file</string>
     <string name="subtitle_exported">Subtitle file saved. Some gallery apps do not support separate subtitles.</string>
     <string name="subtitle_delete_model">Delete translation model</string>
@@ -201,4 +201,24 @@
     <string name="subtitle_deleting_model">Deleting the translation LLM.</string>
     <string name="subtitle_background_hint">Processing continues after you leave this screen. Allow notifications to be notified when it finishes.</string>
     <string name="subtitle_delete_model_description">Delete the translation model? Translating again will require a download of about 2.6 GB. Your videos and subtitles will be kept.</string>
+    <string name="subtitle_language_label">Translation language</string>
+    <string name="subtitle_model_preparing">Preparing the translation runtime and speech model.</string>
+    <string name="subtitle_model_verifying">Download complete. Verifying and preparing the model.</string>
+    <string name="subtitle_model_bytes">%1$s / %2$s · %3$d%%</string>
+    <string name="subtitle_model_remaining">About %1$d min %2$d sec remaining. Network speed may vary.</string>
+    <string name="subtitle_download_background_hint">Downloading continues after you leave this screen. Follow progress in notifications.</string>
+    <string name="subtitle_model_ready">Translation model ready</string>
+    <string name="subtitle_model_on_device">Stored on this device · Shared by all translation languages</string>
+    <string name="subtitle_model_failed">Could not download the translation model. Check your connection and try again.</string>
+    <string name="subtitle_model_manage">Manage translation model</string>
+    <string name="subtitle_speech_permission">Speech recognition permission is required. Tap Generate again and allow access. Only video audio is processed; the microphone is not recorded.</string>
+    <string name="subtitle_no_speech">No speech was recognized in the selected language. Check that the video and source language match.</string>
+    <string name="subtitle_speech_failed">The on-device speech service returned an error. Try again shortly.</string>
+    <string name="subtitle_no_audio">This video has no audio track to transcribe.</string>
+    <string name="subtitle_prepare">Prepare translation</string>
+    <string name="subtitle_prepare_description">Your saved translation model will be reused. Only runtime and speech setup will be prepared.</string>
+    <string name="subtitle_view">View subtitles</string>
+    <string name="subtitle_transcript_back">Close subtitles</string>
+    <string name="subtitle_transcript_count">%1$d subtitles · Organized by time.</string>
+    <string name="subtitle_transcript_empty">No saved subtitles.</string>
 </resources>

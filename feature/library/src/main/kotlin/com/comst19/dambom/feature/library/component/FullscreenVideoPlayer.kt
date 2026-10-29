@@ -1,4 +1,5 @@
 package com.comst19.dambom.feature.library.component
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -46,6 +47,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -63,6 +65,8 @@ import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
 import com.comst19.dambom.feature.library.player.component.PlayerLockButton
 import com.comst19.dambom.feature.library.player.component.PlayerSettingsButton
+import com.comst19.dambom.feature.library.subtitle.playback.SubtitleToggleButton
+import com.comst19.dambom.feature.library.subtitle.playback.TranslatedSubtitleOverlay
 import kotlin.math.roundToInt
 
 @Composable
@@ -109,6 +113,12 @@ internal fun FullscreenVideoPlayer(
                     },
                     onVideoBoundsChanged,
                     contentMode,
+                )
+                TranslatedSubtitleOverlay(
+                    player,
+                    interaction.subtitlesEnabled,
+                    bottomPadding = if (controls.isVisible && !interaction.locked) 80.dp else 28.dp,
+                    fontSize = 18.sp,
                 )
                 Box(
                     Modifier
@@ -203,6 +213,7 @@ private fun BoxScope.FullscreenOverlayControls(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            SubtitleToggleButton(interaction)
             PlayerSettingsButton(
                 player = player,
                 interaction = interaction,

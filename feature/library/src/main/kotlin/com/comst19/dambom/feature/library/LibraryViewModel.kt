@@ -19,6 +19,7 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoCompressionKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoSubtitleKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoTrimKey
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryUiState
@@ -139,6 +140,11 @@ internal class LibraryViewModel
         fun compressVideo(task: DownloadTask) {
             if (task.deletePending || task.localFilePath == null || task.status != DownloadStatus.COMPLETED) return
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoCompressionKey(task.id))) }
+        }
+
+        fun translateVideo(task: DownloadTask) {
+            if (task.deletePending || task.localFilePath == null || task.status != DownloadStatus.COMPLETED) return
+            viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoSubtitleKey(task.id))) }
         }
 
         fun trimVideo(task: DownloadTask) {

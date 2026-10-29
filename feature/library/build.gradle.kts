@@ -3,6 +3,15 @@ plugins { id("dambom.android.feature") }
 android { namespace = "com.comst19.dambom.feature.library" }
 
 dependencies {
+    implementation(libs.androidx.hilt.work)
+    implementation(libs.androidx.work.runtime.ktx)
+    ksp(libs.androidx.hilt.compiler)
+    testImplementation(libs.androidx.work.testing)
+    implementation(libs.mlkit.speech.recognition)
+    implementation(libs.play.feature.delivery)
+    implementation(libs.okhttp.core)
+    implementation(libs.kotlinx.serialization.json)
+    testImplementation(libs.mockwebserver)
     implementation(projects.core.common)
     implementation(projects.core.coroutine)
     implementation(libs.androidx.activity.compose)

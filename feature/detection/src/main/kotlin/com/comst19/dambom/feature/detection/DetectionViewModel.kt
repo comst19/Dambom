@@ -213,6 +213,7 @@ internal class DetectionViewModel
                                             fallbackTitle,
                                             state.candidates.indexOf(candidate),
                                             state.candidates.size,
+                                            state.pageTitle,
                                         ),
                                     mimeType = variant.mimeType,
                                     expectedBytes = variant.contentLength,

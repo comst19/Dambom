@@ -29,7 +29,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -64,7 +63,6 @@ import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
 import com.comst19.dambom.feature.library.player.component.PlayerLockButton
 import com.comst19.dambom.feature.library.player.component.PlayerSettingsButton
-import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
 @Composable
@@ -87,18 +85,10 @@ internal fun FullscreenVideoPlayer(
     val surfaceDescription = stringResource(R.string.player_surface_description, task.title)
     val toggleControlsLabel = stringResource(R.string.player_toggle_controls)
     var selectedContentMode by rememberSaveable(task.id) { mutableStateOf(FullscreenContentMode.Fit) }
-    var controlsVisible by remember(task.id) { mutableStateOf(true) }
-    var controlsInteracting by remember(task.id) { mutableStateOf(false) }
-    var controlsInteractionRevision by remember(task.id) { mutableStateOf(0) }
+    val controls = rememberPlayerControlsState(task.id, isPlaying = !playPauseState.showPlay)
     val contentMode = fullscreenContentModeFor(selectedContentMode, isPipContentOnly)
     val currentOnVideoBoundsChanged by rememberUpdatedState(onVideoBoundsChanged)
     LaunchedEffect(isPipContentOnly) { if (isPipContentOnly) selectedContentMode = FullscreenContentMode.Fit }
-    LaunchedEffect(controlsVisible, playPauseState.showPlay, controlsInteracting, controlsInteractionRevision) {
-        if (shouldAutoHideFullscreenControls(controlsVisible, !playPauseState.showPlay, controlsInteracting)) {
-            delay(FULLSCREEN_CONTROLS_AUTO_HIDE_MILLIS)
-            controlsVisible = false
-        }
-    }
     FullscreenSystemBars(enabled = !isPipContentOnly)
     DisposableEffect(task.id) {
         onDispose { currentOnVideoBoundsChanged(null) }
@@ -126,7 +116,7 @@ internal fun FullscreenVideoPlayer(
                         .fullscreenPlayerGestures(
                             interaction = interaction,
                             toggleControlsLabel = toggleControlsLabel,
-                            onToggleControls = { controlsVisible = !controlsVisible },
+                            onToggleControls = controls::toggle,
                             onContentModeChanged = { selectedContentMode = it },
                         ),
                 )
@@ -143,7 +133,7 @@ internal fun FullscreenVideoPlayer(
                     }
                 }
                 AnimatedVisibility(
-                    visible = controlsVisible && !interaction.locked,
+                    visible = controls.isVisible && !interaction.locked,
                     enter = fadeIn(tween(FULLSCREEN_CONTROLS_FADE_MILLIS)),
                     exit = fadeOut(tween(FULLSCREEN_CONTROLS_FADE_MILLIS)),
                     modifier = Modifier.matchParentSize(),
@@ -165,11 +155,8 @@ internal fun FullscreenVideoPlayer(
                             playPauseState.showPlay,
                             playPauseState.isEnabled,
                             onPlayPauseRequest ?: playPauseState::onClick,
-                            {
-                                controlsVisible = true
-                                controlsInteractionRevision++
-                            },
-                            { controlsInteracting = it },
+                            controls::onInteraction,
+                            controls::onInteractionChanged,
                         )
                     }
                 }
@@ -291,6 +278,5 @@ private fun FullscreenSystemBars(enabled: Boolean) {
     }
 }
 
-private const val FULLSCREEN_CONTROLS_AUTO_HIDE_MILLIS = 3_000L
 private const val FULLSCREEN_CONTROLS_FADE_MILLIS = 180
 private const val FULLSCREEN_CONTROLS_SCRIM_ALPHA = 0.72f

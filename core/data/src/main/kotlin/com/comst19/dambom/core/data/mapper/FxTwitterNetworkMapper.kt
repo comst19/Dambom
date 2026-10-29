@@ -1,5 +1,6 @@
 package com.comst19.dambom.core.data.mapper
 
+import com.comst19.dambom.core.data.media.mediaCandidateId
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.MediaVariant
@@ -8,7 +9,6 @@ import com.comst19.dambom.core.network.fxtwitter.FxTwitterNetworkFailure
 import com.comst19.dambom.core.network.fxtwitter.FxTwitterNetworkResult
 import com.comst19.dambom.core.network.fxtwitter.FxTwitterNetworkVariant
 import com.comst19.dambom.core.network.fxtwitter.FxTwitterNetworkVideo
-import java.security.MessageDigest
 
 internal fun FxTwitterNetworkResult.toDomain(): MediaDetectionResult =
     when (this) {
@@ -27,7 +27,7 @@ internal fun FxTwitterNetworkResult.toDomain(): MediaDetectionResult =
 private fun FxTwitterNetworkVideo.toDomain(): MediaCandidate {
     val primary = variants.first()
     return MediaCandidate(
-        id = MessageDigest.getInstance("SHA-256").digest(sourceUrl.toByteArray()).joinToString("") { "%02x".format(it) },
+        id = sourceUrl.mediaCandidateId(),
         url = primary.url,
         title = title,
         mimeType = "video/mp4",

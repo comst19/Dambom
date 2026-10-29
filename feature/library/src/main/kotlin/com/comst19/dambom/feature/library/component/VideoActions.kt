@@ -13,6 +13,7 @@ import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -76,6 +77,16 @@ internal fun VideoActionsButton(
                             onClick = {
                                 menuExpanded = false
                                 actions.onToggleFavorite(task)
+                            },
+                        )
+                    }
+                    actions.onTranslate?.takeIf { task.localFilePath != null }?.let { onTranslate ->
+                        ActionMenuItem(
+                            label = stringResource(R.string.subtitle_title),
+                            icon = { Icon(Icons.Outlined.Translate, contentDescription = null) },
+                            onClick = {
+                                menuExpanded = false
+                                onTranslate(task)
                             },
                         )
                     }

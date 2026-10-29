@@ -24,6 +24,7 @@ if (crashlyticsEnabled) {
 }
 
 android {
+    dynamicFeatures += setOf(":translationruntime")
     namespace = "com.comst19.dambom"
     defaultConfig {
         applicationId = "com.comst19.dambom"
@@ -88,6 +89,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.play.feature.delivery)
     "releaseImplementation"(platform(libs.firebase.bom))
     "releaseImplementation"(libs.firebase.crashlytics)
     implementation(projects.presentation)

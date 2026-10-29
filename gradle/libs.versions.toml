@@ -46,6 +46,9 @@ googleServices = "4.5.0"
 crashlyticsPlugin = "3.0.8"
 
 [libraries]
+mlkit-speech-recognition = { module = "com.google.mlkit:genai-speech-recognition", version = "1.0.0-alpha2" }
+litertlm = { module = "com.google.ai.edge.litertlm:litertlm-android", version = "0.18.1" }
+play-feature-delivery = { module = "com.google.android.play:feature-delivery", version = "2.1.0" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -139,6 +142,7 @@ coil-video = { module = "io.coil-kt.coil3:coil-video", version.ref = "coil" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlyticsPlugin" }
 android-application = { id = "com.android.application", version.ref = "agp" }
+android-dynamic-feature = { id = "com.android.dynamic-feature", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 android-test = { id = "com.android.test", version.ref = "agp" }
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }

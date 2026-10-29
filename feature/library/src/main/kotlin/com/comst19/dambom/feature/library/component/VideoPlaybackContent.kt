@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,6 +49,8 @@ import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.media.rememberLocalVideoMetadata
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
 import com.comst19.dambom.feature.library.player.component.PlaybackOptionsButton
+import com.comst19.dambom.feature.library.subtitle.playback.SubtitleToggleButton
+import com.comst19.dambom.feature.library.subtitle.playback.TranslatedSubtitleOverlay
 import kotlinx.coroutines.delay
 
 @Composable
@@ -124,7 +127,10 @@ internal fun VideoPlayerPanel(
             },
             onControlsInteractionChanged = { controlsInteracting = it },
         )
-        PlaybackOptionsButton(player)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            PlaybackOptionsButton(player)
+            SubtitleToggleButton(interaction)
+        }
         Text(
             text = task.title,
             style = MaterialTheme.typography.headlineSmall,
@@ -196,6 +202,7 @@ private fun InlineVideoSurface(
                     }
                 }.fullscreenPlayerGestures(toggleControlsLabel, onToggleControls, {}, interaction),
         )
+        TranslatedSubtitleOverlay(player, interaction.subtitlesEnabled) { interaction.hasSubtitles = it }
         AnimatedVisibility(
             visible = controlsVisible,
             enter = fadeIn(tween(INLINE_CONTROLS_FADE_MILLIS)),

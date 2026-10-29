@@ -41,6 +41,7 @@ internal data class LibraryFileActions(
     val onDelete: (DownloadTask) -> Unit,
     val onTrim: ((DownloadTask) -> Unit)? = null,
     val onCompress: ((DownloadTask) -> Unit)? = null,
+    val onTranslate: ((DownloadTask) -> Unit)? = null,
 )
 
 @Composable
@@ -137,6 +138,7 @@ internal fun rememberLibraryFileActions(
             onDelete = { task -> currentOnDelete.value?.invoke(task) ?: viewModel.delete(task) },
             onTrim = viewModel::trimVideo,
             onCompress = viewModel::compressVideo,
+            onTranslate = viewModel::translateVideo,
         )
     }
 }

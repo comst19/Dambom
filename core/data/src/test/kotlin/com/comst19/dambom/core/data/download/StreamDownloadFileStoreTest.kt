@@ -6,6 +6,8 @@ import android.content.Context
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.test.core.app.ApplicationProvider
+import com.comst19.dambom.core.common.io.videoSubtitleFile
+import com.comst19.dambom.core.common.io.videoSubtitleTemporaryFile
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -46,6 +48,18 @@ class StreamDownloadFileStoreTest {
             "stream-file-test.webm",
             store.completedFile("stream-file-test", "https://example.test/video.webm", "video/webm").name,
         )
+    }
+
+    @Test
+    fun `deleting a video removes its subtitles and interrupted subtitle output`() {
+        val file = store.completedFile("stream-file-test", "https://example.test/video.mp4", "video/mp4")
+        file.writeText("video")
+        file.videoSubtitleFile().writeText("subtitles")
+        file.videoSubtitleTemporaryFile().writeText("incomplete")
+        assertTrue(store.delete("stream-file-test", file.name))
+        assertFalse(file.exists())
+        assertFalse(file.videoSubtitleFile().exists())
+        assertFalse(file.videoSubtitleTemporaryFile().exists())
     }
 
     @Test

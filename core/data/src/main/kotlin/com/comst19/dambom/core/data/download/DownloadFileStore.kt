@@ -6,6 +6,8 @@ import android.content.Context
 import android.os.StatFs
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.cache.SimpleCache
+import com.comst19.dambom.core.common.io.videoSubtitleFile
+import com.comst19.dambom.core.common.io.videoSubtitleTemporaryFile
 import com.comst19.dambom.core.common.io.videoThumbnailFile
 import com.comst19.dambom.core.common.io.videoThumbnailTemporaryFile
 import com.comst19.dambom.core.common.io.videoThumbnailUnavailableFile
@@ -84,6 +86,8 @@ internal open class DownloadFileStore
                     localFileName?.let { fileName ->
                         val videoFile = videoDirectory.resolve(fileName)
                         add(videoFile)
+                        add(videoFile.videoSubtitleFile())
+                        add(videoFile.videoSubtitleTemporaryFile())
                         add(videoFile.videoThumbnailFile())
                         add(videoFile.videoThumbnailTemporaryFile())
                         add(videoFile.videoThumbnailUnavailableFile())

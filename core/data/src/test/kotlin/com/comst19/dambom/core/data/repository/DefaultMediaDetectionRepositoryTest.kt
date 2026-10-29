@@ -14,6 +14,7 @@ import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.SocketPolicy
+import okio.Buffer
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -193,6 +194,22 @@ class DefaultMediaDetectionRepositoryTest {
             detection.cancelAndJoin()
 
             assertTrue(detection.isCancelled)
+        }
+
+    @Test
+    fun `extensionless binary MP4 is identified by its file type box`() =
+        runTest {
+            val videoUrl = server.url("/media?token=a%2Bb").toString()
+            server.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "application/octet-stream")
+                    .setBody(Buffer().write(byteArrayOf(0, 0, 0, 24)).writeUtf8("ftypisom")),
+            )
+
+            val result = repository.detect(videoUrl) as MediaDetectionResult.Success
+
+            assertEquals(videoUrl, result.candidates.single().url)
+            assertEquals(12L, result.candidates.single().contentLength)
         }
 
     @Test

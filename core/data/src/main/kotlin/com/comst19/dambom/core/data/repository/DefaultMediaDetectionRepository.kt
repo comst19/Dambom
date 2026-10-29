@@ -5,6 +5,7 @@ import com.comst19.dambom.core.common.net.hasVideoFileExtension
 import com.comst19.dambom.core.common.net.isUnsupportedVideoService
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.data.mapper.toDomain
+import com.comst19.dambom.core.data.media.hasMp4FileTypeBox
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
 import com.comst19.dambom.core.domain.model.UnsupportedReason
@@ -229,7 +230,7 @@ internal class DefaultMediaDetectionRepository
 
                     contentType?.startsWith("video/") == true ||
                         (requestUrl.hasVideoFileExtension() && contentType?.contains("html") != true) ||
-                        isMp4Header(prefix) -> {
+                        prefix.hasMp4FileTypeBox() -> {
                         MediaPageDetection(
                             MediaDetectionResult.Success(
                                 pageTitle = requestUrl.fileTitle(),
@@ -324,14 +325,7 @@ private fun MediaDetectionResult.withHeaders(
         }
     }
 
-private fun isMp4Header(bytes: ByteArray): Boolean =
-    bytes.size >= MP4_HEADER_MIN_BYTES &&
-        bytes.copyOfRange(MP4_BRAND_OFFSET, MP4_BRAND_END).toString(Charsets.US_ASCII) == "ftyp"
-
 private const val MEDIA_PREFIX_BYTES = 512L
-private const val MP4_HEADER_MIN_BYTES = 12
-private const val MP4_BRAND_OFFSET = 4
-private const val MP4_BRAND_END = 8
 
 private data class MediaPageDetection(
     val result: MediaDetectionResult,

@@ -118,6 +118,10 @@ jobs:
         with:
           cache-read-only: "true"
 
+      - name: Check localization consistency
+        if: ${{ matrix.id == 'static-analysis' }}
+        run: python3 tools/check_localization.py
+
       - name: Run ${{ matrix.name }}
         env:
           GRADLE_TASKS: ${{ matrix.tasks }}

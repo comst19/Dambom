@@ -140,6 +140,7 @@ internal fun <T> SettingsChoiceDialog(
                                     onClick = { onSelect(entry) },
                                 ).heightIn(min = 56.dp)
                                 .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(

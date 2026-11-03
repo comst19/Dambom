@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">வலையை மூடு</string>
+    <string name="web_address_placeholder">இணைய முகவரியை உள்ளிடவும்</string>
+    <string name="web_start_title">இணையத்தில் வீடியோக்களைக் கண்டறியவும்</string>
+    <string name="web_start_description">பல தாவல்களைத் திறந்து வைத்து, தற்போதைய தாவலில் மட்டுமே வீடியோக்களைக் கண்டறியவும்.</string>
+    <string name="web_open">பக்கத்தைத் திற</string>
+    <string name="web_recent">சமீபத்திய பக்கங்கள்</string>
+    <string name="web_recent_empty">சமீபத்தில் பார்வையிட்ட பக்கங்கள் இல்லை.</string>
+    <string name="web_go_back">முந்தைய பக்கம்</string>
+    <string name="web_go_forward">அடுத்த பக்கம்</string>
+    <string name="web_refresh">புதுப்பிக்கவும்</string>
+    <string name="web_detecting">கண்டறிதல்</string>
+    <string name="web_open_detected_count">%1$d வீடியோக்களைத் திறக்கவும்</string>
+    <string name="web_no_detected_video">கண்டறியப்பட்ட வீடியோக்கள் இல்லை</string>
+    <string name="web_rescan">மீண்டும் ஸ்கேன் செய்யவும்</string>
+    <string name="web_playback_hint">வீடியோ எதுவும் கண்டறியப்படவில்லை எனில், அதை பக்கத்தில் இயக்கி மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="web_connection_error_title">தளத்துடன் இணைக்க முடியவில்லை</string>
+    <string name="web_connection_error_description">தளம் இணைப்பை மூடியது அல்லது தற்போதைய நெட்வொர்க்கில் கிடைக்கவில்லை.</string>
+    <string name="web_timeout_error_title">தளம் பதிலளிக்க அதிக நேரம் எடுத்தது</string>
+    <string name="web_timeout_error_description">சிறிது நேரம் காத்திருந்து மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="web_unsupported_url_error_title">ஆதரிக்கப்படாத இணைய முகவரி</string>
+    <string name="web_unsupported_url_error_description">இது HTTP அல்லது HTTPS இணைய முகவரியா என்பதைச் சரிபார்க்கவும்.</string>
+    <string name="web_access_error_title">பக்க அணுகல் தோல்வியடைந்தது</string>
+    <string name="web_access_error_description">பக்கம் இல்லை அல்லது அதைப் பார்க்க உங்களுக்கு அனுமதி இல்லை.</string>
+    <string name="web_server_error_title">தளம் தற்காலிகமாக கிடைக்கவில்லை</string>
+    <string name="web_server_error_description">தளத்தில் சர்வர் பிரச்சனை உள்ளது. சிறிது நேரம் காத்திருந்து மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="web_security_error_title">தளத்தை பாதுகாப்பாக திறக்க முடியவில்லை</string>
+    <string name="web_security_error_description">அதன் பாதுகாப்புச் சான்றிதழ் தவறானது அல்லது பக்கம் பாதுகாப்பற்றது என கண்டறியப்பட்டது.</string>
+    <string name="web_unknown_error_title">பக்கத்தைத் திறக்க முடியவில்லை</string>
+    <string name="web_unknown_error_description">முகவரியைச் சரிபார்த்து மீண்டும் திறக்கவும்.</string>
+    <string name="web_retry">மீண்டும் முயற்சிக்கவும்</string>
+    <string name="web_external_download_notice">Dambom வெளிப்புற உலாவியில் இருந்து வீடியோக்களைக் கண்டறியவோ பதிவிறக்கவோ முடியாது.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d திறந்த தாவல்</item>
+        <item quantity="other">%1$d திறந்த தாவல்கள்</item>
+    </plurals>
+    <string name="web_new_tab">புதிய தாவல்</string>
+    <string name="web_close_tab">%1$s தாவலை மூடு</string>
+    <string name="web_empty_tab">வெற்று தாவல்</string>
+    <string name="web_tab_actions">தற்போதைய தாவல் செயல்கள்</string>
+    <string name="web_open_external">இயல்புநிலை உலாவியில் திறக்கவும்</string>
+    <string name="web_copy_link">இணைப்பை நகலெடு</string>
+    <string name="web_share_link">இணைப்பைப் பகிரவும்</string>
+    <string name="web_link_copied">இணைப்பு நகலெடுக்கப்பட்டது.</string>
+    <string name="web_action_failure">இந்த கோரிக்கையை எந்த ஆப்ஸாலும் கையாள முடியாது.</string>
+    <string name="web_share_chooser">இணைப்பைப் பகிரவும்</string>
+    <string name="web_drm_protected">இந்த மீடியா பாதுகாக்கப்பட்டுள்ளது மற்றும் பதிவிறக்க முடியாது.</string>
+    <string name="web_unsupported_service">YouTube வீடியோ பதிவிறக்கங்கள் ஆதரிக்கப்படவில்லை.</string>
+    <string name="web_drm_excluded">பாதுகாக்கப்பட்ட வீடியோக்கள் இந்தப் பட்டியலில் இருந்து மறைக்கப்பட்டுள்ளன.</string>
+</resources>

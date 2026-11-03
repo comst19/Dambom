@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">موضع التشغيل</string>
+    <string name="playback_rewind">الرجوع 10 ثواني</string>
+    <string name="playback_play">العب</string>
+    <string name="playback_pause">وقفة</string>
+    <string name="playback_forward">تقديم 10 ثواني</string>
+</resources>

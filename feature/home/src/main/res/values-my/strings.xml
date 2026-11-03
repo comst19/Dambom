@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">ထပ်ကြည့်ရကျိုးနပ်လား။\nလင့်ခ်တစ်ခုဖြင့် သိမ်းဆည်းပါ။</string>
+    <string name="home_description">စာမျက်နှာလင့်ခ်မှ သိမ်းဆည်းရန် ဗီဒီယိုများကို ရှာပါ။</string>
+    <string name="home_url_label">ဝဘ်လိပ်စာ</string>
+    <string name="home_invalid_url">http:// သို့မဟုတ် https://. ဖြင့် စတင်သော လင့်ခ်တစ်ခုကို ထည့်ပါ။</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">ကူးထည့်ပါ။</string>
+    <string name="home_analyze">ဗီဒီယိုများကို ရှာပါ။</string>
+    <string name="home_open_settings">ဆက်တင်များ</string>
+    <string name="home_hide_results">ရလဒ်များကို ဝှက်ထားပါ။</string>
+    <string name="home_show_results">ထည့်သွင်းမှုနှင့်အတူ ရလဒ်များကို ပြသပါ။</string>
+    <string name="home_web_prompt_title">လင့်ခ်တစ်ခု မရှိသေးဘူးလား။</string>
+    <string name="home_web_prompt_description">လင့်ခ်မပါဘဲ စာမျက်နှာတစ်ခုကို ရှာပါ။</string>
+    <string name="home_browse_web">ဝဘ်ကို ကြည့်ပါ။</string>
+    <string name="home_current_activity">လက်ရှိလုပ်ဆောင်ချက်</string>
+    <string name="home_clipboard_found">ကူးယူထားသောလင့်ခ်ကို ရနိုင်ပါသည်။</string>
+    <string name="home_use_link">ကူးထည့်ပါ။</string>
+    <string name="home_dismiss">ပယ်ရန်</string>
+    <string name="home_clipboard_consent_title">ကူးယူထားသောလင့်ခ်များကို အကြံပြုလိုပါသလား။</string>
+    <string name="home_clipboard_consent_description">Dambom ကိုဖွင့်သောအခါ၊ ၎င်းသည် ဝဘ်လိပ်စာအတွက် ကလစ်ဘုတ်ကိုစစ်ဆေးပြီး ၎င်းကိုဖြည့်သွင်းရန် အကြံပြုနိုင်သည်။ ၎င်းသည် မည်သည့်အခါမှ ခွဲခြမ်းစိတ်ဖြာခြင်း သို့မဟုတ် အလိုအလျောက် ဒေါင်းလုဒ်လုပ်မည်မဟုတ်ပါ။</string>
+    <string name="home_clipboard_consent_allow">အကြံပြုချက်များကို ခွင့်ပြုပါ။</string>
+    <string name="home_clipboard_consent_deny">ကိုယ်တိုင်ကူးထည့်ပါ။</string>
+    <string name="home_clipboard_save_failed">သင့်စိတ်ကြိုက်ရွေးချယ်မှုကို မသိမ်းဆည်းနိုင်ပါ။ ထပ်စမ်းကြည့်ပါ။</string>
+    <string name="home_shared_url_title">မျှဝေထားသောလင့်ခ်ကို လက်ခံရရှိခဲ့သည်။</string>
+    <string name="home_shared_url_description">လင့်ခ်ကို ပြန်သုံးသပ်ပါ၊ ထို့နောက် ဗီဒီယိုများကို စတင်ရှာဖွေပါ။</string>
+    <string name="home_analyze_now">ဗီဒီယိုများကို ရှာပါ။</string>
+    <string name="home_cancel">မလုပ်တော့</string>
+    <string name="home_download_active">%1$d ဒေါင်းလုဒ်လုပ်နေသည်</string>
+    <string name="home_download_paused">%1$d ခဏရပ်ထားသည်။</string>
+    <string name="home_download_failed">%1$d ဒေါင်းလုဒ်များကို ဂရုပြုရန် လိုအပ်သည်။</string>
+    <string name="home_download_open">ဒေါင်းလုဒ် အခြေအနေကို ကြည့်ပါ။</string>
+</resources>

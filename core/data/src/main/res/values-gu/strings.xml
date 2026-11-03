@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">પર્યાપ્ત સંગ્રહ નથી. જગ્યા ખાલી કરો અને ફરી પ્રયાસ કરો: %1$s</string>
+    <string name="download_notification_channel">ડાઉનલોડ્સ</string>
+    <string name="download_notification_title">Dambom વિડિયો ડાઉનલોડ કરી રહ્યું છે</string>
+    <string name="download_notification_description">પુનઃજોડાણ પછી ડાઉનલોડ્સ સાચવેલ બિંદુ પરથી ફરી શરૂ થાય છે.</string>
+    <string name="download_result_notification_channel">પરિણામો ડાઉનલોડ કરો</string>
+    <string name="download_notification_progress_title">%1$s ડાઉનલોડ કરી રહ્યું છે</string>
+    <string name="download_notification_progress">%1$d %% પૂર્ણ</string>
+    <string name="download_notification_completed">ડાઉનલોડ પૂર્ણ</string>
+    <string name="download_notification_completed_description">%1$s તમારી લાઇબ્રેરીમાં સાચવવામાં આવ્યું હતું.</string>
+    <string name="download_notification_failed">ડાઉનલોડ નિષ્ફળ થયું</string>
+    <string name="download_notification_failed_description">ફરીથી %1$s ડાઉનલોડ કરવાનો પ્રયાસ કરો.</string>
+    <string name="download_notification_failed_network">%1$s માટે નેટવર્ક કનેક્શન તપાસો.</string>
+    <string name="download_notification_failed_storage">%1$s માટે ઉપલબ્ધ સ્ટોરેજ તપાસો.</string>
+</resources>

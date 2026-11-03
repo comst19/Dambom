@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">An buga kwanan nan</string>
+    <string name="library_recently_played_empty_title">Babu bidiyo da aka buga kwanan nan</string>
+    <string name="library_recently_played_empty_description">Buga bidiyo don ganin ta a nan. Idan tacewar tana aiki, gwada canza su.</string>
+</resources>

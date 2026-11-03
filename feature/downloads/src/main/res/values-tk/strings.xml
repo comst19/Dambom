@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Saklamak ýeterlik däl. Boş ýer boşadyň we gaýtadan synanyşyň.</string>
+    <string name="downloads_summary_waiting">Göçürip almak üçin garaşýaryn</string>
+    <string name="downloads_summary_paused">süklemeler saklandy</string>
+    <string name="downloads_summary_attention">süklemeler ünsi talap edýär</string>
+    <string name="downloads_quality_original">Asyl nusgasy</string>
+    <string name="downloads_title">süklemeler</string>
+    <string name="downloads_back">Yzyna</string>
+    <string name="downloads_view_as_list">Sanaw hökmünde görüň</string>
+    <string name="downloads_view_as_grid">Tor hökmünde görüň</string>
+    <string name="downloads_empty_title">süklemeler dowam etmeýär</string>
+    <string name="downloads_empty_description">Tamamlanan ýüklemeler kitaphanaňyzda görmäge taýyn.</string>
+    <string name="downloads_open_library">Açyk kitaphana</string>
+    <string name="downloads_summary">%1$d göçürip almak</string>
+    <string name="downloads_summary_remaining">%1$d galdy</string>
+    <string name="downloads_pause_all">Hemmesini duruzyň</string>
+    <string name="downloads_resume_all">Hemmesini dowam etdiriň</string>
+    <string name="downloads_group_active">ingüklemek</string>
+    <string name="downloads_group_queued">nobat</string>
+    <string name="downloads_group_paused">Saklandy</string>
+    <string name="downloads_group_failed">Şowsuz</string>
+    <string name="downloads_group_completed">Tamamlandy</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s kiçi surat</string>
+    <string name="downloads_unknown_size">Jemi ululygy belli däl</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Galan ýüklemeleriň ösüşi</string>
+    <string name="downloads_pause">Arakesme</string>
+    <string name="downloads_resume">Dowam et</string>
+    <string name="downloads_cancel">elatyr</string>
+    <string name="downloads_retry">Gaýtadan synanyşyň</string>
+    <string name="downloads_remove">Sanawdan aýyryň</string>
+    <string name="downloads_error_access">Bu wideo giriş rugsady talap edýär.</string>
+    <string name="downloads_error_format">Bu wideo formaty goldanok.</string>
+    <string name="downloads_error_network">Baglanyşyk dikeldilmedi. Gaýtadan synanyşyň.</string>
+    <string name="downloads_error_storage">Faýly ýatda saklap bolmady Saklanylýan ýeri barlaň.</string>
+    <string name="downloads_error_server">Serwer göçürip alyp bilmeýär.</string>
+    <string name="downloads_error_unknown">Göçürip alanyňyzda bir näsazlyk boldy.</string>
+    <string name="downloads_command_failed">Göçürip alyp bolmaýar. Gaýtadan synanyşyň.</string>
+    <string name="downloads_delete_pending">Öçürmek gerek</string>
+    <string name="downloads_delete_retry">Öçürmek üçin gaýtadan synanyşyň</string>
+    <string name="downloads_delete_group_count">%1$d öçürmek</string>
+    <string name="downloads_error_drm">Goragly wideolary göçürip alyp bolmaýar.</string>
+</resources>

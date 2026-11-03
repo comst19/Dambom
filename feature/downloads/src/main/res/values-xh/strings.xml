@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Akukho ndawo yokugcina eyaneleyo. Khulula indawo kwaye uzame kwakhona.</string>
+    <string name="downloads_summary_waiting">Ukulinda ukukhuphela</string>
+    <string name="downloads_summary_paused">Ukhuphelo lunqunyanyisiwe</string>
+    <string name="downloads_summary_attention">Ukhuphelo lufuna ingqalelo</string>
+    <string name="downloads_quality_original">Original</string>
+    <string name="downloads_title">Iikhuphelo</string>
+    <string name="downloads_back">Buyela umva</string>
+    <string name="downloads_view_as_list">Jonga njengohlobo loluhlu</string>
+    <string name="downloads_view_as_grid">Jonga njengohlobo lwematrix</string>
+    <string name="downloads_empty_title">Akukho zikhutshelo ngoku ezisebenza</string>
+    <string name="downloads_empty_description">Zikhutshelwe zonke zilungele ukujonga kwilayibrari yakho.</string>
+    <string name="downloads_open_library">Vula ilayibrari</string>
+    <string name="downloads_summary">%1$d iyakhutshelwa</string>
+    <string name="downloads_summary_remaining">%1$d esele</string>
+    <string name="downloads_pause_all">Yeka konke okwenzayo</string>
+    <string name="downloads_resume_all">Qalisa konke okwenzayo kwakhona</string>
+    <string name="downloads_group_active">Ukukhutshelwa</string>
+    <string name="downloads_group_queued">Kulindile</string>
+    <string name="downloads_group_paused">Kumiwe</string>
+    <string name="downloads_group_failed">Akuphumelelanga</string>
+    <string name="downloads_group_completed">Kugqityiwe</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s ikhonkco le-thumbnail</string>
+    <string name="downloads_unknown_size">Ubungakanani obupheleleyo abaziwayo</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Inkqubela yomsebenzi weekhutshelo ezisaleleleyo</string>
+    <string name="downloads_pause">Yeka</string>
+    <string name="downloads_resume">Qalisa kwakhona</string>
+    <string name="downloads_cancel">Rhoxisa</string>
+    <string name="downloads_retry">Zama kwakhona</string>
+    <string name="downloads_remove">Susa ohlwini</string>
+    <string name="downloads_error_access">Le vidiyo ifuna imvume yokufikelela.</string>
+    <string name="downloads_error_format">Le fomati yevidiyo ayixhaswanga.</string>
+    <string name="downloads_error_network">Unxibelelwano alubuyiswanga. Zama kwakhona.</string>
+    <string name="downloads_error_storage">Ayikwazanga ukugcina ifayile. Jonga indawo yokugcina.</string>
+    <string name="downloads_error_server">Iseva ayikwazanga ukucubungula ukukhuphela.</string>
+    <string name="downloads_error_unknown">Into embi yenzekile ngelixa ukhuphela.</string>
+    <string name="downloads_command_failed">Ayikwazanga ukuhlaziya ukhuphelo. Zama kwakhona.</string>
+    <string name="downloads_delete_pending">Kufuneka ukuhlamba ukususa</string>
+    <string name="downloads_delete_retry">Zama kwakhona ukususa</string>
+    <string name="downloads_delete_group_count">Ukucoca ukususa %1$d</string>
+    <string name="downloads_error_drm">Iividiyo ezikhuselweyo azinakukhutshelwa.</string>
+</resources>

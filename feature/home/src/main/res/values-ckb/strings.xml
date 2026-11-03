@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">شایەنی سەیرکردنە جارێکی تر؟\nبە لینکێک هەڵیبگرە.</string>
+    <string name="home_description">ڤیدیۆکان بدۆزەوە بۆ هەڵگرتن لە لینکی لاپەڕە.</string>
+    <string name="home_url_label">ناونیشانی وێب</string>
+    <string name="home_invalid_url">لینکێک تێبنووسە کە بە http:// یان https://. دەست پێدەکات</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">چەسپاندن</string>
+    <string name="home_analyze">ڤیدیۆ بدۆزەوە</string>
+    <string name="home_open_settings">ڕێکخستنەکان</string>
+    <string name="home_hide_results">شاردنەوەی ئەنجامەکان</string>
+    <string name="home_show_results">ئەنجامەکان نیشان بدە لە تەنیشت تێکردن.</string>
+    <string name="home_web_prompt_title">هێشتا بەستەرت نیە؟</string>
+    <string name="home_web_prompt_description">پەڕەیەک بدۆزەوە بەبێ بەستەر.</string>
+    <string name="home_browse_web">گەڕان لە وێب</string>
+    <string name="home_current_activity">چالاکی ئێستا</string>
+    <string name="home_clipboard_found">لینکێکی کۆپی کراو بەردەستە</string>
+    <string name="home_use_link">چەسپاندن</string>
+    <string name="home_dismiss">دەرکردن</string>
+    <string name="home_clipboard_consent_title">پێشنیاری بەستەری کۆپی کراو دەکەیت؟</string>
+    <string name="home_clipboard_consent_description">کاتێک Dambom دەکرێتەوە، دەتوانێت ڕوونووسەکە بپشکنێت بۆ ناونیشانی وێب و پێشنیاری پڕکردنەوەی بکات. هەرگیز بە شێوەیەکی ئۆتۆماتیکی شیکاری ناکات یان داونلۆد ناکات.</string>
+    <string name="home_clipboard_consent_allow">ڕێگە بە پێشنیارەکان بدە</string>
+    <string name="home_clipboard_consent_deny">لکاندنی دەستی</string>
+    <string name="home_clipboard_save_failed">نەیتوانی پەسەندکردنەکەت هەڵبگرێت. تکایە دووبارە هەوڵدەوە.</string>
+    <string name="home_shared_url_title">لینکی هاوبەش وەرگیراوە</string>
+    <string name="home_shared_url_description">پێداچوونەوە بە لینکەکە بکە، پاشان دەست بکە بە دۆزینەوەی ڤیدیۆکان.</string>
+    <string name="home_analyze_now">ڤیدیۆ بدۆزەوە</string>
+    <string name="home_cancel">هەڵوەشاندنەوە</string>
+    <string name="home_download_active">%1$d دابەزاندن</string>
+    <string name="home_download_paused">%1$d وەستا</string>
+    <string name="home_download_failed">%1$d داگرتنەکان پێویستیان بە گرنگی هەیە</string>
+    <string name="home_download_open">سەیری دۆخی داگرتن بکە</string>
+</resources>

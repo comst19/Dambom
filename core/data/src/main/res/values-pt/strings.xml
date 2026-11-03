@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Armazenamento insuficiente. Libere espaço e tente novamente: %1$s</string>
+    <string name="download_notification_channel">Transferências</string>
+    <string name="download_notification_title">Dambom está baixando vídeos</string>
+    <string name="download_notification_description">Os downloads são retomados a partir do ponto salvo após a reconexão.</string>
+    <string name="download_result_notification_channel">Baixar resultados</string>
+    <string name="download_notification_progress_title">Baixando %1$s</string>
+    <string name="download_notification_progress">%1$d %% completo</string>
+    <string name="download_notification_completed">Download concluído</string>
+    <string name="download_notification_completed_description">%1$s foi salvo em sua Biblioteca.</string>
+    <string name="download_notification_failed">Falha no download</string>
+    <string name="download_notification_failed_description">Tente baixar %1$s novamente.</string>
+    <string name="download_notification_failed_network">Verifique a conexão de rede para %1$s .</string>
+    <string name="download_notification_failed_storage">Verifique o armazenamento disponível para %1$s .</string>
+</resources>

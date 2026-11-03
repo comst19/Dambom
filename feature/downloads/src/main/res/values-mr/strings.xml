@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">पुरेसा स्टोरेज नाही. जागा मोकळी करा आणि पुन्हा प्रयत्न करा.</string>
+    <string name="downloads_summary_waiting">डाउनलोड होण्याची प्रतीक्षा करत आहे</string>
+    <string name="downloads_summary_paused">डाउनलोड थांबवले</string>
+    <string name="downloads_summary_attention">डाउनलोडकडे लक्ष देणे आवश्यक आहे</string>
+    <string name="downloads_quality_original">मूळ</string>
+    <string name="downloads_title">[००६] डाउनलोड</string>
+    <string name="downloads_back">मागे</string>
+    <string name="downloads_view_as_list">सूची म्हणून पहा</string>
+    <string name="downloads_view_as_grid">ग्रिड म्हणून पहा</string>
+    <string name="downloads_empty_title">कोणतेही डाउनलोड प्रगतीपथावर आहेत</string>
+    <string name="downloads_empty_description">पूर्ण झालेले डाउनलोड तुमच्या लायब्ररीमध्ये पाहण्यासाठी तयार आहेत.</string>
+    <string name="downloads_open_library">लायब्ररी उघडा</string>
+    <string name="downloads_summary">%1$d डाउनलोड करत आहे</string>
+    <string name="downloads_summary_remaining">%1$d शिल्लक</string>
+    <string name="downloads_pause_all">सर्व विराम द्या</string>
+    <string name="downloads_resume_all">सर्व पुन्हा सुरू करा</string>
+    <string name="downloads_group_active">डाउनलोड करत आहे</string>
+    <string name="downloads_group_queued">रांगेत</string>
+    <string name="downloads_group_paused">विराम दिला</string>
+    <string name="downloads_group_failed">अयशस्वी</string>
+    <string name="downloads_group_completed">पूर्ण झाले</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s लघुप्रतिमा</string>
+    <string name="downloads_unknown_size">एकूण आकार अज्ञात</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">उर्वरित डाउनलोड्सची प्रगती</string>
+    <string name="downloads_pause">[००३] विराम द्या</string>
+    <string name="downloads_resume">रेझ्युमे</string>
+    <string name="downloads_cancel">रद्द करा</string>
+    <string name="downloads_retry">पुन्हा प्रयत्न करा</string>
+    <string name="downloads_remove">यादीतून काढून टाका</string>
+    <string name="downloads_error_access">या व्हिडिओला प्रवेश परवानगी आवश्यक आहे.</string>
+    <string name="downloads_error_format">हे व्हिडिओ स्वरूप समर्थित नाही.</string>
+    <string name="downloads_error_network">कनेक्शन पुनर्प्राप्त झाले नाही. पुन्हा प्रयत्न करा.</string>
+    <string name="downloads_error_storage">फाइल सेव्ह करू शकलो नाही. स्टोरेज स्पेस तपासा.</string>
+    <string name="downloads_error_server">सर्व्हर डाउनलोडवर प्रक्रिया करू शकला नाही.</string>
+    <string name="downloads_error_unknown">डाउनलोड करताना काहीतरी चूक झाली.</string>
+    <string name="downloads_command_failed">डाउनलोड अपडेट करू शकलो नाही. पुन्हा प्रयत्न करा.</string>
+    <string name="downloads_delete_pending">हटवणे आवश्यक आहे</string>
+    <string name="downloads_delete_retry">हटवण्याचा पुन्हा प्रयत्न करा</string>
+    <string name="downloads_delete_group_count">हटवणे क्लीनअप %1$d</string>
+    <string name="downloads_error_drm">संरक्षित व्हिडिओ डाउनलोड केले जाऊ शकत नाहीत.</string>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">وێب دابخە</string>
+    <string name="web_address_placeholder">ناونیشانی وێب تێبنووسە</string>
+    <string name="web_start_title">ڤیدیۆ بدۆزەوە لەسەر وێب</string>
+    <string name="web_start_description">چەند خشتەبەندێک بە کراوەیی بهێڵەوە و ڤیدیۆکان تەنها لەسەر خشتەبەندی ئێستا بدۆزەوە.</string>
+    <string name="web_open">لاپەڕەی کراوە</string>
+    <string name="web_recent">پەڕەکانی ئەم دواییە</string>
+    <string name="web_recent_empty">هیچ پەڕەیەکی سەردانکراو بەم دواییانە نییە.</string>
+    <string name="web_go_back">پەڕەی پێشوو</string>
+    <string name="web_go_forward">لاپەڕەی داهاتوو</string>
+    <string name="web_refresh">نوێکردنەوە</string>
+    <string name="web_detecting">دۆزینەوە</string>
+    <string name="web_open_detected_count">ڤیدیۆکانی %1$d بکەرەوە</string>
+    <string name="web_no_detected_video">هیچ ڤیدیۆیەک نەدۆزرایەوە</string>
+    <string name="web_rescan">دووبارە پشکنین بکە</string>
+    <string name="web_playback_hint">ئەگەر هیچ ڤیدیۆیەک نەدۆزرایەوە، لەسەر لاپەڕەکە لێیبدە و دووبارە هەوڵ بدە.</string>
+    <string name="web_connection_error_title">نەیتوانی پەیوەندی بکات بە ماڵپەڕەکەوە</string>
+    <string name="web_connection_error_description">ماڵپەڕەکە پەیوەندیەکەی داخست یان لەسەر تۆڕی ئێستا بەردەست نییە.</string>
+    <string name="web_timeout_error_title">ماڵپەڕەکە زۆر زۆری خایاند بۆ وەڵامدانەوە.</string>
+    <string name="web_timeout_error_description">کەمێک چاوەڕێ بکە و دووبارە هەوڵ بدە.</string>
+    <string name="web_unsupported_url_error_title">ناونیشانی وێبی پشتگیری نەکراو</string>
+    <string name="web_unsupported_url_error_description">بپشکنە کە ئەمە ناونیشانی وێب HTTP یان HTTPS بێت.</string>
+    <string name="web_access_error_title">گەیشتن بە پەڕە سەرکەوتوو نەبوو</string>
+    <string name="web_access_error_description">پەڕەکە بوونی نیە یان تۆ مۆڵەتت نیە بۆ بینینی.</string>
+    <string name="web_server_error_title">ماڵپەڕەکە بۆ ماوەیەکی کاتی بەردەست نییە</string>
+    <string name="web_server_error_description">سایتەکە تووشی کێشەی سێرڤەر دەبێت. تکایە کەمێک بوەستە و دووبارە هەوڵدەوە.</string>
+    <string name="web_security_error_title">شوێنەکە نەتوانرا بە پارێزراوی بکرێتەوە.</string>
+    <string name="web_security_error_description">بڕوانامەی ئاسایشەکەی نادروستە یان لاپەڕەکە وەک ناسەلامەت دۆزرایەوە.</string>
+    <string name="web_unknown_error_title">لاپەڕەکە نەتوانرا بکرێتەوە.</string>
+    <string name="web_unknown_error_description">ناونیشانەکە بپشکنە و هەوڵ بدە دووبارە بیکاتەوە.</string>
+    <string name="web_retry">دووبارە هەوڵ بدە</string>
+    <string name="web_external_download_notice">Dambom ناتوانێت ڤیدیۆ بدۆزێتەوە یان دابەزێنێت لە وێبگەڕێکی دەرەکی.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d خشتەبەندی کراوە.</item>
+        <item quantity="other">%1$d خشتەبەندی کراوە.</item>
+    </plurals>
+    <string name="web_new_tab">خشتەبەندی نوێ.</string>
+    <string name="web_close_tab">خشتەبەندی %1$s دابخە.</string>
+    <string name="web_empty_tab">خشتەبەندی بەتاڵ.</string>
+    <string name="web_tab_actions">کردارەکانی خشتەبەندی هەنووکەیی.</string>
+    <string name="web_open_external">لە وێبگەڕی بنەڕەتدا بکرێتەوە.</string>
+    <string name="web_copy_link">کۆپی لینک</string>
+    <string name="web_share_link">بەستەر هاوبەش بکە</string>
+    <string name="web_link_copied">بەستەر کۆپی کرا.</string>
+    <string name="web_action_failure">هیچ کاربەرنامەیەک ناتوانێت ئەم داواکارییە چارەسەر بکات.</string>
+    <string name="web_share_chooser">بەستەر هاوبەش بکە</string>
+    <string name="web_drm_protected">ئەم میدیایە پارێزراوە و ناتوانرێت دابگیرێت.</string>
+    <string name="web_unsupported_service">YouTube داگرتنی ڤیدیۆ پشتگیری ناکرێت.</string>
+    <string name="web_drm_excluded">ڤیدیۆ پارێزراوەکان لەم لیستەدا شاردراوەتەوە.</string>
+</resources>

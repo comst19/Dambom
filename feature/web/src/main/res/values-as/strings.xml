@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">ৱেব বন্ধ কৰক</string>
+    <string name="web_address_placeholder">ৱেব ঠিকনা প্ৰৱিষ্ট কৰক</string>
+    <string name="web_start_title">ৱেবে ভিডিঅ’ বিচাৰক</string>
+    <string name="web_start_description">বহুত টেব খোলা ৰাখক আৰু কেৱল বৰ্তমান টেবে ভিডিঅ’ চিনাক্ত কৰক।</string>
+    <string name="web_open">পৃষ্ঠা খোলক</string>
+    <string name="web_recent">সৰ্বশেষ পৃষ্ঠা</string>
+    <string name="web_recent_empty">সাম্প্ৰতিক ভিজিট কৰা পৃষ্ঠা নাই।</string>
+    <string name="web_go_back">আগৰ পৃষ্ঠা</string>
+    <string name="web_go_forward">পৰবৰ্তী পৃষ্ঠা</string>
+    <string name="web_refresh">ৰিফ্ৰেছ কৰক</string>
+    <string name="web_detecting">চিনাক্ত কৰা হৈছে</string>
+    <string name="web_open_detected_count">%1$d ভিডিঅ’ খোলক</string>
+    <string name="web_no_detected_video">কোনো ভিডিঅ’ চিনাক্ত হোৱা নাই</string>
+    <string name="web_rescan">পুনৰ স্কেন কৰক</string>
+    <string name="web_playback_hint">যদি কোনো ভিডিঅ’ চিনাক্ত নহয়, পৃষ্ঠাত খেলাওক আৰু পুনৰ প্ৰচেষ্টা কৰক।</string>
+    <string name="web_connection_error_title">চাইটত সংযোগ স্থাপন কৰিব পৰা নগ’ল</string>
+    <string name="web_connection_error_description">চাইটটোৱে সংযোগ বন্ধ কৰিছে অথবা বৰ্তমান নেটৱৰ্কত উপলব্ধ নহয়।</string>
+    <string name="web_timeout_error_title">চাইটটোৱে প্ৰত্যুত্তৰ দিবলৈ অধিক সময় লৈছে</string>
+    <string name="web_timeout_error_description">অলপ সময় ৰ’খক আৰু পুনৰ চেষ্টা কৰক।</string>
+    <string name="web_unsupported_url_error_title">সমৰ্থিত নহয় ৱেব ঠিকনা</string>
+    <string name="web_unsupported_url_error_description">পৰীক্ষা কৰক যে এইটো HTTP বা HTTPS ৱেব ঠিকনা।</string>
+    <string name="web_access_error_title">পৃষ্ঠা প্ৰৱিষ্টত ব্যৰ্থ</string>
+    <string name="web_access_error_description">পৃষ্ঠাটো উপস্থিত নাই বা আপোনাৰ সেইটো চাইৰ অনুমতি নেই।</string>
+    <string name="web_server_error_title">চাইটটো সাময়িকভাৱে উপলব্ধ নহয়</string>
+    <string name="web_server_error_description">ছাইটটোৰ ছাৰ্ভাৰ সমস্যা হৈছে। এক মুহূৰ্ত মানি ৰাখক আৰু পুনৰ চেষ্টা কৰক।</string>
+    <string name="web_security_error_title">ছাইটটো নিৰাপদভাৱে খোলাজাব পৰা নগ’ল</string>
+    <string name="web_security_error_description">ইয়াৰ নিরাপত্তা প্ৰমাণপত্ৰ অশুদ্ধ বা পৃষ্ঠাটো অসুৰক্ষিত হিচাপে প্ৰমাণিত হৈছে।</string>
+    <string name="web_unknown_error_title">পৃষ্ঠাটো খোলাজাব পৰা নগ’ল</string>
+    <string name="web_unknown_error_description">ঠিকনা পৰীক্ষা কৰক আৰু পুনৰ খোলক।</string>
+    <string name="web_retry">পুনৰ চেষ্টা কৰক</string>
+    <string name="web_external_download_notice">Dambom বাহ্যিক ব্ৰাউজাৰৰ পৰা ভিডিঅ’ চিনাক্ত বা ডাউনল’ড কৰিব পৰা নগ’ল।</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d টেব খোলক</item>
+        <item quantity="other">%1$d টেবলসমূহ খোলক</item>
+    </plurals>
+    <string name="web_new_tab">নতুন টেব</string>
+    <string name="web_close_tab">%1$s টেব বন্ধ কৰক</string>
+    <string name="web_empty_tab">খালী টেব</string>
+    <string name="web_tab_actions">বৰ্তমান টেব কাৰ্য</string>
+    <string name="web_open_external">ডিফল্ট ব্ৰাউজাৰত খোলক</string>
+    <string name="web_copy_link">কপি লিংক</string>
+    <string name="web_share_link">শ্বেয়াৰ লিংক</string>
+    <string name="web_link_copied">সংযোগ সমল কপী কৰা হৈছে।</string>
+    <string name="web_action_failure">কোনোধৰণৰ এপ্লিকেশ্যন এই অনুৰোধ সমাধান কৰিব নোৱাৰে।</string>
+    <string name="web_share_chooser">শ্বেয়াৰ লিংক</string>
+    <string name="web_drm_protected">এই মিডিয়াটো সুৰক্ষিত আৰু ডাউনল’ড কৰিব পৰা নগ’ল।</string>
+    <string name="web_unsupported_service">YouTube ভিডিঅ\' ডাউনলোডসমূহ সমৰ্থিত নহয়।</string>
+    <string name="web_drm_excluded">সুৰক্ষিত ভিডিঅ\'সমূহ এই তালিকাৰ পৰা লুকুৱাই ৰখা হৈছে।</string>
+</resources>

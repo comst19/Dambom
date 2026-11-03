@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Продолжить просмотр?</string>
+    <string name="player_resume_message">Вы досмотрели до %1$s .</string>
+    <string name="player_resume_continue">Продолжить</string>
+    <string name="player_resume_restart">Начать сначала</string>
+    <string name="player_history_failure">Не удалось загрузить или сохранить историю воспроизведения.</string>
+    <string name="player_settings_failure">Не удалось сохранить настройки воспроизведения.</string>
+    <string name="player_speed">Скорость воспроизведения</string>
+    <string name="player_speed_value">Скорость воспроизведения · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Повторить это видео</string>
+    <string name="player_options_close">Закрыть</string>
+</resources>

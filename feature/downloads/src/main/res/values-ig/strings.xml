@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Ebe nchekwa ezughị oke. Hapụ ohere wee nwaa ọzọ.</string>
+    <string name="downloads_summary_waiting">Na-eche nbudata</string>
+    <string name="downloads_summary_paused">Nbudata kwụsịtụrụ</string>
+    <string name="downloads_summary_attention">Nbudata chọrọ nlebara anya</string>
+    <string name="downloads_quality_original">Nke izizi</string>
+    <string name="downloads_title">Nbudata</string>
+    <string name="downloads_back">Azụ</string>
+    <string name="downloads_view_as_list">Lelee dị ka ndepụta</string>
+    <string name="downloads_view_as_grid">Lelee dị ka grid</string>
+    <string name="downloads_empty_title">Enweghị nbudata na-aga n\'ihu</string>
+    <string name="downloads_empty_description">Nbudata emechaala adịla njikere ilele n\'ọbá akwụkwọ gị.</string>
+    <string name="downloads_open_library">Ọbá akwụkwọ mepere emepe</string>
+    <string name="downloads_summary">%1$d nbudata</string>
+    <string name="downloads_summary_remaining">%1$d fọdụrụ</string>
+    <string name="downloads_pause_all">Kwụsịtụ ihe niile</string>
+    <string name="downloads_resume_all">maliteghachi ihe niile</string>
+    <string name="downloads_group_active">Nbudata</string>
+    <string name="downloads_group_queued">kwụ n\'ahịrị</string>
+    <string name="downloads_group_paused">kwụsịtụrụ</string>
+    <string name="downloads_group_failed">Okpu</string>
+    <string name="downloads_group_completed">Emechara</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s thumbnail</string>
+    <string name="downloads_unknown_size">Ngụkọta nha amaghị</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Ọganihu nke nbudata ndị fọdụrụ</string>
+    <string name="downloads_pause">kwụsịtụ</string>
+    <string name="downloads_resume">malite</string>
+    <string name="downloads_cancel">Kagbuo</string>
+    <string name="downloads_retry">Gbalịa ọzọ</string>
+    <string name="downloads_remove">Wepụ na ndepụta</string>
+    <string name="downloads_error_access">Vidiyo a chọrọ ikike ịnweta.</string>
+    <string name="downloads_error_format">A naghị akwado usoro vidiyo a.</string>
+    <string name="downloads_error_network">Njikọ ahụ agbakebeghị. Nwaa ọzọ.</string>
+    <string name="downloads_error_storage">Enweghị ike ịchekwa faịlụ ahụ. Lelee oghere nchekwa.</string>
+    <string name="downloads_error_server">Sava enweghị ike hazie nbudata ahụ.</string>
+    <string name="downloads_error_unknown">Ọ nwere ihe ezighi ezi mgbe ị na-ebudata.</string>
+    <string name="downloads_command_failed">Enweghị ike imelite nbudata ahụ. Nwaa ọzọ.</string>
+    <string name="downloads_delete_pending">achọrọ nhichapụ nhichapụ</string>
+    <string name="downloads_delete_retry">Gbalịa ihichapụ</string>
+    <string name="downloads_delete_group_count">Nhicha mkpochapụ %1$d</string>
+    <string name="downloads_error_drm">Enweghị ike ibudata vidiyo echedoro.</string>
+</resources>

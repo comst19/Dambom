@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">போதுமான சேமிப்பிடம் இல்லை. இடத்தைக் காலி செய்து மீண்டும் முயற்சிக்கவும்: %1$s</string>
+    <string name="download_notification_channel">பதிவிறக்கங்கள்</string>
+    <string name="download_notification_title">Dambom வீடியோக்களைப் பதிவிறக்குகிறது</string>
+    <string name="download_notification_description">மீண்டும் இணைத்த பிறகு சேமித்த இடத்திலிருந்து பதிவிறக்கங்கள் மீண்டும் தொடங்கும்.</string>
+    <string name="download_result_notification_channel">பதிவிறக்க முடிவுகளை</string>
+    <string name="download_notification_progress_title">%1$s பதிவிறக்கம்</string>
+    <string name="download_notification_progress">%1$d %% முடிந்தது</string>
+    <string name="download_notification_completed">பதிவிறக்கம் முடிந்தது</string>
+    <string name="download_notification_completed_description">%1$s உங்கள் நூலகத்தில் சேமிக்கப்பட்டது.</string>
+    <string name="download_notification_failed">பதிவிறக்கம் தோல்வியடைந்தது</string>
+    <string name="download_notification_failed_description">மீண்டும் %1$s ஐப் பதிவிறக்க முயற்சிக்கவும்.</string>
+    <string name="download_notification_failed_network">%1$s க்கான பிணைய இணைப்பைச் சரிபார்க்கவும்.</string>
+    <string name="download_notification_failed_storage">%1$s க்கான சேமிப்பகத்தை சரிபார்க்கவும்.</string>
+</resources>

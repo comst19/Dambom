@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">ዳግማይ ክትከታተሎ ዝግባእ?\nብሊንክ ኣቐምጦ።</string>
+    <string name="home_description">ካብ ገጽ መላግቦ ክትዕቅቦም እትኽእል ቪድዮታት ድለ።</string>
+    <string name="home_url_label">ኣድራሻ መርበብ ሓበሬታ</string>
+    <string name="home_invalid_url">ብ http:// ወይ https://. ዝጅምር ሊንክ ኣእቱ</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">ምልጣፍ</string>
+    <string name="home_analyze">ቪድዮታት ርኸብ</string>
+    <string name="home_open_settings">ቅጥዕታት</string>
+    <string name="home_hide_results">ውጽኢት ምሕባእ</string>
+    <string name="home_show_results">ውጽኢት ጎኒ ጎኒ እታው ኣርእዩ</string>
+    <string name="home_web_prompt_title">ገና ሊንክ የብልካን?</string>
+    <string name="home_web_prompt_description">ሊንክ ዘይብሉ ገጽ ርኸብ።</string>
+    <string name="home_browse_web">ኣብ መርበብ ሓበሬታ ድህሰሱ</string>
+    <string name="home_current_activity">ህሉው ንጥፈታት</string>
+    <string name="home_clipboard_found">ዝተቐድሐ ሊንክ ኣሎ።</string>
+    <string name="home_use_link">ምልጣፍ</string>
+    <string name="home_dismiss">ካብ ስራሕ ምብራር</string>
+    <string name="home_clipboard_consent_title">ዝተቐድሑ መላግቦታት ሓሳብ ሃቡ?</string>
+    <string name="home_clipboard_consent_description">Dambom ምስ ተኸፍተ፡ ነቲ ቅንጥብጣብ ሰሌዳ ናይ መርበብ ሓበሬታ ኣድራሻ ክምርምርን ክትመልኦ ሓሳብ ክህብን ይኽእል።ኣውቶማቲክ ፈጺሙ ኣይትንትን ወይ ኣይወርድን እዩ።</string>
+    <string name="home_clipboard_consent_allow">ሓሳባት ፍቐዱ</string>
+    <string name="home_clipboard_consent_deny">ብኢድካ ምልጣፍ</string>
+    <string name="home_clipboard_save_failed">ምርጫኻ ክዕቅብ ኣይከኣለን። በጃኹም ደጊምኩም ፈትኑ።</string>
+    <string name="home_shared_url_title">ዝተኻፈለ መላግቦ ተቐቢሉ።</string>
+    <string name="home_shared_url_description">ነቲ ሊንክ ርአ፣ ድሕሪኡ ቪድዮታት ምርካብ ጀምር።</string>
+    <string name="home_analyze_now">ቪድዮታት ርኸብ</string>
+    <string name="home_cancel">ስርዝ ድልዝ</string>
+    <string name="home_download_active">%1$d ምውራድ</string>
+    <string name="home_download_paused">%1$d ደው ኢሉ</string>
+    <string name="home_download_failed">%1$d ምውራድ ቆላሕታ የድልዮ</string>
+    <string name="home_download_open">ኩነታት ምውራድ ርአ</string>
+</resources>

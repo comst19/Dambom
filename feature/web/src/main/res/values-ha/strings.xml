@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Rufe yanar gizo</string>
+    <string name="web_address_placeholder">Shigar da adireshin yanar gizo</string>
+    <string name="web_start_title">Nemo bidiyo akan yanar gizo</string>
+    <string name="web_start_description">Ci gaba da buɗe shafuka da yawa kuma gano bidiyo kawai akan shafin na yanzu.</string>
+    <string name="web_open">Bude shafi</string>
+    <string name="web_recent">Shafukan baya-bayan nan</string>
+    <string name="web_recent_empty">Babu shafukan da aka ziyarta kwanan nan.</string>
+    <string name="web_go_back">Shafin da ya gabata</string>
+    <string name="web_go_forward">shafi na gaba</string>
+    <string name="web_refresh">Saurara</string>
+    <string name="web_detecting">Ganowa</string>
+    <string name="web_open_detected_count">Bude bidiyo na %1$d</string>
+    <string name="web_no_detected_video">Babu bidiyon da aka gano</string>
+    <string name="web_rescan">A sake dubawa</string>
+    <string name="web_playback_hint">Idan ba a gano bidiyo ba, kunna shi a shafin kuma a sake gwadawa.</string>
+    <string name="web_connection_error_title">Ba a iya haɗawa da rukunin yanar gizon ba</string>
+    <string name="web_connection_error_description">Shafin ya rufe haɗin yanar gizo ko kuma babu shi akan hanyar sadarwa na yanzu.</string>
+    <string name="web_timeout_error_title">Shafin ya dauki lokaci mai tsawo kafin ya mayar da martani</string>
+    <string name="web_timeout_error_description">Dakata na ɗan lokaci kuma a sake gwadawa.</string>
+    <string name="web_unsupported_url_error_title">Adireshin yanar gizo mara tallafi</string>
+    <string name="web_unsupported_url_error_description">Duba cewa wannan adireshin gidan yanar gizo ne na HTTP ko HTTPS .</string>
+    <string name="web_access_error_title">An gaza samun damar shafi</string>
+    <string name="web_access_error_description">Babu shafin ko ba ku da izinin duba shi.</string>
+    <string name="web_server_error_title">Ba a samun wurin na ɗan lokaci</string>
+    <string name="web_server_error_description">Shafin yana samun matsalar uwar garken. Jira dan lokaci kuma a sake gwadawa.</string>
+    <string name="web_security_error_title">An kasa buɗe rukunin yanar gizon amintacce</string>
+    <string name="web_security_error_description">Takardar tsaro ba ta aiki ko kuma an gano shafin a matsayin mara lafiya.</string>
+    <string name="web_unknown_error_title">An kasa buɗe shafin</string>
+    <string name="web_unknown_error_description">Duba adireshin kuma sake buɗe shi.</string>
+    <string name="web_retry">Sake gwadawa</string>
+    <string name="web_external_download_notice">Dambom ba zai iya ganowa ko zazzage bidiyo daga mazugi na waje ba.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d bude shafin</item>
+        <item quantity="other">%1$d bude shafuka</item>
+    </plurals>
+    <string name="web_new_tab">Sabon shafin</string>
+    <string name="web_close_tab">Rufe shafin %1$s</string>
+    <string name="web_empty_tab">Shafi shafin</string>
+    <string name="web_tab_actions">Ayyukan shafin na yanzu</string>
+    <string name="web_open_external">Buɗe a cikin tsoho mai bincike</string>
+    <string name="web_copy_link">Kwafi mahada</string>
+    <string name="web_share_link">Share mahada</string>
+    <string name="web_link_copied">An kwafi mahada.</string>
+    <string name="web_action_failure">Babu app da zai iya ɗaukar wannan buƙatar.</string>
+    <string name="web_share_chooser">Share mahada</string>
+    <string name="web_drm_protected">Wannan kafofin watsa labarai suna da kariya kuma ba za a iya saukewa ba.</string>
+    <string name="web_unsupported_service">Zazzagewar bidiyo na YouTube ba ta da tallafi.</string>
+    <string name="web_drm_excluded">Bidiyo masu kariya suna ɓoye daga wannan jeri.</string>
+</resources>

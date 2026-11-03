@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Idlalwe kutshanje</string>
+    <string name="library_recently_played_empty_title">Akukho vidiyo idlalwe kutshanje</string>
+    <string name="library_recently_played_empty_description">Dlala ividiyo ukuyibona apha. Ukuba iifilitha zisebenza, zama ukuzitshintsha.</string>
+</resources>

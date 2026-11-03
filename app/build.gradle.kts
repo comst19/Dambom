@@ -27,10 +27,57 @@ android {
     namespace = "com.comst19.dambom"
     defaultConfig {
         applicationId = "com.comst19.dambom"
+        resourceConfigurations +=
+            listOf(
+                "en",
+                "ko",
+                "ur",
+                "hi",
+                "fr",
+                "pt",
+                "bn",
+                "ar",
+                "ps",
+                "am",
+                "sw",
+                "de",
+                "in",
+                "iw",
+                "fa",
+                "my",
+                "pa",
+                "sd",
+                "ta",
+                "te",
+                "mr",
+                "gu",
+                "kn",
+                "ml",
+                "or",
+                "as",
+                "ha",
+                "yo",
+                "ig",
+                "ti",
+                "so",
+                "ln",
+                "uz",
+                "tk",
+                "az",
+                "ku",
+                "ckb",
+                "af",
+                "zu",
+                "xh",
+                "st",
+                "ru",
+            )
         versionCode = 12
         versionName = "1.3.2"
         manifestPlaceholders["crashlyticsCollectionEnabled"] = false
     }
+
+    bundle { language { enableSplit = false } }
 
     buildFeatures { buildConfig = true }
 

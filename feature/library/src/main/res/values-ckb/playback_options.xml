@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">بەردەوام دەبیت لە سەیرکردن؟</string>
+    <string name="player_resume_message">تۆ تا %1$s سەیرت کرد.</string>
+    <string name="player_resume_continue">بەردەوام بە</string>
+    <string name="player_resume_restart">دووبارە دەست پێبکەوە</string>
+    <string name="player_history_failure">نەیتوانی مێژووی پەخش کردنەوە باربکات یان پاشەکەوت بکات.</string>
+    <string name="player_settings_failure">نەیتوانی ڕێکبەندەکانی پەخش کردنەوە هەڵبگرێت.</string>
+    <string name="player_speed">خێرایی پەخش کردن</string>
+    <string name="player_speed_value">خێرایی پەخش کردن · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">ئەم ڤیدیۆیە دووبارە بکەوە</string>
+    <string name="player_options_close">داخستن</string>
+</resources>

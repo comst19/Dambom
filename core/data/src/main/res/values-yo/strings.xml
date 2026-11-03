@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Ko to ibi ipamọ. Fi aaye silẹ ki o tun gbiyanju: %1$s</string>
+    <string name="download_notification_channel">gbigba lati ayelujara</string>
+    <string name="download_notification_title">Dambom n ṣe igbasilẹ awọn fidio</string>
+    <string name="download_notification_description">Awọn igbasilẹ tun bẹrẹ lati aaye ti o fipamọ lẹhin isọdọkan.</string>
+    <string name="download_result_notification_channel">Ṣe igbasilẹ awọn abajade</string>
+    <string name="download_notification_progress_title">Gbigba %1$s</string>
+    <string name="download_notification_progress">%1$d %% pari</string>
+    <string name="download_notification_completed">Gbigba lati ayelujara ti pari</string>
+    <string name="download_notification_completed_description">%1$s ti wa ni ipamọ si ile-ikawe rẹ.</string>
+    <string name="download_notification_failed">Gbigbasilẹ kuna</string>
+    <string name="download_notification_failed_description">Gbiyanju gbigba lati ayelujara %1$s lẹẹkansi.</string>
+    <string name="download_notification_failed_network">Ṣayẹwo asopọ nẹtiwọki fun %1$s .</string>
+    <string name="download_notification_failed_storage">Ṣayẹwo ibi ipamọ to wa fun %1$s .</string>
+</resources>

@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">סגור אינטרנט</string>
+    <string name="web_address_placeholder">הזן כתובת אינטרנט</string>
+    <string name="web_start_title">מצא סרטונים באינטרנט</string>
+    <string name="web_start_description">השאר מספר כרטיסיות פתוחות וזיהוי סרטונים רק בכרטיסייה הנוכחית.</string>
+    <string name="web_open">פתח דף</string>
+    <string name="web_recent">דפים אחרונים</string>
+    <string name="web_recent_empty">אין דפים שביקרו לאחרונה.</string>
+    <string name="web_go_back">העמוד הקודם</string>
+    <string name="web_go_forward">העמוד הבא</string>
+    <string name="web_refresh">רענן</string>
+    <string name="web_detecting">זיהוי</string>
+    <string name="web_open_detected_count">פתח סרטוני %1$d</string>
+    <string name="web_no_detected_video">לא זוהו סרטונים</string>
+    <string name="web_rescan">סרוק שוב</string>
+    <string name="web_playback_hint">אם לא זוהה סרטון, הפעל אותו בדף ונסה שוב.</string>
+    <string name="web_connection_error_title">לא ניתן להתחבר לאתר</string>
+    <string name="web_connection_error_description">האתר סגר את החיבור או אינו זמין ברשת הנוכחית.</string>
+    <string name="web_timeout_error_title">לאתר לקח יותר מדי זמן להגיב</string>
+    <string name="web_timeout_error_description">המתן רגע ונסה שוב.</string>
+    <string name="web_unsupported_url_error_title">כתובת אינטרנט לא נתמכת</string>
+    <string name="web_unsupported_url_error_description">בדוק שזו כתובת אינטרנט HTTP או HTTPS .</string>
+    <string name="web_access_error_title">הגישה לדף נכשלה</string>
+    <string name="web_access_error_description">הדף אינו קיים או שאין לך הרשאה לצפות בו.</string>
+    <string name="web_server_error_title">האתר אינו זמין באופן זמני</string>
+    <string name="web_server_error_description">באתר יש בעיה בשרת. המתן רגע ונסה שוב.</string>
+    <string name="web_security_error_title">לא ניתן היה לפתוח את האתר בצורה מאובטחת</string>
+    <string name="web_security_error_description">תעודת האבטחה שלו לא חוקית או שהדף זוהה כלא בטוח.</string>
+    <string name="web_unknown_error_title">לא ניתן היה לפתוח את הדף</string>
+    <string name="web_unknown_error_description">בדוק את הכתובת ופתח אותה שוב.</string>
+    <string name="web_retry">נסה שוב</string>
+    <string name="web_external_download_notice">Dambom לא יכול לזהות או להוריד סרטונים מדפדפן חיצוני.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">כרטיסייה פתוחה %1$d</item>
+        <item quantity="other">%1$d כרטיסיות פתוחות</item>
+        <item quantity="two">%1$d כרטיסיות פתוחות</item>
+        <item quantity="many">%1$d כרטיסיות פתוחות</item>
+    </plurals>
+    <string name="web_new_tab">כרטיסייה חדשה</string>
+    <string name="web_close_tab">סגור את הכרטיסייה %1$s</string>
+    <string name="web_empty_tab">כרטיסייה ריקה</string>
+    <string name="web_tab_actions">פעולות הכרטיסייה הנוכחיות</string>
+    <string name="web_open_external">פתח בדפדפן ברירת המחדל</string>
+    <string name="web_copy_link">העתק קישור</string>
+    <string name="web_share_link">שתף קישור</string>
+    <string name="web_link_copied">הקישור הועתק.</string>
+    <string name="web_action_failure">אף אפליקציה לא יכולה להתמודד עם בקשה זו.</string>
+    <string name="web_share_chooser">שתף קישור</string>
+    <string name="web_drm_protected">מדיה זו מוגנת ולא ניתנת להורדה.</string>
+    <string name="web_unsupported_service">הורדות וידאו YouTube אינן נתמכות.</string>
+    <string name="web_drm_excluded">סרטונים מוגנים מוסתרים מרשימה זו.</string>
+</resources>

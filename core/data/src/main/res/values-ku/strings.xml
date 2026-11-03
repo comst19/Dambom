@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Ne bes e depo. Cihê azad bikin û ji nû ve biceribînin: %1$s</string>
+    <string name="download_notification_channel">Daxistin</string>
+    <string name="download_notification_title">Dambom vîdyoyan dadixe</string>
+    <string name="download_notification_description">Daxistin ji nuqteya tomarkirî piştî ku ji nû ve tê girêdan ji nû ve dest pê dikin.</string>
+    <string name="download_result_notification_channel">Encamên dakêşin</string>
+    <string name="download_notification_progress_title">Daxistina %1$s</string>
+    <string name="download_notification_progress">%1$d %% temam</string>
+    <string name="download_notification_completed">Daxistin temam bû</string>
+    <string name="download_notification_completed_description">%1$s li Pirtûkxaneya we hate tomarkirin.</string>
+    <string name="download_notification_failed">Daxistin bi ser neket</string>
+    <string name="download_notification_failed_description">%1$s dîsa biceribîne.</string>
+    <string name="download_notification_failed_network">Ji bo %1$s girêdana torê kontrol bikin.</string>
+    <string name="download_notification_failed_storage">Ji bo %1$s hilanîna berdest kontrol bikin.</string>
+</resources>

@@ -22,8 +22,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.comst19.dambom.core.common.locale.AppLanguage
 import com.comst19.dambom.core.common.ui.AppScreen
 import com.comst19.dambom.core.common.ui.AppScreenDefaults
 import com.comst19.dambom.core.designsystem.DambomTheme
@@ -45,7 +47,6 @@ import com.comst19.dambom.feature.settings.component.labelRes
 import com.comst19.dambom.feature.settings.component.openExternalPage
 import com.comst19.dambom.feature.settings.component.openSourceLicenses
 import com.comst19.dambom.feature.settings.component.sendSupportEmail
-import com.comst19.dambom.feature.settings.contract.AppLanguage
 import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 
 private const val TERMS_OF_SERVICE_URL =
@@ -208,6 +209,8 @@ internal fun SettingsScreen(
 }
 
 @FormFactorPreviews
+@Preview(name = "Arabic", locale = "ar", widthDp = 320, heightDp = 640)
+@Preview(name = "Hindi", locale = "hi", widthDp = 320, heightDp = 640)
 @Composable
 private fun SettingsScreenPreview() {
     DambomTheme {

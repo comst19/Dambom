@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="root_back_hint">बाहेर पडण्यासाठी परत दाबा.</string>
+    <string name="startup_initialization_failed">ॲप सुरू करू शकलो नाही.</string>
+    <string name="destination_home">घर</string>
+    <string name="destination_library">लायब्ररी</string>
+    <string name="network_offline_banner">इंटरनेट कनेक्शन नाही. नेटवर्क वैशिष्ट्ये तात्पुरती अनुपलब्ध आहेत.</string>
+    <string name="network_unmetered_banner">Wi-Fi ची वाट पाहत आहे. डाउनलोड आपोआप पुन्हा सुरू होतात.</string>
+    <string name="download_feedback_failed">%1$s डाउनलोड करू शकलो नाही.</string>
+    <string name="download_feedback_failed_multiple">%1$d व्हिडिओ डाउनलोड करू शकलो नाही.</string>
+    <string name="download_recovery_failed">प्रलंबित डाउनलोड पुनर्संचयित करू शकलो नाही. डाउनलोड वरून पुन्हा प्रयत्न करा.</string>
+</resources>

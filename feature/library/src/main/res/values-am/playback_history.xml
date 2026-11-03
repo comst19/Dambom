@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">በቅርቡ ተጫውቷል</string>
+    <string name="library_recently_played_empty_title">በቅርብ ጊዜ ያልተጫወቱ ቪዲዮዎች የሉም</string>
+    <string name="library_recently_played_empty_description">እዚህ ለማየት ቪዲዮ አጫውት። ማጣሪያዎች ንቁ ከሆኑ እነሱን ለመለወጥ ይሞክሩ።</string>
+</resources>

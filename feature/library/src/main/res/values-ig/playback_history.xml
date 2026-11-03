@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Egwu emetụtala nso</string>
+    <string name="library_recently_played_empty_title">Enweghị vidiyo emetụtala nso</string>
+    <string name="library_recently_played_empty_description">Gbaa vidiyo ka ị hụ ya ebe a. Ọ bụrụ na nzacha dị active, nwalee ịgbanwe ha.</string>
+</resources>

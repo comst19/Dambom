@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Aýdymyň ýagdaýy</string>
+    <string name="playback_rewind">Yzyna 10 sekunt</string>
+    <string name="playback_play">Oýna</string>
+    <string name="playback_pause">Arakesme</string>
+    <string name="playback_forward">10 sekunt öňe sürüň</string>
+</resources>

@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">ପର୍ଯ୍ୟାପ୍ତ ଷ୍ଟୋରେଜ୍ ନାହିଁ | ସ୍ଥାନ ଖାଲି କରନ୍ତୁ ଏବଂ ପୁନ ry ଚେଷ୍ଟା କରନ୍ତୁ |</string>
+    <string name="downloads_summary_waiting">ଡାଉନଲୋଡ୍ କରିବାକୁ ଅପେକ୍ଷା କରିଛି |</string>
+    <string name="downloads_summary_paused">ଡାଉନଲୋଡ୍ ବନ୍ଦ ହୋଇଗଲା |</string>
+    <string name="downloads_summary_attention">ଡାଉନଲୋଡ୍ ଗୁଡିକ ଧ୍ୟାନ ଦେବା ଆବଶ୍ୟକ |</string>
+    <string name="downloads_quality_original">ମୂଳ |</string>
+    <string name="downloads_title">ଡାଉନଲୋଡ୍ |</string>
+    <string name="downloads_back">ପଛକୁ |</string>
+    <string name="downloads_view_as_list">ତାଲିକା ଭାବରେ ଦେଖନ୍ତୁ |</string>
+    <string name="downloads_view_as_grid">ଗ୍ରୀଡ୍ ଭାବରେ ଦେଖନ୍ତୁ |</string>
+    <string name="downloads_empty_title">କ download ଣସି ଡାଉନଲୋଡ୍ ଚାଲିନାହିଁ |</string>
+    <string name="downloads_empty_description">ସମାପ୍ତ ଡାଉନଲୋଡ୍ ଗୁଡିକ ଆପଣଙ୍କ ଲାଇବ୍ରେରୀରେ ଦେଖିବା ପାଇଁ ପ୍ରସ୍ତୁତ |</string>
+    <string name="downloads_open_library">ଖୋଲା ଲାଇବ୍ରେରୀ |</string>
+    <string name="downloads_summary">%1$d ଡାଉନଲୋଡ୍ |</string>
+    <string name="downloads_summary_remaining">%1$d ଅବଶିଷ୍ଟ |</string>
+    <string name="downloads_pause_all">ସମସ୍ତଙ୍କୁ ବିରତ କର |</string>
+    <string name="downloads_resume_all">ସମସ୍ତ କାର୍ଯ୍ୟ ଆରମ୍ଭ କରନ୍ତୁ |</string>
+    <string name="downloads_group_active">ଡାଉନଲୋଡ୍ କରୁଛି |</string>
+    <string name="downloads_group_queued">ଧାଡିରେ |</string>
+    <string name="downloads_group_paused">ବିରତ |</string>
+    <string name="downloads_group_failed">ବିଫଳ ହେଲା |</string>
+    <string name="downloads_group_completed">ସମାପ୍ତ</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s ଥମ୍ na ନେଲ୍ |</string>
+    <string name="downloads_unknown_size">ମୋଟ ଆକାର ଅଜ୍ଞାତ |</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">ଅବଶିଷ୍ଟ ଡାଉନଲୋଡ୍ ର ଅଗ୍ରଗତି |</string>
+    <string name="downloads_pause">ବିରତି |</string>
+    <string name="downloads_resume">ପୁନ ume କାର୍ଯ୍ୟ ଆରମ୍ଭ କରନ୍ତୁ |</string>
+    <string name="downloads_cancel">ବାତିଲ୍ କରନ୍ତୁ |</string>
+    <string name="downloads_retry">ପୁନ ry ଚେଷ୍ଟା କରନ୍ତୁ |</string>
+    <string name="downloads_remove">ତାଲିକାରୁ ହଟାନ୍ତୁ |</string>
+    <string name="downloads_error_access">ଏହି ଭିଡିଓ ପ୍ରବେଶ ଅନୁମତି ଆବଶ୍ୟକ କରେ |</string>
+    <string name="downloads_error_format">ଏହି ଭିଡିଓ ଫର୍ମାଟ୍ ସମର୍ଥିତ ନୁହେଁ |</string>
+    <string name="downloads_error_network">ସଂଯୋଗ ପୁନରୁଦ୍ଧାର ହୋଇନାହିଁ | ପୁନର୍ବାର ଚେଷ୍ଟା କରନ୍ତୁ |</string>
+    <string name="downloads_error_storage">ଫାଇଲ୍ ସେଭ୍ କରିପାରିଲା ନାହିଁ | ସଂରକ୍ଷଣ ସ୍ଥାନ ଯାଞ୍ଚ କରନ୍ତୁ |</string>
+    <string name="downloads_error_server">ସର୍ଭର ଡାଉନଲୋଡ୍ ପ୍ରକ୍ରିୟା କରିପାରିବ ନାହିଁ |</string>
+    <string name="downloads_error_unknown">ଡାଉନଲୋଡ୍ କରିବା ସମୟରେ କିଛି ଭୁଲ ହୋଇଗଲା |</string>
+    <string name="downloads_command_failed">ଡାଉନଲୋଡ୍ ଅପଡେଟ୍ କରିପାରିଲା ନାହିଁ | ପୁନର୍ବାର ଚେଷ୍ଟା କରନ୍ତୁ |</string>
+    <string name="downloads_delete_pending">ବିଲୋପ ସଫା କରିବା ଆବଶ୍ୟକ |</string>
+    <string name="downloads_delete_retry">ବିଲୋପନ ପୁନ ry ଚେଷ୍ଟା କରନ୍ତୁ |</string>
+    <string name="downloads_delete_group_count">%1$d ବିଲୋପ ସଫା କରିବା |</string>
+    <string name="downloads_error_drm">ସୁରକ୍ଷିତ ଭିଡିଓ ଡାଉନଲୋଡ୍ ହୋଇପାରିବ ନାହିଁ |</string>
+</resources>

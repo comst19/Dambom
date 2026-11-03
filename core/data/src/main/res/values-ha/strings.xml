@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Bai isa wurin ajiya ba. Bayar da sarari kuma sake gwadawa: %1$s</string>
+    <string name="download_notification_channel">Zazzagewa</string>
+    <string name="download_notification_title">Dambom yana zazzage bidiyo</string>
+    <string name="download_notification_description">Ana ci gaba da zazzagewa daga wurin da aka ajiye bayan an sake haɗawa.</string>
+    <string name="download_result_notification_channel">Zazzage sakamakon</string>
+    <string name="download_notification_progress_title">Ana sauke %1$s</string>
+    <string name="download_notification_progress">%1$d %% cikakke</string>
+    <string name="download_notification_completed">An gama saukewa</string>
+    <string name="download_notification_completed_description">An ajiye %1$s zuwa Laburarenku.</string>
+    <string name="download_notification_failed">An kasa saukewa</string>
+    <string name="download_notification_failed_description">Gwada sake zazzage %1$s .</string>
+    <string name="download_notification_failed_network">Duba hanyar sadarwa don %1$s .</string>
+    <string name="download_notification_failed_storage">Duba da akwai ma\'ajiyar %1$s .</string>
+</resources>

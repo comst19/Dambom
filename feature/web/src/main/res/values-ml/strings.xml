@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">വെബ് അടയ്ക്കുക</string>
+    <string name="web_address_placeholder">ഒരു വെബ് വിലാസം നൽകുക</string>
+    <string name="web_start_title">വെബിൽ വീഡിയോകൾ കണ്ടെത്തുക</string>
+    <string name="web_start_description">ഒന്നിലധികം ടാബുകൾ തുറന്ന് സൂക്ഷിക്കുക, നിലവിലെ ടാബിൽ മാത്രം വീഡിയോകൾ കണ്ടെത്തുക.</string>
+    <string name="web_open">പേജ് തുറക്കുക</string>
+    <string name="web_recent">സമീപകാല പേജുകൾ</string>
+    <string name="web_recent_empty">അടുത്തിടെ സന്ദർശിച്ച പേജുകളൊന്നുമില്ല.</string>
+    <string name="web_go_back">മുൻ പേജ്</string>
+    <string name="web_go_forward">അടുത്ത പേജ്</string>
+    <string name="web_refresh">പുതുക്കുക</string>
+    <string name="web_detecting">കണ്ടുപിടിക്കുന്നു</string>
+    <string name="web_open_detected_count">%1$d വീഡിയോകൾ തുറക്കുക</string>
+    <string name="web_no_detected_video">കണ്ടെത്തിയ വീഡിയോകളൊന്നുമില്ല</string>
+    <string name="web_rescan">വീണ്ടും സ്കാൻ ചെയ്യുക</string>
+    <string name="web_playback_hint">വീഡിയോ ഒന്നും കണ്ടെത്തിയില്ലെങ്കിൽ, അത് പേജിൽ പ്ലേ ചെയ്‌ത് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="web_connection_error_title">സൈറ്റിലേക്ക് കണക്റ്റുചെയ്യാനായില്ല</string>
+    <string name="web_connection_error_description">സൈറ്റ് കണക്ഷൻ അടച്ചു അല്ലെങ്കിൽ നിലവിലെ നെറ്റ്‌വർക്കിൽ ലഭ്യമല്ല.</string>
+    <string name="web_timeout_error_title">പ്രതികരിക്കാൻ സൈറ്റ് വളരെയധികം സമയമെടുത്തു</string>
+    <string name="web_timeout_error_description">ഒരു നിമിഷം കാത്തിരുന്ന് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="web_unsupported_url_error_title">പിന്തുണയ്ക്കാത്ത വെബ് വിലാസം</string>
+    <string name="web_unsupported_url_error_description">ഇതൊരു HTTP അല്ലെങ്കിൽ HTTPS വെബ് വിലാസമാണോയെന്ന് പരിശോധിക്കുക.</string>
+    <string name="web_access_error_title">പേജ് ആക്സസ് പരാജയപ്പെട്ടു</string>
+    <string name="web_access_error_description">പേജ് നിലവിലില്ല അല്ലെങ്കിൽ അത് കാണാനുള്ള അനുമതി നിങ്ങൾക്കില്ല.</string>
+    <string name="web_server_error_title">സൈറ്റ് താൽക്കാലികമായി ലഭ്യമല്ല</string>
+    <string name="web_server_error_description">സൈറ്റിന് ഒരു സെർവർ പ്രശ്നമുണ്ട്. ഒരു നിമിഷം കാത്തിരുന്ന് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="web_security_error_title">സൈറ്റ് സുരക്ഷിതമായി തുറക്കാൻ കഴിഞ്ഞില്ല</string>
+    <string name="web_security_error_description">അതിൻ്റെ സുരക്ഷാ സർട്ടിഫിക്കറ്റ് അസാധുവാണ് അല്ലെങ്കിൽ പേജ് സുരക്ഷിതമല്ലെന്ന് കണ്ടെത്തി.</string>
+    <string name="web_unknown_error_title">പേജ് തുറക്കാൻ കഴിഞ്ഞില്ല</string>
+    <string name="web_unknown_error_description">വിലാസം പരിശോധിച്ച് വീണ്ടും തുറക്കുക.</string>
+    <string name="web_retry">വീണ്ടും ശ്രമിക്കുക</string>
+    <string name="web_external_download_notice">Dambom -ന് ഒരു ബാഹ്യ ബ്രൗസറിൽ നിന്ന് വീഡിയോകൾ കണ്ടെത്താനോ ഡൗൺലോഡ് ചെയ്യാനോ കഴിയില്ല.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d ടാബ് തുറക്കുക</item>
+        <item quantity="other">%1$d ടാബുകൾ തുറക്കുക</item>
+    </plurals>
+    <string name="web_new_tab">പുതിയ ടാബ്</string>
+    <string name="web_close_tab">%1$s ടാബ് അടയ്ക്കുക</string>
+    <string name="web_empty_tab">ശൂന്യമായ ടാബ്</string>
+    <string name="web_tab_actions">നിലവിലെ ടാബ് പ്രവർത്തനങ്ങൾ</string>
+    <string name="web_open_external">ഡിഫോൾട്ട് ബ്രൗസറിൽ തുറക്കുക</string>
+    <string name="web_copy_link">ലിങ്ക് പകർത്തുക</string>
+    <string name="web_share_link">ലിങ്ക് പങ്കിടുക</string>
+    <string name="web_link_copied">ലിങ്ക് പകർത്തി.</string>
+    <string name="web_action_failure">ഒരു ആപ്പിനും ഈ അഭ്യർത്ഥന കൈകാര്യം ചെയ്യാൻ കഴിയില്ല.</string>
+    <string name="web_share_chooser">ലിങ്ക് പങ്കിടുക</string>
+    <string name="web_drm_protected">ഈ മീഡിയ പരിരക്ഷിച്ചിരിക്കുന്നതിനാൽ ഡൗൺലോഡ് ചെയ്യാൻ കഴിയില്ല.</string>
+    <string name="web_unsupported_service">YouTube വീഡിയോ ഡൗൺലോഡുകൾ പിന്തുണയ്ക്കുന്നില്ല.</string>
+    <string name="web_drm_excluded">ഈ ലിസ്റ്റിൽ നിന്ന് പരിരക്ഷിത വീഡിയോകൾ മറച്ചിരിക്കുന്നു.</string>
+</resources>

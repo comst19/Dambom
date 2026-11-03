@@ -21,12 +21,13 @@ import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.common.locale.AppLanguage
 import com.comst19.dambom.core.domain.model.SharedLinkQuality
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.feature.settings.R
-import com.comst19.dambom.feature.settings.contract.AppLanguage
 import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 
 @Immutable
@@ -177,10 +178,18 @@ private fun LazyListScope.generalSection(
         )
     }
     item {
+        val displayedLanguage =
+            if (state.language == AppLanguage.SYSTEM) {
+                AppLanguage
+                    .from(LocalConfiguration.current.locales[0].toLanguageTag())
+                    .takeUnless { it == AppLanguage.SYSTEM } ?: AppLanguage.ENGLISH
+            } else {
+                state.language
+            }
         SettingsRow(
             icon = Icons.Outlined.Language,
             title = stringResource(R.string.settings_language),
-            subtitle = stringResource(state.language.labelRes),
+            subtitle = stringResource(displayedLanguage.labelRes),
             onClick = onLanguageClick,
         )
     }

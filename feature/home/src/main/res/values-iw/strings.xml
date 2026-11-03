@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">שווה צפייה נוספת?\nשמור אותו עם קישור.</string>
+    <string name="home_description">מצא סרטונים לשמירה מקישור דף.</string>
+    <string name="home_url_label">כתובת אינטרנט</string>
+    <string name="home_invalid_url">הזן קישור שמתחיל ב-http:// או https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">הדבק</string>
+    <string name="home_analyze">מצא סרטונים</string>
+    <string name="home_open_settings">הגדרות</string>
+    <string name="home_hide_results">הסתר תוצאות</string>
+    <string name="home_show_results">הצג תוצאות לצד קלט</string>
+    <string name="home_web_prompt_title">אין לך עדיין קישור?</string>
+    <string name="home_web_prompt_description">מצא דף ללא קישור.</string>
+    <string name="home_browse_web">גלישה באינטרנט</string>
+    <string name="home_current_activity">פעילות נוכחית</string>
+    <string name="home_clipboard_found">קישור מועתק זמין</string>
+    <string name="home_use_link">הדבק</string>
+    <string name="home_dismiss">דחה</string>
+    <string name="home_clipboard_consent_title">להציע קישורים שהועתקו?</string>
+    <string name="home_clipboard_consent_description">כאשר Dambom נפתח, הוא יכול לבדוק בלוח כתובת אינטרנט ולהציע למלא אותה. הוא אף פעם לא מנתח או מוריד אוטומטית.</string>
+    <string name="home_clipboard_consent_allow">אפשר הצעות</string>
+    <string name="home_clipboard_consent_deny">הדבק ידנית</string>
+    <string name="home_clipboard_save_failed">לא ניתן לשמור את ההעדפה שלך. אנא נסה שוב.</string>
+    <string name="home_shared_url_title">קישור משותף התקבל</string>
+    <string name="home_shared_url_description">עיין בקישור, ואז התחל למצוא סרטונים.</string>
+    <string name="home_analyze_now">מצא סרטונים</string>
+    <string name="home_cancel">בטל</string>
+    <string name="home_download_active">הורדת %1$d</string>
+    <string name="home_download_paused">%1$d הושהה</string>
+    <string name="home_download_failed">הורדות %1$d דורשות תשומת לב</string>
+    <string name="home_download_open">הצג סטטוס הורדה</string>
+</resources>

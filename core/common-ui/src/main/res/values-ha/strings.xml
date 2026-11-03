@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Matsayin sake kunnawa</string>
+    <string name="playback_rewind">Baya 10 seconds</string>
+    <string name="playback_play">Yi wasa</string>
+    <string name="playback_pause">Dakata</string>
+    <string name="playback_forward">Gaba 10 seconds</string>
+</resources>

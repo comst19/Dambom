@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">சமீபத்தில் பிளே செய்யப்பட்டவை</string>
+    <string name="library_recently_played_empty_title">சமீபத்தில் பிளே செய்யப்பட்ட காணொளிகள் இல்லை</string>
+    <string name="library_recently_played_empty_description">இதனை இங்கு பார்க்க ஒரு காணொளியை பிளே செய்யவும். வடிகட்டிகள் செயல்பட்டிருந்தால், அவைகளை மாற்றி பார்க்கவும்.</string>
+</resources>

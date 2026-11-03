@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">فضای ذخیره‌سازی کافی نیست. فضا را آزاد کنید و دوباره امتحان کنید: %1$s</string>
+    <string name="download_notification_channel">دانلودها</string>
+    <string name="download_notification_title">Dambom در حال دانلود ویدیوها است</string>
+    <string name="download_notification_description">پس از اتصال مجدد، دانلودها از نقطه ذخیره شده از سر گرفته می شوند.</string>
+    <string name="download_result_notification_channel">دانلود نتایج</string>
+    <string name="download_notification_progress_title">دانلود %1$s</string>
+    <string name="download_notification_progress">%1$d %% کامل شد</string>
+    <string name="download_notification_completed">دانلود کامل شد</string>
+    <string name="download_notification_completed_description">%1$s در کتابخانه شما ذخیره شد.</string>
+    <string name="download_notification_failed">دانلود انجام نشد</string>
+    <string name="download_notification_failed_description">دوباره %1$s را دانلود کنید.</string>
+    <string name="download_notification_failed_network">اتصال شبکه را برای %1$s بررسی کنید.</string>
+    <string name="download_notification_failed_storage">فضای ذخیره سازی موجود برای %1$s را بررسی کنید.</string>
+</resources>

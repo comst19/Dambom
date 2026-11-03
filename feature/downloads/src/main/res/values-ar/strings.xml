@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">مساحة تخزين غير كافية. قم بتحرير مساحة ثم أعد المحاولة.</string>
+    <string name="downloads_summary_waiting">في انتظار التنزيل</string>
+    <string name="downloads_summary_paused">تم إيقاف التنزيلات مؤقتًا</string>
+    <string name="downloads_summary_attention">التنزيلات تحتاج إلى الاهتمام</string>
+    <string name="downloads_quality_original">الأصل</string>
+    <string name="downloads_title">التنزيلات</string>
+    <string name="downloads_back">العودة</string>
+    <string name="downloads_view_as_list">عرض كقائمة</string>
+    <string name="downloads_view_as_grid">عرض كشبكة</string>
+    <string name="downloads_empty_title">لا توجد تنزيلات قيد التقدم</string>
+    <string name="downloads_empty_description">التنزيلات النهائية جاهزة للمشاهدة في مكتبتك.</string>
+    <string name="downloads_open_library">المكتبة المفتوحة</string>
+    <string name="downloads_summary">تنزيل %1$d</string>
+    <string name="downloads_summary_remaining">%1$d المتبقي</string>
+    <string name="downloads_pause_all">إيقاف الكل مؤقتًا</string>
+    <string name="downloads_resume_all">استئناف الكل</string>
+    <string name="downloads_group_active">التحميل</string>
+    <string name="downloads_group_queued">في قائمة الانتظار</string>
+    <string name="downloads_group_paused">متوقف مؤقتًا</string>
+    <string name="downloads_group_failed">فشل</string>
+    <string name="downloads_group_completed">اكتمل</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">الصورة المصغرة %1$s</string>
+    <string name="downloads_unknown_size">الحجم الإجمالي غير معروف</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">تقدم التنزيلات المتبقية</string>
+    <string name="downloads_pause">وقفة</string>
+    <string name="downloads_resume">استئناف</string>
+    <string name="downloads_cancel">إلغاء</string>
+    <string name="downloads_retry">إعادة المحاولة</string>
+    <string name="downloads_remove">إزالة من القائمة</string>
+    <string name="downloads_error_access">يتطلب هذا الفيديو إذن الوصول.</string>
+    <string name="downloads_error_format">تنسيق الفيديو هذا غير مدعوم.</string>
+    <string name="downloads_error_network">لم يتم استرداد الاتصال. حاول ثانية.</string>
+    <string name="downloads_error_storage">لا يمكن حفظ الملف. تحقق من مساحة التخزين.</string>
+    <string name="downloads_error_server">تعذر على الخادم معالجة التنزيل.</string>
+    <string name="downloads_error_unknown">حدث خطأ ما أثناء التنزيل.</string>
+    <string name="downloads_command_failed">تعذر تحديث التنزيل. حاول ثانية.</string>
+    <string name="downloads_delete_pending">هناك حاجة إلى تنظيف الحذف</string>
+    <string name="downloads_delete_retry">إعادة محاولة الحذف</string>
+    <string name="downloads_delete_group_count">تنظيف الحذف %1$d</string>
+    <string name="downloads_error_drm">لا يمكن تنزيل مقاطع الفيديو المحمية.</string>
+</resources>

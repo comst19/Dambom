@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Kifayət qədər yaddaş yoxdur. Yer boşaltın və yenidən cəhd edin: %1$s</string>
+    <string name="download_notification_channel">Yükləmələr</string>
+    <string name="download_notification_title">Dambom videoları endirir</string>
+    <string name="download_notification_description">Yükləmələr yenidən qoşulduqdan sonra saxlanmış nöqtədən davam edir.</string>
+    <string name="download_result_notification_channel">Nəticələri yükləyin</string>
+    <string name="download_notification_progress_title">%1$s endirilir</string>
+    <string name="download_notification_progress">%1$d %% tamamlandı</string>
+    <string name="download_notification_completed">Yükləmə tamamlandı</string>
+    <string name="download_notification_completed_description">%1$s Kitabxananızda saxlandı.</string>
+    <string name="download_notification_failed">Yükləmə uğursuz oldu</string>
+    <string name="download_notification_failed_description">%1$s -ni yenidən endirməyə cəhd edin.</string>
+    <string name="download_notification_failed_network">%1$s üçün şəbəkə bağlantısını yoxlayın.</string>
+    <string name="download_notification_failed_storage">%1$s üçün mövcud yaddaşı yoxlayın.</string>
+</resources>

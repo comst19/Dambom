@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Pas assez de stockage. Libérez de l\'espace et réessayez : %1$s</string>
+    <string name="download_notification_channel">Téléchargements</string>
+    <string name="download_notification_title">Dambom télécharge des vidéos</string>
+    <string name="download_notification_description">Les téléchargements reprennent à partir du point enregistré après reconnexion.</string>
+    <string name="download_result_notification_channel">Télécharger les résultats</string>
+    <string name="download_notification_progress_title">Téléchargement de %1$s</string>
+    <string name="download_notification_progress">%1$d %% complet</string>
+    <string name="download_notification_completed">Téléchargement terminé</string>
+    <string name="download_notification_completed_description">%1$s a été enregistré dans votre bibliothèque.</string>
+    <string name="download_notification_failed">Échec du téléchargement</string>
+    <string name="download_notification_failed_description">Essayez à nouveau de télécharger %1$s .</string>
+    <string name="download_notification_failed_network">Vérifiez la connexion réseau pour %1$s .</string>
+    <string name="download_notification_failed_storage">Vérifiez le stockage disponible pour %1$s .</string>
+</resources>

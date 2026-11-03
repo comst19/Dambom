@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Position de lecture</string>
+    <string name="playback_rewind">Retour 10 secondes</string>
+    <string name="playback_play">Jouer</string>
+    <string name="playback_pause">Pause</string>
+    <string name="playback_forward">Avance de 10 secondes</string>
+</resources>

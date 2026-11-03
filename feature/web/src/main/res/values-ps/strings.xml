@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">ویب بند کړئ</string>
+    <string name="web_address_placeholder">ویب پته دننه کړئ</string>
+    <string name="web_start_title">په ویب کې ویډیوګانې ومومئ</string>
+    <string name="web_start_description">ډیری ټبونه خلاص وساتئ او ویډیوګانې یوازې په اوسني ټب کې کشف کړئ.</string>
+    <string name="web_open">مخ خلاص کړئ</string>
+    <string name="web_recent">وروستي مخونه</string>
+    <string name="web_recent_empty">په دې وروستیو کې لیدل شوي پاڼې نه دي.</string>
+    <string name="web_go_back">مخکینۍ پاڼه</string>
+    <string name="web_go_forward">بل مخ</string>
+    <string name="web_refresh">تازه کول</string>
+    <string name="web_detecting">کشف کول</string>
+    <string name="web_open_detected_count">%1$d ویډیوګانې خلاص کړئ</string>
+    <string name="web_no_detected_video">هیڅ نه موندل شوي ویډیوګانې</string>
+    <string name="web_rescan">بیا سکین کړئ</string>
+    <string name="web_playback_hint">که کومه ویډیو ونه موندل شوه، په پاڼه کې یې پلی کړئ او بیا هڅه وکړئ.</string>
+    <string name="web_connection_error_title">سایټ سره وصل نشو</string>
+    <string name="web_connection_error_description">سایټ پیوستون بند کړی یا په اوسني شبکه کې شتون نلري.</string>
+    <string name="web_timeout_error_title">سایټ د ځواب ورکولو لپاره ډیر وخت واخیست</string>
+    <string name="web_timeout_error_description">یوه شیبه انتظار وکړئ او بیا هڅه وکړئ.</string>
+    <string name="web_unsupported_url_error_title">نه ملاتړ شوی ویب پته</string>
+    <string name="web_unsupported_url_error_description">وګورئ چې دا د HTTP یا HTTPS ویب پته ده.</string>
+    <string name="web_access_error_title">پاڼې ته لاسرسی ناکام شو</string>
+    <string name="web_access_error_description">پاڼه شتون نلري یا تاسو د لیدلو اجازه نلرئ.</string>
+    <string name="web_server_error_title">سایټ په لنډمهاله توګه شتون نلري</string>
+    <string name="web_server_error_description">سایټ د سرور ستونزه لري. یوه شیبه انتظار وکړئ او بیا هڅه وکړئ.</string>
+    <string name="web_security_error_title">سایټ په خوندي ډول نشي خلاصیدلی</string>
+    <string name="web_security_error_description">د دې امنیت سند ناسم دی یا پاڼه د ناامنه په توګه موندل شوې.</string>
+    <string name="web_unknown_error_title">پاڼه خلاص نشو</string>
+    <string name="web_unknown_error_description">پته وګورئ او بیا یې پرانیزئ.</string>
+    <string name="web_retry">بیا هڅه وکړئ</string>
+    <string name="web_external_download_notice">Dambom نشي کولی د بهرني براوزر څخه ویډیوګانې کشف یا ډاونلوډ کړي.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d خلاص ټب</item>
+        <item quantity="other">%1$d خلاص ټبونه</item>
+    </plurals>
+    <string name="web_new_tab">نوی ټب</string>
+    <string name="web_close_tab">%1$s ټب بند کړئ</string>
+    <string name="web_empty_tab">خالي ټب</string>
+    <string name="web_tab_actions">اوسنۍ ټب کړنې</string>
+    <string name="web_open_external">په ډیفالټ براوزر کې خلاص کړئ</string>
+    <string name="web_copy_link">لینک کاپي کړئ</string>
+    <string name="web_share_link">لینک شریک کړئ</string>
+    <string name="web_link_copied">لینک کاپي شوی.</string>
+    <string name="web_action_failure">هیڅ اپلیکیشن نشي کولی دا غوښتنه اداره کړي.</string>
+    <string name="web_share_chooser">لینک شریک کړئ</string>
+    <string name="web_drm_protected">دا میډیا خوندي ده او ډاونلوډ نشي کیدی.</string>
+    <string name="web_unsupported_service">YouTube ویډیو ډاونلوډونه ملاتړ نه کوي.</string>
+    <string name="web_drm_excluded">خوندي ویډیوګانې له دې لیست څخه پټې دي.</string>
+</resources>

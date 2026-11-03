@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="root_back_hint">બહાર નીકળવા માટે ફરીથી પાછા દબાવો.</string>
+    <string name="startup_initialization_failed">એપ્લિકેશન શરૂ કરી શકાઈ નથી.</string>
+    <string name="destination_home">ઘર</string>
+    <string name="destination_library">પુસ્તકાલય</string>
+    <string name="network_offline_banner">ઇન્ટરનેટ કનેક્શન નથી. નેટવર્ક સુવિધાઓ અસ્થાયી રૂપે અનુપલબ્ધ છે.</string>
+    <string name="network_unmetered_banner">Wi-Fi ની રાહ જુએ છે. ડાઉનલોડ્સ આપમેળે ફરી શરૂ થાય છે.</string>
+    <string name="download_feedback_failed">%1$s ડાઉનલોડ કરી શકાયું નથી.</string>
+    <string name="download_feedback_failed_multiple">%1$d વિડિઓઝ ડાઉનલોડ કરી શક્યા નથી.</string>
+    <string name="download_recovery_failed">બાકી ડાઉનલોડ્સ પુનઃસ્થાપિત કરી શક્યાં નથી. ડાઉનલોડ્સમાંથી ફરી પ્રયાસ કરો.</string>
+</resources>

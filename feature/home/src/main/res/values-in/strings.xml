@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Layak ditonton lagi?\nSimpan dengan tautan.</string>
+    <string name="home_description">Temukan video untuk disimpan dari tautan halaman.</string>
+    <string name="home_url_label">Alamat web</string>
+    <string name="home_invalid_url">Masukkan tautan yang dimulai dengan http:// atau https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Tempel</string>
+    <string name="home_analyze">Temukan video</string>
+    <string name="home_open_settings">Pengaturan</string>
+    <string name="home_hide_results">Sembunyikan hasil</string>
+    <string name="home_show_results">Tampilkan hasil di samping masukan</string>
+    <string name="home_web_prompt_title">Belum punya linknya?</string>
+    <string name="home_web_prompt_description">Temukan halaman tanpa tautan.</string>
+    <string name="home_browse_web">Jelajahi web</string>
+    <string name="home_current_activity">Aktivitas saat ini</string>
+    <string name="home_clipboard_found">Tautan yang disalin tersedia</string>
+    <string name="home_use_link">Tempel</string>
+    <string name="home_dismiss">Singkirkan</string>
+    <string name="home_clipboard_consent_title">Sarankan tautan yang disalin?</string>
+    <string name="home_clipboard_consent_description">Ketika Dambom terbuka, ia dapat memeriksa alamat web di clipboard dan menyarankan untuk mengisinya. Ia tidak pernah menganalisis atau mengunduh secara otomatis.</string>
+    <string name="home_clipboard_consent_allow">Izinkan saran</string>
+    <string name="home_clipboard_consent_deny">Tempel secara manual</string>
+    <string name="home_clipboard_save_failed">Tidak dapat menyimpan preferensi Anda. Silakan coba lagi.</string>
+    <string name="home_shared_url_title">Tautan bersama diterima</string>
+    <string name="home_shared_url_description">Tinjau tautannya, lalu mulailah mencari video.</string>
+    <string name="home_analyze_now">Temukan video</string>
+    <string name="home_cancel">Batal</string>
+    <string name="home_download_active">pengunduhan %1$d</string>
+    <string name="home_download_paused">%1$d dijeda</string>
+    <string name="home_download_failed">Unduhan %1$d perlu diperhatikan</string>
+    <string name="home_download_open">Lihat status unduhan</string>
+</resources>

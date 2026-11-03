@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Ko to ibi ipamọ. Gba aaye laaye ki o tun gbiyanju.</string>
+    <string name="downloads_summary_waiting">Nduro lati ṣe igbasilẹ</string>
+    <string name="downloads_summary_paused">Awọn igbasilẹ ti daduro</string>
+    <string name="downloads_summary_attention">Awọn igbasilẹ nilo akiyesi</string>
+    <string name="downloads_quality_original">Atilẹba</string>
+    <string name="downloads_title">gbigba lati ayelujara</string>
+    <string name="downloads_back">Pada</string>
+    <string name="downloads_view_as_list">Wo bi akojọ</string>
+    <string name="downloads_view_as_grid">Wo bi akoj</string>
+    <string name="downloads_empty_title">Ko si awọn igbasilẹ ti nlọ lọwọ</string>
+    <string name="downloads_empty_description">Awọn igbasilẹ ti o ti pari ti ṣetan lati wo ninu ile-ikawe rẹ.</string>
+    <string name="downloads_open_library">Open ìkàwé</string>
+    <string name="downloads_summary">%1$d gbigba lati ayelujara</string>
+    <string name="downloads_summary_remaining">%1$d ti o ku</string>
+    <string name="downloads_pause_all">Sinmi gbogbo</string>
+    <string name="downloads_resume_all">Pada gbogbo rẹ</string>
+    <string name="downloads_group_active">Gbigbasilẹ</string>
+    <string name="downloads_group_queued">Ti o wa ni ila</string>
+    <string name="downloads_group_paused">Daduro</string>
+    <string name="downloads_group_failed">kuna</string>
+    <string name="downloads_group_completed">Ti pari</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">eekanna atanpako %1$s</string>
+    <string name="downloads_unknown_size">Lapapọ iwọn aimọ</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Ilọsiwaju ti awọn igbasilẹ ti o ku</string>
+    <string name="downloads_pause">Duro</string>
+    <string name="downloads_resume">Pada</string>
+    <string name="downloads_cancel">Fagilee</string>
+    <string name="downloads_retry">Tun gbiyanju</string>
+    <string name="downloads_remove">Yọọ kuro ninu akojọ</string>
+    <string name="downloads_error_access">Fidio yii nilo igbanilaaye wiwọle.</string>
+    <string name="downloads_error_format">Ọna kika fidio yii ko ni atilẹyin.</string>
+    <string name="downloads_error_network">Asopọmọra ko gba pada. Gbiyanju lẹẹkansi.</string>
+    <string name="downloads_error_storage">Ko le fi faili naa pamọ. Ṣayẹwo aaye ipamọ.</string>
+    <string name="downloads_error_server">Olupin naa ko le ṣe ilana igbasilẹ naa.</string>
+    <string name="downloads_error_unknown">Nkankan ti lọ aṣiṣe lakoko ti o ṣe igbasilẹ.</string>
+    <string name="downloads_command_failed">Ko le ṣe imudojuiwọn igbasilẹ naa. Gbiyanju lẹẹkansi.</string>
+    <string name="downloads_delete_pending">Imukuro piparẹ ti nilo</string>
+    <string name="downloads_delete_retry">Tun gbiyanju piparẹ</string>
+    <string name="downloads_delete_group_count">Piparẹ afọmọ %1$d</string>
+    <string name="downloads_error_drm">Awọn fidio ti o ni aabo ko ṣe igbasilẹ.</string>
+</resources>

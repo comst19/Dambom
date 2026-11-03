@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Ci gaba da kallo?</string>
+    <string name="player_resume_message">Ka kalli har zuwa %1$s .</string>
+    <string name="player_resume_continue">Ci gaba</string>
+    <string name="player_resume_restart">Fara daga farko</string>
+    <string name="player_history_failure">Ba a iya lodawa ko adana tarihin kunnawa ba.</string>
+    <string name="player_settings_failure">Ba a iya adana saitunan kunnawa ba.</string>
+    <string name="player_speed">Saurin kunnawa</string>
+    <string name="player_speed_value">Saurin kunnawa · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Maimaici wannan bidiyo</string>
+    <string name="player_options_close">Rufe</string>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">વેબ બંધ કરો</string>
+    <string name="web_address_placeholder">વેબ સરનામું દાખલ કરો</string>
+    <string name="web_start_title">વેબ પર વિડિઓઝ શોધો</string>
+    <string name="web_start_description">બહુવિધ ટેબ્સ ખુલ્લી રાખો અને વર્તમાન ટેબ પર જ વિડીયો શોધો.</string>
+    <string name="web_open">પેજ ખોલો</string>
+    <string name="web_recent">તાજેતરના પૃષ્ઠો</string>
+    <string name="web_recent_empty">તાજેતરમાં મુલાકાત લીધેલ કોઈ પૃષ્ઠો નથી.</string>
+    <string name="web_go_back">પાછલું પૃષ્ઠ</string>
+    <string name="web_go_forward">આગલું પૃષ્ઠ</string>
+    <string name="web_refresh">તાજું કરો</string>
+    <string name="web_detecting">શોધવું</string>
+    <string name="web_open_detected_count">%1$d વીડિયો ખોલો</string>
+    <string name="web_no_detected_video">કોઈ શોધાયેલ વિડિઓ નથી</string>
+    <string name="web_rescan">ફરીથી સ્કેન કરો</string>
+    <string name="web_playback_hint">જો કોઈ વિડિયો ન મળે, તો તેને પેજ પર ચલાવો અને ફરી પ્રયાસ કરો.</string>
+    <string name="web_connection_error_title">સાઇટ સાથે કનેક્ટ કરી શકાયું નથી</string>
+    <string name="web_connection_error_description">સાઇટે કનેક્શન બંધ કર્યું છે અથવા વર્તમાન નેટવર્ક પર અનુપલબ્ધ છે.</string>
+    <string name="web_timeout_error_title">સાઈટને પ્રતિસાદ આપવામાં ઘણો સમય લાગ્યો</string>
+    <string name="web_timeout_error_description">થોડીવાર રાહ જુઓ અને ફરી પ્રયાસ કરો.</string>
+    <string name="web_unsupported_url_error_title">અસમર્થિત વેબ સરનામું</string>
+    <string name="web_unsupported_url_error_description">તપાસો કે આ HTTP અથવા HTTPS વેબ સરનામું છે.</string>
+    <string name="web_access_error_title">પૃષ્ઠ ઍક્સેસ નિષ્ફળ</string>
+    <string name="web_access_error_description">પૃષ્ઠ અસ્તિત્વમાં નથી અથવા તમને તે જોવાની પરવાનગી નથી.</string>
+    <string name="web_server_error_title">સાઇટ અસ્થાયી રૂપે અનુપલબ્ધ છે</string>
+    <string name="web_server_error_description">સાઈટમાં સર્વર સમસ્યા છે. થોડીવાર રાહ જુઓ અને ફરી પ્રયાસ કરો.</string>
+    <string name="web_security_error_title">સાઇટ સુરક્ષિત રીતે ખોલી શકાતી નથી</string>
+    <string name="web_security_error_description">તેનું સુરક્ષા પ્રમાણપત્ર અમાન્ય છે અથવા પૃષ્ઠ અસુરક્ષિત હોવાનું જણાયું હતું.</string>
+    <string name="web_unknown_error_title">પાનું ખોલી શકાયું નથી</string>
+    <string name="web_unknown_error_description">સરનામું તપાસો અને તેને ફરીથી ખોલો.</string>
+    <string name="web_retry">ફરી પ્રયાસ કરો</string>
+    <string name="web_external_download_notice">Dambom બાહ્ય બ્રાઉઝરમાંથી વીડિયો શોધી કે ડાઉનલોડ કરી શકતું નથી.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d ઓપન ટેબ</item>
+        <item quantity="other">%1$d ઓપન ટેબ્સ</item>
+    </plurals>
+    <string name="web_new_tab">નવી ટેબ</string>
+    <string name="web_close_tab">%1$s ટેબ બંધ કરો</string>
+    <string name="web_empty_tab">ખાલી ટેબ</string>
+    <string name="web_tab_actions">વર્તમાન ટેબ ક્રિયાઓ</string>
+    <string name="web_open_external">ડિફોલ્ટ બ્રાઉઝરમાં ખોલો</string>
+    <string name="web_copy_link">લિંક કોપી કરો</string>
+    <string name="web_share_link">લિંક શેર કરો</string>
+    <string name="web_link_copied">લિંક કોપી કરી.</string>
+    <string name="web_action_failure">કોઈપણ એપ્લિકેશન આ વિનંતીને હેન્ડલ કરી શકશે નહીં.</string>
+    <string name="web_share_chooser">લિંક શેર કરો</string>
+    <string name="web_drm_protected">આ મીડિયા સુરક્ષિત છે અને ડાઉનલોડ કરી શકાતું નથી.</string>
+    <string name="web_unsupported_service">YouTube વિડિયો ડાઉનલોડ સપોર્ટેડ નથી.</string>
+    <string name="web_drm_excluded">સંરક્ષિત વિડિયો આ સૂચિમાંથી છુપાયેલા છે.</string>
+</resources>

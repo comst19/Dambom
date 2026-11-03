@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">እኹል መኽዘን የለን። ቦታ ነጻ ኣውጺእካ ዳግማይ ፈትኖ: %1$s</string>
+    <string name="download_notification_channel">ምውራድ</string>
+    <string name="download_notification_title">Dambom ቪድዮታት የውርድ ኣሎ።</string>
+    <string name="download_notification_description">ዳውንሎድ ድሕሪ ዳግማይ ምትእስሳር ካብቲ ዝተቐመጠ ነጥቢ ዳግማይ ይጅምር።</string>
+    <string name="download_result_notification_channel">ውጽኢት ምውራድ</string>
+    <string name="download_notification_progress_title">ምውራድ %1$s</string>
+    <string name="download_notification_progress">%1$d %% ተዛዚሙ</string>
+    <string name="download_notification_completed">ምውራድ ተዛዚሙ</string>
+    <string name="download_notification_completed_description">%1$s ኣብ ቤተ መጻሕፍቲኩም ተቐሚጡ።</string>
+    <string name="download_notification_failed">ምውራድ ኣይተዓወተን</string>
+    <string name="download_notification_failed_description">%1$s እንደገና ከተውርድ ፈትን።</string>
+    <string name="download_notification_failed_network">ን %1$s ዝምልከት ናይ መርበብ ምትእስሳር መርምሩ።</string>
+    <string name="download_notification_failed_storage">ን %1$s ዝርከብ መኽዘን መርምሩ።</string>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Web sahypany ýap</string>
+    <string name="web_address_placeholder">Web salgysyny giriziň</string>
+    <string name="web_start_title">Webde wideo tapyň</string>
+    <string name="web_start_description">Birnäçe taby açyk saklaň we diňe häzirki tabdaky wideoýleri ýüze çykaryň.</string>
+    <string name="web_open">Sahypany açyň</string>
+    <string name="web_recent">Iň soňky sahypalar</string>
+    <string name="web_recent_empty">Soňky gelnen sahypalar ýok.</string>
+    <string name="web_go_back">Öňki sahypa</string>
+    <string name="web_go_forward">Indiki sahypa</string>
+    <string name="web_refresh">Täzeden ýükle</string>
+    <string name="web_detecting">Yuze çykarylýar</string>
+    <string name="web_open_detected_count">%1$d wideoýlerini aç</string>
+    <string name="web_no_detected_video">Howa çykarylan wideo ýok</string>
+    <string name="web_rescan">Täzeden skanirle</string>
+    <string name="web_playback_hint">Eger wideo tapylanok bolsa, ony sahypada ýatyryň we gaýtadan synanyşyň.</string>
+    <string name="web_connection_error_title">Sahypa bilen baglanyşyk gazanyp bolmady</string>
+    <string name="web_connection_error_description">Sahypa baglanyşygy ýapdy ýa-da häzirki torda elýeterli däl.</string>
+    <string name="web_timeout_error_title">Sahypa jogap bermäge goýlan wagty artykdy</string>
+    <string name="web_timeout_error_description">Bir pursat garaşyp, täzeden synanyşyň.</string>
+    <string name="web_unsupported_url_error_title">Goldanmaýan web salgysy</string>
+    <string name="web_unsupported_url_error_description">Munuň HTTP ýa-da HTTPS web salgysy bolandygyny barlaň.</string>
+    <string name="web_access_error_title">Sahypa elýeter däl boldy</string>
+    <string name="web_access_error_description">Sahypa ýok ýa-da ony görmek üçin rugsadyňyz ýok.</string>
+    <string name="web_server_error_title">Sahypa wagtlaýyn elýeterli däl</string>
+    <string name="web_server_error_description">Saýtda server problemasy bar. Biraz garaşyň we ýene synanyşyň.</string>
+    <string name="web_security_error_title">Saýty howpsuz açyp bolmady</string>
+    <string name="web_security_error_description">Onuň howpsuzlyk şahadatnamasy nädogry, ýa-da sahypa howpsuz hasaplanyldy.</string>
+    <string name="web_unknown_error_title">Sahypa açylyp bilmedi</string>
+    <string name="web_unknown_error_description">Adresi barlap ýene-de aç.</string>
+    <string name="web_retry">Ýene-de synanyşyň</string>
+    <string name="web_external_download_notice">Dambom daşky brauzerden wideolary anyklap ýa-da ýükläp bilmeýär.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d aç täb</item>
+        <item quantity="other">%1$d aç täbler</item>
+    </plurals>
+    <string name="web_new_tab">Täze sekme</string>
+    <string name="web_close_tab">Sekme %1$s</string>
+    <string name="web_empty_tab">Boş täb</string>
+    <string name="web_tab_actions">Häzirki täb hereketleri</string>
+    <string name="web_open_external">Öň bellenen brauzerde aç</string>
+    <string name="web_copy_link">Baglanyşygy göçüriň</string>
+    <string name="web_share_link">Baglanyşyk baglanyşygy</string>
+    <string name="web_link_copied">Link nusgasy.</string>
+    <string name="web_action_failure">Bu soragy hiç bir programma işläp bilmez.</string>
+    <string name="web_share_chooser">Baglanyşyk baglanyşygy</string>
+    <string name="web_drm_protected">Bu habar beriş serişdeleri goralýar we ýükläp bolmaýar.</string>
+    <string name="web_unsupported_service">YouTube wideo göçürip almak goldanylmaýar.</string>
+    <string name="web_drm_excluded">Goragly wideolar bu sanawdan gizlenendir.</string>
+</resources>

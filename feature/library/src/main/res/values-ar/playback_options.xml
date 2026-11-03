@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">هل ترغب في متابعة المشاهدة؟</string>
+    <string name="player_resume_message">شاهدت حتى %1$s .</string>
+    <string name="player_resume_continue">متابعة</string>
+    <string name="player_resume_restart">ابدأ من جديد</string>
+    <string name="player_history_failure">لم يتمكن من تحميل أو حفظ سجل التشغيل.</string>
+    <string name="player_settings_failure">لم يتمكن من حفظ إعدادات التشغيل.</string>
+    <string name="player_speed">سرعة التشغيل</string>
+    <string name="player_speed_value">سرعة التشغيل · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">إعادة هذا الفيديو</string>
+    <string name="player_options_close">إغلاق</string>
+</resources>

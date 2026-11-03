@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">ಇತ್ತೀಚೆಗೆ ಆಡಿದವುಗಳು</string>
+    <string name="library_recently_played_empty_title">ಇತ್ತೀಚೆಗೆ ಯಾವುದೇ ವಿಡಿಯೋಗಳನ್ನು ಆಡಲಾಗಿಲ್ಲ</string>
+    <string name="library_recently_played_empty_description">ಇದನ್ನು ಇಲ್ಲಿ ನೋಡಲು ವಿಡಿಯೋವನ್ನು ಆಡಿರಿ. ಫಿಲ್ಟರ್‌ಗಳು ಸಕ್ರಿಯವಾಗಿದ್ದರೆ, ಅವುಗಳನ್ನು ಬದಲಾಯಿಸಲು ಪ್ರಯತ್ನಿಸಿ.</string>
+</resources>

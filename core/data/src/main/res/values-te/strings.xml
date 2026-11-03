@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">తగినంత నిల్వ లేదు. స్థలాన్ని ఖాళీ చేసి, మళ్లీ ప్రయత్నించండి: %1$s</string>
+    <string name="download_notification_channel">డౌన్‌లోడ్‌లు</string>
+    <string name="download_notification_title">Dambom వీడియోలను డౌన్‌లోడ్ చేస్తోంది</string>
+    <string name="download_notification_description">డౌన్‌లోడ్‌లు మళ్లీ కనెక్ట్ అయిన తర్వాత సేవ్ చేయబడిన పాయింట్ నుండి పునఃప్రారంభమవుతాయి.</string>
+    <string name="download_result_notification_channel">డౌన్‌లోడ్ ఫలితాలు</string>
+    <string name="download_notification_progress_title">%1$s డౌన్‌లోడ్ చేస్తోంది</string>
+    <string name="download_notification_progress">%1$d %% పూర్తయింది</string>
+    <string name="download_notification_completed">డౌన్‌లోడ్ పూర్తయింది</string>
+    <string name="download_notification_completed_description">%1$s మీ లైబ్రరీలో సేవ్ చేయబడింది.</string>
+    <string name="download_notification_failed">డౌన్‌లోడ్ విఫలమైంది</string>
+    <string name="download_notification_failed_description">%1$s ని మళ్లీ డౌన్‌లోడ్ చేయడానికి ప్రయత్నించండి.</string>
+    <string name="download_notification_failed_network">%1$s కోసం నెట్‌వర్క్ కనెక్షన్‌ని తనిఖీ చేయండి.</string>
+    <string name="download_notification_failed_storage">%1$s కోసం అందుబాటులో ఉన్న నిల్వను తనిఖీ చేయండి.</string>
+</resources>

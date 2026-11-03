@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">O tọ lati wo lẹẹkansi?\nFipamọ pẹlu ọna asopọ kan.</string>
+    <string name="home_description">Wa awọn fidio lati fipamọ lati ọna asopọ oju-iwe kan.</string>
+    <string name="home_url_label">adirẹsi ayelujara</string>
+    <string name="home_invalid_url">Tẹ ọna asopọ kan sii ti o bẹrẹ pẹlu http: // tabi https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Lẹẹmọ</string>
+    <string name="home_analyze">Wa awọn fidio</string>
+    <string name="home_open_settings">Eto</string>
+    <string name="home_hide_results">Tọju awọn esi</string>
+    <string name="home_show_results">Ṣe afihan awọn abajade lẹgbẹẹ titẹ sii</string>
+    <string name="home_web_prompt_title">Ṣe ko ni ọna asopọ sibẹsibẹ?</string>
+    <string name="home_web_prompt_description">Wa oju-iwe kan laisi ọna asopọ.</string>
+    <string name="home_browse_web">Ṣawakiri wẹẹbu</string>
+    <string name="home_current_activity">lọwọlọwọ aṣayan iṣẹ-ṣiṣe</string>
+    <string name="home_clipboard_found">Ọna asopọ daakọ wa</string>
+    <string name="home_use_link">Lẹẹmọ</string>
+    <string name="home_dismiss">Kọ silẹ</string>
+    <string name="home_clipboard_consent_title">Daba awọn ọna asopọ daakọ?</string>
+    <string name="home_clipboard_consent_description">Nigbati Dambom ba ṣii, o le ṣayẹwo agekuru agekuru fun adirẹsi wẹẹbu kan ki o daba pe ki o kun si. Ko ṣe itupalẹ tabi ṣe igbasilẹ laifọwọyi.</string>
+    <string name="home_clipboard_consent_allow">Gba awọn imọran laaye</string>
+    <string name="home_clipboard_consent_deny">Lẹẹmọ pẹlu ọwọ</string>
+    <string name="home_clipboard_save_failed">Ko le fi awọn ayanfẹ rẹ pamọ. Jọwọ gbiyanju lẹẹkansi.</string>
+    <string name="home_shared_url_title">Pipin ọna asopọ ti gba</string>
+    <string name="home_shared_url_description">Ṣayẹwo ọna asopọ naa, lẹhinna bẹrẹ wiwa awọn fidio.</string>
+    <string name="home_analyze_now">Wa awọn fidio</string>
+    <string name="home_cancel">Fagilee</string>
+    <string name="home_download_active">%1$d gbigba lati ayelujara</string>
+    <string name="home_download_paused">%1$d da duro</string>
+    <string name="home_download_failed">Awọn igbasilẹ %1$d nilo akiyesi</string>
+    <string name="home_download_open">Wo ipo igbasilẹ</string>
+</resources>

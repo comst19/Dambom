@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">ڪافي اسٽوريج نه آهي. جاء خالي ڪريو ۽ ٻيهر ڪوشش ڪريو: %1$s</string>
+    <string name="download_notification_channel">ڊائون لوڊ</string>
+    <string name="download_notification_title">Dambom وڊيوز ڊائون لوڊ ڪري رهيو آهي</string>
+    <string name="download_notification_description">ٻيهر ڳنڍڻ کان پوءِ محفوظ ٿيل پوائنٽ تان ڊائون لوڊ ٻيهر شروع ٿئي ٿو.</string>
+    <string name="download_result_notification_channel">نتيجا ڊائون لوڊ ڪريو</string>
+    <string name="download_notification_progress_title">ڊائون لوڊ ڪندي %1$s</string>
+    <string name="download_notification_progress">%1$d %% مڪمل</string>
+    <string name="download_notification_completed">ڊائون لوڊ مڪمل</string>
+    <string name="download_notification_completed_description">%1$s توهان جي لائبريري ۾ محفوظ ڪيو ويو.</string>
+    <string name="download_notification_failed">ڊائون لوڊ ناڪام</string>
+    <string name="download_notification_failed_description">%1$s ٻيهر ڊائون لوڊ ڪرڻ جي ڪوشش ڪريو.</string>
+    <string name="download_notification_failed_network">%1$s لاءِ نيٽ ورڪ ڪنيڪشن چيڪ ڪريو.</string>
+    <string name="download_notification_failed_storage">چيڪ ڪريو دستياب اسٽوريج لاءِ %1$s .</string>
+</resources>

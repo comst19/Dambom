@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">ድር ዝጋ</string>
+    <string name="web_address_placeholder">የድር አድራሻ አስገባ</string>
+    <string name="web_start_title">ቪዲዮዎችን በድሩ ላይ ያግኙ</string>
+    <string name="web_start_description">ብዙ ትሮችን ይክፈቱ እና ቪዲዮዎችን አሁን ባለው ትር ላይ ብቻ ያግኙ።</string>
+    <string name="web_open">ክፍት ገጽ</string>
+    <string name="web_recent">የቅርብ ጊዜ ገጾች</string>
+    <string name="web_recent_empty">ምንም በቅርብ የተጎበኙ ገጾች የሉም።</string>
+    <string name="web_go_back">ያለፈው ገጽ</string>
+    <string name="web_go_forward">ቀጣይ ገጽ</string>
+    <string name="web_refresh">አድስ</string>
+    <string name="web_detecting">ማጣራት።</string>
+    <string name="web_open_detected_count">የ %1$d ቪዲዮዎችን ክፈት</string>
+    <string name="web_no_detected_video">ምንም የተገኙ ቪዲዮዎች የሉም</string>
+    <string name="web_rescan">እንደገና ይቃኙ</string>
+    <string name="web_playback_hint">ምንም ቪዲዮ ካልተገኘ በገጹ ላይ ያጫውቱትና እንደገና ይሞክሩ።</string>
+    <string name="web_connection_error_title">ከጣቢያው ጋር መገናኘት አልተቻለም</string>
+    <string name="web_connection_error_description">ጣቢያው ግንኙነቱን ዘግቷል ወይም አሁን ባለው አውታረ መረብ ላይ አይገኝም።</string>
+    <string name="web_timeout_error_title">ጣቢያው ምላሽ ለመስጠት ብዙ ጊዜ ወስዷል</string>
+    <string name="web_timeout_error_description">ትንሽ ቆይ እና እንደገና ሞክር።</string>
+    <string name="web_unsupported_url_error_title">የማይደገፍ የድር አድራሻ</string>
+    <string name="web_unsupported_url_error_description">ይህ HTTP ወይም HTTPS ድር አድራሻ መሆኑን ያረጋግጡ።</string>
+    <string name="web_access_error_title">የገጽ መዳረሻ አልተሳካም።</string>
+    <string name="web_access_error_description">ገጹ የለም ወይም ለማየት ፍቃድ የለዎትም።</string>
+    <string name="web_server_error_title">ጣቢያው ለጊዜው አይገኝም</string>
+    <string name="web_server_error_description">ጣቢያው የአገልጋይ ችግር አለበት። ትንሽ ቆይ እና እንደገና ሞክር።</string>
+    <string name="web_security_error_title">ጣቢያው ደህንነቱ በተጠበቀ ሁኔታ ሊከፈት አልቻለም</string>
+    <string name="web_security_error_description">የደህንነት የምስክር ወረቀቱ ልክ ያልሆነ ነው ወይም ገጹ ደህንነቱ ያልተጠበቀ ሆኖ ተገኝቷል።</string>
+    <string name="web_unknown_error_title">ገጹ ሊከፈት አልቻለም</string>
+    <string name="web_unknown_error_description">አድራሻውን ይፈትሹ እና እንደገና ይክፈቱት።</string>
+    <string name="web_retry">እንደገና ይሞክሩ</string>
+    <string name="web_external_download_notice">Dambom ቪዲዮዎችን ከውጭ አሳሽ ማግኘት ወይም ማውረድ አይችልም።</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d ትር ክፈት</item>
+        <item quantity="other">%1$d ክፍት ትሮች</item>
+    </plurals>
+    <string name="web_new_tab">አዲስ ትር</string>
+    <string name="web_close_tab">የ %1$s ትርን ዝጋ</string>
+    <string name="web_empty_tab">ባዶ ትር</string>
+    <string name="web_tab_actions">የአሁን ትር ድርጊቶች</string>
+    <string name="web_open_external">በነባሪ አሳሽ ክፈት</string>
+    <string name="web_copy_link">አገናኝ ቅዳ</string>
+    <string name="web_share_link">አገናኝ አጋራ</string>
+    <string name="web_link_copied">ሊንክ ተቀድቷል።</string>
+    <string name="web_action_failure">ምንም መተግበሪያ ይህን ጥያቄ ማስተናገድ አይችልም።</string>
+    <string name="web_share_chooser">አገናኝ አጋራ</string>
+    <string name="web_drm_protected">ይህ ሚዲያ የተጠበቀ ነው እና ሊወርድ አይችልም።</string>
+    <string name="web_unsupported_service">YouTube ቪዲዮ ማውረዶች አይደገፉም።</string>
+    <string name="web_drm_excluded">የተጠበቁ ቪዲዮዎች ከዚህ ዝርዝር ተደብቀዋል።</string>
+</resources>

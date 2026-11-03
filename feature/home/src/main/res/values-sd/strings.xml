@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">ٻيهر ڏسڻ جي لائق؟\nان کي محفوظ ڪريو لنڪ سان.</string>
+    <string name="home_description">صفحي جي لنڪ تان محفوظ ڪرڻ لاءِ وڊيوز ڳولھيو.</string>
+    <string name="home_url_label">ويب ايڊريس</string>
+    <string name="home_invalid_url">http:// يا https://. سان شروع ٿيندڙ لنڪ داخل ڪريو</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">پيسٽ</string>
+    <string name="home_analyze">وڊيوز ڳوليو</string>
+    <string name="home_open_settings">سيٽنگون</string>
+    <string name="home_hide_results">نتيجا لڪايو</string>
+    <string name="home_show_results">ان پٽ سان گڏ نتيجا ڏيکاريو</string>
+    <string name="home_web_prompt_title">اڃا تائين لنڪ نه آهي؟</string>
+    <string name="home_web_prompt_description">بغير لنڪ جي هڪ صفحو ڳوليو.</string>
+    <string name="home_browse_web">ويب برائوز ڪريو</string>
+    <string name="home_current_activity">موجوده سرگرمي</string>
+    <string name="home_clipboard_found">ڪاپي ڪيل لنڪ موجود آهي</string>
+    <string name="home_use_link">پيسٽ</string>
+    <string name="home_dismiss">برطرف</string>
+    <string name="home_clipboard_consent_title">ڪاپي ڪيل لنڪس تجويز ڪريو؟</string>
+    <string name="home_clipboard_consent_description">جڏهن Dambom کوليندو آهي، اهو ويب ايڊريس لاءِ ڪلپ بورڊ چيڪ ڪري سگهي ٿو ۽ ان کي ڀرڻ جو مشورو ڏئي ٿو. اهو ڪڏهن به خودڪار طريقي سان تجزيو يا ڊائون لوڊ نٿو ٿئي.</string>
+    <string name="home_clipboard_consent_allow">صلاح ڏيو</string>
+    <string name="home_clipboard_consent_deny">دستي طور پيسٽ ڪريو</string>
+    <string name="home_clipboard_save_failed">توهان جي ترجيح محفوظ نه ٿي سگهي. مهرباني ڪري ٻيهر ڪوشش ڪريو.</string>
+    <string name="home_shared_url_title">حصيداري ڪيل لنڪ حاصل ڪئي</string>
+    <string name="home_shared_url_description">لنڪ جو جائزو وٺو، پوءِ وڊيوز ڳولڻ شروع ڪريو.</string>
+    <string name="home_analyze_now">وڊيوز ڳوليو</string>
+    <string name="home_cancel">منسوخ ڪريو</string>
+    <string name="home_download_active">%1$d ڊائون لوڊ</string>
+    <string name="home_download_paused">%1$d روڪيو ويو</string>
+    <string name="home_download_failed">%1$d ڊائون لوڊ تي ڌيان ڏيڻ جي ضرورت آهي</string>
+    <string name="home_download_open">ڊائون لوڊ اسٽيٽس ڏسو</string>
+</resources>

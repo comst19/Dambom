@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Sisisẹsẹhin ipo</string>
+    <string name="playback_rewind">Pada 10 aaya</string>
+    <string name="playback_play">Ṣiṣẹ</string>
+    <string name="playback_pause">Duro</string>
+    <string name="playback_forward">Siwaju 10 aaya</string>
+</resources>

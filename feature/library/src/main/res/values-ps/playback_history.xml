@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">تازه لوبول شوي</string>
+    <string name="library_recently_played_empty_title">تازه لوبول شوي ویډیوګانې نشته</string>
+    <string name="library_recently_played_empty_description">یو ویډیو وپلې کړئ ترڅو دلته یې وګورئ. که فلټرونه فعال وي، هڅه وکړئ چې بدل یې کړئ.</string>
+</resources>

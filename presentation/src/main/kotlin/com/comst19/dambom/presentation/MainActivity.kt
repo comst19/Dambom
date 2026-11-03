@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.common.ui.locale.AppLanguagePreferences
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.presentation.contract.AppStartupState
 import com.comst19.dambom.presentation.entry.SharedTextEntryHandler
@@ -33,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        AppLanguagePreferences.syncSystemLanguage(this)
         videoOrientationCoordinator.applyInitialPolicy()
         splashScreen.setKeepOnScreenCondition {
             mainViewModel.startupState.value is AppStartupState.Initializing
@@ -51,6 +53,11 @@ class MainActivity : AppCompatActivity() {
                 onVideoRotate = videoOrientationCoordinator::onRotateRequested,
             )
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AppLanguagePreferences.syncSystemLanguage(this)
     }
 
     override fun onNewIntent(intent: Intent) {

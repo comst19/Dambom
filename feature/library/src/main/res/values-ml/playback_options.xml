@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">തുടർന്നും കാണണോ?</string>
+    <string name="player_resume_message">നിങ്ങൾ %1$s വരെ കണ്ടു.</string>
+    <string name="player_resume_continue">തുടരുക</string>
+    <string name="player_resume_restart">തുടക്കം മുതൽ തുടങ്ങുക</string>
+    <string name="player_history_failure">പ്ലേബാക്ക് ചരിത്രം ലോഡ് ചെയ്യാനും സംരക്ഷിക്കാനും സാധിച്ചില്ല.</string>
+    <string name="player_settings_failure">പ്ലേബാക്ക് സജ്ജീകരണങ്ങൾ സംരക്ഷിക്കാനായില്ല.</string>
+    <string name="player_speed">പ്ലേബാക്ക് വേഗം</string>
+    <string name="player_speed_value">പ്ലേബാക്ക് വേഗം · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">ഈ വീഡിയോ ആവർത്തിക്കുക</string>
+    <string name="player_options_close">അടയ്‌ക്കുക</string>
+</resources>

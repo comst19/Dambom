@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Täze oýnalanlar</string>
+    <string name="library_recently_played_empty_title">Täze oýnalan wideo ýok</string>
+    <string name="library_recently_played_empty_description">Muny görmek üçin wideo öwret. Eger süzgçler işjeň bolsa, olaryň üýtgedilip bolýandygyny synap görüň.</string>
+</resources>

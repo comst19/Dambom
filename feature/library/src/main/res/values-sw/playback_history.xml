@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Ilichezwa hivi karibuni</string>
+    <string name="library_recently_played_empty_title">Hakuna video zilizochezwa hivi karibuni</string>
+    <string name="library_recently_played_empty_description">Cheza video kuona hapa. Ikiwa vichujio vinafanya kazi, jaribu kubadilisha</string>
+</resources>

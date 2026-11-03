@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Yenidən baxmağa dəyərmi?\nLink ilə yadda saxlayın.</string>
+    <string name="home_description">Səhifə linkindən yadda saxlamaq üçün videoları tapın.</string>
+    <string name="home_url_label">Veb ünvanı</string>
+    <string name="home_invalid_url">http:// və ya https://. ilə başlayan keçid daxil edin</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Yapışdırın</string>
+    <string name="home_analyze">Videoları tapın</string>
+    <string name="home_open_settings">Parametrlər</string>
+    <string name="home_hide_results">Nəticələri gizlədin</string>
+    <string name="home_show_results">Nəticələri daxil etməklə yanaşı göstərin</string>
+    <string name="home_web_prompt_title">Hələ də linkiniz yoxdur?</string>
+    <string name="home_web_prompt_description">Linki olmayan səhifə tapın.</string>
+    <string name="home_browse_web">İnternetə göz atın</string>
+    <string name="home_current_activity">Cari fəaliyyət</string>
+    <string name="home_clipboard_found">Kopyalanmış keçid mövcuddur</string>
+    <string name="home_use_link">Yapışdırın</string>
+    <string name="home_dismiss">İşdən çıxarın</string>
+    <string name="home_clipboard_consent_title">Kopyalanmış keçidlər təklif edirsiniz?</string>
+    <string name="home_clipboard_consent_description">Dambom açıldıqda, o, mübadilə buferində veb ünvanı yoxlaya və onu doldurmağı təklif edə bilər. O, heç vaxt avtomatik analiz etmir və ya endirmir.</string>
+    <string name="home_clipboard_consent_allow">Təkliflərə icazə verin</string>
+    <string name="home_clipboard_consent_deny">Əl ilə yapışdırın</string>
+    <string name="home_clipboard_save_failed">Tercihinizi saxlamaq mümkün olmadı. Yenidən cəhd edin.</string>
+    <string name="home_shared_url_title">Paylaşılan keçid alındı</string>
+    <string name="home_shared_url_description">Linki nəzərdən keçirin, sonra video tapmağa başlayın.</string>
+    <string name="home_analyze_now">Videoları tapın</string>
+    <string name="home_cancel">Ləğv et</string>
+    <string name="home_download_active">%1$d endirilir</string>
+    <string name="home_download_paused">%1$d dayandırıldı</string>
+    <string name="home_download_failed">%1$d yükləmələri diqqət tələb edir</string>
+    <string name="home_download_open">Yükləmə statusuna baxın</string>
+</resources>

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Стоит посмотреть снова?\nСохранить с ссылкой.</string>
+    <string name="home_description">Найдите видео для сохранения по ссылке на страницу.</string>
+    <string name="home_url_label">Веб-адрес</string>
+    <string name="home_invalid_url">Введите ссылку, начинающуюся с http:// или https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Вставить</string>
+    <string name="home_analyze">Найти видео</string>
+    <string name="home_open_settings">Настройки</string>
+    <string name="home_hide_results">Скрыть результаты</string>
+    <string name="home_show_results">Показать результаты рядом с вводом</string>
+    <string name="home_web_prompt_title">Еще нет ссылки?</string>
+    <string name="home_web_prompt_description">Найти страницу без ссылки.</string>
+    <string name="home_browse_web">Просматривать веб</string>
+    <string name="home_current_activity">Текущая активность</string>
+    <string name="home_clipboard_found">Доступна скопированная ссылка</string>
+    <string name="home_use_link">Вставить</string>
+    <string name="home_dismiss">Закрыть</string>
+    <string name="home_clipboard_consent_title">Предложить скопированные ссылки?</string>
+    <string name="home_clipboard_consent_description">Когда Dambom открывается, он может проверить буфер обмена на наличие веб-адреса и предложить его заполнить. Он никогда не анализирует и не загружает автоматически.</string>
+    <string name="home_clipboard_consent_allow">Разрешить предложения</string>
+    <string name="home_clipboard_consent_deny">Вставить вручную</string>
+    <string name="home_clipboard_save_failed">Не удалось сохранить ваши предпочтения. Пожалуйста, попробуйте снова.</string>
+    <string name="home_shared_url_title">Получена общая ссылка</string>
+    <string name="home_shared_url_description">Проверьте ссылку, затем начните поиск видео.</string>
+    <string name="home_analyze_now">Найти видео</string>
+    <string name="home_cancel">Отменить</string>
+    <string name="home_download_active">%1$d загружается</string>
+    <string name="home_download_paused">%1$d приостановлен</string>
+    <string name="home_download_failed">Загрузка %1$d требует внимания</string>
+    <string name="home_download_open">Просмотреть статус загрузки</string>
+</resources>

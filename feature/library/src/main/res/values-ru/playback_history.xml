@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Недавно воспроизведено</string>
+    <string name="library_recently_played_empty_title">Нет недавно воспроизведённых видео</string>
+    <string name="library_recently_played_empty_description">Воспроизведите видео, чтобы увидеть его здесь. Если фильтры активны, попробуйте их изменить.</string>
+</resources>

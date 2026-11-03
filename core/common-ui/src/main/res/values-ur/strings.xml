@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">پلے بیک پوزیشن</string>
+    <string name="playback_rewind">10 سیکنڈ پیچھے</string>
+    <string name="playback_play">کھیلیں</string>
+    <string name="playback_pause">توقف کریں۔</string>
+    <string name="playback_forward">10 سیکنڈ فارورڈ کریں۔</string>
+</resources>

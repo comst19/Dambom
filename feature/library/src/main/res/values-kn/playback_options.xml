@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">ವೀಕ್ಷಣೆಯನ್ನು ಮುಂದುವರಿಸಬೇಕೆ?</string>
+    <string name="player_resume_message">ನೀವು %1$s ವರೆಗೆ ವೀಕ್ಷಿಸಿದ್ದಾರೆ.</string>
+    <string name="player_resume_continue">ಮುಂದುವರಿಸು</string>
+    <string name="player_resume_restart">ಮರುಪ್ರಾರಂಭಿಸು</string>
+    <string name="player_history_failure">ಪ್ಲೇಬ್ಯಾಕ್ ಇತಿಹಾಸವನ್ನು ಲೋಡ್ ಅಥವಾ ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
+    <string name="player_settings_failure">ಪ್ಲೇಬ್ಯಾಕ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
+    <string name="player_speed">ಪ್ಲೇಬ್ಯಾಕ್ ವೇಗ</string>
+    <string name="player_speed_value">ಪ್ಲೇಬ್ಯಾಕ್ ವೇಗ · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">ಈ ವಿಡಿಯೋವನ್ನು ಪುನರಾವರ್ತಿಸು</string>
+    <string name="player_options_close">ಮುಚ್ಚು</string>
+</resources>

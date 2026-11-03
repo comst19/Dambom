@@ -1,12 +1,15 @@
 package com.comst19.dambom.feature.settings.component
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
+import com.comst19.dambom.core.common.locale.AppLanguage
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.domain.model.ThemeMode
-import com.comst19.dambom.feature.settings.contract.AppLanguage
 import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -53,9 +56,20 @@ class SettingsContentTest {
         assertTrue(clicked)
     }
 
+    @Test
+    @Config(qualifiers = "hi")
+    fun `automatic language row displays the effective language name`() {
+        setSettingsContent(language = AppLanguage.SYSTEM)
+
+        composeRule.onNode(hasScrollAction()).performScrollToNode(hasText("हिन्दी"))
+        composeRule.onNodeWithText("हिन्दी").assertIsDisplayed()
+        composeRule.onNodeWithText("한국어").assertDoesNotExist()
+    }
+
     private fun setSettingsContent(
-        saveLocationMode: SaveLocationMode,
-        downloadLocation: String,
+        saveLocationMode: SaveLocationMode = SaveLocationMode.DEFAULT_FOLDER,
+        downloadLocation: String = "Download/Dambom",
+        language: AppLanguage = AppLanguage.KOREAN,
         onSaveMethodClick: () -> Unit = {},
     ) {
         composeRule.setContent {
@@ -64,7 +78,7 @@ class SettingsContentTest {
                     state =
                         SettingsContentState(
                             themeMode = ThemeMode.SYSTEM,
-                            language = AppLanguage.KOREAN,
+                            language = language,
                             clipboardSuggestionEnabled = false,
                             wifiOnlyDownloads = false,
                             saveLocationMode = saveLocationMode,

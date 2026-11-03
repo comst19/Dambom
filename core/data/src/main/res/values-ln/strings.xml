@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Bobombi ekoki te. Kofungola esika mpe komeka lisusu: %1$s</string>
+    <string name="download_notification_channel">Ba téléchargements</string>
+    <string name="download_notification_title">Dambom ezali ko télécharger ba vidéos</string>
+    <string name="download_notification_description">Ba téléchargements ezongeli uta na esika oyo ebombami sima ya kozongisa boyokani.</string>
+    <string name="download_result_notification_channel">Ba résultats ya téléchargement</string>
+    <string name="download_notification_progress_title">Kozwa %1$s</string>
+    <string name="download_notification_progress">%1$d %% esili</string>
+    <string name="download_notification_completed">Téléchargement esili</string>
+    <string name="download_notification_completed_description">%1$s ebombamaki na Bibliothèque na yo.</string>
+    <string name="download_notification_failed">Téléchargement elongi te</string>
+    <string name="download_notification_failed_description">Meka kozwa lisusu %1$s .</string>
+    <string name="download_notification_failed_network">Tala boyokani ya réseau mpo na %1$s .</string>
+    <string name="download_notification_failed_storage">Tala bobateli oyo ezali mpo na %1$s .</string>
+</resources>

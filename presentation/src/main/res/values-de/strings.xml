@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="root_back_hint">Drücken Sie erneut „Zurück“, um den Vorgang zu beenden.</string>
+    <string name="startup_initialization_failed">Die App konnte nicht gestartet werden.</string>
+    <string name="destination_home">Zuhause</string>
+    <string name="destination_library">Bibliothek</string>
+    <string name="network_offline_banner">Keine Internetverbindung. Netzwerkfunktionen sind vorübergehend nicht verfügbar.</string>
+    <string name="network_unmetered_banner">Warten auf Wi-Fi . Die Downloads werden automatisch fortgesetzt.</string>
+    <string name="download_feedback_failed">%1$s konnte nicht heruntergeladen werden.</string>
+    <string name="download_feedback_failed_multiple">%1$d -Videos konnten nicht heruntergeladen werden.</string>
+    <string name="download_recovery_failed">Ausstehende Downloads konnten nicht wiederhergestellt werden. Versuchen Sie es erneut über Downloads.</string>
+</resources>

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">আবার দেখার মূল্য?\nএকটি লিঙ্ক দিয়ে এটি সংরক্ষণ করুন।</string>
+    <string name="home_description">একটি পৃষ্ঠা লিঙ্ক থেকে সংরক্ষণ করতে ভিডিও খুঁজুন.</string>
+    <string name="home_url_label">ওয়েব ঠিকানা</string>
+    <string name="home_invalid_url">http:// অথবা https://. দিয়ে শুরু হওয়া একটি লিঙ্ক লিখুন</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">পেস্ট করুন</string>
+    <string name="home_analyze">ভিডিও খুঁজুন</string>
+    <string name="home_open_settings">সেটিংস</string>
+    <string name="home_hide_results">ফলাফল লুকান</string>
+    <string name="home_show_results">ইনপুটের পাশাপাশি ফলাফল দেখান</string>
+    <string name="home_web_prompt_title">এখনও একটি লিঙ্ক নেই?</string>
+    <string name="home_web_prompt_description">একটি লিঙ্ক ছাড়া একটি পৃষ্ঠা খুঁজুন.</string>
+    <string name="home_browse_web">ওয়েব ব্রাউজ করুন</string>
+    <string name="home_current_activity">বর্তমান কার্যকলাপ</string>
+    <string name="home_clipboard_found">একটি অনুলিপি লিঙ্ক উপলব্ধ</string>
+    <string name="home_use_link">পেস্ট করুন</string>
+    <string name="home_dismiss">খারিজ</string>
+    <string name="home_clipboard_consent_title">অনুলিপি করা লিঙ্কগুলি সাজেস্ট করবেন?</string>
+    <string name="home_clipboard_consent_description">যখন Dambom খোলে, এটি একটি ওয়েব ঠিকানার জন্য ক্লিপবোর্ড পরীক্ষা করতে পারে এবং এটি পূরণ করার পরামর্শ দিতে পারে। এটি কখনই স্বয়ংক্রিয়ভাবে বিশ্লেষণ বা ডাউনলোড হয় না।</string>
+    <string name="home_clipboard_consent_allow">পরামর্শের অনুমতি দিন</string>
+    <string name="home_clipboard_consent_deny">ম্যানুয়ালি পেস্ট করুন</string>
+    <string name="home_clipboard_save_failed">আপনার পছন্দ সংরক্ষণ করা যায়নি. আবার চেষ্টা করুন.</string>
+    <string name="home_shared_url_title">শেয়ার করা লিঙ্ক প্রাপ্ত</string>
+    <string name="home_shared_url_description">লিঙ্ক পর্যালোচনা করুন, তারপর ভিডিও খুঁজে শুরু করুন.</string>
+    <string name="home_analyze_now">ভিডিও খুঁজুন</string>
+    <string name="home_cancel">বাতিল</string>
+    <string name="home_download_active">%1$d ডাউনলোড হচ্ছে</string>
+    <string name="home_download_paused">%1$d বিরতি দেওয়া হয়েছে৷</string>
+    <string name="home_download_failed">%1$d ডাউনলোড মনোযোগ প্রয়োজন</string>
+    <string name="home_download_open">ডাউনলোড অবস্থা দেখুন</string>
+</resources>

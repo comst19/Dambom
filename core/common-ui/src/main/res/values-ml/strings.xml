@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">പ്ലേബാക്ക് സ്ഥാനം</string>
+    <string name="playback_rewind">10 സെക്കൻഡ് പിന്നോട്ട്</string>
+    <string name="playback_play">കളിക്കുക</string>
+    <string name="playback_pause">താൽക്കാലികമായി നിർത്തുക</string>
+    <string name="playback_forward">10 സെക്കൻഡ് മുന്നോട്ട്</string>
+</resources>

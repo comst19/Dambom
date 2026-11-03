@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Pokola kolanda koyoka?</string>
+    <string name="player_resume_message">Oyonaki kino na %1$s .</string>
+    <string name="player_resume_continue">Pokola</string>
+    <string name="player_resume_restart">Tangá lisusu</string>
+    <string name="player_history_failure">Ekoki te ko landa to ko sala etaleli ya koyoka</string>
+    <string name="player_settings_failure">Ekoki te ko sala bana ya etaleli ya koyoka</string>
+    <string name="player_speed">Malamu ya koyoka</string>
+    <string name="player_speed_value">Malamu ya koyoka · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Loba video oyo lisusu</string>
+    <string name="player_options_close">Funga</string>
+</resources>

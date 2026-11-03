@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Mechie webụ</string>
+    <string name="web_address_placeholder">Tinye adreesị webụ</string>
+    <string name="web_start_title">Chọta vidiyo na webụ</string>
+    <string name="web_start_description">Debe ọtụtụ taabụ mepere wee chọpụta vidiyo naanị na taabụ dị ugbu a.</string>
+    <string name="web_open">Mepee ibe</string>
+    <string name="web_recent">Ibe ọhụrụ</string>
+    <string name="web_recent_empty">Ọnweghị ibe ndị a gara nso nso a.</string>
+    <string name="web_go_back">Ibe gara aga</string>
+    <string name="web_go_forward">Ibe na-esote</string>
+    <string name="web_refresh">Weghachite</string>
+    <string name="web_detecting">Ịchọpụta</string>
+    <string name="web_open_detected_count">Mepee vidiyo %1$d</string>
+    <string name="web_no_detected_video">Enweghị vidiyo achọpụtara</string>
+    <string name="web_rescan">Nyochaa ọzọ</string>
+    <string name="web_playback_hint">Ọ bụrụ na achọpụtaghị vidiyo ọ bụla, kpọọ ya na ibe wee nwaa ọzọ.</string>
+    <string name="web_connection_error_title">Enweghị ike ijikọ na saịtị ahụ</string>
+    <string name="web_connection_error_description">Saịtị ahụ mechiri njikọ ma ọ bụ na ọ dịghị na netwọk ugbu a.</string>
+    <string name="web_timeout_error_title">Saịtị ahụ were ogologo oge iji zaghachi</string>
+    <string name="web_timeout_error_description">Chere nwa oge wee nwaa ọzọ.</string>
+    <string name="web_unsupported_url_error_title">Adreesị weebụ anaghị akwado</string>
+    <string name="web_unsupported_url_error_description">Lelee na nke a bụ adreesị webụ HTTP ma ọ bụ HTTPS .</string>
+    <string name="web_access_error_title">Ịnweta ibe adịghị</string>
+    <string name="web_access_error_description">Ibe a adịghị ma ọ bụ na i nweghi ikike ilele ya.</string>
+    <string name="web_server_error_title">Ebe ahụ adịghị adị nwa oge</string>
+    <string name="web_server_error_description">Saịtị ahụ nwere nsogbu nkesa. Chere obere oge wee nwaa ọzọ.</string>
+    <string name="web_security_error_title">Enweghị ike imepe saịtị ahụ nke ọma</string>
+    <string name="web_security_error_description">Asambodo nchekwa ya ezighi ezi ma ọ bụ achọpụtara ibe ahụ ka enweghị nchekwa.</string>
+    <string name="web_unknown_error_title">Enweghị ike imepe ibe ahụ</string>
+    <string name="web_unknown_error_description">Lelee adreesị wee mepee ya ọzọ.</string>
+    <string name="web_retry">Gbalịa ọzọ</string>
+    <string name="web_external_download_notice">Dambom enweghị ike ịchọpụta ma ọ bụ budata vidiyo site na ihe nchọgharị mpụga.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d mepere taabụ</item>
+        <item quantity="other">%1$d mepere taabụ</item>
+    </plurals>
+    <string name="web_new_tab">Taabụ ọhụrụ</string>
+    <string name="web_close_tab">Mechie taabụ %1$s</string>
+    <string name="web_empty_tab">Taabụ efu</string>
+    <string name="web_tab_actions">Omume tab dị ugbu a</string>
+    <string name="web_open_external">Mepee na ihe nchọgharị ndabere</string>
+    <string name="web_copy_link">Detuo njikọ</string>
+    <string name="web_share_link">Kekọrịta njikọ</string>
+    <string name="web_link_copied">Njikọ eṅomiri.</string>
+    <string name="web_action_failure">Ọ nweghị ngwa nwere ike ijikwa arịrịọ a.</string>
+    <string name="web_share_chooser">Kekọrịta njikọ</string>
+    <string name="web_drm_protected">Edobere mgbasa ozi a enweghị ike ibudata ya.</string>
+    <string name="web_unsupported_service">Anaghị akwado nbudata vidiyo YouTube .</string>
+    <string name="web_drm_excluded">Vidiyo echedoro ezoro na ndetu a.</string>
+</resources>

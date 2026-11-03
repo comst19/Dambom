@@ -1,0 +1,13 @@
+<resources>
+    <string name="player_resume_title">이어서 볼까요?</string>
+    <string name="player_resume_message">%1$s까지 본 영상이에요.</string>
+    <string name="player_resume_continue">이어보기</string>
+    <string name="player_resume_restart">처음부터</string>
+    <string name="player_history_failure">재생 기록을 불러오거나 저장하지 못했어요.</string>
+    <string name="player_settings_failure">재생 설정을 저장하지 못했어요.</string>
+    <string name="player_speed">재생 배속</string>
+    <string name="player_speed_value">재생 배속 · %1$s배</string>
+    <string name="player_speed_multiplier">%1$s배</string>
+    <string name="player_repeat_one">한 영상 반복</string>
+    <string name="player_options_close">닫기</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Akukho ndawo yokugcina eyaneleyo. Khulula indawo uze uzame kwakhona: %1$s</string>
+    <string name="download_notification_channel">Iikhuphelo</string>
+    <string name="download_notification_title">Dambom ikhupha iividiyo</string>
+    <string name="download_notification_description">IiKhuphelo ziya kuqala kwindawo egciniweyo emva kokudibanisa kwakhona.</string>
+    <string name="download_result_notification_channel">Iziphumo zekhupload</string>
+    <string name="download_notification_progress_title">Kukhuphelela %1$s</string>
+    <string name="download_notification_progress">%1$d %% igqityiwe</string>
+    <string name="download_notification_completed">Ukukhuphela kugqityiwe</string>
+    <string name="download_notification_completed_description">%1$s igcinwe kwiLibrari yakho.</string>
+    <string name="download_notification_failed">Ukukhuphela kwehlulekile</string>
+    <string name="download_notification_failed_description">Zama ukukhuphela %1$s kwakhona.</string>
+    <string name="download_notification_failed_network">Jonga unxibelelwano lwenethiwekhi lwe- %1$s .</string>
+    <string name="download_notification_failed_storage">Jonga indawo ekhoyo yokugcina ye- %1$s .</string>
+</resources>

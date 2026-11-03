@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Ya cancanci kallo kuma?\nAjiye shi tare da hanyar haɗi.</string>
+    <string name="home_description">Nemo bidiyoyi don adanawa daga mahaɗin shafi.</string>
+    <string name="home_url_label">Adireshin Yanar Gizo</string>
+    <string name="home_invalid_url">Shigar da hanyar haɗin da ta fara da http:// ko https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Manna</string>
+    <string name="home_analyze">Nemo bidiyoyi</string>
+    <string name="home_open_settings">Saituna</string>
+    <string name="home_hide_results">Boye sakamakon</string>
+    <string name="home_show_results">Nuna sakamako tare da shigarwa</string>
+    <string name="home_web_prompt_title">Har yanzu ba ku da hanyar haɗi?</string>
+    <string name="home_web_prompt_description">Nemo shafi ba tare da hanyar haɗi ba.</string>
+    <string name="home_browse_web">Shiga yanar gizo</string>
+    <string name="home_current_activity">Aiki na yanzu</string>
+    <string name="home_clipboard_found">Akwai hanyar haɗin da aka kwafi</string>
+    <string name="home_use_link">Manna</string>
+    <string name="home_dismiss">Kore</string>
+    <string name="home_clipboard_consent_title">Ba da shawarar hanyoyin haɗin gwiwa da aka kwafi?</string>
+    <string name="home_clipboard_consent_description">Lokacin da Dambom ya buɗe, zai iya duba allo don adireshin gidan yanar gizo kuma ya ba da shawarar cika shi. Ba ya taɓa yin nazari ko saukewa ta atomatik.</string>
+    <string name="home_clipboard_consent_allow">Bada shawarwari</string>
+    <string name="home_clipboard_consent_deny">Manna da hannu</string>
+    <string name="home_clipboard_save_failed">Ba za a iya ajiye abin da kuke so ba. Da fatan za a sake gwadawa.</string>
+    <string name="home_shared_url_title">An sami hanyar haɗin haɗin gwiwa</string>
+    <string name="home_shared_url_description">Duba hanyar haɗin yanar gizon, sannan fara nemo bidiyo.</string>
+    <string name="home_analyze_now">Nemo bidiyoyi</string>
+    <string name="home_cancel">Soke</string>
+    <string name="home_download_active">Zazzagewar %1$d</string>
+    <string name="home_download_paused">An dakatad da %1$d</string>
+    <string name="home_download_failed">Zazzagewar %1$d na buƙatar kulawa</string>
+    <string name="home_download_open">Duba halin zazzagewa</string>
+</resources>

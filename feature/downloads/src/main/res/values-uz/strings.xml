@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Xotira yetarli emas. Joy bo\'shating va qayta urinib ko\'ring.</string>
+    <string name="downloads_summary_waiting">Yuklab olish kutilmoqda</string>
+    <string name="downloads_summary_paused">Yuklashlar toʻxtatildi</string>
+    <string name="downloads_summary_attention">Yuklashlarga e\'tibor kerak</string>
+    <string name="downloads_quality_original">Original</string>
+    <string name="downloads_title">Yuklashlar</string>
+    <string name="downloads_back">Orqaga</string>
+    <string name="downloads_view_as_list">Roʻyxat sifatida koʻrish</string>
+    <string name="downloads_view_as_grid">To\'r sifatida ko\'rish</string>
+    <string name="downloads_empty_title">Yuklashlar davom etmayapti</string>
+    <string name="downloads_empty_description">Tugallangan yuklab olishlar kutubxonangizda tomosha qilishga tayyor.</string>
+    <string name="downloads_open_library">Ochiq kutubxona</string>
+    <string name="downloads_summary">%1$d yuklanmoqda</string>
+    <string name="downloads_summary_remaining">%1$d qoldi</string>
+    <string name="downloads_pause_all">Hammasini pauza qiling</string>
+    <string name="downloads_resume_all">Hammasini davom ettiring</string>
+    <string name="downloads_group_active">Yuklab olinmoqda</string>
+    <string name="downloads_group_queued">Navbatda</string>
+    <string name="downloads_group_paused">Pauza qilingan</string>
+    <string name="downloads_group_failed">Muvaffaqiyatsiz</string>
+    <string name="downloads_group_completed">Tugallangan</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s eskizi</string>
+    <string name="downloads_unknown_size">Umumiy hajmi noma\'lum</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Qolgan yuklab olish jarayoni</string>
+    <string name="downloads_pause">Pauza</string>
+    <string name="downloads_resume">Davom etish</string>
+    <string name="downloads_cancel">Bekor qilish</string>
+    <string name="downloads_retry">Qayta urinib ko\'ring</string>
+    <string name="downloads_remove">Roʻyxatdan oʻchirish</string>
+    <string name="downloads_error_access">Ushbu videoga kirish ruxsati talab qilinadi.</string>
+    <string name="downloads_error_format">Bu video formati qoʻllab-quvvatlanmaydi.</string>
+    <string name="downloads_error_network">Ulanish tiklanmadi. Qayta urinib ko\'ring.</string>
+    <string name="downloads_error_storage">Faylni saqlab boʻlmadi. Saqlash joyini tekshiring.</string>
+    <string name="downloads_error_server">Server yuklashni qayta ishlay olmadi.</string>
+    <string name="downloads_error_unknown">Yuklab olishda nimadir xato ketdi.</string>
+    <string name="downloads_command_failed">Yuklab olishni yangilab boʻlmadi. Qayta urinib ko\'ring.</string>
+    <string name="downloads_delete_pending">Oʻchirishni tozalash kerak</string>
+    <string name="downloads_delete_retry">Oʻchirishni qaytadan urinib koʻring</string>
+    <string name="downloads_delete_group_count">Oʻchirishni tozalash %1$d</string>
+    <string name="downloads_error_drm">Himoyalangan videolarni yuklab bo\'lmaydi.</string>
+</resources>

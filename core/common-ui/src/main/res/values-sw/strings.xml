@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Nafasi ya kucheza</string>
+    <string name="playback_rewind">Nyuma ya sekunde 10</string>
+    <string name="playback_play">Cheza</string>
+    <string name="playback_pause">Sitisha</string>
+    <string name="playback_forward">Mbele kwa sekunde 10</string>
+</resources>

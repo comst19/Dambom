@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">መመልከትዎን ይቀጥሉ?</string>
+    <string name="player_resume_message">4\"&gt; እስከ %1$s ድረስ ተመልክተሃል ።</string>
+    <string name="player_resume_continue">ቀጥል</string>
+    <string name="player_resume_restart">እንደገና ጀምር</string>
+    <string name="player_history_failure">የመልሶ ማጫወት ታሪክን መጫን ወይም ማስቀመጥ አልተቻለም።.</string>
+    <string name="player_settings_failure">የመልሶ ማጫወት ቅንብሮችን ማስቀመጥ አልተቻለም.</string>
+    <string name="player_speed">የመልሶ ማጫወት ፍጥነት</string>
+    <string name="player_speed_value">የመልሶ ማጫወት ፍጥነት · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">ይህን ቪዲዮ ይድገሙት</string>
+    <string name="player_options_close">ይዝጉ</string>
+</resources>

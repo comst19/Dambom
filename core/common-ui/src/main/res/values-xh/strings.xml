@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Indawo yokudlala kwakhona</string>
+    <string name="playback_rewind">Buyela emuva imizuzwana eyi-10</string>
+    <string name="playback_play">Dlala</string>
+    <string name="playback_pause">Yeka</string>
+    <string name="playback_forward">Phambili imizuzwana eyi-10</string>
+</resources>

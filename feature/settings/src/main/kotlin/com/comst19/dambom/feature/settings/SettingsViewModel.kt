@@ -2,6 +2,7 @@ package com.comst19.dambom.feature.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.comst19.dambom.core.common.locale.AppLanguage
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
@@ -14,7 +15,6 @@ import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.HelpKey
-import com.comst19.dambom.feature.settings.contract.AppLanguage
 import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 import com.comst19.dambom.feature.settings.platform.SettingsPlatformActions
 import dagger.hilt.android.lifecycle.HiltViewModel

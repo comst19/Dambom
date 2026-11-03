@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Posisi pemutaran</string>
+    <string name="playback_rewind">Mundur 10 detik</string>
+    <string name="playback_play">Mainkan</string>
+    <string name="playback_pause">Jeda</string>
+    <string name="playback_forward">Maju 10 detik</string>
+</resources>

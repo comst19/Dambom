@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Ayikho indawo eyanele. Khulula indawo bese uzama futhi: %1$s</string>
+    <string name="download_notification_channel">Okulandwayo</string>
+    <string name="download_notification_title">Dambom ikulanda amavidiyo</string>
+    <string name="download_notification_description">Ukulandwayo kuqhubeka kusukela endaweni egciniwe ngemva kokuxhuma futhi.</string>
+    <string name="download_result_notification_channel">Imiphumela yokulandwayo</string>
+    <string name="download_notification_progress_title">Ukulanda %1$s</string>
+    <string name="download_notification_progress">%1$d %% kuqediwe</string>
+    <string name="download_notification_completed">Ukulandwayo kuqediwe</string>
+    <string name="download_notification_completed_description">%1$s kugcinwe kuLabhulali yakho.</string>
+    <string name="download_notification_failed">Ukulandwayo kwehlulekile</string>
+    <string name="download_notification_failed_description">Zama ukulanda %1$s futhi.</string>
+    <string name="download_notification_failed_network">Hlola uxhumano lwe-network lwe %1$s .</string>
+    <string name="download_notification_failed_storage">Hlola indawo etholakalayo yokugcina lwe %1$s .</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">کتل ته دوام ورکول؟</string>
+    <string name="player_resume_message">تاسو تر %1$s پورې کتلي دي.</string>
+    <string name="player_resume_continue">دوام ورکړئ</string>
+    <string name="player_resume_restart">له سره پیل کړئ</string>
+    <string name="player_history_failure">د بیاکتنې تاریخ نه شو پورته یا خوندي کولی.</string>
+    <string name="player_settings_failure">د بیاکتنې ترتیبات نه شو خوندي کولی.</string>
+    <string name="player_speed">د بیاکتنې سرعت</string>
+    <string name="player_speed_value">د بیاکتنې سرعت · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">دغه ویډیو بیا تکرار کړئ</string>
+    <string name="player_options_close">بندول</string>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">वेब बंद करा</string>
+    <string name="web_address_placeholder">वेब पत्ता प्रविष्ट करा</string>
+    <string name="web_start_title">वेबवर व्हिडिओ शोधा</string>
+    <string name="web_start_description">एकाधिक टॅब उघडे ठेवा आणि फक्त वर्तमान टॅबवर व्हिडिओ शोधा.</string>
+    <string name="web_open">पान उघडा</string>
+    <string name="web_recent">अलीकडील पृष्ठे</string>
+    <string name="web_recent_empty">अलीकडे भेट दिलेली कोणतीही पृष्ठे नाहीत.</string>
+    <string name="web_go_back">मागील पान</string>
+    <string name="web_go_forward">पुढील पान</string>
+    <string name="web_refresh">रिफ्रेश करा</string>
+    <string name="web_detecting">शोधणे</string>
+    <string name="web_open_detected_count">%1$d व्हिडिओ उघडा</string>
+    <string name="web_no_detected_video">कोणतेही व्हिडिओ आढळले नाहीत</string>
+    <string name="web_rescan">पुन्हा स्कॅन करा</string>
+    <string name="web_playback_hint">कोणताही व्हिडिओ आढळला नसल्यास, तो पृष्ठावर प्ले करा आणि पुन्हा प्रयत्न करा.</string>
+    <string name="web_connection_error_title">साइटशी कनेक्ट होऊ शकले नाही</string>
+    <string name="web_connection_error_description">साइटने कनेक्शन बंद केले आहे किंवा सध्याच्या नेटवर्कवर अनुपलब्ध आहे.</string>
+    <string name="web_timeout_error_title">साइटला प्रतिसाद देण्यासाठी खूप वेळ लागला</string>
+    <string name="web_timeout_error_description">थोडा वेळ थांबा आणि पुन्हा प्रयत्न करा.</string>
+    <string name="web_unsupported_url_error_title">असमर्थित वेब पत्ता</string>
+    <string name="web_unsupported_url_error_description">हा HTTP किंवा HTTPS वेब पत्ता असल्याचे तपासा.</string>
+    <string name="web_access_error_title">पृष्ठ प्रवेश अयशस्वी</string>
+    <string name="web_access_error_description">पृष्ठ अस्तित्वात नाही किंवा तुम्हाला ते पाहण्याची परवानगी नाही.</string>
+    <string name="web_server_error_title">साइट तात्पुरती अनुपलब्ध आहे</string>
+    <string name="web_server_error_description">साइटवर सर्व्हर समस्या आहे. एक क्षण थांबा आणि पुन्हा प्रयत्न करा.</string>
+    <string name="web_security_error_title">साइट सुरक्षितपणे उघडता आली नाही</string>
+    <string name="web_security_error_description">त्याचे सुरक्षा प्रमाणपत्र अवैध आहे किंवा पृष्ठ असुरक्षित असल्याचे आढळले आहे.</string>
+    <string name="web_unknown_error_title">पान उघडता आले नाही</string>
+    <string name="web_unknown_error_description">पत्ता तपासा आणि पुन्हा उघडा.</string>
+    <string name="web_retry">पुन्हा प्रयत्न करा</string>
+    <string name="web_external_download_notice">Dambom बाह्य ब्राउझरवरून व्हिडिओ शोधू किंवा डाउनलोड करू शकत नाही.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d उघडा टॅब</item>
+        <item quantity="other">%1$d टॅब उघडा</item>
+    </plurals>
+    <string name="web_new_tab">नवीन टॅब</string>
+    <string name="web_close_tab">%1$s टॅब बंद करा</string>
+    <string name="web_empty_tab">रिक्त टॅब</string>
+    <string name="web_tab_actions">वर्तमान टॅब क्रिया</string>
+    <string name="web_open_external">डीफॉल्ट ब्राउझरमध्ये उघडा</string>
+    <string name="web_copy_link">लिंक कॉपी करा</string>
+    <string name="web_share_link">लिंक शेअर करा</string>
+    <string name="web_link_copied">लिंक कॉपी केली.</string>
+    <string name="web_action_failure">कोणतेही ॲप ही विनंती हाताळू शकत नाही.</string>
+    <string name="web_share_chooser">लिंक शेअर करा</string>
+    <string name="web_drm_protected">हा मीडिया संरक्षित आहे आणि डाउनलोड केला जाऊ शकत नाही.</string>
+    <string name="web_unsupported_service">YouTube व्हिडिओ डाउनलोड समर्थित नाहीत.</string>
+    <string name="web_drm_excluded">संरक्षित व्हिडिओ या सूचीमधून लपवलेले आहेत.</string>
+</resources>

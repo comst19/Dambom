@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">کافی ذخیرہ نہیں ہے۔ جگہ خالی کریں اور دوبارہ کوشش کریں: %1$s</string>
+    <string name="download_notification_channel">ڈاؤن لوڈز</string>
+    <string name="download_notification_title">Dambom ویڈیوز ڈاؤن لوڈ کر رہا ہے۔</string>
+    <string name="download_notification_description">دوبارہ منسلک ہونے کے بعد ڈاؤن لوڈز محفوظ شدہ پوائنٹ سے دوبارہ شروع ہو جاتے ہیں۔</string>
+    <string name="download_result_notification_channel">نتائج ڈاؤن لوڈ کریں۔</string>
+    <string name="download_notification_progress_title">%1$s ڈاؤن لوڈ ہو رہا ہے۔</string>
+    <string name="download_notification_progress">%1$d %% مکمل</string>
+    <string name="download_notification_completed">ڈاؤن لوڈ مکمل</string>
+    <string name="download_notification_completed_description">%1$s آپ کی لائبریری میں محفوظ کیا گیا تھا۔</string>
+    <string name="download_notification_failed">ڈاؤن لوڈ ناکام ہوگیا۔</string>
+    <string name="download_notification_failed_description">%1$s دوبارہ ڈاؤن لوڈ کرنے کی کوشش کریں۔</string>
+    <string name="download_notification_failed_network">%1$s کے لیے نیٹ ورک کنکشن چیک کریں۔</string>
+    <string name="download_notification_failed_storage">%1$s کے لیے دستیاب اسٹوریج کی جانچ کریں۔</string>
+</resources>

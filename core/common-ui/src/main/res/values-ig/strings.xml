@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Ọkwa ọkpụkpọ</string>
+    <string name="playback_rewind">azụ 10 sekọnd</string>
+    <string name="playback_play">Gwuo</string>
+    <string name="playback_pause">kwụsịtụ</string>
+    <string name="playback_forward">Gaba 10 sekọnd</string>
+</resources>

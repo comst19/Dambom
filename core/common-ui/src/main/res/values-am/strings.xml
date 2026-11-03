@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">የመልሶ ማጫወት ቦታ</string>
+    <string name="playback_rewind">ወደ ኋላ 10 ሰከንዶች</string>
+    <string name="playback_play">ይጫወቱ</string>
+    <string name="playback_pause">ለአፍታ አቁም</string>
+    <string name="playback_forward">ወደፊት 10 ሰከንዶች</string>
+</resources>

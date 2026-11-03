@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Son oynatılanlar</string>
+    <string name="library_recently_played_empty_title">Son oynatılan video yoxdur</string>
+    <string name="library_recently_played_empty_description">Burada görmək üçün bir video oynadın. Filtrlər aktivdirsə, onları dəyişdirməyə çalışın.</string>
+</resources>

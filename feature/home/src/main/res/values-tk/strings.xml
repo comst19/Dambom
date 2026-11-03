@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">againene synlamaga mynasypmy?\nSalgy bilen ýazdyryň.</string>
+    <string name="home_description">Sahypa baglanyşygyndan saklamak üçin wideo tapyň.</string>
+    <string name="home_url_label">Web salgysy</string>
+    <string name="home_invalid_url">http: // ýa-da https://. bilen baglanyşyk giriziň</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Goýuň</string>
+    <string name="home_analyze">Wideo tapyň</string>
+    <string name="home_open_settings">Sazlamalar</string>
+    <string name="home_hide_results">Netijeleri gizläň</string>
+    <string name="home_show_results">Giriş bilen birlikde netijeleri görkeziň</string>
+    <string name="home_web_prompt_title">Entek baglanyşyk ýokmy?</string>
+    <string name="home_web_prompt_description">Baglanyşyksyz sahypa tapyň.</string>
+    <string name="home_browse_web">Webde göz aýlaň</string>
+    <string name="home_current_activity">Häzirki işjeňlik</string>
+    <string name="home_clipboard_found">Göçürilen baglanyşyk bar</string>
+    <string name="home_use_link">Goýuň</string>
+    <string name="home_dismiss">Işden aýyrmak</string>
+    <string name="home_clipboard_consent_title">Göçürilen baglanyşyklary maslahat beriň?</string>
+    <string name="home_clipboard_consent_description">Dambom açylanda, web adresi üçin paneli barlap, doldurmagy teklip edip biler. Hiç haçan awtomatiki analiz etmeýär we göçürip almaýar.</string>
+    <string name="home_clipboard_consent_allow">Tekliplere rugsat beriň</string>
+    <string name="home_clipboard_consent_deny">El bilen goýuň</string>
+    <string name="home_clipboard_save_failed">Saýlawyňyzy saklap bilmedim. Gaýtadan synanyşmagyňyzy haýyş edýäris.</string>
+    <string name="home_shared_url_title">Paýlaşylan baglanyşyk alyndy</string>
+    <string name="home_shared_url_description">Baglanyşygy gözden geçiriň, soňra wideo tapyp başlaň.</string>
+    <string name="home_analyze_now">Wideo tapyň</string>
+    <string name="home_cancel">elatyr</string>
+    <string name="home_download_active">%1$d göçürip almak</string>
+    <string name="home_download_paused">%1$d saklandy</string>
+    <string name="home_download_failed">%1$d ýüklemeler ünsi talap edýär</string>
+    <string name="home_download_open">Göçürip almak ýagdaýyny görüň</string>
+</resources>

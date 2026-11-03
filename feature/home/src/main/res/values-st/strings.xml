@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Ho loketse ho shebella hape?\nE boloke ka sehokelo.</string>
+    <string name="home_description">Fumana li-video tseo u ka li bolokang ho tloha ho sehokelo sa leqephe.</string>
+    <string name="home_url_label">Aterese ea inthanete</string>
+    <string name="home_invalid_url">Kenya sehokelo se qalang ka http:// kapa https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Kenya</string>
+    <string name="home_analyze">Fumana livideo</string>
+    <string name="home_open_settings">Litlhophiso</string>
+    <string name="home_hide_results">Etsa hore liphetho li patiloe</string>
+    <string name="home_show_results">Bontša liphetho haufi le ho kenya</string>
+    <string name="home_web_prompt_title">Ha ho na khokahano hajoale?</string>
+    <string name="home_web_prompt_description">Fumana leqephe le se nang khokahano.</string>
+    <string name="home_browse_web">Batla inthaneteng</string>
+    <string name="home_current_activity">Tšebeliso ea hajoale</string>
+    <string name="home_clipboard_found">Khokahano e nkiloeng e fumaneha</string>
+    <string name="home_use_link">Kenya</string>
+    <string name="home_dismiss">Hlokomoloha</string>
+    <string name="home_clipboard_consent_title">Etsa likhothaletso tsa lihokahano tse kopitsoang?</string>
+    <string name="home_clipboard_consent_description">Ha Dambom e bula, e ka hlahloba clipboard bakeng sa aterese ea websaete \'me e khothaletse ho e tlatsa. E ke ke ea hlahlojoa kapa ho jarolla ka bo eona ka mokhoa o iketsang.</string>
+    <string name="home_clipboard_consent_allow">Lumella likhothaletso</string>
+    <string name="home_clipboard_consent_deny">Kenya ka letsoho</string>
+    <string name="home_clipboard_save_failed">Ha e ka boloka khetho ea hau. Ka kopo leka hape.</string>
+    <string name="home_shared_url_title">Khokahano e aroliloeng e fumanoe</string>
+    <string name="home_shared_url_description">Hlahloba khokahano, ebe o qala ho batla livideo.</string>
+    <string name="home_analyze_now">Fumana livideo</string>
+    <string name="home_cancel">Hlola</string>
+    <string name="home_download_active">%1$d e jarolla</string>
+    <string name="home_download_paused">%1$d e eme</string>
+    <string name="home_download_failed">%1$d ho jarolla ho hloka tlhokomelo</string>
+    <string name="home_download_open">Sheba boemo ba ho jarolla</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">ప్లేబ్యాక్ స్థానం</string>
+    <string name="playback_rewind">తిరిగి 10 సెకన్లు</string>
+    <string name="playback_play">ఆడండి</string>
+    <string name="playback_pause">పాజ్</string>
+    <string name="playback_forward">ఫార్వర్డ్ 10 సెకన్లు</string>
+</resources>

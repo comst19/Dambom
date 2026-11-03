@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">अलीकडे प्ले केलेले</string>
+    <string name="library_recently_played_empty_title">अलीकडे कोणतेही व्हिडिओ प्ले केलेले नाहीत</string>
+    <string name="library_recently_played_empty_description">येथे पाहण्यासाठी व्हिडिओ प्ले करा. जर फिल्टर्स सक्रिय असतील, तर त्यांना बदलून पहा.</string>
+</resources>

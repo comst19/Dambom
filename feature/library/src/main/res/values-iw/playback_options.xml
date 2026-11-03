@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">להמשיך לצפות?</string>
+    <string name="player_resume_message">צפת עד %1$s .</string>
+    <string name="player_resume_continue">להמשיך</string>
+    <string name="player_resume_restart">להתחיל מחדש</string>
+    <string name="player_history_failure">לא ניתן לטעון או לשמור היסטוריית ניגון.</string>
+    <string name="player_settings_failure">לא ניתן לשמור הגדרות ניגון.</string>
+    <string name="player_speed">מהירות ניגון</string>
+    <string name="player_speed_value">מהירות ניגון · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">חזור על סרטון זה</string>
+    <string name="player_options_close">סגור</string>
+</resources>

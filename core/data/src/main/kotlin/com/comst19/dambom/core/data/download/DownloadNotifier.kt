@@ -24,22 +24,25 @@ internal class DownloadNotifier
         @ApplicationContext private val context: Context,
     ) {
         private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        private var channelsCreated = false
+        private val localizedContext: Context
+            get() = ContextCompat.getContextForLanguage(context)
+        private var channelLanguageTags: String? = null
 
         fun foreground(
             title: String? = null,
             downloadedBytes: Long = 0L,
             totalBytes: Long? = null,
         ): ForegroundInfo {
-            ensureChannels()
+            val resourceContext = localizedContext
+            ensureChannels(resourceContext)
             val notification =
                 NotificationCompat
                     .Builder(context, DOWNLOAD_PROGRESS_CHANNEL_ID)
                     .setSmallIcon(android.R.drawable.stat_sys_download)
                     .setContentTitle(
-                        title?.let { context.getString(R.string.download_notification_progress_title, it) }
-                            ?: context.getString(R.string.download_notification_title),
-                    ).setContentText(progressText(downloadedBytes, totalBytes))
+                        title?.let { resourceContext.getString(R.string.download_notification_progress_title, it) }
+                            ?: resourceContext.getString(R.string.download_notification_title),
+                    ).setContentText(progressText(resourceContext, downloadedBytes, totalBytes))
                     .setContentIntent(contentIntent())
                     .setOngoing(true)
                     .setOnlyAlertOnce(true)
@@ -59,11 +62,13 @@ internal class DownloadNotifier
             taskId: String,
             title: String,
         ) {
+            val resourceContext = localizedContext
             notifyResult(
+                resourceContext = resourceContext,
                 taskId = taskId,
                 icon = android.R.drawable.stat_sys_download_done,
-                title = context.getString(R.string.download_notification_completed),
-                text = context.getString(R.string.download_notification_completed_description, title),
+                title = resourceContext.getString(R.string.download_notification_completed),
+                text = resourceContext.getString(R.string.download_notification_completed_description, title),
             )
         }
 
@@ -72,15 +77,18 @@ internal class DownloadNotifier
             title: String,
             reason: DownloadFailureReason,
         ) {
+            val resourceContext = localizedContext
             notifyResult(
+                resourceContext = resourceContext,
                 taskId = taskId,
                 icon = android.R.drawable.stat_notify_error,
-                title = context.getString(R.string.download_notification_failed),
-                text = context.getString(reason.notificationDescription, title),
+                title = resourceContext.getString(R.string.download_notification_failed),
+                text = resourceContext.getString(reason.notificationDescription, title),
             )
         }
 
         private fun notifyResult(
+            resourceContext: Context,
             taskId: String,
             icon: Int,
             title: String,
@@ -92,7 +100,7 @@ internal class DownloadNotifier
             ) {
                 return
             }
-            ensureChannels()
+            ensureChannels(resourceContext)
             val notification =
                 NotificationCompat
                     .Builder(context, DOWNLOAD_RESULT_CHANNEL_ID)
@@ -106,24 +114,27 @@ internal class DownloadNotifier
             notificationManager.notify(taskId.resultNotificationId(), notification)
         }
 
-        private fun ensureChannels() {
+        private fun ensureChannels(resourceContext: Context) {
             synchronized(this) {
-                if (channelsCreated) return
+                val languageTags =
+                    resourceContext.resources.configuration.locales
+                        .toLanguageTags()
+                if (channelLanguageTags == languageTags) return
                 notificationManager.createNotificationChannels(
                     listOf(
                         NotificationChannel(
                             DOWNLOAD_PROGRESS_CHANNEL_ID,
-                            context.getString(R.string.download_notification_channel),
+                            resourceContext.getString(R.string.download_notification_channel),
                             NotificationManager.IMPORTANCE_LOW,
                         ),
                         NotificationChannel(
                             DOWNLOAD_RESULT_CHANNEL_ID,
-                            context.getString(R.string.download_result_notification_channel),
+                            resourceContext.getString(R.string.download_result_notification_channel),
                             NotificationManager.IMPORTANCE_DEFAULT,
                         ),
                     ),
                 )
-                channelsCreated = true
+                channelLanguageTags = languageTags
             }
         }
 
@@ -138,13 +149,14 @@ internal class DownloadNotifier
             }
 
         private fun progressText(
+            resourceContext: Context,
             downloadedBytes: Long,
             totalBytes: Long?,
         ): String =
             totalBytes
                 ?.takeIf { it > 0L }
-                ?.let { context.getString(R.string.download_notification_progress, downloadProgress(downloadedBytes, it)) }
-                ?: context.getString(R.string.download_notification_description)
+                ?.let { resourceContext.getString(R.string.download_notification_progress, downloadProgress(downloadedBytes, it)) }
+                ?: resourceContext.getString(R.string.download_notification_description)
     }
 
 internal fun downloadProgress(

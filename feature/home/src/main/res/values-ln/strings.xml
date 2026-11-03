@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Ebongi kotala lisusu?\nBomba yango na lien.</string>
+    <string name="home_description">Luka ba vidéos ya kobomba na lien ya page.</string>
+    <string name="home_url_label">Addresse ya web</string>
+    <string name="home_invalid_url">Tyá lien oyo ebandi na http:// to https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Kosala pâte</string>
+    <string name="home_analyze">Luka ba vidéos</string>
+    <string name="home_open_settings">Ba paramètres</string>
+    <string name="home_hide_results">Bomba ba résultats</string>
+    <string name="home_show_results">Lakisa ba résultats pembeni ya entrée</string>
+    <string name="home_web_prompt_title">Ozali naino na lien te?</string>
+    <string name="home_web_prompt_description">Luka lokasa oyo ezangi lien.</string>
+    <string name="home_browse_web">Tala na web</string>
+    <string name="home_current_activity">Mosala ya lelo</string>
+    <string name="home_clipboard_found">Lien oyo esalemi kopi ezali</string>
+    <string name="home_use_link">Kosala pâte</string>
+    <string name="home_dismiss">Kolongolama na mosala</string>
+    <string name="home_clipboard_consent_title">Opesa likanisi ya ba liens oyo esalemi kopi?</string>
+    <string name="home_clipboard_consent_description">Tango Dambom efungwami, ekoki kotala tableau de bord mpo na adresse web mpe kopesa likanisi ya kotondisa yango.Ezali jamais ko analyser to ko télécharger automatiquement.</string>
+    <string name="home_clipboard_consent_allow">Tika makanisi</string>
+    <string name="home_clipboard_consent_deny">Kokangama na maboko</string>
+    <string name="home_clipboard_save_failed">Ekoki te kobomba bolingi na yo. Svp meka lisusu.</string>
+    <string name="home_shared_url_title">Lien ya kokabola ezwami</string>
+    <string name="home_shared_url_description">Tala lisusu lien, sima banda koluka ba vidéos.</string>
+    <string name="home_analyze_now">Luka ba vidéos</string>
+    <string name="home_cancel">Kolongola</string>
+    <string name="home_download_active">%1$d ko télécharger</string>
+    <string name="home_download_paused">%1$d apemaki mwa moke</string>
+    <string name="home_download_failed">Ba téléchargements ya %1$d esengeli na attention</string>
+    <string name="home_download_open">Tala ezalela ya téléchargement</string>
+</resources>

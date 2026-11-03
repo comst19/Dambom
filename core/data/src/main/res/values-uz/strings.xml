@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Xotira yetarli emas. Joy boʻshating va qayta urinib koʻring: %1$s</string>
+    <string name="download_notification_channel">Yuklashlar</string>
+    <string name="download_notification_title">Dambom videolarni yuklab olmoqda</string>
+    <string name="download_notification_description">Yuklashlar qayta ulangandan keyin saqlangan nuqtadan davom etadi.</string>
+    <string name="download_result_notification_channel">Natijalarni yuklab oling</string>
+    <string name="download_notification_progress_title">%1$s yuklab olinmoqda</string>
+    <string name="download_notification_progress">%1$d %% tugallandi</string>
+    <string name="download_notification_completed">Yuklab olish tugallandi</string>
+    <string name="download_notification_completed_description">%1$s kutubxonangizga saqlandi.</string>
+    <string name="download_notification_failed">Yuklab boʻlmadi</string>
+    <string name="download_notification_failed_description">%1$s ni qayta yuklab koʻring.</string>
+    <string name="download_notification_failed_network">Check the network connection for %1$s .</string>
+    <string name="download_notification_failed_storage">%1$s uchun mavjud xotirani tekshiring.</string>
+</resources>

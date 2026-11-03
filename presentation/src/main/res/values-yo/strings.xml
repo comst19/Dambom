@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="root_back_hint">Tẹ pada lẹẹkansi lati jade.</string>
+    <string name="startup_initialization_failed">Ko le bẹrẹ ohun elo naa.</string>
+    <string name="destination_home">Ile</string>
+    <string name="destination_library">Ile-ikawe</string>
+    <string name="network_offline_banner">Ko si isopọ Ayelujara. Awọn ẹya nẹtiwọki ko si fun igba diẹ.</string>
+    <string name="network_unmetered_banner">Nduro fun Wi-Fi . Awọn igbasilẹ tun bẹrẹ laifọwọyi.</string>
+    <string name="download_feedback_failed">Ko le ṣe igbasilẹ %1$s .</string>
+    <string name="download_feedback_failed_multiple">Ko le ṣe igbasilẹ awọn fidio %1$d .</string>
+    <string name="download_recovery_failed">Ko le mu awọn igbasilẹ isunmọtosi pada. Gbiyanju lẹẹkansi lati Awọn igbasilẹ.</string>
+</resources>

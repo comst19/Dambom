@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="root_back_hint">প্রস্থান করতে আবার ফিরে টিপুন.</string>
+    <string name="startup_initialization_failed">অ্যাপটি শুরু করা যায়নি।</string>
+    <string name="destination_home">হোম</string>
+    <string name="destination_library">লাইব্রেরি</string>
+    <string name="network_offline_banner">ইন্টারনেট সংযোগ নেই। নেটওয়ার্ক বৈশিষ্ট্যগুলি সাময়িকভাবে অনুপলব্ধ৷</string>
+    <string name="network_unmetered_banner">Wi-Fi এর জন্য অপেক্ষা করা হচ্ছে। ডাউনলোডগুলি স্বয়ংক্রিয়ভাবে পুনরায় শুরু হয়।</string>
+    <string name="download_feedback_failed">%1$s ডাউনলোড করা যায়নি।</string>
+    <string name="download_feedback_failed_multiple">%1$d ভিডিও ডাউনলোড করা যায়নি।</string>
+    <string name="download_recovery_failed">মুলতুবি ডাউনলোডগুলি পুনরুদ্ধার করা যায়নি। ডাউনলোড থেকে আবার চেষ্টা করুন.</string>
+</resources>

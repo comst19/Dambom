@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Закрыть веб</string>
+    <string name="web_address_placeholder">Введите веб-адрес</string>
+    <string name="web_start_title">Найдите видео в интернете</string>
+    <string name="web_start_description">Держите открытыми несколько вкладок и обнаруживайте видео только на текущей вкладке.</string>
+    <string name="web_open">Открыть страницу</string>
+    <string name="web_recent">Последние страницы</string>
+    <string name="web_recent_empty">Недавно посещенных страниц нет.</string>
+    <string name="web_go_back">Предыдущая страница</string>
+    <string name="web_go_forward">Следующая страница</string>
+    <string name="web_refresh">Обновить</string>
+    <string name="web_detecting">Обнаружение</string>
+    <string name="web_open_detected_count">Открыть видео %1$d</string>
+    <string name="web_no_detected_video">Видео не обнаружено</string>
+    <string name="web_rescan">Сканировать снова</string>
+    <string name="web_playback_hint">Если видео не обнаружено, воспроизведите его на странице и попробуйте снова.</string>
+    <string name="web_connection_error_title">Не удалось подключиться к сайту</string>
+    <string name="web_connection_error_description">Сайт закрыл соединение или недоступен в текущей сети.</string>
+    <string name="web_timeout_error_title">Сайт слишком долго отвечает</string>
+    <string name="web_timeout_error_description">Подождите немного и попробуйте снова.</string>
+    <string name="web_unsupported_url_error_title">Неподдерживаемый веб-адрес</string>
+    <string name="web_unsupported_url_error_description">Проверьте, что это веб-адрес HTTP или HTTPS .</string>
+    <string name="web_access_error_title">Ошибка доступа к странице</string>
+    <string name="web_access_error_description">Страница не существует или у вас нет разрешения на просмотр.</string>
+    <string name="web_server_error_title">Сайт временно недоступен</string>
+    <string name="web_server_error_description">На сайте возникла проблема с сервером. Подождите немного и попробуйте снова.</string>
+    <string name="web_security_error_title">Невозможно безопасно открыть сайт</string>
+    <string name="web_security_error_description">Его сертификат безопасности недействителен или страница признана небезопасной.</string>
+    <string name="web_unknown_error_title">Не удается открыть страницу</string>
+    <string name="web_unknown_error_description">Проверьте адрес и откройте снова.</string>
+    <string name="web_retry">Попробуйте снова</string>
+    <string name="web_external_download_notice">Dambom не может обнаруживать или загружать видео из внешнего браузера.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">Открыта %1$d вкладка</item>
+        <item quantity="other">Открыто %1$d вкладок</item>
+        <item quantity="few">Открыто %1$d вкладки</item>
+        <item quantity="many">Открыто %1$d вкладок</item>
+    </plurals>
+    <string name="web_new_tab">Новая вкладка</string>
+    <string name="web_close_tab">Закрыть вкладку %1$s</string>
+    <string name="web_empty_tab">Пустая вкладка</string>
+    <string name="web_tab_actions">Действия с текущей вкладкой</string>
+    <string name="web_open_external">Открыть в браузере по умолчанию</string>
+    <string name="web_copy_link">Копировать ссылку</string>
+    <string name="web_share_link">Поделиться ссылкой</string>
+    <string name="web_link_copied">Ссылка скопирована.</string>
+    <string name="web_action_failure">Ни одно приложение не может обработать этот запрос.</string>
+    <string name="web_share_chooser">Поделиться ссылкой</string>
+    <string name="web_drm_protected">Этот медиафайл защищен и не может быть загружен.</string>
+    <string name="web_unsupported_service">Загрузка видео YouTube не поддерживается.</string>
+    <string name="web_drm_excluded">Защищенные видео скрыты из этого списка.</string>
+</resources>

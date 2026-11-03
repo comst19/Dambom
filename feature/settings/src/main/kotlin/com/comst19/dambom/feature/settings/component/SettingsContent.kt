@@ -29,6 +29,7 @@ import com.comst19.dambom.core.domain.model.SharedLinkQuality
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.feature.settings.R
 import com.comst19.dambom.feature.settings.contract.SaveLocationMode
+import com.comst19.dambom.feature.settings.language.labelRes
 
 @Immutable
 internal data class SettingsContentState(

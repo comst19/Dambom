@@ -57,6 +57,10 @@ internal class SettingsViewModel
             launchSettingUpdate { repository.setThemeMode(mode) }
         }
 
+        fun refreshLanguage() {
+            mutableLanguage.value = AppLanguage.from(platformActions.currentLanguageTags)
+        }
+
         fun setLanguage(language: AppLanguage) {
             mutableLanguage.value = language
             platformActions.applyLanguage(language.languageTag)

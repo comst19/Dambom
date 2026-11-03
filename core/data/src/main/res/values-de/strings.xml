@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Nicht genügend Speicherplatz. Geben Sie Speicherplatz frei und versuchen Sie es erneut: %1$s</string>
+    <string name="download_notification_channel">Downloads</string>
+    <string name="download_notification_title">Dambom lädt Videos herunter</string>
+    <string name="download_notification_description">Nach dem erneuten Herstellen der Verbindung werden die Downloads ab dem gespeicherten Punkt fortgesetzt.</string>
+    <string name="download_result_notification_channel">Ergebnisse herunterladen</string>
+    <string name="download_notification_progress_title">Herunterladen von %1$s</string>
+    <string name="download_notification_progress">%1$d %% komplett</string>
+    <string name="download_notification_completed">Download abgeschlossen</string>
+    <string name="download_notification_completed_description">%1$s wurde in Ihrer Bibliothek gespeichert.</string>
+    <string name="download_notification_failed">Download fehlgeschlagen</string>
+    <string name="download_notification_failed_description">Versuchen Sie erneut, %1$s herunterzuladen.</string>
+    <string name="download_notification_failed_network">Überprüfen Sie die Netzwerkverbindung für %1$s .</string>
+    <string name="download_notification_failed_storage">Überprüfen Sie den verfügbaren Speicher für %1$s .</string>
+</resources>

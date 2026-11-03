@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">دیکھنا جاری رکھیں؟</string>
+    <string name="player_resume_message">آپ نے %1$s تک دیکھا۔</string>
+    <string name="player_resume_continue">جاری رکھیں</string>
+    <string name="player_resume_restart">دوبارہ شروع کریں</string>
+    <string name="player_history_failure">پلے بیک ہسٹری لوڈ یا محفوظ نہیں کی جا سکی۔</string>
+    <string name="player_settings_failure">پلے بیک سیٹنگز محفوظ نہیں کی جا سکیں۔</string>
+    <string name="player_speed">پلے بیک کی رفتار</string>
+    <string name="player_speed_value">پلے بیک کی رفتار · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">اس ویڈیو کو دہرائیں</string>
+    <string name="player_options_close">بند کریں</string>
+</resources>

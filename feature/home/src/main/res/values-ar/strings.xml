@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">هل يستحق المشاهدة مرة أخرى؟\nاحفظه برابط.</string>
+    <string name="home_description">ابحث عن مقاطع الفيديو لحفظها من رابط الصفحة.</string>
+    <string name="home_url_label">عنوان الويب</string>
+    <string name="home_invalid_url">أدخل رابطًا يبدأ بـ http:// أو https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">لصق</string>
+    <string name="home_analyze">البحث عن مقاطع الفيديو</string>
+    <string name="home_open_settings">الإعدادات</string>
+    <string name="home_hide_results">إخفاء النتائج</string>
+    <string name="home_show_results">إظهار النتائج بجانب المدخلات</string>
+    <string name="home_web_prompt_title">ليس لديك رابط بعد؟</string>
+    <string name="home_web_prompt_description">ابحث عن صفحة بدون رابط.</string>
+    <string name="home_browse_web">تصفح الويب</string>
+    <string name="home_current_activity">النشاط الحالي</string>
+    <string name="home_clipboard_found">يتوفر رابط منسوخ</string>
+    <string name="home_use_link">لصق</string>
+    <string name="home_dismiss">استبعاد</string>
+    <string name="home_clipboard_consent_title">هل تقترح روابط منسوخة؟</string>
+    <string name="home_clipboard_consent_description">عند فتح Dambom ، يمكنه فحص الحافظة بحثًا عن عنوان ويب واقتراح تعبئته. ولا يقوم أبدًا بالتحليل أو التنزيل تلقائيًا.</string>
+    <string name="home_clipboard_consent_allow">السماح بالاقتراحات</string>
+    <string name="home_clipboard_consent_deny">اللصق يدويًا</string>
+    <string name="home_clipboard_save_failed">لا يمكن حفظ تفضيلاتك. يرجى المحاولة مرة أخرى.</string>
+    <string name="home_shared_url_title">تم استلام الرابط المشترك</string>
+    <string name="home_shared_url_description">قم بمراجعة الرابط، ثم ابدأ في البحث عن مقاطع الفيديو.</string>
+    <string name="home_analyze_now">البحث عن مقاطع الفيديو</string>
+    <string name="home_cancel">إلغاء</string>
+    <string name="home_download_active">تنزيل %1$d</string>
+    <string name="home_download_paused">توقف %1$d مؤقتًا</string>
+    <string name="home_download_failed">تحتاج تنزيلات %1$d إلى الاهتمام</string>
+    <string name="home_download_open">عرض حالة التنزيل</string>
+</resources>

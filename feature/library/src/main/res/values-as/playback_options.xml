@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">চাৰ্টিনি চলাই যোৱাৰ প্ৰাৰম্ভ কৰক?</string>
+    <string name="player_resume_message">আপুনি %1$s পৰ্যন্ত চাইছে.</string>
+    <string name="player_resume_continue">চালাই যোৱা</string>
+    <string name="player_resume_restart">আৰম্ভণি</string>
+    <string name="player_history_failure">প্লেবেক ইতিহাস লোড বা সংৰক্ষণ কৰিব পৰা নগ\'ল.</string>
+    <string name="player_settings_failure">প্লেবেক ছেটিং সংৰক্ষণ কৰিব পৰা নগ\'ল.</string>
+    <string name="player_speed">প্লেবেক গতি</string>
+    <string name="player_speed_value">প্লেবেক গতি · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">এই ভিডিঅ\' পুনৰাবৃত্তি কৰক</string>
+    <string name="player_options_close">বন্ধ</string>
+</resources>

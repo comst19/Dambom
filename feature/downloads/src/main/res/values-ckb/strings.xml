@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">کۆگای پێویست نیە. شوێن بەتاڵ بکە و دووبارە هەوڵ بدە.</string>
+    <string name="downloads_summary_waiting">چاوەڕێی داگرتن</string>
+    <string name="downloads_summary_paused">داگرتنەکان وەستان</string>
+    <string name="downloads_summary_attention">دابەزاندن پێویستی بە سەرنج هەیە</string>
+    <string name="downloads_quality_original">ئەسڵی</string>
+    <string name="downloads_title">دابەزاندنەکان</string>
+    <string name="downloads_back">گەڕانەوە</string>
+    <string name="downloads_view_as_list">پیشاندان وەک لیست</string>
+    <string name="downloads_view_as_grid">پیشاندان وەک تۆڕ</string>
+    <string name="downloads_empty_title">هیچ داگرتنێک لە بەردەوامیدایە</string>
+    <string name="downloads_empty_description">دابەزاندنە تەواوکراوەکان ئامادەن بۆ سەیرکردن لە کتێبخانەکەت.</string>
+    <string name="downloads_open_library">کتێبخانەی کراوە</string>
+    <string name="downloads_summary">%1$d دابەزاندن</string>
+    <string name="downloads_summary_remaining">%1$d ماوە</string>
+    <string name="downloads_pause_all">هەمووی ڕابوەستێنە</string>
+    <string name="downloads_resume_all">هەموو دەستپێکردنەوە</string>
+    <string name="downloads_group_active">دابەزاندن</string>
+    <string name="downloads_group_queued">ڕیز</string>
+    <string name="downloads_group_paused">وەستا</string>
+    <string name="downloads_group_failed">سەرکەوتوو نەبوو</string>
+    <string name="downloads_group_completed">تەواوبوو</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s وێنەی بچووک</string>
+    <string name="downloads_unknown_size">کۆی قەبارەی نەزانراو</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">بەرەوپێشچوونی داگرتنەکانی ماوە</string>
+    <string name="downloads_pause">وەستان</string>
+    <string name="downloads_resume">دەستپێکردنەوە</string>
+    <string name="downloads_cancel">هەڵوەشاندنەوە</string>
+    <string name="downloads_retry">دووبارە هەوڵ بدە</string>
+    <string name="downloads_remove">لابردن لە لیست</string>
+    <string name="downloads_error_access">ئەم ڤیدیۆیە پێویستی بە مۆڵەتی چوونە ژوورەوە هەیە.</string>
+    <string name="downloads_error_format">ئەم فۆرماتی ڤیدیۆیە پشتگیری نەکراوە.</string>
+    <string name="downloads_error_network">پەیوەندیەکە چاک نەبووەوە. دووبارە تاقی بکەوە.</string>
+    <string name="downloads_error_storage">نەیتوانی فایلەکە پاشەکەوت بکات. شوێنی هەمارگە بپشکنە.</string>
+    <string name="downloads_error_server">سێرڤەرەکە نەیتوانی داگرتنەکە جێبەجێ بکات.</string>
+    <string name="downloads_error_unknown">هەڵەیەک ڕوویدا لەکاتی داگرتن.</string>
+    <string name="downloads_command_failed">نەیتوانی داگرتنەکە نوێ بکاتەوە. دووبارە تاقی بکەوە.</string>
+    <string name="downloads_delete_pending">خاوێنکردنەوەی سڕینەوە پێویستە</string>
+    <string name="downloads_delete_retry">دووبارە هەوڵدان بۆ سڕینەوە</string>
+    <string name="downloads_delete_group_count">پاککردنەوەی سڕینەوە %1$d</string>
+    <string name="downloads_error_drm">ڤیدیۆی پارێزراو ناتوانرێت دابگیرێت.</string>
+</resources>

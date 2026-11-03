@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">ڏسڻ جاري رکجي؟</string>
+    <string name="player_resume_message">توهان ڏٺو %1$s تائين.</string>
+    <string name="player_resume_continue">جاري رکو</string>
+    <string name="player_resume_restart">شروع ڪريو</string>
+    <string name="player_history_failure">پلے بيڪ تاريخ لوڊ يا محفوظ نه ٿي سگهي.</string>
+    <string name="player_settings_failure">پلے بيڪ سيٽنگون محفوظ نه ٿي سگهيون.</string>
+    <string name="player_speed">پلے بيڪ رفتار</string>
+    <string name="player_speed_value">پلے بيڪ رفتار · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">هي وڊيو ٻيهر دوهرائيندو</string>
+    <string name="player_options_close">بند ڪريو</string>
+</resources>

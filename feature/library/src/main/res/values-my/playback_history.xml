@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">မကြာသေးခင်တွင် ဖွင့်ကြည့်ခဲ့သော</string>
+    <string name="library_recently_played_empty_title">မကြာသေးခင်တွင် ဖွင့်ကြည့်ခဲ့သော ဗီဒီယို မရှိပါ</string>
+    <string name="library_recently_played_empty_description">ဗီဒီယိုတစ်ခု ဖွင့်ကြည့်ပြီးမှ ဒီနေရာမှာမြင်နိုင်ပါသည်။ စစ်ထုတ်မှုများ လုပ်ထားပါက၊ တိုးချဲ့ရန် ကြိုးစားပါ။</string>
+</resources>

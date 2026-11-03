@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Inafaa kutazama tena?\nIhifadhi kwa kiungo.</string>
+    <string name="home_description">Tafuta video za kuhifadhi kutoka kwa kiungo cha ukurasa.</string>
+    <string name="home_url_label">Anwani ya wavuti</string>
+    <string name="home_invalid_url">Weka kiungo kinachoanza na http:// au https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Bandika</string>
+    <string name="home_analyze">Tafuta video</string>
+    <string name="home_open_settings">Mipangilio</string>
+    <string name="home_hide_results">Ficha matokeo</string>
+    <string name="home_show_results">Onyesha matokeo pamoja na ingizo</string>
+    <string name="home_web_prompt_title">Je, bado huna kiungo?</string>
+    <string name="home_web_prompt_description">Tafuta ukurasa bila kiungo.</string>
+    <string name="home_browse_web">Vinjari wavuti</string>
+    <string name="home_current_activity">Shughuli ya sasa</string>
+    <string name="home_clipboard_found">Kiungo kilichonakiliwa kinapatikana</string>
+    <string name="home_use_link">Bandika</string>
+    <string name="home_dismiss">Ondoa</string>
+    <string name="home_clipboard_consent_title">Pendekeza viungo vilivyonakiliwa?</string>
+    <string name="home_clipboard_consent_description">Dambom inapofunguliwa, inaweza kuangalia ubao wa kunakili kwa anwani ya wavuti na kupendekeza kuijaza. Haichanganui au kupakua kiotomatiki.</string>
+    <string name="home_clipboard_consent_allow">Ruhusu mapendekezo</string>
+    <string name="home_clipboard_consent_deny">Bandika wewe mwenyewe</string>
+    <string name="home_clipboard_save_failed">Haikuweza kuhifadhi mapendeleo yako. Tafadhali jaribu tena.</string>
+    <string name="home_shared_url_title">Kiungo kilichoshirikiwa kimepokelewa</string>
+    <string name="home_shared_url_description">Kagua kiungo, kisha anza kutafuta video.</string>
+    <string name="home_analyze_now">Tafuta video</string>
+    <string name="home_cancel">Ghairi</string>
+    <string name="home_download_active">%1$d inapakua</string>
+    <string name="home_download_paused">%1$d imesitishwa</string>
+    <string name="home_download_failed">Vipakuliwa vya %1$d vinahitaji kuzingatiwa</string>
+    <string name="home_download_open">Tazama hali ya upakuaji</string>
+</resources>

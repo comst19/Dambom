@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Hakuna hifadhi ya kutosha. Futa nafasi na ujaribu tena.</string>
+    <string name="downloads_summary_waiting">Inasubiri kupakua</string>
+    <string name="downloads_summary_paused">Upakuaji umesitishwa</string>
+    <string name="downloads_summary_attention">Vipakuliwa vinahitaji kuzingatiwa</string>
+    <string name="downloads_quality_original">Asili</string>
+    <string name="downloads_title">Vipakuliwa</string>
+    <string name="downloads_back">Nyuma</string>
+    <string name="downloads_view_as_list">Tazama kama orodha</string>
+    <string name="downloads_view_as_grid">Tazama kama gridi ya taifa</string>
+    <string name="downloads_empty_title">Hakuna upakuaji unaoendelea</string>
+    <string name="downloads_empty_description">Vipakuliwa vilivyokamilika viko tayari kutazamwa katika maktaba yako.</string>
+    <string name="downloads_open_library">Fungua maktaba</string>
+    <string name="downloads_summary">%1$d inapakua</string>
+    <string name="downloads_summary_remaining">%1$d iliyosalia</string>
+    <string name="downloads_pause_all">Sitisha yote</string>
+    <string name="downloads_resume_all">Rejesha zote</string>
+    <string name="downloads_group_active">Inapakua</string>
+    <string name="downloads_group_queued">Imewekwa kwenye foleni</string>
+    <string name="downloads_group_paused">Imesitishwa</string>
+    <string name="downloads_group_failed">Imeshindwa</string>
+    <string name="downloads_group_completed">Imekamilika</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">kijipicha cha %1$s</string>
+    <string name="downloads_unknown_size">Jumla ya saizi haijulikani</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Maendeleo ya vipakuliwa vilivyosalia</string>
+    <string name="downloads_pause">Sitisha</string>
+    <string name="downloads_resume">Endelea</string>
+    <string name="downloads_cancel">Ghairi</string>
+    <string name="downloads_retry">Jaribu tena</string>
+    <string name="downloads_remove">Ondoa kwenye orodha</string>
+    <string name="downloads_error_access">Video hii inahitaji idhini ya ufikiaji.</string>
+    <string name="downloads_error_format">Umbizo hili la video halitumiki.</string>
+    <string name="downloads_error_network">Muunganisho haukurejea. Jaribu tena.</string>
+    <string name="downloads_error_storage">Haikuweza kuhifadhi faili. Angalia nafasi ya kuhifadhi.</string>
+    <string name="downloads_error_server">Seva haikuweza kuchakata upakuaji.</string>
+    <string name="downloads_error_unknown">Hitilafu fulani imetokea wakati wa kupakua.</string>
+    <string name="downloads_command_failed">Haikuweza kusasisha upakuaji. Jaribu tena.</string>
+    <string name="downloads_delete_pending">Usafishaji wa ufutaji unahitajika</string>
+    <string name="downloads_delete_retry">Jaribu tena kufuta</string>
+    <string name="downloads_delete_group_count">Usafishaji wa ufutaji %1$d</string>
+    <string name="downloads_error_drm">Video zilizolindwa haziwezi kupakuliwa.</string>
+</resources>

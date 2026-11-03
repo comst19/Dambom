@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Edlalwe muva nje</string>
+    <string name="library_recently_played_empty_title">Azikho ividiyo ezidlalwe muva nje</string>
+    <string name="library_recently_played_empty_description">Dlala ividiyo ukuze uyibone lapha. Uma izihlungi zisebenza, zama ukuzenza zihluke.</string>
+</resources>

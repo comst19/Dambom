@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">প্লেবেক অৱস্থান</string>
+    <string name="playback_rewind">পিছলৈ ১০ ছেকেণ্ড</string>
+    <string name="playback_play">খেলা</string>
+    <string name="playback_pause">থমকি ৰ\'ব</string>
+    <string name="playback_forward">আগলৈ ১০ ছেকেণ্ড</string>
+</resources>

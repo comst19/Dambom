@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="root_back_hint">నిష్క్రమించడానికి మళ్లీ వెనుకకు నొక్కండి.</string>
+    <string name="startup_initialization_failed">యాప్‌ను ప్రారంభించడం సాధ్యపడలేదు.</string>
+    <string name="destination_home">హోమ్</string>
+    <string name="destination_library">లైబ్రరీ</string>
+    <string name="network_offline_banner">ఇంటర్నెట్ కనెక్షన్ లేదు. నెట్‌వర్క్ ఫీచర్‌లు తాత్కాలికంగా అందుబాటులో లేవు.</string>
+    <string name="network_unmetered_banner">Wi-Fi కోసం వేచి ఉంది. డౌన్‌లోడ్‌లు స్వయంచాలకంగా పునఃప్రారంభించబడతాయి.</string>
+    <string name="download_feedback_failed">%1$s డౌన్‌లోడ్ చేయడం సాధ్యపడలేదు.</string>
+    <string name="download_feedback_failed_multiple">%1$d వీడియోలను డౌన్‌లోడ్ చేయడం సాధ్యపడలేదు.</string>
+    <string name="download_recovery_failed">పెండింగ్‌లో ఉన్న డౌన్‌లోడ్‌లను పునరుద్ధరించడం సాధ్యపడలేదు. డౌన్‌లోడ్‌ల నుండి మళ్లీ ప్రయత్నించండి.</string>
+</resources>

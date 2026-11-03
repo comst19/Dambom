@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">تم تشغيله مؤخرًا</string>
+    <string name="library_recently_played_empty_title">لا توجد مقاطع فيديو تم تشغيلها مؤخرًا</string>
+    <string name="library_recently_played_empty_description">شغّل مقطع فيديو لرؤيته هنا. إذا كانت الفلاتر مفعلة، جرب تغييرها.</string>
+</resources>

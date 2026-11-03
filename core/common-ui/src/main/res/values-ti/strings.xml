@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">ናይ ምጽዋት ቦታ</string>
+    <string name="playback_rewind">ንድሕሪት 10 ካልኢት</string>
+    <string name="playback_play">ጸወታ</string>
+    <string name="playback_pause">ደው ምባል</string>
+    <string name="playback_forward">ንቕድሚት 10 ካልኢት</string>
+</resources>

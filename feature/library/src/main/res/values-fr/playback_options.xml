@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Continuer à regarder ?</string>
+    <string name="player_resume_message">Vous avez regardé jusqu\'à %1$s .</string>
+    <string name="player_resume_continue">Continuer</string>
+    <string name="player_resume_restart">Recommencer</string>
+    <string name="player_history_failure">Impossible de charger ou d\'enregistrer l\'historique de lecture.</string>
+    <string name="player_settings_failure">Impossible d\'enregistrer les paramètres de lecture.</string>
+    <string name="player_speed">Vitesse de lecture</string>
+    <string name="player_speed_value">Vitesse de lecture · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Répéter cette vidéo</string>
+    <string name="player_options_close">Fermer</string>
+</resources>

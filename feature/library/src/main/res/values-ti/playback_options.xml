@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">ምርኣይ ቀጺሉ?</string>
+    <string name="player_resume_message">ክሳዕ %1$s ርኢኻዮ።</string>
+    <string name="player_resume_continue">ቀጽል</string>
+    <string name="player_resume_restart">ከም ብሓድሽ ጀምር</string>
+    <string name="player_history_failure">ታሪኽ ጸወታታት ክዕቀብ ወይ ክዕቅብ ኣይከኣለን።</string>
+    <string name="player_settings_failure">ናይ ጸወታ መዐቀኒታት ክዕቀብ ኣይከኣለን።</string>
+    <string name="player_speed">ናይ ጸወታ ፍጥነት</string>
+    <string name="player_speed_value">ናይ ጸወታ ፍጥነት · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">ነዛ ቪድዮ እዚኣ ድገማ</string>
+    <string name="player_options_close">ምዕጻው</string>
+</resources>

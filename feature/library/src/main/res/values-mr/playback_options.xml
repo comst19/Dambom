@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">पाहणे सुरू ठेवायचे का?</string>
+    <string name="player_resume_message">तुम्ही %1$s पर्यंत पाहिले.</string>
+    <string name="player_resume_continue">सुरू ठेवा</string>
+    <string name="player_resume_restart">पुन्हा सुरू करा</string>
+    <string name="player_history_failure">प्लेबॅक इतिहास लोड किंवा जतन करता आले नाही.</string>
+    <string name="player_settings_failure">प्लेबॅक सेटिंग्ज जतन करता आले नाहीत.</string>
+    <string name="player_speed">प्लेबॅक गती</string>
+    <string name="player_speed_value">प्लेबॅक गती · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">हा व्हिडिओ पुनरावृत्ती करा</string>
+    <string name="player_options_close">बंद करा</string>
+</resources>

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">ફરીથી જોવા યોગ્ય છે?\nતેને લિંક સાથે સાચવો.</string>
+    <string name="home_description">પૃષ્ઠ લિંકમાંથી સાચવવા માટે વિડિઓઝ શોધો.</string>
+    <string name="home_url_label">વેબ સરનામું</string>
+    <string name="home_invalid_url">http:// અથવા https://. થી શરૂ થતી લિંક દાખલ કરો</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">પેસ્ટ કરો</string>
+    <string name="home_analyze">વિડિઓઝ શોધો</string>
+    <string name="home_open_settings">સેટિંગ્સ</string>
+    <string name="home_hide_results">પરિણામો છુપાવો</string>
+    <string name="home_show_results">ઇનપુટની સાથે પરિણામો બતાવો</string>
+    <string name="home_web_prompt_title">હજુ સુધી કોઈ લિંક નથી?</string>
+    <string name="home_web_prompt_description">લિંક વગરનું પેજ શોધો.</string>
+    <string name="home_browse_web">વેબ બ્રાઉઝ કરો</string>
+    <string name="home_current_activity">વર્તમાન પ્રવૃત્તિ</string>
+    <string name="home_clipboard_found">કૉપિ કરેલી લિંક ઉપલબ્ધ છે</string>
+    <string name="home_use_link">પેસ્ટ કરો</string>
+    <string name="home_dismiss">કાઢી નાખો</string>
+    <string name="home_clipboard_consent_title">કૉપિ કરેલી લિંક્સ સૂચવો છો?</string>
+    <string name="home_clipboard_consent_description">જ્યારે Dambom ખુલે છે, ત્યારે તે વેબ એડ્રેસ માટે ક્લિપબોર્ડ તપાસી શકે છે અને તેને ભરવાનું સૂચન કરી શકે છે. તે ક્યારેય વિશ્લેષણ કે આપમેળે ડાઉનલોડ થતું નથી.</string>
+    <string name="home_clipboard_consent_allow">સૂચનોને મંજૂરી આપો</string>
+    <string name="home_clipboard_consent_deny">મેન્યુઅલી પેસ્ટ કરો</string>
+    <string name="home_clipboard_save_failed">તમારી પસંદગી સાચવી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો.</string>
+    <string name="home_shared_url_title">શેર કરેલી લિંક પ્રાપ્ત થઈ</string>
+    <string name="home_shared_url_description">લિંકની સમીક્ષા કરો, પછી વિડિઓઝ શોધવાનું શરૂ કરો.</string>
+    <string name="home_analyze_now">વિડિઓઝ શોધો</string>
+    <string name="home_cancel">રદ કરો</string>
+    <string name="home_download_active">%1$d ડાઉનલોડ કરી રહ્યું છે</string>
+    <string name="home_download_paused">%1$d થોભાવ્યું</string>
+    <string name="home_download_failed">%1$d ડાઉનલોડ પર ધ્યાન આપવાની જરૂર છે</string>
+    <string name="home_download_open">ડાઉનલોડ સ્થિતિ જુઓ</string>
+</resources>

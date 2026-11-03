@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="root_back_hint">പുറത്തുകടക്കാൻ വീണ്ടും വീണ്ടും അമർത്തുക.</string>
+    <string name="startup_initialization_failed">ആപ്പ് ആരംഭിക്കാനായില്ല.</string>
+    <string name="destination_home">വീട്</string>
+    <string name="destination_library">ലൈബ്രറി</string>
+    <string name="network_offline_banner">ഇൻ്റർനെറ്റ് കണക്ഷനില്ല. നെറ്റ്‌വർക്ക് സവിശേഷതകൾ താൽക്കാലികമായി ലഭ്യമല്ല.</string>
+    <string name="network_unmetered_banner">Wi-Fi -നായി കാത്തിരിക്കുന്നു. ഡൗൺലോഡുകൾ സ്വയമേവ പുനരാരംഭിക്കുന്നു.</string>
+    <string name="download_feedback_failed">%1$s ഡൗൺലോഡ് ചെയ്യാനായില്ല.</string>
+    <string name="download_feedback_failed_multiple">%1$d വീഡിയോകൾ ഡൗൺലോഡ് ചെയ്യാനായില്ല.</string>
+    <string name="download_recovery_failed">തീർച്ചപ്പെടുത്താത്ത ഡൗൺലോഡുകൾ പുനഃസ്ഥാപിക്കാനായില്ല. ഡൗൺലോഡുകളിൽ നിന്ന് വീണ്ടും ശ്രമിക്കുക.</string>
+</resources>

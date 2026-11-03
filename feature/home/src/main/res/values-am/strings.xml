@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">እንደገና መመልከት ተገቢ ነው?\nበአገናኝ ያስቀምጡት።</string>
+    <string name="home_description">ከገጽ አገናኝ የሚቀመጡ ቪዲዮዎችን ያግኙ።</string>
+    <string name="home_url_label">የድር አድራሻ</string>
+    <string name="home_invalid_url">በ http:// ወይም https://. የሚጀምር ሊንክ አስገባ</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">ለጥፍ</string>
+    <string name="home_analyze">ቪዲዮዎችን ያግኙ</string>
+    <string name="home_open_settings">ቅንብሮች</string>
+    <string name="home_hide_results">ውጤቶችን ደብቅ</string>
+    <string name="home_show_results">ከግቤት ጎን ለጎን ውጤቶችን አሳይ</string>
+    <string name="home_web_prompt_title">እስካሁን አገናኝ የለዎትም?</string>
+    <string name="home_web_prompt_description">አገናኝ የሌለው ገጽ ያግኙ።</string>
+    <string name="home_browse_web">ድሩን ያስሱ</string>
+    <string name="home_current_activity">ወቅታዊ እንቅስቃሴ</string>
+    <string name="home_clipboard_found">የተቀዳ ማገናኛ አለ።</string>
+    <string name="home_use_link">ለጥፍ</string>
+    <string name="home_dismiss">አሰናብት</string>
+    <string name="home_clipboard_consent_title">የተቀዱ ማገናኛዎች ይጠቁሙ?</string>
+    <string name="home_clipboard_consent_description">Dambom ሲከፈት የድረ-ገጽ አድራሻ ለማግኘት ክሊፕቦርዱን በመፈተሽ እንዲሞላው ሃሳብ ማቅረብ ይችላል።</string>
+    <string name="home_clipboard_consent_allow">ጥቆማዎችን ፍቀድ</string>
+    <string name="home_clipboard_consent_deny">በእጅ ለጥፍ</string>
+    <string name="home_clipboard_save_failed">ምርጫዎን ማስቀመጥ አልተቻለም። እባክህ እንደገና ሞክር።</string>
+    <string name="home_shared_url_title">የተጋራ አገናኝ ደርሷል</string>
+    <string name="home_shared_url_description">አገናኙን ይገምግሙ እና ቪዲዮዎችን ማግኘት ይጀምሩ።</string>
+    <string name="home_analyze_now">ቪዲዮዎችን ያግኙ</string>
+    <string name="home_cancel">ሰርዝ</string>
+    <string name="home_download_active">%1$d በማውረድ ላይ</string>
+    <string name="home_download_paused">%1$d ባለበት ቆሟል</string>
+    <string name="home_download_failed">%1$d ውርዶች ትኩረት ያስፈልጋቸዋል</string>
+    <string name="home_download_open">የማውረድ ሁኔታን ይመልከቱ</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">ਹਾਲ ਹੀ ਵਿੱਚ ਖੇਡਿਆ ਗਿਆ</string>
+    <string name="library_recently_played_empty_title">ਕੋਈ ਹਾਲ ਹੀ ਵਿੱਚ ਖੇਡਿਆ ਗਿਆ ਵੀਡੀਓ ਨਹੀਂ</string>
+    <string name="library_recently_played_empty_description">ਇੱਥੇ ਦੇਖਣ ਲਈ ਕੋਈ ਵੀਡੀਓ ਚਲਾਓ। ਜੇ ਫਿਲਟਰ ਸਰਗਰਮ ਹਨ, ਤਾਂ ਉਨ੍ਹਾਂ ਨੂੰ ਬਦਲ ਕੇ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Di van demên dawî de hate lîstin</string>
+    <string name="library_recently_played_empty_title">Vîdyoyên ku di demên dawî de hatine lîstin tune</string>
+    <string name="library_recently_played_empty_description">Ji bo dîtina wê li vir vîdeoyekê bilîze. Ger fîltre çalak bin, biceribînin ku wan biguherînin.</string>
+</resources>

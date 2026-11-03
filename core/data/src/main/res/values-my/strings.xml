@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">သိုလှောင်မှု မလုံလောက်ပါ။ နေရာလွတ်နှင့် ထပ်စမ်းကြည့်ပါ- %1$s</string>
+    <string name="download_notification_channel">ဒေါင်းလုဒ်များ</string>
+    <string name="download_notification_title">Dambom သည် ဗီဒီယိုများကို ဒေါင်းလုဒ်လုပ်နေပါသည်။</string>
+    <string name="download_notification_description">ပြန်လည်ချိတ်ဆက်ပြီးနောက် သိမ်းဆည်းထားသောနေရာမှ ဒေါင်းလုဒ်များ ပြန်လည်စတင်သည်။</string>
+    <string name="download_result_notification_channel">ဒေါင်းလုဒ်ရလဒ်များ</string>
+    <string name="download_notification_progress_title">%1$s ကို ဒေါင်းလုဒ်လုပ်နေသည်။</string>
+    <string name="download_notification_progress">%1$d %% ပြီးပါပြီ။</string>
+    <string name="download_notification_completed">ဒေါင်းလုဒ် ပြီးပါပြီ။</string>
+    <string name="download_notification_completed_description">%1$s ကို သင့်စာကြည့်တိုက်တွင် သိမ်းဆည်းထားသည်။</string>
+    <string name="download_notification_failed">ဒေါင်းလုဒ် မအောင်မြင်ပါ။</string>
+    <string name="download_notification_failed_description">%1$s ကို ထပ်မံဒေါင်းလုဒ်လုပ်ကြည့်ပါ။</string>
+    <string name="download_notification_failed_network">%1$s အတွက် ကွန်ရက်ချိတ်ဆက်မှုကို စစ်ဆေးပါ။</string>
+    <string name="download_notification_failed_storage">%1$s အတွက် ရနိုင်သော သိုလှောင်မှုကို စစ်ဆေးပါ။</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Kürzlich gespielt</string>
+    <string name="library_recently_played_empty_title">Keine kürzlich gespielten Videos</string>
+    <string name="library_recently_played_empty_description">Spiele ein Video ab, um es hier zu sehen. Wenn Filter aktiv sind, versuche, sie zu ändern.</string>
+</resources>

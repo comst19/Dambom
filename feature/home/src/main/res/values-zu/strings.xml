@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Kufanele ukubuka futhi?\nKugcina ngekusixhumanisi.</string>
+    <string name="home_description">Thola amavidiyo ongawagcina kusuka kuxhumanisi lwekhasi.</string>
+    <string name="home_url_label">Ikheli lewebhu</string>
+    <string name="home_invalid_url">Faka isixhumanisi siqale ngo-http:// noma https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Namamathisela</string>
+    <string name="home_analyze">Thola amavidiyo</string>
+    <string name="home_open_settings">Izilungiselelo</string>
+    <string name="home_hide_results">Fihla imiphumela</string>
+    <string name="home_show_results">Khombisa imiphumela eduze kokufaka</string>
+    <string name="home_web_prompt_title">Awukakayitholi isixhumanisi?</string>
+    <string name="home_web_prompt_description">Thola ikhasi elingenasixhumanisi.</string>
+    <string name="home_browse_web">Bhrawuza ku-inthanethi</string>
+    <string name="home_current_activity">Umsebenzi wamanje</string>
+    <string name="home_clipboard_found">Isixhumanisi esikopishiwe siyatholakala</string>
+    <string name="home_use_link">Namamathisela</string>
+    <string name="home_dismiss">Shiya</string>
+    <string name="home_clipboard_consent_title">Phakamisa izixhumanisi ezikopishiwe?</string>
+    <string name="home_clipboard_consent_description">Lapho u- Dambom evula, ungaqinisekisa i-clipboard ukuze ubheke ikheli lewebhu futhi uphakamise ukufaka. Akuhlaziye noma akulandeli ngokuzenzakalela.</string>
+    <string name="home_clipboard_consent_allow">Vumela iziphakamiso</string>
+    <string name="home_clipboard_consent_deny">Namathisela ngokwakho</string>
+    <string name="home_clipboard_save_failed">Akuzenzekanga ukonga okuthandayo. Sicela uzame futhi.</string>
+    <string name="home_shared_url_title">Isixhumanisi esabelwe sitholakele</string>
+    <string name="home_shared_url_description">Bheka isixhumanisi, bese uqala ukuthola amavidiyo.</string>
+    <string name="home_analyze_now">Thola amavidiyo</string>
+    <string name="home_cancel">Khansela</string>
+    <string name="home_download_active">%1$d kusayinelwa</string>
+    <string name="home_download_paused">U- %1$d ume</string>
+    <string name="home_download_failed">Ukulanda kuka- %1$d kudinga ukunakwa</string>
+    <string name="home_download_open">Buka isimo sokulanda</string>
+</resources>

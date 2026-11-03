@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Tsamaeang morao ho bapala</string>
+    <string name="library_recently_played_empty_title">Ha ho livideo tse bapaloang morao</string>
+    <string name="library_recently_played_empty_description">Bapala video ho e bona mona. Haeba limahla li sebetsa, leka ho li fetola.</string>
+</resources>

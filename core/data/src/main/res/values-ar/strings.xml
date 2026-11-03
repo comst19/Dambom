@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">مساحة تخزين غير كافية. قم بتحرير مساحة ثم أعد المحاولة: %1$s</string>
+    <string name="download_notification_channel">التنزيلات</string>
+    <string name="download_notification_title">يقوم Dambom بتنزيل مقاطع الفيديو</string>
+    <string name="download_notification_description">يتم استئناف التنزيلات من النقطة المحفوظة بعد إعادة الاتصال.</string>
+    <string name="download_result_notification_channel">تنزيل النتائج</string>
+    <string name="download_notification_progress_title">تنزيل %1$s</string>
+    <string name="download_notification_progress">اكتمل %1$d %%</string>
+    <string name="download_notification_completed">اكتمل التحميل</string>
+    <string name="download_notification_completed_description">تم حفظ %1$s في مكتبتك.</string>
+    <string name="download_notification_failed">فشل التنزيل</string>
+    <string name="download_notification_failed_description">حاول تنزيل %1$s مرة أخرى.</string>
+    <string name="download_notification_failed_network">تحقق من اتصال الشبكة لـ %1$s .</string>
+    <string name="download_notification_failed_storage">تحقق من مساحة التخزين المتوفرة لـ %1$s .</string>
+</resources>

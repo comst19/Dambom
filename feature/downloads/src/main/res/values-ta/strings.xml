@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">போதுமான சேமிப்பிடம் இல்லை. இடத்தைக் காலி செய்து மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="downloads_summary_waiting">பதிவிறக்க காத்திருக்கிறது</string>
+    <string name="downloads_summary_paused">பதிவிறக்கங்கள் இடைநிறுத்தப்பட்டன</string>
+    <string name="downloads_summary_attention">பதிவிறக்கங்களில் கவனம் தேவை</string>
+    <string name="downloads_quality_original">அசல்</string>
+    <string name="downloads_title">பதிவிறக்கங்கள்</string>
+    <string name="downloads_back">மீண்டும்</string>
+    <string name="downloads_view_as_list">பட்டியலாக பார்க்கவும்</string>
+    <string name="downloads_view_as_grid">கட்டமாக பார்க்கவும்</string>
+    <string name="downloads_empty_title">பதிவிறக்கங்கள் எதுவும் நடைபெறவில்லை</string>
+    <string name="downloads_empty_description">முடிக்கப்பட்ட பதிவிறக்கங்கள் உங்கள் லைப்ரரியில் பார்க்க தயாராக உள்ளன.</string>
+    <string name="downloads_open_library">திறந்த நூலகம்</string>
+    <string name="downloads_summary">%1$d பதிவிறக்கம்</string>
+    <string name="downloads_summary_remaining">%1$d மீதமுள்ளது</string>
+    <string name="downloads_pause_all">அனைத்தையும் இடைநிறுத்து</string>
+    <string name="downloads_resume_all">அனைத்தையும் மீண்டும் தொடங்கவும்</string>
+    <string name="downloads_group_active">பதிவிறக்குகிறது</string>
+    <string name="downloads_group_queued">வரிசையில் நிற்கிறது</string>
+    <string name="downloads_group_paused">இடைநிறுத்தப்பட்டது</string>
+    <string name="downloads_group_failed">தோல்வியடைந்தது</string>
+    <string name="downloads_group_completed">முடிந்தது</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s சிறுபடம்</string>
+    <string name="downloads_unknown_size">மொத்த அளவு தெரியவில்லை</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">மீதமுள்ள பதிவிறக்கங்களின் முன்னேற்றம்</string>
+    <string name="downloads_pause">இடைநிறுத்தம்</string>
+    <string name="downloads_resume">ரெஸ்யூம்</string>
+    <string name="downloads_cancel">ரத்துசெய்</string>
+    <string name="downloads_retry">மீண்டும் முயற்சிக்கவும்</string>
+    <string name="downloads_remove">பட்டியலில் இருந்து நீக்கு</string>
+    <string name="downloads_error_access">இந்த வீடியோவிற்கு அணுகல் அனுமதி தேவை.</string>
+    <string name="downloads_error_format">இந்த வீடியோ வடிவம் ஆதரிக்கப்படவில்லை.</string>
+    <string name="downloads_error_network">இணைப்பு மீட்கப்படவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="downloads_error_storage">கோப்பைச் சேமிக்க முடியவில்லை. சேமிப்பக இடத்தை சரிபார்க்கவும்.</string>
+    <string name="downloads_error_server">சர்வரால் பதிவிறக்கத்தைச் செயல்படுத்த முடியவில்லை.</string>
+    <string name="downloads_error_unknown">பதிவிறக்கும் போது ஏதோ தவறு ஏற்பட்டது.</string>
+    <string name="downloads_command_failed">பதிவிறக்கத்தைப் புதுப்பிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="downloads_delete_pending">நீக்குதல் சுத்தம் தேவை</string>
+    <string name="downloads_delete_retry">நீக்க மீண்டும் முயற்சிக்கவும்</string>
+    <string name="downloads_delete_group_count">நீக்குதல் சுத்தம் %1$d</string>
+    <string name="downloads_error_drm">பாதுகாக்கப்பட்ட வீடியோக்களை பதிவிறக்கம் செய்ய முடியாது.</string>
+</resources>

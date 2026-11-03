@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Ingaba ixabiseke ukubukela kwakhona?\nGcina kunye nesikhokelo.</string>
+    <string name="home_description">Fumana iividiyo zokugcina ukusuka kusixhumanisi sephepha.</string>
+    <string name="home_url_label">Idilesi yewebhu</string>
+    <string name="home_invalid_url">Faka isikhokelo siqala nge-http:// okanye https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Namathisela</string>
+    <string name="home_analyze">Fumana iividiyo</string>
+    <string name="home_open_settings">Izicwangciso</string>
+    <string name="home_hide_results">Fihla iziphumo</string>
+    <string name="home_show_results">Bonisa iziphumo eceleni kokufaka</string>
+    <string name="home_web_prompt_title">Awunakuba nexhumo okwamanje?</string>
+    <string name="home_web_prompt_description">Fumana iphepha elingenaxhumo.</string>
+    <string name="home_browse_web">Khangela kwi-intanethi</string>
+    <string name="home_current_activity">Umsebenzi wexesha elikhoyo</string>
+    <string name="home_clipboard_found">Ixhumo elikopiwe liyafumaneka</string>
+    <string name="home_use_link">Namathisela</string>
+    <string name="home_dismiss">Rhoxisa</string>
+    <string name="home_clipboard_consent_title">Phakamisa iikhonkco ezikopiwe?</string>
+    <string name="home_clipboard_consent_description">Xa Dambom ivuliwe, ingajonga ikliphubhodi ukukhangela idilesi yewebhu kwaye icebise ukuyigcwalisa. Ayihlali ihlalutya okanye ikhuphele ngokuzenzekelayo.</string>
+    <string name="home_clipboard_consent_allow">Vumela iziphakamiso</string>
+    <string name="home_clipboard_consent_deny">Namathisela ngesandla</string>
+    <string name="home_clipboard_save_failed">Akukazigcini ukunqwenela kwakho. Nceda uzame kwakhona.</string>
+    <string name="home_shared_url_title">Ixhumano elabelwe lifunyenwe</string>
+    <string name="home_shared_url_description">Jonga uxhumano, emva koko uqale ukufumana iividiyo.</string>
+    <string name="home_analyze_now">Fumana iividiyo</string>
+    <string name="home_cancel">Rhoxisa</string>
+    <string name="home_download_active">%1$d iyakhutshelwa</string>
+    <string name="home_download_paused">%1$d iyekile okwethutyana</string>
+    <string name="home_download_failed">%1$d iinkhetho zokukhuphela zidinga uqwalaselo</string>
+    <string name="home_download_open">Jonga imeko yokukhuphela</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">شوێنی پەخشکردن</string>
+    <string name="playback_rewind">10 چرکە بۆ دواوە</string>
+    <string name="playback_play">یاری</string>
+    <string name="playback_pause">وەستان</string>
+    <string name="playback_forward">پێشەوە 10 چرکە</string>
+</resources>

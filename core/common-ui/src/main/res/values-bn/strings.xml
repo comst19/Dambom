@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">প্লেব্যাক অবস্থান</string>
+    <string name="playback_rewind">10 সেকেন্ড পিছনে</string>
+    <string name="playback_play">খেলুন</string>
+    <string name="playback_pause">বিরতি</string>
+    <string name="playback_forward">10 সেকেন্ড ফরোয়ার্ড করুন</string>
+</resources>

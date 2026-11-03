@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">ڪافي اسٽوريج نه آهي. جاء خالي ڪريو ۽ ٻيهر ڪوشش ڪريو.</string>
+    <string name="downloads_summary_waiting">ڊائون لوڊ ڪرڻ جو انتظار</string>
+    <string name="downloads_summary_paused">ڊائون لوڊ روڪيو ويو</string>
+    <string name="downloads_summary_attention">ڊائون لوڊ تي ڌيان ڏيڻ جي ضرورت آهي</string>
+    <string name="downloads_quality_original">اصل</string>
+    <string name="downloads_title">ڊائون لوڊ</string>
+    <string name="downloads_back">پوئتي</string>
+    <string name="downloads_view_as_list">فهرست جي طور تي ڏسو</string>
+    <string name="downloads_view_as_grid">گرڊ طور ڏسو</string>
+    <string name="downloads_empty_title">ڪا به ڊائون لوڊ جاري آهي</string>
+    <string name="downloads_empty_description">مڪمل ٿيل ڊائون لوڊ توهان جي لائبريري ۾ ڏسڻ لاءِ تيار آهن.</string>
+    <string name="downloads_open_library">کليل لائبريري</string>
+    <string name="downloads_summary">%1$d ڊائون لوڊ</string>
+    <string name="downloads_summary_remaining">%1$d باقي</string>
+    <string name="downloads_pause_all">سڀ روڪيو</string>
+    <string name="downloads_resume_all">سڀ ٻيهر شروع ڪريو</string>
+    <string name="downloads_group_active">ڊائون لوڊ</string>
+    <string name="downloads_group_queued">قطار</string>
+    <string name="downloads_group_paused">روڪيو ويو</string>
+    <string name="downloads_group_failed">ناڪام</string>
+    <string name="downloads_group_completed">مڪمل ٿيو</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s ٺمبر</string>
+    <string name="downloads_unknown_size">مجموعي سائيز نامعلوم</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">باقي ڊائون لوڊ جي ترقي</string>
+    <string name="downloads_pause">روڪ</string>
+    <string name="downloads_resume">ٻيهر شروع ڪريو</string>
+    <string name="downloads_cancel">منسوخ ڪريو</string>
+    <string name="downloads_retry">ٻيهر ڪوشش ڪريو</string>
+    <string name="downloads_remove">فهرست مان هٽايو</string>
+    <string name="downloads_error_access">هن وڊيو کي رسائي جي اجازت جي ضرورت آهي.</string>
+    <string name="downloads_error_format">هي وڊيو فارميٽ سپورٽ نه آهي.</string>
+    <string name="downloads_error_network">ڪنيڪشن بحال نه ٿيو. ٻيهر ڪوشش ڪريو.</string>
+    <string name="downloads_error_storage">فائل محفوظ نه ٿي سگھي. اسٽوريج جي جاء چيڪ ڪريو.</string>
+    <string name="downloads_error_server">سرور ڊائون لوڊ کي پروسيس نه ڪري سگهيو.</string>
+    <string name="downloads_error_unknown">ڊائون لوڊ ڪرڻ دوران ڪجھ غلط ٿي ويو.</string>
+    <string name="downloads_command_failed">ڊائون لوڊ اپڊيٽ نه ٿي سگهيو. ٻيهر ڪوشش ڪريو.</string>
+    <string name="downloads_delete_pending">حذف ڪرڻ جي صفائي جي ضرورت آهي</string>
+    <string name="downloads_delete_retry">ٻيهر ڪوشش ڪريو حذف ڪرڻ</string>
+    <string name="downloads_delete_group_count">حذف ڪرڻ جي صفائي %1$d</string>
+    <string name="downloads_error_drm">محفوظ وڊيوز ڊائون لوڊ نه ٿي ڪري سگھجي.</string>
+</resources>

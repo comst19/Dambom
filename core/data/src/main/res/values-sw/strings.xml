@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Hakuna hifadhi ya kutosha. Futa nafasi na ujaribu tena: %1$s</string>
+    <string name="download_notification_channel">Vipakuliwa</string>
+    <string name="download_notification_title">Dambom inapakua video</string>
+    <string name="download_notification_description">Upakuaji unaendelea kutoka sehemu iliyohifadhiwa baada ya kuunganisha tena.</string>
+    <string name="download_result_notification_channel">Pakua matokeo</string>
+    <string name="download_notification_progress_title">Inapakua %1$s</string>
+    <string name="download_notification_progress">%1$d %% imekamilika</string>
+    <string name="download_notification_completed">Upakuaji umekamilika</string>
+    <string name="download_notification_completed_description">%1$s ilihifadhiwa kwenye Maktaba yako.</string>
+    <string name="download_notification_failed">Imeshindwa kupakua</string>
+    <string name="download_notification_failed_description">Jaribu kupakua %1$s tena.</string>
+    <string name="download_notification_failed_network">Angalia muunganisho wa mtandao wa %1$s .</string>
+    <string name="download_notification_failed_storage">Angalia hifadhi inayopatikana ya %1$s .</string>
+</resources>

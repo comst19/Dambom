@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Koala webo</string>
+    <string name="web_address_placeholder">Kenya aterese ea webo</string>
+    <string name="web_start_title">Fumana livideo ho webo</string>
+    <string name="web_start_description">Boloka matabeng a mangata a bula \'me u lemohe livideo feela ho tab e teng hajoale.</string>
+    <string name="web_open">Bula leqephe</string>
+    <string name="web_recent">Maqephe a morao-rao</string>
+    <string name="web_recent_empty">Ha ho maqephe a etetsoeng morao-rao.</string>
+    <string name="web_go_back">Leqephe le fetileng</string>
+    <string name="web_go_forward">Leqephe le latelang</string>
+    <string name="web_refresh">Ntlafatsa</string>
+    <string name="web_detecting">Ho lemoha</string>
+    <string name="web_open_detected_count">Bula livideo tsa %1$d</string>
+    <string name="web_no_detected_video">Ha ho livideo tse lemohoang</string>
+    <string name="web_rescan">Skena hape</string>
+    <string name="web_playback_hint">Haeba ha ho video e lemohoang, e bapala leqepheng ebe o leka hape.</string>
+    <string name="web_connection_error_title">E sitsoe ho ikopanya le sebaka sa marang-rang</string>
+    <string name="web_connection_error_description">Sebaka sa marang-rang se koetse khokahano kapa ha se fumanehe marang-rang a hajoale.</string>
+    <string name="web_timeout_error_title">Sebaka sa marang-rang se nka nako e telele ho araba</string>
+    <string name="web_timeout_error_description">Emela nakoana ebe o leka hape.</string>
+    <string name="web_unsupported_url_error_title">Aterese ea webo e sa tšehelletsoeng</string>
+    <string name="web_unsupported_url_error_description">Hlahloba hore ena ke aterese ea webo ea HTTP kapa HTTPS .</string>
+    <string name="web_access_error_title">Ho fella ho fumana leqephe</string>
+    <string name="web_access_error_description">Leqephe ha le eo kapa ha u na tumello ea ho le sheba.</string>
+    <string name="web_server_error_title">Sebaka sa marang-rang se sa fumanehe nakoana</string>
+    <string name="web_server_error_description">Sebaka se na le bothata ba seva. Emela hanyane \'me u leke hape.</string>
+    <string name="web_security_error_title">Sebaka se sitoa ho buloa ka tšireletso</string>
+    <string name="web_security_error_description">Setifikeiti sa sona sa tšireletso se haelloa kapa leqephe le ile la lekoa e le le kotsi.</string>
+    <string name="web_unknown_error_title">Leqephe le sitoa ho buloa</string>
+    <string name="web_unknown_error_description">Hlahloba aterese \'me u le bue hape.</string>
+    <string name="web_retry">Leka hape</string>
+    <string name="web_external_download_notice">Dambom e ke ke ea hlokomela kapa ea khoasolla livideo ho sebatli se kantle.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d bula tabo</item>
+        <item quantity="other">%1$d bula matabo</item>
+    </plurals>
+    <string name="web_new_tab">Tabo e ncha</string>
+    <string name="web_close_tab">Koala tabo ea %1$s</string>
+    <string name="web_empty_tab">Tabo e se nang letho</string>
+    <string name="web_tab_actions">Liketso tsa tabo ea hajoale</string>
+    <string name="web_open_external">Bula ho sebatli se tloaelehileng</string>
+    <string name="web_copy_link">Khophi khokahanyo</string>
+    <string name="web_share_link">Arolelana sehokelo</string>
+    <string name="web_link_copied">Sehokelo se kopilitsoe.</string>
+    <string name="web_action_failure">Ha ho na app e ka sebetsang le kopo ena.</string>
+    <string name="web_share_chooser">Arolelana sehokelo</string>
+    <string name="web_drm_protected">Sechaba sena se sirelelitsoe ebile se ke ke sa khoasolloa.</string>
+    <string name="web_unsupported_service">Khoasollo ea livideo tsa YouTube ha e tšehetsoe.</string>
+    <string name="web_drm_excluded">Livideo tse sirelelitsoeng li patiloe lenaneng lena.</string>
+</resources>

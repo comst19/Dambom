@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">موقعیت پخش</string>
+    <string name="playback_rewind">10 ثانیه عقب</string>
+    <string name="playback_play">پخش کنید</string>
+    <string name="playback_pause">مکث</string>
+    <string name="playback_forward">10 ثانیه به جلو</string>
+</resources>

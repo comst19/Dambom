@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Vala iwebhu</string>
+    <string name="web_address_placeholder">Faka idilesi yewebhu</string>
+    <string name="web_start_title">Fumana iividiyo kwiwebhu</string>
+    <string name="web_start_description">Gcina iithebhu ezininzi zivuliwe kwaye ujonge iividiyo kuphela kwithebhu yangoku.</string>
+    <string name="web_open">Vula iphepha</string>
+    <string name="web_recent">Amaphepha akutshanje</string>
+    <string name="web_recent_empty">Akukho maphepha atyelelweyo kutshanje.</string>
+    <string name="web_go_back">Iphepha langaphambili</string>
+    <string name="web_go_forward">Iphepha elilandelayo</string>
+    <string name="web_refresh">Phinda uvuselele</string>
+    <string name="web_detecting">Kuhlolwe</string>
+    <string name="web_open_detected_count">Vula iividiyo ze- %1$d</string>
+    <string name="web_no_detected_video">Akukho vidiyo ifunyenweyo</string>
+    <string name="web_rescan">Hlola kwakhona</string>
+    <string name="web_playback_hint">Ukuba akukho vidiyo ifunyenweyo, yidlale ekhasini kwaye uzame kwakhona.</string>
+    <string name="web_connection_error_title">Ayikwazanga ukudibana nendawo</string>
+    <string name="web_connection_error_description">Indawo ivalile ukudibana okanye ayifikelelekanga kwinethiwekhi yangoku.</string>
+    <string name="web_timeout_error_title">Indawo ithathe ixesha elide ukuphendula</string>
+    <string name="web_timeout_error_description">Linda umzuzu uze uzame kwakhona.</string>
+    <string name="web_unsupported_url_error_title">Idilesi yewebhu engaxhaswanga</string>
+    <string name="web_unsupported_url_error_description">Jonga ukuba le yiidilesi zewebhu ze- HTTP okanye HTTPS .</string>
+    <string name="web_access_error_title">Ukufikelela kwiphepha kuhlulekile</string>
+    <string name="web_access_error_description">Iphepha alikho okanye awunamvume yokuliqwalasela.</string>
+    <string name="web_server_error_title">Indawo ayifikelelekanga okwexeshana</string>
+    <string name="web_server_error_description">Indawo inengxaki yeseva. Linda umzuzwana kwaye uzame kwakhona.</string>
+    <string name="web_security_error_title">Indawo ayikwazanga ukuvulwa ngokukhuselekileyo</string>
+    <string name="web_security_error_description">Isatifikethi sayo sokhuseleko asisebenzi okanye iphepha lifunyenwe lingakhuselekanga.</string>
+    <string name="web_unknown_error_title">Iphepha alikwazanga ukuvulwa</string>
+    <string name="web_unknown_error_description">Jonga idilesi kwaye uyivule kwakhona.</string>
+    <string name="web_retry">Zama kwakhona</string>
+    <string name="web_external_download_notice">Dambom ayikwazi ukubona okanye ukukhuphela iividiyo kwisikhangeli sangaphandle.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d ithebhu evulekileyo</item>
+        <item quantity="other">%1$d iithebhu ezivulekileyo</item>
+    </plurals>
+    <string name="web_new_tab">Ithebhu entsha</string>
+    <string name="web_close_tab">Vala ithebhu %1$s</string>
+    <string name="web_empty_tab">Ithebhu engenanto</string>
+    <string name="web_tab_actions">Izenzo zethebhu yangoku</string>
+    <string name="web_open_external">Vula kwisikhangeli esingagqibekanga</string>
+    <string name="web_copy_link">Kopisha ilinki</string>
+    <string name="web_share_link">Yabelana ngelinki</string>
+    <string name="web_link_copied">Ikhonkco elikhutshelweyo.</string>
+    <string name="web_action_failure">Akukho sicelo sinokuphatha lo mceli mngeni.</string>
+    <string name="web_share_chooser">Yabelana ngelinki</string>
+    <string name="web_drm_protected">Le mithombo yeendaba ikhuselwe kwaye ayinakukhutshelwa.</string>
+    <string name="web_unsupported_service">YouTube ukhuphelo lwevidiyo aluxhaswanga.</string>
+    <string name="web_drm_excluded">Iividiyo ezikhuselweyo zifihliwe kolu luhlu.</string>
+</resources>

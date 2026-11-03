@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Voortgaan om te kyk?</string>
+    <string name="player_resume_message">Jy het gekyk tot by %1$s .</string>
+    <string name="player_resume_continue">Voortgaan</string>
+    <string name="player_resume_restart">Begin oor</string>
+    <string name="player_history_failure">Kon nie afspeelgeskiedenis laai of stoor nie.</string>
+    <string name="player_settings_failure">Kon nie afspeelinstellings stoor nie.</string>
+    <string name="player_speed">Afspeelsnelheid</string>
+    <string name="player_speed_value">Afspeelsnelheid · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Herhaal hierdie video</string>
+    <string name="player_options_close">Sluit</string>
+</resources>

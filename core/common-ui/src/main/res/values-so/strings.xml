@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Booska dib u ciyaarista</string>
+    <string name="playback_rewind">gadaal 10 ilbiriqsi</string>
+    <string name="playback_play">Ciyaar</string>
+    <string name="playback_pause">Jooji</string>
+    <string name="playback_forward">Horey 10 ilbiriqsi</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="root_back_hint">دووبارە دابگرە بۆ گەڕانەوە بۆ دەرچوون.</string>
+    <string name="startup_initialization_failed">نەیتوانی کاربەرنامەکە دەست پێبکات.</string>
+    <string name="destination_home">ماڵ.</string>
+    <string name="destination_library">کتێبخانە</string>
+    <string name="network_offline_banner">پەیوەندی ئینتەرنێت نییە. تایبەتمەندیەکانی تۆڕ بە شێوەیەکی کاتی بەردەست نین.</string>
+    <string name="network_unmetered_banner">چاوەڕێی Wi-Fi . داگرتنەکان بە شێوەیەکی ئۆتۆماتیکی دەست پێدەکەنەوە.</string>
+    <string name="download_feedback_failed">نەیتوانی دابەزێنرێت %1$s .</string>
+    <string name="download_feedback_failed_multiple">نەیتوانی ڤیدیۆکانی %1$d دابەزێنێت.</string>
+    <string name="download_recovery_failed">نەیتوانی داگرتنە هەڵواسراوەکان بگەڕێنێتەوە. دووبارە هەوڵ بدە لە داگرتنەکان.</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">تازوڏاڏيل</string>
+    <string name="library_recently_played_empty_title">تازوڏاڏيل وڊيوز نه آهن</string>
+    <string name="library_recently_played_empty_description">هتي ڏسڻ لاءِ وڊيو کيڏو. جيڪڏهن فلٽر فعال آهن، انهن کي تبديل ڪرڻ جي ڪوشش ڪريو.</string>
+</resources>

@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">فضای ذخیره‌سازی کافی نیست. فضا را آزاد کنید و دوباره امتحان کنید.</string>
+    <string name="downloads_summary_waiting">در انتظار دانلود</string>
+    <string name="downloads_summary_paused">بارگیری ها متوقف شد</string>
+    <string name="downloads_summary_attention">دانلودها نیاز به توجه دارند</string>
+    <string name="downloads_quality_original">اصل</string>
+    <string name="downloads_title">دانلودها</string>
+    <string name="downloads_back">برگشت</string>
+    <string name="downloads_view_as_list">مشاهده به عنوان فهرست</string>
+    <string name="downloads_view_as_grid">مشاهده به عنوان شبکه</string>
+    <string name="downloads_empty_title">هیچ بارگیری در حال انجام نیست</string>
+    <string name="downloads_empty_description">دانلودهای تمام شده برای تماشا در کتابخانه شما آماده هستند.</string>
+    <string name="downloads_open_library">باز کردن کتابخانه</string>
+    <string name="downloads_summary">دانلود %1$d</string>
+    <string name="downloads_summary_remaining">%1$d باقی مانده است</string>
+    <string name="downloads_pause_all">مکث همه</string>
+    <string name="downloads_resume_all">از سرگیری همه</string>
+    <string name="downloads_group_active">در حال دانلود</string>
+    <string name="downloads_group_queued">در صف</string>
+    <string name="downloads_group_paused">مکث شد</string>
+    <string name="downloads_group_failed">ناموفق</string>
+    <string name="downloads_group_completed">تکمیل شد</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">تصویر کوچک %1$s</string>
+    <string name="downloads_unknown_size">اندازه کل ناشناخته است</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">پیشرفت دانلودهای باقیمانده</string>
+    <string name="downloads_pause">مکث</string>
+    <string name="downloads_resume">رزومه</string>
+    <string name="downloads_cancel">لغو</string>
+    <string name="downloads_retry">دوباره امتحان کنید</string>
+    <string name="downloads_remove">حذف از لیست</string>
+    <string name="downloads_error_access">این ویدیو به مجوز دسترسی نیاز دارد.</string>
+    <string name="downloads_error_format">این قالب ویدیویی پشتیبانی نمی‌شود.</string>
+    <string name="downloads_error_network">اتصال بازیابی نشد. دوباره امتحان کنید.</string>
+    <string name="downloads_error_storage">فایل ذخیره نشد. فضای ذخیره سازی را بررسی کنید.</string>
+    <string name="downloads_error_server">سرور نتوانست دانلود را پردازش کند.</string>
+    <string name="downloads_error_unknown">هنگام دانلود مشکلی پیش آمد.</string>
+    <string name="downloads_command_failed">دانلود به‌روزرسانی نشد. دوباره امتحان کنید.</string>
+    <string name="downloads_delete_pending">پاکسازی حذف مورد نیاز است</string>
+    <string name="downloads_delete_retry">حذف مجدد را امتحان کنید</string>
+    <string name="downloads_delete_group_count">پاکسازی حذف %1$d</string>
+    <string name="downloads_error_drm">ویدیوهای محافظت شده دانلود نمی شوند.</string>
+</resources>

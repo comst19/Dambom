@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Nie genoeg stoorplek nie. Maak spasie vry en probeer weer: %1$s</string>
+    <string name="download_notification_channel">Aflaaie</string>
+    <string name="download_notification_title">Dambom laai video\'s af</string>
+    <string name="download_notification_description">Aflaaie hervat vanaf die gestoor punt nadat herverbinding gemaak is.</string>
+    <string name="download_result_notification_channel">Aflaai resultate</string>
+    <string name="download_notification_progress_title">Besig om %1$s af te laai</string>
+    <string name="download_notification_progress">%1$d %% voltooi</string>
+    <string name="download_notification_completed">Aflaai voltooi</string>
+    <string name="download_notification_completed_description">%1$s is in jou Biblioteek gestoor.</string>
+    <string name="download_notification_failed">Aflaai het misluk</string>
+    <string name="download_notification_failed_description">Probeer om %1$s weer af te laai.</string>
+    <string name="download_notification_failed_network">Kontroleer die netwerkverbinding vir %1$s .</string>
+    <string name="download_notification_failed_storage">Kontroleer beskikbare stoorplek vir %1$s .</string>
+</resources>

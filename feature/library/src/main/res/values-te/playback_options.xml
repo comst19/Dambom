@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">చూడడం కొనసాగించాలా?</string>
+    <string name="player_resume_message">మీరు %1$s వరకు చూశారు.</string>
+    <string name="player_resume_continue">కొనసాగించండి</string>
+    <string name="player_resume_restart">మొదలు నుండి ప్రారంభించండి</string>
+    <string name="player_history_failure">ప్లేబాక్ చరిత్రను లోడ్ చేయడం లేదా సేవ్ చేయడం సాధ్యంకాలేదు.</string>
+    <string name="player_settings_failure">ప్లేబాక్ సెట్టింగ్స్‌ను సేవ్ చేయడం సాధ్యంకాలేదు.</string>
+    <string name="player_speed">ప్లేబాక్ వేగం</string>
+    <string name="player_speed_value">ప్లేబాక్ వేగం · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">ఈ వీడియోను మళ్లీ పునరావృతం చేయండి</string>
+    <string name="player_options_close">మూసివేయండి</string>
+</resources>

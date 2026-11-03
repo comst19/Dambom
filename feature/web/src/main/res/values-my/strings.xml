@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">ဝဘ်ကို ပိတ်ပါ။</string>
+    <string name="web_address_placeholder">ဝဘ်လိပ်စာကို ထည့်ပါ။</string>
+    <string name="web_start_title">ဝဘ်ပေါ်ရှိ ဗီဒီယိုများကို ရှာပါ။</string>
+    <string name="web_start_description">တက်ဘ်များစွာကို ဖွင့်ထားပြီး လက်ရှိတက်ဘ်တွင်သာ ဗီဒီယိုများကို ရှာဖွေပါ။</string>
+    <string name="web_open">စာမျက်နှာဖွင့်ပါ။</string>
+    <string name="web_recent">လတ်တလော စာမျက်နှာများ</string>
+    <string name="web_recent_empty">မကြာသေးမီက ဝင်ကြည့်ခဲ့သည့် စာမျက်နှာများ မရှိပါ။</string>
+    <string name="web_go_back">ယခင်စာမျက်နှာ</string>
+    <string name="web_go_forward">နောက်စာမျက်နှာ</string>
+    <string name="web_refresh">ပြန်လည်စတင်ပါ။</string>
+    <string name="web_detecting">ထောက်လှမ်းခြင်း။</string>
+    <string name="web_open_detected_count">%1$d ဗီဒီယိုများကို ဖွင့်ပါ။</string>
+    <string name="web_no_detected_video">တွေ့ရှိထားသည့် ဗီဒီယိုများ မရှိပါ။</string>
+    <string name="web_rescan">ထပ်မံစကင်ဖတ်ပါ။</string>
+    <string name="web_playback_hint">မည်သည့်ဗီဒီယိုကိုမျှ ရှာမတွေ့ပါက ၎င်းကို စာမျက်နှာပေါ်တွင် ဖွင့်ပြီး ထပ်စမ်းကြည့်ပါ။</string>
+    <string name="web_connection_error_title">ဆိုက်သို့ ချိတ်ဆက်၍မရပါ။</string>
+    <string name="web_connection_error_description">ဆိုက်သည် ချိတ်ဆက်မှုကို ပိတ်လိုက်သည် သို့မဟုတ် လက်ရှိကွန်ရက်တွင် မရရှိနိုင်ပါ။</string>
+    <string name="web_timeout_error_title">ဆိုက်သည် တုံ့ပြန်ရန် အလွန်ကြာပါသည်။</string>
+    <string name="web_timeout_error_description">ခဏစောင့်ပြီး ထပ်စမ်းကြည့်ပါ။</string>
+    <string name="web_unsupported_url_error_title">ပံ့ပိုးမထားသော ဝဘ်လိပ်စာ</string>
+    <string name="web_unsupported_url_error_description">၎င်းသည် HTTP သို့မဟုတ် HTTPS ဝဘ်လိပ်စာဖြစ်ကြောင်း စစ်ဆေးပါ။</string>
+    <string name="web_access_error_title">စာမျက်နှာ အသုံးပြုခွင့် မအောင်မြင်ပါ။</string>
+    <string name="web_access_error_description">စာမျက်နှာ မရှိပါ သို့မဟုတ် ၎င်းကို ကြည့်ရှုရန် သင့်တွင် ခွင့်ပြုချက် မရှိပါ။</string>
+    <string name="web_server_error_title">ဆိုက်ကို ယာယီ မရနိုင်ပါ။</string>
+    <string name="web_server_error_description">ဤဆိုက်တွင် ဆာဗာပြဿနာရှိနေပါသည်။ ခဏစောင့်ပြီး ထပ်စမ်းကြည့်ပါ။</string>
+    <string name="web_security_error_title">ဆိုက်ကို လုံခြုံစွာ ဖွင့်၍မရပါ။</string>
+    <string name="web_security_error_description">၎င်း၏ လုံခြုံရေး လက်မှတ်သည် မမှန်ကန်ပါ သို့မဟုတ် စာမျက်နှာကို မလုံခြုံဟု တွေ့ရှိခဲ့သည်။</string>
+    <string name="web_unknown_error_title">စာမျက်နှာကို ဖွင့်၍မရပါ။</string>
+    <string name="web_unknown_error_description">လိပ်စာကို စစ်ဆေးပြီး ထပ်မံဖွင့်ပါ။</string>
+    <string name="web_retry">ထပ်စမ်းကြည့်ပါ။</string>
+    <string name="web_external_download_notice">Dambom သည် ပြင်ပဘရောက်ဆာမှ ဗီဒီယိုများကို ရှာဖွေခြင်း သို့မဟုတ် ဒေါင်းလုဒ်လုပ်၍မရပါ။</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d တက်ဘ်ကိုဖွင့်ပါ။</item>
+        <item quantity="other">%1$d ဖွင့်ထားသည့် တဘ်များ</item>
+    </plurals>
+    <string name="web_new_tab">တက်ဘ်အသစ်</string>
+    <string name="web_close_tab">%1$s တက်ဘ်ကို ပိတ်ပါ။</string>
+    <string name="web_empty_tab">ဗလာ တက်ဘ်</string>
+    <string name="web_tab_actions">လက်ရှိ တက်ဘ်လုပ်ဆောင်ချက်များ</string>
+    <string name="web_open_external">မူရင်းဘရောက်ဆာတွင် ဖွင့်ပါ။</string>
+    <string name="web_copy_link">လင့်ခ်ကို ကူးယူပါ။</string>
+    <string name="web_share_link">လင့်ခ်ကို မျှဝေပါ။</string>
+    <string name="web_link_copied">လင့်ခ်ကို ကူးယူထားသည်။</string>
+    <string name="web_action_failure">မည်သည့်အက်ပ်မှ ဤတောင်းဆိုချက်ကို ကိုင်တွယ်ဖြေရှင်းနိုင်မည်မဟုတ်ပေ။</string>
+    <string name="web_share_chooser">လင့်ခ်ကို မျှဝေပါ။</string>
+    <string name="web_drm_protected">ဤမီဒီယာကို ကာကွယ်ထားပြီး ဒေါင်းလုဒ်လုပ်၍မရပါ။</string>
+    <string name="web_unsupported_service">YouTube ဗီဒီယိုဒေါင်းလုဒ်များကို ပံ့ပိုးမထားပါ။</string>
+    <string name="web_drm_excluded">ကာကွယ်ထားသော ဗီဒီယိုများကို ဤစာရင်းမှ ဝှက်ထားသည်။</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">അടുത്തിടെ പ്ലേ ചെയ്‌തത്</string>
+    <string name="library_recently_played_empty_title">അടുത്തിടെ പ്ലേ ചെയ്ത വീഡിയോകൾ ഒന്നും ഇല്ല</string>
+    <string name="library_recently_played_empty_description">ഇവിടെ കാണാൻ ഒരു വീഡിയോ പ്ലേ ചെയ്യുക. ഫിൽറ്ററുകൾ പ്രവർത്തിക്കുന്നുണ്ടെങ്കിൽ, അവ മാറ്റാൻ ശ്രമിക്കുക.</string>
+</resources>

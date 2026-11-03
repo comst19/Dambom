@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">पर्याप्त भंडारण नहीं। स्थान खाली करें और पुनः प्रयास करें।</string>
+    <string name="downloads_summary_waiting">डाउनलोड होने की प्रतीक्षा है</string>
+    <string name="downloads_summary_paused">डाउनलोड रोक दिया गया</string>
+    <string name="downloads_summary_attention">डाउनलोड पर ध्यान देने की आवश्यकता है</string>
+    <string name="downloads_quality_original">मूल</string>
+    <string name="downloads_title">डाउनलोड</string>
+    <string name="downloads_back">वापस</string>
+    <string name="downloads_view_as_list">सूची के रूप में देखें</string>
+    <string name="downloads_view_as_grid">ग्रिड के रूप में देखें</string>
+    <string name="downloads_empty_title">कोई डाउनलोड प्रगति पर नहीं है</string>
+    <string name="downloads_empty_description">समाप्त डाउनलोड आपकी लाइब्रेरी में देखने के लिए तैयार हैं।</string>
+    <string name="downloads_open_library">पुस्तकालय खोलें</string>
+    <string name="downloads_summary">%1$d डाउनलोड हो रहा है</string>
+    <string name="downloads_summary_remaining">%1$d शेष</string>
+    <string name="downloads_pause_all">सभी को रोकें</string>
+    <string name="downloads_resume_all">सभी को फिर से शुरू करें</string>
+    <string name="downloads_group_active">डाउनलोड हो रहा है</string>
+    <string name="downloads_group_queued">कतारबद्ध</string>
+    <string name="downloads_group_paused">रोका गया</string>
+    <string name="downloads_group_failed">विफल</string>
+    <string name="downloads_group_completed">पूरा हुआ</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s थंबनेल</string>
+    <string name="downloads_unknown_size">कुल आकार अज्ञात</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">शेष डाउनलोड की प्रगति</string>
+    <string name="downloads_pause">विराम</string>
+    <string name="downloads_resume">बायोडाटा</string>
+    <string name="downloads_cancel">रद्द करें</string>
+    <string name="downloads_retry">पुनः प्रयास करें</string>
+    <string name="downloads_remove">सूची से हटाएँ</string>
+    <string name="downloads_error_access">इस वीडियो के लिए एक्सेस अनुमति की आवश्यकता है।</string>
+    <string name="downloads_error_format">यह वीडियो प्रारूप समर्थित नहीं है।</string>
+    <string name="downloads_error_network">कनेक्शन ठीक नहीं हुआ। पुनः प्रयास करें।</string>
+    <string name="downloads_error_storage">फ़ाइल को सहेजा नहीं जा सका। भंडारण स्थान की जाँच करें.</string>
+    <string name="downloads_error_server">सर्वर डाउनलोड की प्रक्रिया नहीं कर सका।</string>
+    <string name="downloads_error_unknown">डाउनलोड करते समय कुछ गलत हो गया।</string>
+    <string name="downloads_command_failed">डाउनलोड को अपडेट नहीं किया जा सका। पुनः प्रयास करें।</string>
+    <string name="downloads_delete_pending">विलोपन सफ़ाई की आवश्यकता है</string>
+    <string name="downloads_delete_retry">हटाने का पुनः प्रयास करें</string>
+    <string name="downloads_delete_group_count">विलोपन सफ़ाई %1$d</string>
+    <string name="downloads_error_drm">संरक्षित वीडियो डाउनलोड नहीं किए जा सकते।</string>
+</resources>

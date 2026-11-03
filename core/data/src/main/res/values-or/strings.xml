@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">ପର୍ଯ୍ୟାପ୍ତ ଷ୍ଟୋରେଜ୍ ନାହିଁ | ସ୍ଥାନ ଖାଲି କରନ୍ତୁ ଏବଂ ପୁନ ry ଚେଷ୍ଟା କରନ୍ତୁ: %1$s |</string>
+    <string name="download_notification_channel">ଡାଉନଲୋଡ୍ |</string>
+    <string name="download_notification_title">Dambom ଭିଡିଓ ଡାଉନଲୋଡ୍ କରୁଛି |</string>
+    <string name="download_notification_description">ପୁନ recon ସଂଯୋଗ ହେବା ପରେ ସଞ୍ଚିତ ବିନ୍ଦୁରୁ ଡାଉନଲୋଡ୍ ଆରମ୍ଭ ହୁଏ |</string>
+    <string name="download_result_notification_channel">ଫଳାଫଳ ଡାଉନଲୋଡ୍ କରନ୍ତୁ |</string>
+    <string name="download_notification_progress_title">%1$s ଡାଉନଲୋଡ୍ କରୁଛି |</string>
+    <string name="download_notification_progress">%1$d %% ସଂପୂର୍ଣ୍ଣ |</string>
+    <string name="download_notification_completed">ସମ୍ପୂର୍ଣ୍ଣ ଡାଉନଲୋଡ୍ କରନ୍ତୁ |</string>
+    <string name="download_notification_completed_description">%1$s ଆପଣଙ୍କ ଲାଇବ୍ରେରୀରେ ସଞ୍ଚୟ ହୋଇଛି |</string>
+    <string name="download_notification_failed">ଡାଉନଲୋଡ୍ ବିଫଳ ହେଲା |</string>
+    <string name="download_notification_failed_description">%1$s କୁ ପୁଣି ଡାଉନଲୋଡ୍ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ |</string>
+    <string name="download_notification_failed_network">%1$s ପାଇଁ ନେଟୱର୍କ ସଂଯୋଗ ଯାଞ୍ଚ କରନ୍ତୁ |</string>
+    <string name="download_notification_failed_storage">%1$s ପାଇଁ ଉପଲବ୍ଧ ଷ୍ଟୋରେଜ୍ ଯାଞ୍ଚ କରନ୍ତୁ |</string>
+</resources>

@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Kifayət qədər yaddaş yoxdur. Yer boşaltın və yenidən cəhd edin.</string>
+    <string name="downloads_summary_waiting">Endirilməsi gözlənilir</string>
+    <string name="downloads_summary_paused">Yükləmələr dayandırıldı</string>
+    <string name="downloads_summary_attention">Yükləmələrə diqqət lazımdır</string>
+    <string name="downloads_quality_original">Orijinal</string>
+    <string name="downloads_title">Yükləmələr</string>
+    <string name="downloads_back">Geri</string>
+    <string name="downloads_view_as_list">Siyahı kimi baxın</string>
+    <string name="downloads_view_as_grid">Tor kimi baxın</string>
+    <string name="downloads_empty_title">Yükləmələr davam etmir</string>
+    <string name="downloads_empty_description">Tamamlanmış endirmələr kitabxananızda baxmağa hazırdır.</string>
+    <string name="downloads_open_library">Açıq kitabxana</string>
+    <string name="downloads_summary">%1$d endirilir</string>
+    <string name="downloads_summary_remaining">%1$d qalıb</string>
+    <string name="downloads_pause_all">Hamısını dayandırın</string>
+    <string name="downloads_resume_all">Hamısını davam etdirin</string>
+    <string name="downloads_group_active">Yüklənir</string>
+    <string name="downloads_group_queued">Növbədə</string>
+    <string name="downloads_group_paused">Fasilə</string>
+    <string name="downloads_group_failed">Uğursuz oldu</string>
+    <string name="downloads_group_completed">Tamamlandı</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s miniatürü</string>
+    <string name="downloads_unknown_size">Ümumi ölçü məlum deyil</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Qalan endirmələrin gedişi</string>
+    <string name="downloads_pause">Fasilə</string>
+    <string name="downloads_resume">Davam edin</string>
+    <string name="downloads_cancel">Ləğv et</string>
+    <string name="downloads_retry">Yenidən cəhd edin</string>
+    <string name="downloads_remove">Siyahıdan silin</string>
+    <string name="downloads_error_access">Bu video giriş icazəsi tələb edir.</string>
+    <string name="downloads_error_format">Bu video formatı dəstəklənmir.</string>
+    <string name="downloads_error_network">Bağlantı bərpa edilmədi. Yenidən cəhd edin.</string>
+    <string name="downloads_error_storage">Faylı saxlamaq mümkün olmadı. Saxlama yerini yoxlayın.</string>
+    <string name="downloads_error_server">Server endirməni emal edə bilmədi.</string>
+    <string name="downloads_error_unknown">Yükləyərkən xəta baş verdi.</string>
+    <string name="downloads_command_failed">Yükləməni yeniləmək mümkün olmadı. Yenidən cəhd edin.</string>
+    <string name="downloads_delete_pending">Silinmənin təmizlənməsi lazımdır</string>
+    <string name="downloads_delete_retry">Yenidən silməyə cəhd edin</string>
+    <string name="downloads_delete_group_count">Silinmənin təmizlənməsi %1$d</string>
+    <string name="downloads_error_drm">Qorunan videolar endirilə bilməz.</string>
+</resources>

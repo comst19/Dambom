@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">اخیراً پخش شده</string>
+    <string name="library_recently_played_empty_title">هیچ ویدیوی اخیراً پخش شده‌ای وجود ندارد</string>
+    <string name="library_recently_played_empty_description">یک ویدیو پخش کنید تا اینجا نمایش داده شود. اگر فیلترها فعال هستند، سعی کنید آن‌ها را تغییر دهید.</string>
+</resources>

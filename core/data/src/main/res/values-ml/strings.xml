@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">മതിയായ സംഭരണമില്ല. ഇടം സൃഷ്‌ടിച്ച് വീണ്ടും ശ്രമിക്കുക: %1$s</string>
+    <string name="download_notification_channel">ഡൗൺലോഡുകൾ</string>
+    <string name="download_notification_title">Dambom വീഡിയോകൾ ഡൗൺലോഡ് ചെയ്യുന്നു</string>
+    <string name="download_notification_description">വീണ്ടും കണക്‌റ്റുചെയ്‌തതിനുശേഷം സംരക്ഷിച്ച പോയിൻ്റിൽ നിന്ന് ഡൗൺലോഡുകൾ പുനരാരംഭിക്കുന്നു.</string>
+    <string name="download_result_notification_channel">ഡൗൺലോഡ് ഫലങ്ങൾ</string>
+    <string name="download_notification_progress_title">%1$s ഡൗൺലോഡ് ചെയ്യുന്നു</string>
+    <string name="download_notification_progress">%1$d %% പൂർത്തിയായി</string>
+    <string name="download_notification_completed">ഡൗൺലോഡ് പൂർത്തിയായി</string>
+    <string name="download_notification_completed_description">%1$s നിങ്ങളുടെ ലൈബ്രറിയിൽ സംരക്ഷിച്ചു.</string>
+    <string name="download_notification_failed">ഡൗൺലോഡ് പരാജയപ്പെട്ടു</string>
+    <string name="download_notification_failed_description">%1$s വീണ്ടും ഡൗൺലോഡ് ചെയ്യാൻ ശ്രമിക്കുക.</string>
+    <string name="download_notification_failed_network">%1$s എന്നതിനായുള്ള നെറ്റ്‌വർക്ക് കണക്ഷൻ പരിശോധിക്കുക.</string>
+    <string name="download_notification_failed_storage">%1$s -ന് ലഭ്യമായ സംഭരണം പരിശോധിക്കുക.</string>
+</resources>

@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Ne bes e depo. Cihê azad bikin û ji nû ve biceribînin.</string>
+    <string name="downloads_summary_waiting">Li benda dakêşanê ye</string>
+    <string name="downloads_summary_paused">Daxistin rawestiyan</string>
+    <string name="downloads_summary_attention">Dakêşan hewceyê baldariyê ye</string>
+    <string name="downloads_quality_original">Orjînal</string>
+    <string name="downloads_title">Daxistin</string>
+    <string name="downloads_back">Vegere</string>
+    <string name="downloads_view_as_list">Binêre wekî navnîşê</string>
+    <string name="downloads_view_as_grid">Binêre wekî torê</string>
+    <string name="downloads_empty_title">Tu dakêşandin di pêş de tune</string>
+    <string name="downloads_empty_description">Daxistinên qedandî amade ne ku li pirtûkxaneya we temaşe bikin.</string>
+    <string name="downloads_open_library">Pirtûkxane veke</string>
+    <string name="downloads_summary">%1$d dakêşin</string>
+    <string name="downloads_summary_remaining">%1$d maye</string>
+    <string name="downloads_pause_all">Hemî rawestînin</string>
+    <string name="downloads_resume_all">Hemî ji nû ve bidin destpêkirin</string>
+    <string name="downloads_group_active">Daxistin</string>
+    <string name="downloads_group_queued">Li dorê</string>
+    <string name="downloads_group_paused">Rawestiya</string>
+    <string name="downloads_group_failed">Biserneket</string>
+    <string name="downloads_group_completed">Temam</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s thumbnail</string>
+    <string name="downloads_unknown_size">Mezinahiya tevahî nenas</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Pêşveçûna dakêşanên mayî</string>
+    <string name="downloads_pause">Raweste</string>
+    <string name="downloads_resume">Resume</string>
+    <string name="downloads_cancel">Betal bike</string>
+    <string name="downloads_retry">Ji nû ve biceribîne</string>
+    <string name="downloads_remove">Ji navnîşê derxe</string>
+    <string name="downloads_error_access">Vê vîdyoyê destûra gihîştinê hewce dike.</string>
+    <string name="downloads_error_format">Ev formata vîdyoyê nayê piştgirî kirin.</string>
+    <string name="downloads_error_network">Têkilî baş nebû. Dubare bixebitin.</string>
+    <string name="downloads_error_storage">Nekarî pelê hilîne. Cihê hilanînê kontrol bikin.</string>
+    <string name="downloads_error_server">Pêşkêşkar nikarî dakêşanê pêvajo bike.</string>
+    <string name="downloads_error_unknown">Di dema dakêşandinê de tiştek xelet derket.</string>
+    <string name="downloads_command_failed">Nekarî dakêşanê nûve bike. Dubare bixebitin.</string>
+    <string name="downloads_delete_pending">Paqijkirina jêbirinê hewce ye</string>
+    <string name="downloads_delete_retry">Ji nû ve jêbirinê biceribîne</string>
+    <string name="downloads_delete_group_count">Paqijkirina jêbirinê %1$d</string>
+    <string name="downloads_error_drm">Vîdyoyên parastî nayên dakêşandin.</string>
+</resources>

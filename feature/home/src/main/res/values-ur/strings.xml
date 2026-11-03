@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">دوبارہ دیکھنے کے قابل؟\nاسے ایک لنک کے ساتھ محفوظ کریں۔</string>
+    <string name="home_description">صفحہ کے لنک سے محفوظ کرنے کے لیے ویڈیوز تلاش کریں۔</string>
+    <string name="home_url_label">ویب ایڈریس</string>
+    <string name="home_invalid_url">http:// یا https://. سے شروع ہونے والا لنک درج کریں۔</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">چسپاں کریں۔</string>
+    <string name="home_analyze">ویڈیوز تلاش کریں۔</string>
+    <string name="home_open_settings">ترتیبات</string>
+    <string name="home_hide_results">نتائج چھپائیں۔</string>
+    <string name="home_show_results">ان پٹ کے ساتھ نتائج دکھائیں۔</string>
+    <string name="home_web_prompt_title">ابھی تک کوئی لنک نہیں ہے؟</string>
+    <string name="home_web_prompt_description">بغیر کسی لنک کے صفحہ تلاش کریں۔</string>
+    <string name="home_browse_web">ویب براؤز کریں۔</string>
+    <string name="home_current_activity">موجودہ سرگرمی</string>
+    <string name="home_clipboard_found">کاپی شدہ لنک دستیاب ہے۔</string>
+    <string name="home_use_link">چسپاں کریں۔</string>
+    <string name="home_dismiss">برطرف</string>
+    <string name="home_clipboard_consent_title">کاپی شدہ لنکس تجویز کریں؟</string>
+    <string name="home_clipboard_consent_description">جب Dambom کھلتا ہے، تو یہ ویب ایڈریس کے لیے کلپ بورڈ کو چیک کر سکتا ہے اور اسے بھرنے کا مشورہ دے سکتا ہے۔ یہ کبھی خود بخود تجزیہ یا ڈاؤن لوڈ نہیں ہوتا ہے۔</string>
+    <string name="home_clipboard_consent_allow">تجاویز کی اجازت دیں۔</string>
+    <string name="home_clipboard_consent_deny">دستی طور پر پیسٹ کریں۔</string>
+    <string name="home_clipboard_save_failed">آپ کی ترجیح کو محفوظ نہیں کیا جا سکا۔ براہ کرم دوبارہ کوشش کریں۔</string>
+    <string name="home_shared_url_title">مشترکہ لنک موصول ہوا۔</string>
+    <string name="home_shared_url_description">لنک کا جائزہ لیں، پھر ویڈیوز تلاش کرنا شروع کریں۔</string>
+    <string name="home_analyze_now">ویڈیوز تلاش کریں۔</string>
+    <string name="home_cancel">منسوخ کریں۔</string>
+    <string name="home_download_active">%1$d ڈاؤن لوڈ ہو رہا ہے۔</string>
+    <string name="home_download_paused">%1$d روک دیا گیا۔</string>
+    <string name="home_download_failed">%1$d ڈاؤن لوڈ پر توجہ کی ضرورت ہے۔</string>
+    <string name="home_download_open">ڈاؤن لوڈ کی حیثیت دیکھیں</string>
+</resources>

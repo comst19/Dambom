@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">ਕਾਫ਼ੀ ਸਟੋਰੇਜ ਨਹੀਂ ਹੈ। ਜਗ੍ਹਾ ਖਾਲੀ ਕਰੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ: %1$s</string>
+    <string name="download_notification_channel">ਡਾਊਨਲੋਡ</string>
+    <string name="download_notification_title">Dambom ਵੀਡੀਓ ਡਾਊਨਲੋਡ ਕਰ ਰਿਹਾ ਹੈ</string>
+    <string name="download_notification_description">ਮੁੜ ਕਨੈਕਟ ਕਰਨ ਤੋਂ ਬਾਅਦ ਸੁਰੱਖਿਅਤ ਕੀਤੇ ਬਿੰਦੂ ਤੋਂ ਡਾਊਨਲੋਡ ਮੁੜ ਸ਼ੁਰੂ ਹੁੰਦੇ ਹਨ।</string>
+    <string name="download_result_notification_channel">ਨਤੀਜੇ ਡਾਊਨਲੋਡ ਕਰੋ</string>
+    <string name="download_notification_progress_title">%1$s ਨੂੰ ਡਾਊਨਲੋਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ</string>
+    <string name="download_notification_progress">%1$d %% ਪੂਰਾ</string>
+    <string name="download_notification_completed">ਡਾਊਨਲੋਡ ਪੂਰਾ ਹੋਇਆ</string>
+    <string name="download_notification_completed_description">%1$s ਤੁਹਾਡੀ ਲਾਇਬ੍ਰੇਰੀ ਵਿੱਚ ਸੁਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ ਸੀ।</string>
+    <string name="download_notification_failed">ਡਾਊਨਲੋਡ ਅਸਫਲ ਰਿਹਾ</string>
+    <string name="download_notification_failed_description">%1$s ਨੂੰ ਦੁਬਾਰਾ ਡਾਊਨਲੋਡ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="download_notification_failed_network">%1$s ਲਈ ਨੈੱਟਵਰਕ ਕਨੈਕਸ਼ਨ ਦੀ ਜਾਂਚ ਕਰੋ।</string>
+    <string name="download_notification_failed_storage">%1$s ਲਈ ਉਪਲਬਧ ਸਟੋਰੇਜ ਦੀ ਜਾਂਚ ਕਰੋ।</string>
+</resources>

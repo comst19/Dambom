@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Baru diputar</string>
+    <string name="library_recently_played_empty_title">Tidak ada video yang baru diputar</string>
+    <string name="library_recently_played_empty_description">Putar video untuk melihatnya di sini. Jika filter aktif, coba ubah filter tersebut.</string>
+</resources>

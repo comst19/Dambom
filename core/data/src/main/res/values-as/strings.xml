@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">পৰ্যাপ্ত পৰিমাণৰ সংৰক্ষণ নহয়। স্থান মুক্ত কৰক আৰু পুনৰ চেষ্টা কৰক: %1$s</string>
+    <string name="download_notification_channel">ডাউনলোডসমূহ</string>
+    <string name="download_notification_title">Dambom এ ভিডিঅ\' ডাউনলোড কৰি আছে</string>
+    <string name="download_notification_description">পুনৰ সংযোগ কৰাৰ পিছত সংৰক্ষিত বিন্দুৰ পৰা ডাউনলোডসমূহ পুনৰ আৰম্ভ হয়।</string>
+    <string name="download_result_notification_channel">ডাউনলোড ফলাফল</string>
+    <string name="download_notification_progress_title">%1$s ডাউনলোড কৰা হৈছে</string>
+    <string name="download_notification_progress">%1$d %% সম্পূৰ্ণ</string>
+    <string name="download_notification_completed">ডাউনলোড সম্পূৰ্ণ</string>
+    <string name="download_notification_completed_description">%1$s আপোনাৰ লাইব্ৰেৰীত সংৰক্ষণ কৰা হৈছিল।</string>
+    <string name="download_notification_failed">ডাউনলোড বিফল</string>
+    <string name="download_notification_failed_description">%1$s আকৌ ডাউনলোড কৰিবলৈ চেষ্টা কৰক।</string>
+    <string name="download_notification_failed_network">%1$s ৰ বাবে নে\'টৱৰ্ক সংযোগ পৰীক্ষা কৰক।</string>
+    <string name="download_notification_failed_storage">%1$s ৰ বাবে উপলব্ধ সংৰক্ষণ পৰীক্ষা কৰক।</string>
+</resources>

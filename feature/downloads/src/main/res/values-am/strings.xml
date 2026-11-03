@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">በቂ ማከማቻ የለም። ቦታ ያስለቅቁ እና እንደገና ይሞክሩ።</string>
+    <string name="downloads_summary_waiting">ለማውረድ በመጠባበቅ ላይ</string>
+    <string name="downloads_summary_paused">ውርዶች ባሉበት ቆመዋል</string>
+    <string name="downloads_summary_attention">ውርዶች ትኩረት ያስፈልጋቸዋል</string>
+    <string name="downloads_quality_original">ኦሪጅናል</string>
+    <string name="downloads_title">ውርዶች</string>
+    <string name="downloads_back">ተመለስ</string>
+    <string name="downloads_view_as_list">እንደ ዝርዝር ይመልከቱ</string>
+    <string name="downloads_view_as_grid">እንደ ፍርግርግ ይመልከቱ</string>
+    <string name="downloads_empty_title">ምንም ውርዶች በሂደት ላይ ናቸው።</string>
+    <string name="downloads_empty_description">የተጠናቀቁ ማውረዶች በእርስዎ ቤተ-መጽሐፍት ውስጥ ለመመልከት ዝግጁ ናቸው።</string>
+    <string name="downloads_open_library">ክፍት ቤተ-መጽሐፍት</string>
+    <string name="downloads_summary">%1$d በማውረድ ላይ</string>
+    <string name="downloads_summary_remaining">%1$d ይቀራል</string>
+    <string name="downloads_pause_all">ሁሉንም ለአፍታ አቁም</string>
+    <string name="downloads_resume_all">ሁሉንም ከቆመበት ይቀጥሉ</string>
+    <string name="downloads_group_active">በማውረድ ላይ</string>
+    <string name="downloads_group_queued">ተሰልፏል</string>
+    <string name="downloads_group_paused">ባለበት ቆሟል</string>
+    <string name="downloads_group_failed">አልተሳካም።</string>
+    <string name="downloads_group_completed">ተጠናቀቀ</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s ድንክዬ</string>
+    <string name="downloads_unknown_size">ጠቅላላ መጠን አልታወቀም።</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">የቀሩት ውርዶች ሂደት</string>
+    <string name="downloads_pause">ለአፍታ አቁም</string>
+    <string name="downloads_resume">ከቆመበት ቀጥል</string>
+    <string name="downloads_cancel">ሰርዝ</string>
+    <string name="downloads_retry">እንደገና ይሞክሩ</string>
+    <string name="downloads_remove">ከዝርዝሩ አስወግድ</string>
+    <string name="downloads_error_access">ይህ ቪዲዮ የመዳረሻ ፍቃድ ያስፈልገዋል።</string>
+    <string name="downloads_error_format">ይህ የቪዲዮ ቅርጸት አይደገፍም።</string>
+    <string name="downloads_error_network">ግንኙነቱ አልተመለሰም። እንደገና ይሞክሩ።</string>
+    <string name="downloads_error_storage">ፋይሉን ማስቀመጥ አልተቻለም። የማከማቻ ቦታን ይፈትሹ.</string>
+    <string name="downloads_error_server">አገልጋዩ ማውረዱን ማካሄድ አልቻለም።</string>
+    <string name="downloads_error_unknown">በማውረድ ላይ ሳለ የሆነ ችግር ተፈጥሯል።</string>
+    <string name="downloads_command_failed">ማውረዱን ማዘመን አልተቻለም። እንደገና ይሞክሩ።</string>
+    <string name="downloads_delete_pending">ስረዛን ማጽዳት ያስፈልጋል</string>
+    <string name="downloads_delete_retry">መሰረዝን እንደገና ይሞክሩ</string>
+    <string name="downloads_delete_group_count">ማጽጃ %1$d</string>
+    <string name="downloads_error_drm">የተጠበቁ ቪዲዮዎች ሊወርዱ አይችሉም።</string>
+</resources>

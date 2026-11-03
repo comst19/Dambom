@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">பார்ப்பதை தொடரவோ?</string>
+    <string name="player_resume_message">நீங்கள் %1$s வரை பார்த்தீர்கள்.</string>
+    <string name="player_resume_continue">தொடர்வது</string>
+    <string name="player_resume_restart">மீண்டும் தொடங்கவும்</string>
+    <string name="player_history_failure">பிளேபேக் வரலாற்றை ஏற்றவோ சேமிக்கவோ முடியவில்லை.</string>
+    <string name="player_settings_failure">பிளேபேக் அமைப்புகளை சேமிக்க முடியவில்லை.</string>
+    <string name="player_speed">பிளேபேக் வேகம்</string>
+    <string name="player_speed_value">பிளேபேக் வேகம் · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">இந்த காணொளியை மறுபடி பிளே செய்யவும்</string>
+    <string name="player_options_close">மூடு</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">İzləməyə davam edilsin?</string>
+    <string name="player_resume_message">Siz %1$s hissəsinə qədər izlədiniz.</string>
+    <string name="player_resume_continue">Davam et</string>
+    <string name="player_resume_restart">Yenidən başla</string>
+    <string name="player_history_failure">Oynatma tarixçəsi yüklənə və ya yadda saxlanıla bilmədi.</string>
+    <string name="player_settings_failure">Oynatma parametrləri yadda saxlanıla bilmədi.</string>
+    <string name="player_speed">Oynatma sürəti</string>
+    <string name="player_speed_value">Oynatma sürəti · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Bu videonu təkrar et</string>
+    <string name="player_options_close">Bağla</string>
+</resources>

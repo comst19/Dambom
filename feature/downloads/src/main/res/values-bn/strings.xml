@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">পর্যাপ্ত স্টোরেজ নেই। জায়গা খালি করুন এবং আবার চেষ্টা করুন।</string>
+    <string name="downloads_summary_waiting">ডাউনলোডের অপেক্ষায়</string>
+    <string name="downloads_summary_paused">ডাউনলোড বিরাম দেওয়া হয়েছে৷</string>
+    <string name="downloads_summary_attention">ডাউনলোড মনোযোগ প্রয়োজন</string>
+    <string name="downloads_quality_original">মূল</string>
+    <string name="downloads_title">ডাউনলোড</string>
+    <string name="downloads_back">ফিরে</string>
+    <string name="downloads_view_as_list">তালিকা হিসাবে দেখুন</string>
+    <string name="downloads_view_as_grid">গ্রিড হিসাবে দেখুন</string>
+    <string name="downloads_empty_title">কোনো ডাউনলোড চলছে না</string>
+    <string name="downloads_empty_description">সমাপ্ত ডাউনলোডগুলি আপনার লাইব্রেরিতে দেখার জন্য প্রস্তুত।</string>
+    <string name="downloads_open_library">ওপেন লাইব্রেরি</string>
+    <string name="downloads_summary">%1$d ডাউনলোড হচ্ছে</string>
+    <string name="downloads_summary_remaining">%1$d অবশিষ্ট</string>
+    <string name="downloads_pause_all">সব থামান</string>
+    <string name="downloads_resume_all">সব পুনরায় শুরু করুন</string>
+    <string name="downloads_group_active">ডাউনলোড হচ্ছে</string>
+    <string name="downloads_group_queued">সারিবদ্ধ</string>
+    <string name="downloads_group_paused">বিরতি দেওয়া হয়েছে</string>
+    <string name="downloads_group_failed">ব্যর্থ</string>
+    <string name="downloads_group_completed">সম্পন্ন</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s থাম্বনেইল</string>
+    <string name="downloads_unknown_size">মোট আকার অজানা</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">অবশিষ্ট ডাউনলোডের অগ্রগতি</string>
+    <string name="downloads_pause">বিরতি</string>
+    <string name="downloads_resume">জীবনবৃত্তান্ত</string>
+    <string name="downloads_cancel">বাতিল</string>
+    <string name="downloads_retry">পুনরায় চেষ্টা করুন</string>
+    <string name="downloads_remove">তালিকা থেকে সরান</string>
+    <string name="downloads_error_access">এই ভিডিওটির অ্যাক্সেসের অনুমতি প্রয়োজন।</string>
+    <string name="downloads_error_format">এই ভিডিও বিন্যাসটি সমর্থিত নয়।</string>
+    <string name="downloads_error_network">সংযোগ পুনরুদ্ধার করা হয়নি. আবার চেষ্টা করুন</string>
+    <string name="downloads_error_storage">ফাইলটি সংরক্ষণ করা যায়নি। স্টোরেজ স্পেস চেক করুন।</string>
+    <string name="downloads_error_server">সার্ভার ডাউনলোড প্রক্রিয়া করতে পারেনি।</string>
+    <string name="downloads_error_unknown">ডাউনলোড করার সময় কিছু ভুল হয়েছে।</string>
+    <string name="downloads_command_failed">ডাউনলোড আপডেট করা যায়নি। আবার চেষ্টা করুন</string>
+    <string name="downloads_delete_pending">মুছে ফেলা পরিষ্কার প্রয়োজন</string>
+    <string name="downloads_delete_retry">মুছে ফেলার পুনরায় চেষ্টা করুন</string>
+    <string name="downloads_delete_group_count">মুছে ফেলা পরিষ্কার %1$d</string>
+    <string name="downloads_error_drm">সুরক্ষিত ভিডিও ডাউনলোড করা যাবে না।</string>
+</resources>

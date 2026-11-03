@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">אין מספיק אחסון. פנה מקום ונסה שוב.</string>
+    <string name="downloads_summary_waiting">ממתין להורדה</string>
+    <string name="downloads_summary_paused">ההורדות הושהו</string>
+    <string name="downloads_summary_attention">הורדות דורשות תשומת לב</string>
+    <string name="downloads_quality_original">מקורי</string>
+    <string name="downloads_title">הורדות</string>
+    <string name="downloads_back">חזרה</string>
+    <string name="downloads_view_as_list">הצג כרשימה</string>
+    <string name="downloads_view_as_grid">הצג כרשת</string>
+    <string name="downloads_empty_title">אין הורדות מתבצעות</string>
+    <string name="downloads_empty_description">הורדות שהסתיימו מוכנות לצפייה בספרייה שלך.</string>
+    <string name="downloads_open_library">ספרייה פתוחה</string>
+    <string name="downloads_summary">הורדת %1$d</string>
+    <string name="downloads_summary_remaining">%1$d נותרו</string>
+    <string name="downloads_pause_all">השהה הכל</string>
+    <string name="downloads_resume_all">המשך הכל</string>
+    <string name="downloads_group_active">הורדה</string>
+    <string name="downloads_group_queued">בתור</string>
+    <string name="downloads_group_paused">מושהה</string>
+    <string name="downloads_group_failed">נכשל</string>
+    <string name="downloads_group_completed">הושלם</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">תמונה ממוזערת של %1$s</string>
+    <string name="downloads_unknown_size">גודל כולל לא ידוע</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">התקדמות ההורדות שנותרו</string>
+    <string name="downloads_pause">הפסקה</string>
+    <string name="downloads_resume">קורות חיים</string>
+    <string name="downloads_cancel">בטל</string>
+    <string name="downloads_retry">נסה שוב</string>
+    <string name="downloads_remove">הסר מהרשימה</string>
+    <string name="downloads_error_access">סרטון זה דורש הרשאת גישה.</string>
+    <string name="downloads_error_format">פורמט וידאו זה אינו נתמך.</string>
+    <string name="downloads_error_network">החיבור לא התאושש. נסה שוב.</string>
+    <string name="downloads_error_storage">לא ניתן לשמור את הקובץ. בדוק שטח אחסון.</string>
+    <string name="downloads_error_server">השרת לא הצליח לעבד את ההורדה.</string>
+    <string name="downloads_error_unknown">משהו השתבש במהלך ההורדה.</string>
+    <string name="downloads_command_failed">לא ניתן היה לעדכן את ההורדה. נסה שוב.</string>
+    <string name="downloads_delete_pending">דרוש ניקוי מחיקה</string>
+    <string name="downloads_delete_retry">נסה שוב למחוק</string>
+    <string name="downloads_delete_group_count">ניקוי מחיקה %1$d</string>
+    <string name="downloads_error_drm">לא ניתן להוריד סרטונים מוגנים.</string>
+</resources>

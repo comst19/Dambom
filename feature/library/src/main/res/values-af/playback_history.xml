@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Onlangs gespeel</string>
+    <string name="library_recently_played_empty_title">Geen onlangs gespeelde video\'s nie</string>
+    <string name="library_recently_played_empty_description">Speel \'n video om dit hier te sien. As filtere aktief is, probeer om dit te verander.</string>
+</resources>

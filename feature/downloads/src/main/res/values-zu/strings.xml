@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Akukho okudingekayo esitokweni. Khulula isikhala bese uzama futhi.</string>
+    <string name="downloads_summary_waiting">Silindele ukulanda</string>
+    <string name="downloads_summary_paused">Ukulanda kumisiwe</string>
+    <string name="downloads_summary_attention">Ukulanda kudinga ukunakwa</string>
+    <string name="downloads_quality_original">Yangempela</string>
+    <string name="downloads_title">Okulandwayo</string>
+    <string name="downloads_back">Buyela emuva</string>
+    <string name="downloads_view_as_list">Buka njengohlu</string>
+    <string name="downloads_view_as_grid">Buka njengogridi</string>
+    <string name="downloads_empty_title">Akukho okutholiwe okwamanje</string>
+    <string name="downloads_empty_description">Okutholiwe okuphelile sekulungile ukubukwa emtatsheni wakho wezincwadi.</string>
+    <string name="downloads_open_library">Vula umtapo wezincwadi</string>
+    <string name="downloads_summary">%1$d kusayinelwa</string>
+    <string name="downloads_summary_remaining">%1$d kusele</string>
+    <string name="downloads_pause_all">Misa konke</string>
+    <string name="downloads_resume_all">Qalisa konke futhi</string>
+    <string name="downloads_group_active">Ukulandwayo</string>
+    <string name="downloads_group_queued">Kusemugqa</string>
+    <string name="downloads_group_paused">Kumisiwe</string>
+    <string name="downloads_group_failed">Kuyehluleka</string>
+    <string name="downloads_group_completed">Kuqediwe</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s isithombe esiqoshiwe</string>
+    <string name="downloads_unknown_size">Usayizi ophelele awaziwa</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Inqubekela phambili yokulandwayo okusele</string>
+    <string name="downloads_pause">Misa</string>
+    <string name="downloads_resume">Qalisa futhi</string>
+    <string name="downloads_cancel">Khansela</string>
+    <string name="downloads_retry">Zama futhi</string>
+    <string name="downloads_remove">Susa ohlwini</string>
+    <string name="downloads_error_access">Le vidiyo idinga imvume yokufinyelela.</string>
+    <string name="downloads_error_format">Lolu hlobo lwevidiyo aluxhaswanga.</string>
+    <string name="downloads_error_network">Ukuxhumana akubuyanga. Zama futhi.</string>
+    <string name="downloads_error_storage">Akuqinisekanga ukugcina ifayela. Bheka isikhala sokugcina.</string>
+    <string name="downloads_error_server">Iseva ayikwazanga ukucubungula ukulanda.</string>
+    <string name="downloads_error_unknown">Kube nenkinga ngenkathi kulandwa.</string>
+    <string name="downloads_command_failed">Akuvuselelwanga ukulanda. Zama futhi.</string>
+    <string name="downloads_delete_pending">Kudinga ukuhlanzwa kokususa</string>
+    <string name="downloads_delete_retry">Zama ukususa futhi</string>
+    <string name="downloads_delete_group_count">Ukuhlanzwa kokususa %1$d</string>
+    <string name="downloads_error_drm">Amavidiyo avikelwe awanakulandwa.</string>
+</resources>

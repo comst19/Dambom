@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">بیا د لیدلو وړ؟\nدا د لینک سره خوندي کړئ.</string>
+    <string name="home_description">د پاڼې لینک څخه د خوندي کولو لپاره ویډیوګانې ومومئ.</string>
+    <string name="home_url_label">ویب پته</string>
+    <string name="home_invalid_url">یو لینک داخل کړئ چې د http:// یا https://. سره پیل کیږي</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">پیسټ</string>
+    <string name="home_analyze">ویډیوګانې ومومئ</string>
+    <string name="home_open_settings">ترتیبات</string>
+    <string name="home_hide_results">پایلې پټ کړئ</string>
+    <string name="home_show_results">د ننوت سره سم پایلې وښایاست</string>
+    <string name="home_web_prompt_title">تر اوسه لینک نلرئ؟</string>
+    <string name="home_web_prompt_description">د لینک پرته یوه پاڼه ومومئ.</string>
+    <string name="home_browse_web">ویب لټون وکړئ</string>
+    <string name="home_current_activity">اوسنی فعالیت</string>
+    <string name="home_clipboard_found">یو کاپي شوی لینک شتون لري</string>
+    <string name="home_use_link">پیسټ</string>
+    <string name="home_dismiss">ګوښه کول</string>
+    <string name="home_clipboard_consent_title">کاپي شوي لینکونه وړاندیز کړئ؟</string>
+    <string name="home_clipboard_consent_description">کله چې Dambom خلاصیږي، دا کولی شي د ویب پتې لپاره کلپ بورډ وګوري او د ډکولو وړاندیز وکړي. دا هیڅکله په اتوماتيک ډول تحلیل یا ډاونلوډ نه کوي.</string>
+    <string name="home_clipboard_consent_allow">وړاندیزونو ته اجازه ورکړئ</string>
+    <string name="home_clipboard_consent_deny">په لاسي ډول پیسټ کړئ</string>
+    <string name="home_clipboard_save_failed">نشي کولی ستاسو غوره توب خوندي کړي. مهرباني وکړئ بیا هڅه وکړئ.</string>
+    <string name="home_shared_url_title">شریک شوی لینک ترلاسه شو</string>
+    <string name="home_shared_url_description">لینک بیاکتنه وکړئ، بیا د ویډیوګانو موندل پیل کړئ.</string>
+    <string name="home_analyze_now">ویډیوګانې ومومئ</string>
+    <string name="home_cancel">لغوه</string>
+    <string name="home_download_active">%1$d ډاونلوډ کول</string>
+    <string name="home_download_paused">%1$d ودرول شو</string>
+    <string name="home_download_failed">%1$d ډاونلوډونه پاملرنې ته اړتیا لري</string>
+    <string name="home_download_open">د ډاونلوډ حالت وګورئ</string>
+</resources>

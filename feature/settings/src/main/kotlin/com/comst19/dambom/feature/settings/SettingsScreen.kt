@@ -22,15 +22,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.comst19.dambom.core.common.locale.AppLanguage
 import com.comst19.dambom.core.common.ui.AppScreen
 import com.comst19.dambom.core.common.ui.AppScreenDefaults
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.designsystem.previewNoOp
 import com.comst19.dambom.core.domain.model.ThemeMode
-import com.comst19.dambom.feature.settings.component.APP_LANGUAGE_ENTRIES
 import com.comst19.dambom.feature.settings.component.DeviceSaveActions
 import com.comst19.dambom.feature.settings.component.DownloadSettingsActions
 import com.comst19.dambom.feature.settings.component.GeneralSettingsActions
@@ -45,8 +47,8 @@ import com.comst19.dambom.feature.settings.component.labelRes
 import com.comst19.dambom.feature.settings.component.openExternalPage
 import com.comst19.dambom.feature.settings.component.openSourceLicenses
 import com.comst19.dambom.feature.settings.component.sendSupportEmail
-import com.comst19.dambom.feature.settings.contract.AppLanguage
 import com.comst19.dambom.feature.settings.contract.SaveLocationMode
+import com.comst19.dambom.feature.settings.language.LanguageChoiceDialog
 
 private const val TERMS_OF_SERVICE_URL =
     "https://waiting-manchego-38d.notion.site/3cbeb6bb8cd580a0a03fc0287ed2420f"
@@ -57,6 +59,10 @@ private const val PRIVACY_POLICY_URL =
 internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val language by viewModel.language.collectAsStateWithLifecycle()
+    LifecycleResumeEffect(viewModel) {
+        viewModel.refreshLanguage()
+        onPauseOrDispose {}
+    }
     val context = LocalContext.current
     val bugReportSubject = stringResource(R.string.settings_bug_report_subject)
     val bugReportBody =
@@ -193,11 +199,8 @@ internal fun SettingsScreen(
         )
     }
     if (showLanguageDialog) {
-        SettingsChoiceDialog(
-            title = stringResource(R.string.settings_language),
-            entries = APP_LANGUAGE_ENTRIES,
+        LanguageChoiceDialog(
             selected = state.language,
-            label = { stringResource(it.labelRes) },
             onDismiss = { showLanguageDialog = false },
             onSelect = {
                 showLanguageDialog = false
@@ -208,6 +211,8 @@ internal fun SettingsScreen(
 }
 
 @FormFactorPreviews
+@Preview(name = "Arabic", locale = "ar", widthDp = 320, heightDp = 640)
+@Preview(name = "Hindi", locale = "hi", widthDp = 320, heightDp = 640)
 @Composable
 private fun SettingsScreenPreview() {
     DambomTheme {

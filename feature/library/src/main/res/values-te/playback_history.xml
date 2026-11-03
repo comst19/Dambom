@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">ఇటీవల ప్లే చేసినవి</string>
+    <string name="library_recently_played_empty_title">ఇటీవల ప్లే చేసిన వీడియోలు లేవు</string>
+    <string name="library_recently_played_empty_description">దీనిని ఇక్కడ చూడటానికి ఒక వీడియో ప్లే చేయండి. ఫిల్టర్లు సక్రియంగా ఉంటే, వాటిని మార్చి చూడండి.</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">সম্প্রতি খেলা হয়েছে</string>
+    <string name="library_recently_played_empty_title">সম্প্রতি কোন ভিডিও খেলা হয়নি</string>
+    <string name="library_recently_played_empty_description">এখানে দেখতে একটি ভিডিও প্লে করুন। যদি ফিল্টার সক্রিয় থাকে, তবে সেগুলি পরিবর্তনের চেষ্টা করুন।</string>
+</resources>

@@ -1,5 +1,6 @@
 package com.comst19.dambom.feature.settings
 
+import com.comst19.dambom.core.common.locale.AppLanguage
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
@@ -13,7 +14,6 @@ import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.testing.MainDispatcherRule
-import com.comst19.dambom.feature.settings.contract.AppLanguage
 import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 import com.comst19.dambom.feature.settings.platform.SettingsPlatformActions
 import kotlinx.coroutines.CancellationException
@@ -50,6 +50,30 @@ class SettingsViewModelTest {
 
         assertEquals(AppLanguage.ENGLISH, viewModel.language.value)
         assertEquals("en", platform.appliedLanguageTag)
+    }
+
+    @Test
+    fun `resuming settings refreshes an externally changed language`() {
+        val platform = FakeSettingsPlatformActions(currentLanguageTags = "ko")
+        val viewModel = createViewModel(platformActions = platform)
+
+        platform.currentLanguageTags = "fr-FR"
+        viewModel.refreshLanguage()
+
+        assertEquals(AppLanguage.FRENCH, viewModel.language.value)
+        assertNull(platform.appliedLanguageTag)
+    }
+
+    @Test
+    fun `resuming settings reflects a return to automatic selection`() {
+        val platform = FakeSettingsPlatformActions(currentLanguageTags = "fr")
+        val viewModel = createViewModel(platformActions = platform)
+
+        platform.currentLanguageTags = ""
+        viewModel.refreshLanguage()
+
+        assertEquals(AppLanguage.SYSTEM, viewModel.language.value)
+        assertNull(platform.appliedLanguageTag)
     }
 
     @Test
@@ -413,7 +437,7 @@ class SettingsViewModelTest {
 }
 
 private class FakeSettingsPlatformActions(
-    override val currentLanguageTags: String = "",
+    override var currentLanguageTags: String = "",
     override val versionName: String = "1.0.1",
     private val canPersistDirectory: Boolean = true,
 ) : SettingsPlatformActions {

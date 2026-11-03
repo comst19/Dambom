@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">प्लेबॅक स्थिती</string>
+    <string name="playback_rewind">[००१] १० सेकंद मागे</string>
+    <string name="playback_play">[००२] खेळा</string>
+    <string name="playback_pause">[००३] विराम द्या</string>
+    <string name="playback_forward">[००४] १० सेकंद फॉरवर्ड करा</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Ti o ti wa ni ti o ti wa ni ti o</string>
+    <string name="library_recently_played_empty_title">Ko si awọn fidio ti o ṣẹṣẹ dun</string>
+    <string name="library_recently_played_empty_description">Mu fidio kan lati wo nibi. Ti awọn àlẹmọ ba n ṣiṣẹ, gbiyanju lati yi wọn pada.</string>
+</resources>

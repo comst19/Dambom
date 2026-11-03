@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">[००५] पुरेसा स्टोरेज नाही. जागा मोकळी करा आणि पुन्हा प्रयत्न करा: %1$s</string>
+    <string name="download_notification_channel">[००६] डाउनलोड</string>
+    <string name="download_notification_title">Dambom व्हिडिओ डाउनलोड करत आहे</string>
+    <string name="download_notification_description">पुन्हा कनेक्ट केल्यानंतर जतन केलेल्या बिंदूवरून डाउनलोड पुन्हा सुरू होतात.</string>
+    <string name="download_result_notification_channel">[००९] परिणाम डाउनलोड करा</string>
+    <string name="download_notification_progress_title">%1$s डाउनलोड करत आहे</string>
+    <string name="download_notification_progress">%1$d %% पूर्ण</string>
+    <string name="download_notification_completed">डाउनलोड पूर्ण</string>
+    <string name="download_notification_completed_description">%1$s तुमच्या लायब्ररीमध्ये सेव्ह केले होते.</string>
+    <string name="download_notification_failed">डाउनलोड अयशस्वी</string>
+    <string name="download_notification_failed_description">%1$s पुन्हा डाउनलोड करण्याचा प्रयत्न करा.</string>
+    <string name="download_notification_failed_network">%1$s साठी नेटवर्क कनेक्शन तपासा.</string>
+    <string name="download_notification_failed_storage">%1$s साठी उपलब्ध स्टोरेज तपासा.</string>
+</resources>

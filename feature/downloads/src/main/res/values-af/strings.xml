@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Nie genoeg stoorplek nie. Maak spasie vry en probeer weer.</string>
+    <string name="downloads_summary_waiting">Wag om af te laai</string>
+    <string name="downloads_summary_paused">Aflaaie gepauseer</string>
+    <string name="downloads_summary_attention">Aflaaie benodig aandag</string>
+    <string name="downloads_quality_original">Oorspronklike</string>
+    <string name="downloads_title">Aflaaie</string>
+    <string name="downloads_back">Terug</string>
+    <string name="downloads_view_as_list">Besigtig as lys</string>
+    <string name="downloads_view_as_grid">Besigtig as rooster</string>
+    <string name="downloads_empty_title">Geen aflaaie in vooruitgang</string>
+    <string name="downloads_empty_description">Voltooide aflaaie is gereed om in jou biblioteek te kyk.</string>
+    <string name="downloads_open_library">Open biblioteek</string>
+    <string name="downloads_summary">%1$d aflaai</string>
+    <string name="downloads_summary_remaining">%1$d oor</string>
+    <string name="downloads_pause_all">Pauzeer alles</string>
+    <string name="downloads_resume_all">Hervat alles</string>
+    <string name="downloads_group_active">Besig om af te laai</string>
+    <string name="downloads_group_queued">In ry</string>
+    <string name="downloads_group_paused">Gepauseer</string>
+    <string name="downloads_group_failed">Misluk</string>
+    <string name="downloads_group_completed">Voltooi</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s miniatuur</string>
+    <string name="downloads_unknown_size">Totale grootte onbekend</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Vordering van oorblywende aflaaie</string>
+    <string name="downloads_pause">Pauzeer</string>
+    <string name="downloads_resume">Hervat</string>
+    <string name="downloads_cancel">Kanselleer</string>
+    <string name="downloads_retry">Probeer weer</string>
+    <string name="downloads_remove">Verwyder van lys</string>
+    <string name="downloads_error_access">Hierdie video vereis toegangstoestemming.</string>
+    <string name="downloads_error_format">Hierdie videoformaat word nie ondersteun nie.</string>
+    <string name="downloads_error_network">Die verbinding het nie herstel nie. Probeer weer.</string>
+    <string name="downloads_error_storage">Kon nie die lêer stoor nie. Kontroleer bergingsruimte.</string>
+    <string name="downloads_error_server">Die bediener kon nie die aflaai verwerk nie.</string>
+    <string name="downloads_error_unknown">Iets het verkeerd geloop tydens die aflaai.</string>
+    <string name="downloads_command_failed">Kon nie die aflaai opdateer nie. Probeer weer.</string>
+    <string name="downloads_delete_pending">Verwydering skoonmaak nodig</string>
+    <string name="downloads_delete_retry">Probeer verwydering weer</string>
+    <string name="downloads_delete_group_count">Verwydering skoonmaak %1$d</string>
+    <string name="downloads_error_drm">Beskermde video\'s kan nie afgelaai word nie.</string>
+</resources>

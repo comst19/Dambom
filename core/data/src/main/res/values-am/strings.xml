@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">በቂ ማከማቻ የለም። ቦታ ያስለቅቁ እና እንደገና ይሞክሩ፡ %1$s</string>
+    <string name="download_notification_channel">ውርዶች</string>
+    <string name="download_notification_title">Dambom ቪዲዮዎችን በማውረድ ላይ ነው።</string>
+    <string name="download_notification_description">ውርዶች እንደገና ከተገናኙ በኋላ ከተቀመጡት ነጥብ ይቀጥላሉ.</string>
+    <string name="download_result_notification_channel">የውርድ ውጤቶች</string>
+    <string name="download_notification_progress_title">%1$s በማውረድ ላይ</string>
+    <string name="download_notification_progress">%1$d %% ተጠናቋል</string>
+    <string name="download_notification_completed">ማውረድ ተጠናቅቋል</string>
+    <string name="download_notification_completed_description">%1$s ወደ ቤተ-መጽሐፍትዎ ተቀምጧል።</string>
+    <string name="download_notification_failed">ማውረድ አልተሳካም።</string>
+    <string name="download_notification_failed_description">%1$s ን እንደገና ለማውረድ ይሞክሩ።</string>
+    <string name="download_notification_failed_network">ለ %1$s የኔትወርክ ግንኙነቱን ያረጋግጡ።</string>
+    <string name="download_notification_failed_storage">ለ %1$s ያለውን ማከማቻ ያረጋግጡ።</string>
+</resources>

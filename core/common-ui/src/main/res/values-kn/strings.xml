@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">ಪ್ಲೇಬ್ಯಾಕ್ ಸ್ಥಾನ</string>
+    <string name="playback_rewind">ಹಿಂದೆ 10 ಸೆಕೆಂಡುಗಳು</string>
+    <string name="playback_play">ಪ್ಲೇ</string>
+    <string name="playback_pause">ವಿರಾಮ</string>
+    <string name="playback_forward">ಫಾರ್ವರ್ಡ್ 10 ಸೆಕೆಂಡುಗಳು</string>
+</resources>

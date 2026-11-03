@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="root_back_hint">Ji bo derketinê dîsa pê li paş bikin.</string>
+    <string name="startup_initialization_failed">Min nekarî sepanê bide destpêkirin.</string>
+    <string name="destination_home">Mal</string>
+    <string name="destination_library">Pirtûkxane</string>
+    <string name="network_offline_banner">Pêwendiya înternetê tune ye. Taybetmendiyên torê bi demkî ne guncaw in.</string>
+    <string name="network_unmetered_banner">Li benda Wi-Fi . Daxistin dê bixweber ji nû ve dest pê bikin.</string>
+    <string name="download_feedback_failed">Min nekarî %1$s .</string>
+    <string name="download_feedback_failed_multiple">Vîdyoyên %1$d dakêşin.</string>
+    <string name="download_recovery_failed">Daxistinên li bendê nehatin vegerandin. Ji Daxistinan dîsa biceribînin.</string>
+</resources>

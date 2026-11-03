@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Esika ya kobɛta</string>
+    <string name="playback_rewind">Kozonga sima 10 secondes</string>
+    <string name="playback_play">Kosakana</string>
+    <string name="playback_pause">Kopema mwa moke</string>
+    <string name="playback_forward">Kokende liboso 10 secondes</string>
+</resources>

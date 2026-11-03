@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Enweghị nchekwa zuru oke. Hapụ ohere wee nwaa ọzọ: %1$s</string>
+    <string name="download_notification_channel">Nbudata</string>
+    <string name="download_notification_title">Dambom na-ebudata vidiyo</string>
+    <string name="download_notification_description">Nbudata malitegharịa site na ebe echekwara ka emegharịrị.</string>
+    <string name="download_result_notification_channel">Budata nsonaazụ</string>
+    <string name="download_notification_progress_title">Na-ebudata %1$s</string>
+    <string name="download_notification_progress">%1$d %% zuru ezu</string>
+    <string name="download_notification_completed">Nbudata zuru ezu</string>
+    <string name="download_notification_completed_description">echekwara %1$s na ọba akwụkwọ gị.</string>
+    <string name="download_notification_failed">Nbudata agaghị</string>
+    <string name="download_notification_failed_description">Gbalịa budata %1$s ọzọ.</string>
+    <string name="download_notification_failed_network">Lelee njikọ netwọk maka %1$s .</string>
+    <string name="download_notification_failed_storage">Lelee ebe nchekwa dị maka %1$s .</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Gunan dowam etdirmek isleýärsiňizmi?</string>
+    <string name="player_resume_message">Siz %1$s çenli gördüňiz.</string>
+    <string name="player_resume_continue">Dowam et</string>
+    <string name="player_resume_restart">Täzeden başla</string>
+    <string name="player_history_failure">Oýun taryhyny ýüklemek ýa-da saklamak başartmady.</string>
+    <string name="player_settings_failure">Oýun sazlamalaryny saklap bolmady.</string>
+    <string name="player_speed">Oýnamak tizligi</string>
+    <string name="player_speed_value">Oýnamak tizligi · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Muny wideo gaýtala</string>
+    <string name="player_options_close">Ýap</string>
+</resources>

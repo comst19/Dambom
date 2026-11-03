@@ -1,0 +1,7 @@
+<resources>
+    <string name="playback_seek_description">재생 위치</string>
+    <string name="playback_rewind">10초 뒤로</string>
+    <string name="playback_play">재생</string>
+    <string name="playback_pause">일시정지</string>
+    <string name="playback_forward">10초 앞으로</string>
+</resources>

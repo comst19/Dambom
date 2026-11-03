@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Penyimpanan tidak cukup. Kosongkan ruang dan coba lagi.</string>
+    <string name="downloads_summary_waiting">Menunggu untuk diunduh</string>
+    <string name="downloads_summary_paused">Pengunduhan dijeda</string>
+    <string name="downloads_summary_attention">Download perlu diperhatikan</string>
+    <string name="downloads_quality_original">Asli</string>
+    <string name="downloads_title">Unduhan</string>
+    <string name="downloads_back">Kembali</string>
+    <string name="downloads_view_as_list">Lihat sebagai daftar</string>
+    <string name="downloads_view_as_grid">Lihat sebagai kisi</string>
+    <string name="downloads_empty_title">Tidak ada pengunduhan yang sedang berlangsung</string>
+    <string name="downloads_empty_description">Unduhan yang telah selesai siap untuk ditonton di perpustakaan Anda.</string>
+    <string name="downloads_open_library">Buka perpustakaan</string>
+    <string name="downloads_summary">pengunduhan %1$d</string>
+    <string name="downloads_summary_remaining">%1$d tersisa</string>
+    <string name="downloads_pause_all">Jeda semua</string>
+    <string name="downloads_resume_all">Lanjutkan semuanya</string>
+    <string name="downloads_group_active">Mengunduh</string>
+    <string name="downloads_group_queued">Mengantri</string>
+    <string name="downloads_group_paused">Dijeda</string>
+    <string name="downloads_group_failed">Gagal</string>
+    <string name="downloads_group_completed">Selesai</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">gambar kecil %1$s</string>
+    <string name="downloads_unknown_size">Ukuran total tidak diketahui</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Kemajuan sisa unduhan</string>
+    <string name="downloads_pause">Jeda</string>
+    <string name="downloads_resume">Lanjutkan</string>
+    <string name="downloads_cancel">Batal</string>
+    <string name="downloads_retry">Coba lagi</string>
+    <string name="downloads_remove">Hapus dari daftar</string>
+    <string name="downloads_error_access">Video ini memerlukan izin akses.</string>
+    <string name="downloads_error_format">Format video ini tidak didukung.</string>
+    <string name="downloads_error_network">Sambungannya tidak pulih. Coba lagi.</string>
+    <string name="downloads_error_storage">Tidak dapat menyimpan file. Periksa ruang penyimpanan.</string>
+    <string name="downloads_error_server">Server tidak dapat memproses pengunduhan.</string>
+    <string name="downloads_error_unknown">Ada yang tidak beres saat mengunduh.</string>
+    <string name="downloads_command_failed">Tidak dapat memperbarui unduhan. Coba lagi.</string>
+    <string name="downloads_delete_pending">Diperlukan pembersihan penghapusan</string>
+    <string name="downloads_delete_retry">Coba lagi penghapusan</string>
+    <string name="downloads_delete_group_count">Pembersihan penghapusan %1$d</string>
+    <string name="downloads_error_drm">Video yang dilindungi tidak dapat diunduh.</string>
+</resources>

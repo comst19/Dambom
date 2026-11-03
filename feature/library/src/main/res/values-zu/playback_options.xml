@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Qhubeka ubuka?</string>
+    <string name="player_resume_message">Ubukele kuze kube %1$s .</string>
+    <string name="player_resume_continue">Qhubeka</string>
+    <string name="player_resume_restart">Qala phansi</string>
+    <string name="player_history_failure">Kungakwazi ukulayisha noma ukulondoloza umlando wokudlala.</string>
+    <string name="player_settings_failure">Kungakwazi ukulondoloza izilungiselelo zokudlala.</string>
+    <string name="player_speed">Isivinini sokudlala</string>
+    <string name="player_speed_value">Isivinini sokudlala · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Phinda le vidiyo</string>
+    <string name="player_options_close">Vala</string>
+</resources>

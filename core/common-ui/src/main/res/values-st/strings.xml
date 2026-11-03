@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Boemo ba ho bapala</string>
+    <string name="playback_rewind">Morago ho motsotso o 10</string>
+    <string name="playback_play">Bapala</string>
+    <string name="playback_pause">Emisa</string>
+    <string name="playback_forward">Pele ho metsotsoana e 10</string>
+</resources>

@@ -6,21 +6,15 @@ object AppLocalePolicy {
     fun resolve(systemLocales: List<Locale>): String {
         val primaryLocale = systemLocales.firstOrNull() ?: return "en"
         val language = AppLanguage.from(primaryLocale.toLanguageTag())
-        val supportedScript = supportedScripts[language.languageTag]
-        val scriptMatches = supportedScript == null || primaryLocale.script.isEmpty() || primaryLocale.script == supportedScript
-        if (language != AppLanguage.SYSTEM && scriptMatches) return language.languageTag
-        return countryDefaults[primaryLocale.country] ?: "en"
+        val supportedScript = language.supportedScript
+        val scriptMatches =
+            supportedScript == null || primaryLocale.script.isEmpty() || primaryLocale.script == supportedScript
+        return if (language != AppLanguage.SYSTEM && scriptMatches) {
+            language.languageTag
+        } else {
+            countryDefaults[primaryLocale.country] ?: AppLanguage.ENGLISH.languageTag
+        }
     }
-
-    private val supportedScripts =
-        mapOf(
-            "pa" to "Guru",
-            "sd" to "Arab",
-            "az" to "Latn",
-            "uz" to "Latn",
-            "ha" to "Latn",
-            "ku" to "Latn",
-        )
 
     private val countryDefaults =
         mapOf(

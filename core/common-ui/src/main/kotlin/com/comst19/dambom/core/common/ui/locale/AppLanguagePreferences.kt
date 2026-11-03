@@ -67,7 +67,10 @@ object AppLanguagePreferences {
             }
         val languageTag = AppLocalePolicy.resolve(listOfNotNull(primaryLocale))
         val preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-        if (!preferences.getBoolean(FOLLOW_SYSTEM, false) || preferences.getString(AUTOMATIC_TAG, null) != languageTag) {
+        val automaticSelectionChanged =
+            !preferences.getBoolean(FOLLOW_SYSTEM, false) ||
+                preferences.getString(AUTOMATIC_TAG, null) != languageTag
+        if (automaticSelectionChanged) {
             preferences
                 .edit()
                 .putBoolean(FOLLOW_SYSTEM, true)

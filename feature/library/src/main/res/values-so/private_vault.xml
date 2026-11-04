@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Maktabadda gaarka ah</string>
+    <string name="vault_locked_title">Maktabaddaada muuqaalada gaarka ah</string>
+    <string name="vault_locked_description">Furo si aad u aragto muuqaaladaada gaarka ah</string>
+    <string name="vault_unlock">Furo</string>
+    <string name="vault_lock">Xir</string>
+    <string name="vault_auth_subtitle">Isticmaal biometrics ama xannibaadda shaashadda qalabkaaga</string>
+    <string name="vault_use_device_lock">Isticmaal xannibaadda shaashadda</string>
+    <string name="vault_setup_lock">Dejiso PIN, qaab, ama eray sir ah goobaha taleefankaaga si aad u isticmaasho maktabadda gaarka ah.</string>
+    <string name="vault_open_settings">Fur goobaha</string>
+    <string name="vault_auth_unavailable">Aqoonsigu ma bilaaban karo qalabkan. Fadlan isku day mar kale.</string>
+    <string name="vault_move">U guuri maktabadda gaarka ah</string>
+    <string name="vault_restore">U guuri maktabadda caadiga ah</string>
+    <string name="vault_move_success">Waxaa loo guuray maktabadda gaarka ah. Nuqulkii hore ee la dhoofiyay waa sidaas oo kale.</string>
+    <string name="vault_restore_success">Waxaa loo guuray maktabadda caadiga ah</string>
+    <string name="vault_move_failure">Muuqaalada lama guurin karo. Fadlan isku day mar kale.</string>
+    <string name="vault_empty_title">Muuqaalo gaar ah ma jiraan</string>
+    <string name="vault_empty_description">Dooro muuqaalada ku jira maktabaddaada caadiga ah una guuri halkan</string>
+</resources>

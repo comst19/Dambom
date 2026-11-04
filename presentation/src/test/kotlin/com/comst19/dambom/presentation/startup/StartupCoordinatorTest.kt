@@ -52,6 +52,11 @@ private object BlockingRecoveryRepository : DownloadRepository by FailingRecover
 private object FailingRecoveryRepository : DownloadRepository {
     override val downloads: Flow<List<DownloadTask>> = flowOf(emptyList())
 
+    override suspend fun setPrivate(
+        ids: Set<String>,
+        isPrivate: Boolean,
+    ) = Unit
+
     override suspend fun enqueue(requests: List<DownloadRequest>) = EnqueueDownloadsResult(0, 0)
 
     override suspend fun pause(id: String) = Unit

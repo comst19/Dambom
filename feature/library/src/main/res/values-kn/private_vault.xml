@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">ಖಾಸಗಿ ಪುಸ್ತಕಾಲಯ</string>
+    <string name="vault_locked_title">ನಿಮ್ಮ ಖಾಸಗಿ ವೀಡಿಯೋ ಪುಸ್ತಕಾಲಯ</string>
+    <string name="vault_locked_description">ನಿಮ್ಮ ಖಾಸಗಿ ವೀಡಿಯೋಗಳನ್ನು ನೋಡುವುದಕ್ಕಾಗಿ ಅನ್ಲಾಕ್ ಮಾಡಿ</string>
+    <string name="vault_unlock">ಅನ್ಲಾಕ್ ಮಾಡಿ</string>
+    <string name="vault_lock">ಲಾಕ್ ಮಾಡಿ</string>
+    <string name="vault_auth_subtitle">ಜೀವಸಂಖ್ಯಾನಿಕಿ ಅಥವಾ ನಿಮ್ಮ ಸಾಧನದ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಬಳಸಿ</string>
+    <string name="vault_use_device_lock">ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಬಳಸಿ</string>
+    <string name="vault_setup_lock">ಖಾಸಗಿ ಪುಸ್ತಕಾಲಯವನ್ನು ಬಳಸಲು ನಿಮ್ಮ ಫೋನ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಪಿನ್, ಪ್ಯಾಟರ್ನ್ ಅಥವಾ ಪಾಸ್ವರ್ಡ್ ಸೆಟ್ ಮಾಡಿ.</string>
+    <string name="vault_open_settings">ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ</string>
+    <string name="vault_auth_unavailable">ಈ ಸಾಧನದಲ್ಲಿ ದೃಢೀಕರಣ ಪ್ರಾರಂಭಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮರುಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="vault_move">ಖಾಸಗಿ ಪುಸ್ತಕಾಲಯಕ್ಕೆ ಸಂಚರಿಸಿ</string>
+    <string name="vault_restore">ಸಾಮಾನ್ಯ ಪುಸ್ತಕಾಲಯಕ್ಕೆ ಸಂಚರಿಸಿ</string>
+    <string name="vault_move_success">ಖಾಸಗಿ ಪುಸ್ತಕಾಲಯಕ್ಕೆ ಪರಿವರ್ತಿಸಲಾಗಿದೆ. ಹಿಂದಿನ ರಫ್ತು ಪ್ರತಿಗಳು ಬದಲಾವಣೆಯಾಗಿಲ್ಲ.</string>
+    <string name="vault_restore_success">ಸಾಮಾನ್ಯ ಪುಸ್ತಕಾಲಯಕ್ಕೆ ಪರಿವರ್ತಿಸಲಾಗಿದೆ</string>
+    <string name="vault_move_failure">ವೀಡಿಯೋಗಳನ್ನು ಸಂಚರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮರುಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="vault_empty_title">ಯಾವುದೇ ಖಾಸಗಿ ವೀಡಿಯೋಗಳು ಇಲ್ಲ</string>
+    <string name="vault_empty_description">ನಿಮ್ಮ ಸಾಮಾನ್ಯ ಪುಸ್ತಕಾಲಯದಲ್ಲಿ ವೀಡಿಯೋಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಿ ಮತ್ತು ಅವನ್ನು כאןಗೆ ಸಂಚರಿಸಿ</string>
+</resources>

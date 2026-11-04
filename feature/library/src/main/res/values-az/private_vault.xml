@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Şəxsi kitabxana</string>
+    <string name="vault_locked_title">Sizin şəxsi video kitabxananız</string>
+    <string name="vault_locked_description">Şəxsi videolarınızı görmək üçün açın</string>
+    <string name="vault_unlock">Aç</string>
+    <string name="vault_lock">Kilidlə</string>
+    <string name="vault_auth_subtitle">Biometrik məlumatdan və ya cihaz ekran kilidindən istifadə edin</string>
+    <string name="vault_use_device_lock">Ekran kilidindən istifadə et</string>
+    <string name="vault_setup_lock">Şəxsi kitabxanadan istifadə etmək üçün telefon parametrlərində PIN, nümunə və ya şifrə təyin edin.</string>
+    <string name="vault_open_settings">Parametrləri aç</string>
+    <string name="vault_auth_unavailable">Bu cihazda autentifikasiya başlaya bilmədi. Zəhmət olmasa yenidən cəhd edin.</string>
+    <string name="vault_move">Şəxsi kitabxanaya köçür</string>
+    <string name="vault_restore">Normal kitabxanaya köçür</string>
+    <string name="vault_move_success">Şəxsi kitabxanaya köçürüldü. Əvvəl ixrac edilmiş nüsxələr dəyişməyib.</string>
+    <string name="vault_restore_success">Normal kitabxanaya köçürüldü</string>
+    <string name="vault_move_failure">Videoları köçürmək mümkün olmadı. Zəhmət olmasa yenidən cəhd edin.</string>
+    <string name="vault_empty_title">Heç bir şəxsi video yoxdur</string>
+    <string name="vault_empty_description">Normal kitabxanadakı videoları seçin və buraya köçürün</string>
+</resources>

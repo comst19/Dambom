@@ -32,14 +32,23 @@ interface DownloadRepository {
     val completedDownloads: Flow<List<DownloadTask>>
         get() =
             downloads
-                .map { tasks -> tasks.filter { it.status == DownloadStatus.COMPLETED && !it.deletePending } }
-                .distinctUntilChanged()
+                .map { tasks ->
+                    tasks.filter { it.status == DownloadStatus.COMPLETED && !it.deletePending && !it.isPrivate }
+                }.distinctUntilChanged()
 
     val deletionPendingDownloads: Flow<List<DownloadTask>>
         get() =
             downloads
                 .map { tasks -> tasks.filter(DownloadTask::deletePending) }
                 .distinctUntilChanged()
+
+    val privateCompletedDownloads: Flow<List<DownloadTask>>
+        get() = downloads.map { tasks -> tasks.filter { it.isPrivate && it.status == DownloadStatus.COMPLETED } }
+
+    suspend fun setPrivate(
+        ids: Set<String>,
+        isPrivate: Boolean,
+    )
 
     suspend fun enqueue(requests: List<DownloadRequest>): EnqueueDownloadsResult
 

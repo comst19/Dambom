@@ -374,6 +374,11 @@ private object EnabledClipboardSettingsRepository : SettingsRepository {
 private object EmptyDownloadRepository : DownloadRepository {
     override val downloads: Flow<List<DownloadTask>> = flowOf(emptyList())
 
+    override suspend fun setPrivate(
+        ids: Set<String>,
+        isPrivate: Boolean,
+    ) = Unit
+
     override suspend fun enqueue(requests: List<DownloadRequest>): EnqueueDownloadsResult =
         EnqueueDownloadsResult(addedCount = 0, duplicateCount = 0)
 

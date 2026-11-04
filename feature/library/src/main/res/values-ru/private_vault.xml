@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Личная библиотека</string>
+    <string name="vault_locked_title">Ваша личная видеотека</string>
+    <string name="vault_locked_description">Разблокируйте, чтобы просмотреть ваши личные видео</string>
+    <string name="vault_unlock">Разблокировать</string>
+    <string name="vault_lock">Заблокировать</string>
+    <string name="vault_auth_subtitle">Используйте биометрические данные или блокировку экрана устройства</string>
+    <string name="vault_use_device_lock">Использовать блокировку экрана</string>
+    <string name="vault_setup_lock">Установите PIN-код, рисунок или пароль в настройках телефона, чтобы использовать личную библиотеку.</string>
+    <string name="vault_open_settings">Открыть настройки</string>
+    <string name="vault_auth_unavailable">Аутентификация не может быть запущена на этом устройстве. Пожалуйста, попробуйте снова.</string>
+    <string name="vault_move">Переместить в личную библиотеку</string>
+    <string name="vault_restore">Переместить в обычную библиотеку</string>
+    <string name="vault_move_success">Перемещено в личную библиотеку. Ранее экспортированные копии остаются без изменений.</string>
+    <string name="vault_restore_success">Перемещено в обычную библиотеку</string>
+    <string name="vault_move_failure">Не удалось переместить видео. Пожалуйста, попробуйте снова.</string>
+    <string name="vault_empty_title">Нет личных видео</string>
+    <string name="vault_empty_description">Выберите видео в вашей обычной библиотеке и переместите их сюда</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Biblioteki ya moto moko</string>
+    <string name="vault_locked_title">Biblioteki ya vidio ya moto moko</string>
+    <string name="vault_locked_description">Fungola mpo na kotala ba vidio na yo ya moto moko</string>
+    <string name="vault_unlock">Fungola</string>
+    <string name="vault_lock">Lakatisa</string>
+    <string name="vault_auth_subtitle">Sala na biometrics to na lukatano ya ekran ya appareil na yo</string>
+    <string name="vault_use_device_lock">Sala na lukatano ya ekran</string>
+    <string name="vault_setup_lock">Tia PIN, patron, to mot de passe na misala ya telefone na yo mpo na kosalela biblioteki ya moto moko.</string>
+    <string name="vault_open_settings">Fungola misala</string>
+    <string name="vault_auth_unavailable">Kotika nzela ya authentication esalemi te na appareil oyo. Kobaka lisusu, s\'il vous plaît.</string>
+    <string name="vault_move">Kende na biblioteki ya moto moko</string>
+    <string name="vault_restore">Kende na biblioteki ya minene</string>
+    <string name="vault_move_success">Esalemi kopesa na biblioteki ya moto moko. Ba copie oyo etali liboso ekoki te ezali kobongwana.</string>
+    <string name="vault_restore_success">Esalemi kopesa na biblioteki ya minene</string>
+    <string name="vault_move_failure">Ekozanga kolimbisa ba vidio. Kobaka lisusu, s\'il vous plaît.</string>
+    <string name="vault_empty_title">Nako vidio ya moto moko te</string>
+    <string name="vault_empty_description">Sipa ba vidio na biblioteki ya minene na yo mpe kende na esika oyo</string>
+</resources>

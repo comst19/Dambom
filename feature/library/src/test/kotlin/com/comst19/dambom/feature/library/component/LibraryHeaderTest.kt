@@ -29,6 +29,17 @@ class LibraryHeaderTest {
     @get:Rule val composeRule = createComposeRule()
 
     @Test
+    fun `private library never offers the unsupported detail pane toggle`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        composeRule.setContent {
+            DambomTheme { TestLibraryHeader(isPrivateVault = true, showDetailPaneControl = true) }
+        }
+        composeRule.onNodeWithContentDescription(context.getString(R.string.library_hide_details)).assertDoesNotExist()
+        composeRule.onNodeWithContentDescription(context.getString(R.string.library_show_details)).assertDoesNotExist()
+        composeRule.onNodeWithText(context.getString(R.string.vault_title)).assertExists()
+    }
+
+    @Test
     fun `library header title uses material top bar typography`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val title = context.getString(R.string.library_title)
@@ -68,11 +79,14 @@ class LibraryHeaderTest {
 }
 
 @Composable
-private fun TestLibraryHeader() {
+private fun TestLibraryHeader(
+    isPrivateVault: Boolean = false,
+    showDetailPaneControl: Boolean = false,
+) {
     LibraryHeader(
         viewMode = LibraryViewMode.GRID,
         onViewModeChange = {},
-        showDetailPaneControl = false,
+        showDetailPaneControl = showDetailPaneControl,
         isDetailPaneVisible = true,
         onDetailPaneVisibilityChange = {},
         hasVideos = false,
@@ -82,5 +96,6 @@ private fun TestLibraryHeader() {
         onSelectAll = {},
         onDeleteSelected = {},
         onClearSelection = {},
+        isPrivateVault = isPrivateVault,
     )
 }

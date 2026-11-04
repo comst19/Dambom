@@ -1,11 +1,14 @@
 package com.comst19.dambom.feature.library.component
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.PlaylistAddCheck
 import androidx.compose.material.icons.automirrored.outlined.ViewList
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -15,6 +18,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import com.comst19.dambom.core.designsystem.DambomIconTooltip
 import com.comst19.dambom.core.designsystem.DambomPaneToggleButton
 import com.comst19.dambom.feature.library.R
@@ -22,6 +26,7 @@ import com.comst19.dambom.feature.library.contract.LibraryViewMode
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("LongParameterList", "LongMethod")
 internal fun LibraryHeader(
     viewMode: LibraryViewMode,
     onViewModeChange: (LibraryViewMode) -> Unit,
@@ -35,6 +40,10 @@ internal fun LibraryHeader(
     onSelectAll: () -> Unit,
     onDeleteSelected: () -> Unit,
     onClearSelection: () -> Unit,
+    isPrivateVault: Boolean = false,
+    onVaultClick: () -> Unit = {},
+    onBack: (() -> Unit)? = null,
+    onChangeSelectedPrivacy: () -> Unit = {},
 ) {
     TopAppBar(
         title = {
@@ -43,13 +52,30 @@ internal fun LibraryHeader(
                     if (isSelecting) {
                         stringResource(R.string.library_selected_count, selectedCount)
                     } else {
-                        stringResource(R.string.library_title)
+                        stringResource(
+                            if (isPrivateVault) R.string.vault_title else R.string.library_title,
+                        )
                     },
                 fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
+        },
+        navigationIcon = {
+            onBack?.let { back ->
+                IconButton(onClick = back) {
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.player_back))
+                }
+            }
         },
         actions = {
             if (isSelecting) {
+                IconButton(onClick = onChangeSelectedPrivacy, enabled = selectedCount > 0) {
+                    Icon(
+                        if (isPrivateVault) Icons.Outlined.LockOpen else Icons.Outlined.Lock,
+                        stringResource(if (isPrivateVault) R.string.vault_restore else R.string.vault_move),
+                    )
+                }
                 SelectionActions(
                     selectedCount = selectedCount,
                     onSelectAll = onSelectAll,
@@ -57,8 +83,12 @@ internal fun LibraryHeader(
                     onClearSelection = onClearSelection,
                 )
             } else {
+                val vaultLabel = stringResource(if (isPrivateVault) R.string.vault_lock else R.string.vault_title)
+                DambomIconTooltip(vaultLabel) {
+                    IconButton(onClick = onVaultClick) { Icon(Icons.Outlined.Lock, vaultLabel) }
+                }
                 LibraryViewModeButton(viewMode, onViewModeChange)
-                if (showDetailPaneControl) {
+                if (showDetailPaneControl && !isPrivateVault) {
                     val label =
                         if (isDetailPaneVisible) R.string.library_hide_details else R.string.library_show_details
                     DambomPaneToggleButton(

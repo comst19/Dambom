@@ -12,11 +12,13 @@ import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.PlaybackHistoryRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.PrivateLibraryKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoCompressionKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoTrimKey
@@ -49,7 +51,9 @@ internal class LibraryViewModel
         private val fileManager: LibraryFileManager,
         private val appEventBus: AppEventBus,
         private val playbackHistoryRepository: PlaybackHistoryRepository,
+        val privateVideoSession: PrivateVideoSession,
     ) : ViewModel() {
+        private val privateVault = MutableStateFlow(false)
         private val selectedId = savedStateHandle.getStateFlow<String?>(SELECTED_ID_KEY, null)
         private val query = savedStateHandle.getStateFlow(QUERY_KEY, "")
         private val viewMode = savedStateHandle.getStateFlow(VIEW_MODE_KEY, LibraryViewMode.GRID.name)
@@ -78,7 +82,28 @@ internal class LibraryViewModel
                     completed.filterNot(DownloadTask::deletePending) +
                         pending.filter { it.status == DownloadStatus.COMPLETED }
                 ).distinctBy(DownloadTask::id)
-            }.map(::LibrarySnapshot)
+            }
+        private val scopedDownloads =
+            combine(
+                libraryDownloads,
+                repository.privateCompletedDownloads,
+                privateVault,
+                privateVideoSession.isUnlocked,
+            ) {
+                publicVideos,
+                privateVideos,
+                privateScope,
+                unlocked,
+                ->
+                LibrarySnapshot(
+                    if (privateScope) {
+                        if (unlocked) privateVideos.filter(DownloadTask::isPrivate) else emptyList()
+                    } else {
+                        publicVideos.filterNot(DownloadTask::isPrivate)
+                    },
+                    isPrivateVault = privateScope,
+                )
+            }
 
         val settings: StateFlow<AppSettings> =
             settingsRepository.settings.stateIn(
@@ -89,14 +114,14 @@ internal class LibraryViewModel
 
         private val libraryWithHistory =
             combine(
-                libraryDownloads,
+                scopedDownloads,
                 playbackHistoryRepository.observeHistory().distinctUntilChanged { old, new ->
                     old.size == new.size &&
                         old.all { (id, item) -> new[id]?.lastPlayedAtMillis == item.lastPlayedAtMillis }
                 },
             ) { tasks, history -> tasks to history }
 
-        val uiState: StateFlow<LibraryUiState> =
+        private val mappedUiState =
             combine(
                 libraryWithHistory,
                 selectedId,
@@ -114,14 +139,62 @@ internal class LibraryViewModel
                     selection = selection,
                     favoritesOnly = preferences.favoritesOnly,
                     recentlyPlayedOnly = preferences.recentlyPlayedOnly,
-                )
+                ).copy(isPrivateVault = tasks.first.isPrivateVault)
+            }
+        val uiState: StateFlow<LibraryUiState> =
+            combine(mappedUiState, privateVault, privateVideoSession.isUnlocked) { state, privateScope, unlocked ->
+                if ((privateScope && !unlocked) || state.isPrivateVault != privateScope) {
+                    LibraryUiState(isPrivateVault = privateScope)
+                } else {
+                    state
+                }
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
                 initialValue = LibraryUiState(),
             )
 
-        fun observeVideo(id: String) = repository.observeDownload(id).asVideoDetailState()
+        fun setPrivateVault(enabled: Boolean) {
+            privateVault.value = enabled
+        }
+
+        fun openPrivateVault() {
+            viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(PrivateLibraryKey)) }
+        }
+
+        fun lockPrivateVault() {
+            privateVideoSession.lock()
+            selection.value = LibrarySelectionState()
+            savedStateHandle[SELECTED_ID_KEY] = null
+        }
+
+        fun leavePrivateVault() {
+            goBack()
+        }
+
+        fun changePrivacy(
+            ids: Set<String>,
+            isPrivate: Boolean,
+        ) {
+            if (!privateVideoSession.isUnlocked.value || ids.isEmpty()) return
+            viewModelScope.launch {
+                suspendRunCatching { repository.setPrivate(ids, isPrivate) }.fold(
+                    onSuccess = {
+                        selection.value = LibrarySelectionState()
+                        savedStateHandle[SELECTED_ID_KEY] = null
+                        showMessage(if (isPrivate) R.string.vault_move_success else R.string.vault_restore_success)
+                    },
+                    onFailure = { showMessage(R.string.vault_move_failure) },
+                )
+            }
+        }
+
+        fun observeVideo(id: String) =
+            repository
+                .observeDownload(id)
+                .combine(privateVideoSession.isUnlocked) { task, unlocked ->
+                    task?.takeIf { !it.isPrivate || unlocked }
+                }.asVideoDetailState()
 
         fun openVideo(
             id: String,
@@ -137,12 +210,13 @@ internal class LibraryViewModel
         }
 
         fun compressVideo(task: DownloadTask) {
+            if (task.isPrivate) return
             if (task.deletePending || task.localFilePath == null || task.status != DownloadStatus.COMPLETED) return
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoCompressionKey(task.id))) }
         }
 
         fun trimVideo(task: DownloadTask) {
-            if (task.deletePending || task.localFilePath == null) return
+            if (task.isPrivate || task.deletePending || task.localFilePath == null) return
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoTrimKey(task.id))) }
         }
 
@@ -256,7 +330,7 @@ internal class LibraryViewModel
                 suspendRunCatching {
                     id
                         ?.let { repository.observeDownload(it).first() }
-                        ?.takeIf { !it.deletePending && it.localFilePath != null }
+                        ?.takeIf { !it.isPrivate && !it.deletePending && it.localFilePath != null }
                 }.getOrNull()
             if (task == null) showMessage(R.string.library_export_failure)
             return task
@@ -280,7 +354,7 @@ internal class LibraryViewModel
             task: DownloadTask,
             destination: Uri,
         ) {
-            if (task.deletePending || task.localFilePath == null) return
+            if (task.isPrivate || task.deletePending || task.localFilePath == null) return
             viewModelScope.launch {
                 suspendRunCatching { fileManager.export(task, destination) }
                     .notifyResult(R.string.library_export_success, R.string.library_export_failure)
@@ -288,7 +362,7 @@ internal class LibraryViewModel
         }
 
         fun exportToConfiguredLocation(task: DownloadTask) {
-            if (task.deletePending || task.localFilePath == null) return
+            if (task.isPrivate || task.deletePending || task.localFilePath == null) return
             viewModelScope.launch {
                 val treeUri =
                     settingsRepository.settings
@@ -324,7 +398,9 @@ internal class LibraryViewModel
         }
 
         fun createShareIntent(task: DownloadTask): Intent? =
-            task.takeIf { !it.deletePending && it.localFilePath != null }?.let(fileManager::createShareIntent)
+            task
+                .takeIf { !it.isPrivate && !it.deletePending && it.localFilePath != null }
+                ?.let(fileManager::createShareIntent)
 
         fun notifyShareFailure() {
             viewModelScope.launch { showMessage(R.string.library_share_failure) }

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Maktaba binafsi</string>
+    <string name="vault_locked_title">Maktaba yako binafsi ya video</string>
+    <string name="vault_locked_description">Fungua ili kuona video zako binafsi</string>
+    <string name="vault_unlock">Fungua</string>
+    <string name="vault_lock">Funga</string>
+    <string name="vault_auth_subtitle">Tumia alama za kibiometri au kufunga skrini ya kifaa chako</string>
+    <string name="vault_use_device_lock">Tumia kufunga skrini</string>
+    <string name="vault_setup_lock">Weka PIN, muundo, au nywila kwenye mipangilio ya simu yako ili kutumia maktaba binafsi.</string>
+    <string name="vault_open_settings">Fungua mipangilio</string>
+    <string name="vault_auth_unavailable">Uthibitishaji haukuweza kuanza kwenye kifaa hiki. Tafadhali jaribu tena.</string>
+    <string name="vault_move">Hamisha kwenda maktaba binafsi</string>
+    <string name="vault_restore">Hamisha kwenda maktaba ya kawaida</string>
+    <string name="vault_move_success">Imesogezwa kwenye maktaba binafsi. Nakala zilizohamishiwa hapo awali hazijabadilika.</string>
+    <string name="vault_restore_success">Imesogezwa kwenye maktaba ya kawaida</string>
+    <string name="vault_move_failure">Haiwezekani kuhamisha video. Tafadhali jaribu tena.</string>
+    <string name="vault_empty_title">Hakuna video binafsi</string>
+    <string name="vault_empty_description">Chagua video katika maktaba yako ya kawaida na zihamishe hapa</string>
+</resources>

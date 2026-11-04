@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">ကိုယ်ပိုင်စာကြည့်တိုက်</string>
+    <string name="vault_locked_title">သင့်ကိုယ်ပိုင်ဗီဒီယိုစာကြည့်တိုက်</string>
+    <string name="vault_locked_description">သင့်ကိုယ်ပိုင်ဗီဒီယိုများကိုကြည့်ရန်ဖွင့်ပါ</string>
+    <string name="vault_unlock">ဖွင့်ပါ</string>
+    <string name="vault_lock">ဖြစ်ဖွင့်ပါ</string>
+    <string name="vault_auth_subtitle">ကိုယ်ပိုင်ခန္ဓာကိုယ်အချက်အလက် သို့မဟုတ် သင့်စက်ရဲ့ screen lock ကိုအသုံးပြုပါ</string>
+    <string name="vault_use_device_lock">screen lock ကိုအသုံးပြုပါ</string>
+    <string name="vault_setup_lock">ကိုယ်ပိုင်စာကြည့်တိုက်ကိုအသုံးပြုရန် သင့်ဖုန်းဆက်တင်များတွင် PIN, ပုံစံ သို့မဟုတ် စကားဝှက်ကိုသတ်မှတ်ပါ။</string>
+    <string name="vault_open_settings">ဆက်တင်များကိုဖွင့်ပါ</string>
+    <string name="vault_auth_unavailable">ဤစက်တွင် အထောက်အထားစစ်ဆေးခြင်း မစတင်နိုင်ပါ။ ကျေးဇူးပြု၍ ပြန်လည်ကြိုးစားပါ။</string>
+    <string name="vault_move">ကိုယ်ပိုင်စာကြည့်တိုက်သို့ရွှေ့ပါ</string>
+    <string name="vault_restore">ပုံမှန်စာကြည့်တိုက်သို့ရွှေ့ပါ</string>
+    <string name="vault_move_success">ကိုယ်ပိုင်စာကြည့်တိုက်သို့ရွှေ့ပြီး။ အရင့်မရနိုင်သည့် မူရင်းနောက်ထပ်မိတ္တူများမပြောင်းလဲပါ။</string>
+    <string name="vault_restore_success">ပုံမှန်စာကြည့်တိုက်သို့ရွှေ့ပြီး</string>
+    <string name="vault_move_failure">ဗီဒီယိုများကိုရွှေ့၍မရနိုင်ပါ။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။</string>
+    <string name="vault_empty_title">ကိုယ်ပိုင်ဗီဒီယိုမရှိပါ</string>
+    <string name="vault_empty_description">သင့်ပုံမှန်စာကြည့်တိုက်မှ ဗီဒီယိုများကိုရွေးချယ်ပြီး ဒီနေရာသို့ရွှေ့ပါ</string>
+</resources>

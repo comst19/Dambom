@@ -7,6 +7,7 @@ import com.comst19.dambom.core.data.download.DownloadFileStore
 import com.comst19.dambom.core.data.download.DownloadWorkScheduler
 import com.comst19.dambom.core.database.DambomDatabase
 import com.comst19.dambom.core.domain.model.DownloadRequest
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.network.header.decodeMediaHeaders
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -41,6 +42,7 @@ class DownloadRequestContextTest {
                         scheduler,
                         DownloadFileStore(context),
                         StandardTestDispatcher(testScheduler),
+                        privateVideoSession = PrivateVideoSession(),
                     )
                 val request =
                     DownloadRequest(

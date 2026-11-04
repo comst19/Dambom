@@ -560,6 +560,11 @@ private class RecordingDownloadRepository : DownloadRepository {
     override val downloads: Flow<List<DownloadTask>> = flowOf(emptyList())
     val enqueued = mutableListOf<List<DownloadRequest>>()
 
+    override suspend fun setPrivate(
+        ids: Set<String>,
+        isPrivate: Boolean,
+    ) = Unit
+
     override suspend fun enqueue(requests: List<DownloadRequest>): EnqueueDownloadsResult {
         enqueued += requests
         return EnqueueDownloadsResult(requests.size, 0)

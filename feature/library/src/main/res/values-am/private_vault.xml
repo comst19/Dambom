@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">የግል ቤተ መጻሕፍት</string>
+    <string name="vault_locked_title">የእርስዎ የግል ቪዲዮ ቤተ-መጽሐፍት</string>
+    <string name="vault_locked_description">የግል ቪዲዮዎችዎን ለማየት ይክፈቱ</string>
+    <string name="vault_unlock">ክፈት</string>
+    <string name="vault_lock">ቆልፍ</string>
+    <string name="vault_auth_subtitle">ባዮሜትሪክስ ወይም የመሣሪያዎን ማያ ገጽ መቆለፊያ ይጠቀሙ</string>
+    <string name="vault_use_device_lock">የስክሪን መቆለፊያን ተጠቀም</string>
+    <string name="vault_setup_lock">የግል ቤተ-መጽሐፍትን ለመጠቀም በስልክዎ ቅንብሮች ውስጥ ፒን፣ ስርዓተ-ጥለት ወይም የይለፍ ቃል ያዘጋጁ።</string>
+    <string name="vault_open_settings">ቅንብሮችን ክፈት</string>
+    <string name="vault_auth_unavailable">ማረጋገጫው በዚህ መሣሪያ ላይ ሊጀመር አልቻለም።. እባክዎ ዳግም ይሞክሩ.</string>
+    <string name="vault_move">ወደ የግል ቤተ-መጽሐፍት ውሰድ</string>
+    <string name="vault_restore">ወደ መደበኛ ቤተ-መጽሐፍት ውሰድ</string>
+    <string name="vault_move_success">ወደ ግል ቤተ-መጽሐፍት ተዛወረ። ከዚህ ቀደም ወደ ውጭ የተላኩ ቅጂዎች አልተለወጡም።</string>
+    <string name="vault_restore_success">ወደ መደበኛ ቤተ-መጽሐፍት ተወስዷል</string>
+    <string name="vault_move_failure">ቪዲዮዎቹን ማንቀሳቀስ አልተቻለም ። እባክዎ ዳግም ይሞክሩ.</string>
+    <string name="vault_empty_title">ምንም የግል ቪዲዮዎች የሉም</string>
+    <string name="vault_empty_description">በመደበኛ ቤተ-መጽሐፍትዎ ውስጥ ቪዲዮዎችን ይምረጡ እና እዚህ ያንቀሳቅሷቸው</string>
+</resources>

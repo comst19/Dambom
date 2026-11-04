@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
@@ -157,5 +158,6 @@ class LibraryFavoritesTest {
         LibraryFileManager(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
         events,
         LibraryTestPlaybackHistory(),
+        privateVideoSession = PrivateVideoSession(),
     )
 }

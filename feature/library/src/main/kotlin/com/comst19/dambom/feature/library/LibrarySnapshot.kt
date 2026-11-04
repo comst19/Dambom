@@ -5,6 +5,7 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 
 internal class LibrarySnapshot(
     tasks: List<DownloadTask>,
+    val isPrivateVault: Boolean = false,
 ) {
     val videos =
         tasks

@@ -77,12 +77,14 @@ internal fun VideoDetails(
                 ),
             onToggle = { informationExpanded = !informationExpanded },
         )
-        VideoSourceCard(
-            sourcePageUrl = task.sourcePageUrl,
-            onOpenOriginal = onOpenOriginal,
-            onCopyLink = onCopyLink,
-            onShareLink = onShareLink,
-        )
+        if (!task.isPrivate) {
+            VideoSourceCard(
+                sourcePageUrl = task.sourcePageUrl,
+                onOpenOriginal = onOpenOriginal,
+                onCopyLink = onCopyLink,
+                onShareLink = onShareLink,
+            )
+        }
     }
 }
 

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">ذاتي لائبريري</string>
+    <string name="vault_locked_title">توهان جي ذاتي وڊيو لائبريري</string>
+    <string name="vault_locked_description">توهان جون ذاتي وڊيوز ڏسڻ لاءِ ان لاڪ ڪريو</string>
+    <string name="vault_unlock">ان لاڪ ڪريو</string>
+    <string name="vault_lock">لاڪ ڪريو</string>
+    <string name="vault_auth_subtitle">بايوميٽرڪ يا توهان جو ڊوائيس اسڪرين لاڪ استعمال ڪريو</string>
+    <string name="vault_use_device_lock">اسڪرين لاڪ استعمال ڪريو</string>
+    <string name="vault_setup_lock">ذاتي لائبريري استعمال ڪرڻ لاءِ پنهنجي فون جي سيٽنگن ۾ PIN، پيٽرن، يا پاسورڊ سيٽ ڪريو.</string>
+    <string name="vault_open_settings">سيٽنگون کوليو</string>
+    <string name="vault_auth_unavailable">ڪنهن هن ڊوائيس تي تصديق شروع نه ٿي سگهي. مهرباني ڪري ٻيهر ڪوشش ڪريو.</string>
+    <string name="vault_move">ذاتي لائبريري ڏانهن منتقل ڪريو</string>
+    <string name="vault_restore">عام لائبريري ڏانهن منتقل ڪريو</string>
+    <string name="vault_move_success">ذاتي لائبريري ڏانهن منتقل ڪيو ويو. اڳ ۾ برآمد ٿيل ڪاپيون اڻبدل ٿيل آهن.</string>
+    <string name="vault_restore_success">عام لائبريري ڏانهن منتقل ڪيو ويو</string>
+    <string name="vault_move_failure">وڊيوز منتقل نه ٿيون ڪري سگهن. مهرباني ڪري ٻيهر ڪوشش ڪريو.</string>
+    <string name="vault_empty_title">ڪا ذاتي وڊيوز نه آهي</string>
+    <string name="vault_empty_description">پنهنجي عام لائبريري مان وڊيوز چونڊيو ۽ هتي منتقل ڪريو</string>
+</resources>

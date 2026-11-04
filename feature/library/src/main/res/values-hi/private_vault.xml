@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">निजी पुस्तकालय</string>
+    <string name="vault_locked_title">आपका निजी वीडियो पुस्तकालय</string>
+    <string name="vault_locked_description">अपनी निजी वीडियो देखने के लिए अनलॉक करें</string>
+    <string name="vault_unlock">अनलॉक करें</string>
+    <string name="vault_lock">लॉक करें</string>
+    <string name="vault_auth_subtitle">बायोमेट्रिक्स या अपने डिवाइस स्क्रीन लॉक का उपयोग करें</string>
+    <string name="vault_use_device_lock">स्क्रीन लॉक का उपयोग करें</string>
+    <string name="vault_setup_lock">निजी पुस्तकालय का उपयोग करने के लिए अपने फोन की सेटिंग्स में पिन, पैटर्न, या पासवर्ड सेट करें।</string>
+    <string name="vault_open_settings">सेटिंग्स खोलें</string>
+    <string name="vault_auth_unavailable">इस डिवाइस पर प्रमाणीकरण शुरू नहीं हो सका। कृपया फिर से प्रयास करें।</string>
+    <string name="vault_move">निजी पुस्तकालय में स्थानांतरित करें</string>
+    <string name="vault_restore">सामान्य पुस्तकालय में स्थानांतरित करें</string>
+    <string name="vault_move_success">निजी पुस्तकालय में स्थानांतरित किया गया। पहले निर्यात की गई प्रतियां अपरिवर्तित हैं।</string>
+    <string name="vault_restore_success">सामान्य पुस्तकालय में स्थानांतरित किया गया</string>
+    <string name="vault_move_failure">वीडियो स्थानांतरित नहीं कर पाए। कृपया फिर से प्रयास करें।</string>
+    <string name="vault_empty_title">कोई निजी वीडियो नहीं हैं</string>
+    <string name="vault_empty_description">अपने सामान्य पुस्तकालय में वीडियो का चयन करें और उन्हें यहां स्थानांतरित करें</string>
+</resources>

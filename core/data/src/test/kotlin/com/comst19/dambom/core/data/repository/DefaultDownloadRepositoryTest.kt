@@ -17,6 +17,7 @@ import com.comst19.dambom.core.database.download.DownloadTaskDao
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadStatus
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -111,6 +112,7 @@ class DefaultDownloadRepositoryTest {
                     scheduler = scheduler,
                     fileStore = DownloadFileStore(ApplicationProvider.getApplicationContext()),
                     ioDispatcher = StandardTestDispatcher(testScheduler),
+                    privateVideoSession = PrivateVideoSession(),
                 )
             val request = testRequest()
 
@@ -206,6 +208,7 @@ class DefaultDownloadRepositoryTest {
                     scheduler,
                     DownloadFileStore(ApplicationProvider.getApplicationContext()),
                     StandardTestDispatcher(testScheduler),
+                    privateVideoSession = PrivateVideoSession(),
                 )
             val first = testRequest().copy(id = "quality-720", quality = "720p")
             val second = first.copy(id = "quality-1080", url = first.url + "?quality=1080", quality = "1080p")
@@ -223,6 +226,7 @@ class DefaultDownloadRepositoryTest {
                     scheduler = scheduler,
                     fileStore = DownloadFileStore(ApplicationProvider.getApplicationContext()),
                     ioDispatcher = StandardTestDispatcher(testScheduler),
+                    privateVideoSession = PrivateVideoSession(),
                 )
             repository.enqueue(listOf(testRequest()))
 
@@ -498,6 +502,7 @@ class DefaultDownloadRepositoryTest {
                     scheduler = scheduler,
                     fileStore = DownloadFileStore(ApplicationProvider.getApplicationContext()),
                     ioDispatcher = StandardTestDispatcher(testScheduler),
+                    privateVideoSession = PrivateVideoSession(),
                 )
 
             val downloads = repository.downloads.first()
@@ -631,6 +636,7 @@ class DefaultDownloadRepositoryTest {
                     scheduler = scheduler,
                     fileStore = gatedFileStore,
                     ioDispatcher = Dispatchers.IO,
+                    privateVideoSession = PrivateVideoSession(),
                 )
 
             val first = async(Dispatchers.IO) { repository.delete(TEST_ID) }
@@ -703,6 +709,7 @@ class DefaultDownloadRepositoryTest {
             scheduler = scheduler,
             fileStore = DownloadFileStore(ApplicationProvider.getApplicationContext()),
             ioDispatcher = StandardTestDispatcher(testScheduler),
+            privateVideoSession = PrivateVideoSession(),
         )
 }
 

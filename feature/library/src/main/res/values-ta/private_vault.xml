@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">தனிப்பட்ட நூலகம்</string>
+    <string name="vault_locked_title">உங்கள் தனிப்பட்ட வீடியோ நூலகம்</string>
+    <string name="vault_locked_description">உங்கள் தனிப்பட்ட வீடியோக்கள் பார்க்க தடை நீக்கு</string>
+    <string name="vault_unlock">தடை நீக்கு</string>
+    <string name="vault_lock">பூட்டு</string>
+    <string name="vault_auth_subtitle">உயிர்முறை அங்கீகாரத்தை அல்லது உங்கள் சாதனத்தின் திரை பூட்டை பயன்படுத்தவும்</string>
+    <string name="vault_use_device_lock">திரை பூட்டை பயன்படுத்தவும்</string>
+    <string name="vault_setup_lock">தனிப்பட்ட நூலகத்தை பயன்படுத்த உங்கள் கைபேசி அமைப்புகளில் PIN, மாதிரி அல்லது கடவுச்சொல்லை அமைக்கவும்.</string>
+    <string name="vault_open_settings">அமைப்புகளை திறக்கவும்</string>
+    <string name="vault_auth_unavailable">இந்த சாதனத்தில் அங்கீகாரத்தை தொடக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="vault_move">தனிப்பட்ட நூலகத்திற்கு நகர்த்தவும்</string>
+    <string name="vault_restore">சாதாரண நூலகத்திற்கு நகர்த்தவும்</string>
+    <string name="vault_move_success">தனிப்பட்ட நூலகத்திற்கு நகர்த்தப்பட்டது. முன் ஏற்றிய நகல்கள் மாற்றமின்றி உள்ளன.</string>
+    <string name="vault_restore_success">சாதாரண நூலகத்திற்கு நகர்த்தப்பட்டது</string>
+    <string name="vault_move_failure">வீடியோக்களை நகர்த்த முடியவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="vault_empty_title">எந்த தனிப்பட்ட வீடியோக்களும் இல்லை</string>
+    <string name="vault_empty_description">உங்கள் சாதாரண நூலகத்தில் வீடியோக்களை தேர்வு செய்து இங்கு நகர்த்தவும்</string>
+</resources>

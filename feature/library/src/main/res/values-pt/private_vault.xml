@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Biblioteca privada</string>
+    <string name="vault_locked_title">Sua biblioteca de vídeos privada</string>
+    <string name="vault_locked_description">Desbloqueie para ver seus vídeos privados</string>
+    <string name="vault_unlock">Desbloquear</string>
+    <string name="vault_lock">Bloquear</string>
+    <string name="vault_auth_subtitle">Use biometria ou a tela de bloqueio do seu dispositivo</string>
+    <string name="vault_use_device_lock">Usar bloqueio de tela</string>
+    <string name="vault_setup_lock">Defina um PIN, padrão ou senha nas configurações do seu telefone para usar a biblioteca privada.</string>
+    <string name="vault_open_settings">Abrir configurações</string>
+    <string name="vault_auth_unavailable">Não foi possível iniciar a autenticação neste dispositivo. Por favor, tente novamente.</string>
+    <string name="vault_move">Mover para biblioteca privada</string>
+    <string name="vault_restore">Mover para biblioteca comum</string>
+    <string name="vault_move_success">Movido para a biblioteca privada. Cópias exportadas anteriormente permanecem inalteradas.</string>
+    <string name="vault_restore_success">Movido para biblioteca comum</string>
+    <string name="vault_move_failure">Não foi possível mover os vídeos. Por favor, tente novamente.</string>
+    <string name="vault_empty_title">Nenhum vídeo privado</string>
+    <string name="vault_empty_description">Selecione vídeos na sua biblioteca comum e os mova para cá</string>
+</resources>

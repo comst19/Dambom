@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">ናይ ብሕቲ ቤተ-መጻሕፍቲ</string>
+    <string name="vault_locked_title">ናይ ብሕቲ ቪድዮ ቤተ-መጻሕፍቲ</string>
+    <string name="vault_locked_description">ብሕታዊ ቪድዮታትካ ንምርኣይ ክፈት</string>
+    <string name="vault_unlock">ክኽፈት</string>
+    <string name="vault_lock">ሎክ</string>
+    <string name="vault_auth_subtitle">ባዮሜትሪክስ ወይ ናይ ስክሪን መዐሸጊ መሳርሒኻ ተጠቐም</string>
+    <string name="vault_use_device_lock">ናይ ስክሪን መቝጸሪ ተጠቐም</string>
+    <string name="vault_setup_lock">ነቲ ናይ ብሕቲ ቤተ-መጻሕፍቲ ንምጥቃም ኣብ ናይ ተሌፎንካ ኣሰራርሓ ፒን ንድፊ ወይ ፓስዎርድ ኣቐምጥ።</string>
+    <string name="vault_open_settings">ክፉት ኣቀማምጣታት</string>
+    <string name="vault_auth_unavailable">ኣብዚ መሳርሒ እዚ መረጋገጺ ክጅምር ኣይከኣለን። በጃኻ ደጊምካ ፈትን።</string>
+    <string name="vault_move">ናብ ናይ ብሕቲ ቤተ-መጻሕፍቲ ግዕዝ</string>
+    <string name="vault_restore">ናብ ስሩዕ ቤተ-መጻሕፍቲ ምግዓዝ</string>
+    <string name="vault_move_success">ናብ ናይ ብሕቲ ቤተ-መጻሕፍቲ ገዓዘ። ቅድሚ ሕጂ ናብ ወጻኢ እተላእከ ቅዳሓት ኣይተቐየረን።</string>
+    <string name="vault_restore_success">ናብ ስሩዕ ቤተ-መጻሕፍቲ ገዓዘ</string>
+    <string name="vault_move_failure">ነቲ ቪድዮታት ከንቀሳቕሶ ኣይከኣለን። በጃኻ ደጊምካ ፈትን።</string>
+    <string name="vault_empty_title">ናይ ብሕቲ ቪድዮታት የለን</string>
+    <string name="vault_empty_description">ኣብ ስሩዕ ቤተ-መጻሕፍትኻ ቪድዮታት ምረጽ እሞ ናብዚ ግዕዞ</string>
+</resources>

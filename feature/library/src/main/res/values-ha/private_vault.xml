@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Laburaren sirri</string>
+    <string name="vault_locked_title">Laburaren bidiyo naka na sirri</string>
+    <string name="vault_locked_description">Bude don kallon bidiyoyinka na sirri</string>
+    <string name="vault_unlock">Bude</string>
+    <string name="vault_lock">Kulle</string>
+    <string name="vault_auth_subtitle">Yi amfani da biometrics ko kulle allo na na\'urarka</string>
+    <string name="vault_use_device_lock">Yi amfani da kulle allo</string>
+    <string name="vault_setup_lock">Saita PIN, tsari, ko kalmar sirri a saitunan wayarka don amfani da laburaren sirri.</string>
+    <string name="vault_open_settings">Bude saituna</string>
+    <string name="vault_auth_unavailable">Ba a iya fara tantancewa a wannan na\'ura ba. Da fatan za a sake gwadawa.</string>
+    <string name="vault_move">Matsar zuwa laburaren sirri</string>
+    <string name="vault_restore">Matsar zuwa laburaren yau da kullum</string>
+    <string name="vault_move_success">An matsar zuwa laburaren sirri. Kwafin da aka fitar a baya ba su canza ba.</string>
+    <string name="vault_restore_success">An matsar zuwa laburaren yau da kullum</string>
+    <string name="vault_move_failure">Ba a iya matsar da bidiyoyin ba. Da fatan za a sake gwadawa.</string>
+    <string name="vault_empty_title">Babu bidiyoyin sirri</string>
+    <string name="vault_empty_description">Zaɓi bidiyoyi a cikin laburaren yau da kullum ka matsar da su anan</string>
+</resources>

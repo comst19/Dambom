@@ -32,4 +32,5 @@ data class DownloadTaskEntity(
     @ColumnInfo(defaultValue = "0") val isFavorite: Boolean = false,
     @ColumnInfo(defaultValue = "'{}'") val requestHeaders: String = "{}",
     val videoHeight: Int? = null,
+    @ColumnInfo(defaultValue = "0") val isPrivate: Boolean = false,
 )

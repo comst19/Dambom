@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Ụlọ akwụkwọ vidiyo onwe</string>
+    <string name="vault_locked_title">Ụlọ akwụkwọ vidiyo onwe gị</string>
+    <string name="vault_locked_description">Mepee iji hụ vidiyo onwe gị</string>
+    <string name="vault_unlock">Mepee</string>
+    <string name="vault_lock">Kpọchie</string>
+    <string name="vault_auth_subtitle">Jiri biometrics ma ọ bụ mkpuchi ihuenyo ngwaọrụ gị</string>
+    <string name="vault_use_device_lock">Jiri mkpuchi ihuenyo</string>
+    <string name="vault_setup_lock">Tọpụ PIN, nke usoro, ma ọ bụ okwuntughe na ntọala ekwentị gị iji jiri ụlọ akwụkwọ onwe.</string>
+    <string name="vault_open_settings">Mepee ntọala</string>
+    <string name="vault_auth_unavailable">Enweghị ike ịmalite nnwale na ngwaọrụ a. Biko nwalee ọzọ.</string>
+    <string name="vault_move">Gaa na ụlọ akwụkwọ onwe</string>
+    <string name="vault_restore">Gaa na ụlọ akwụkwọ nkịtị</string>
+    <string name="vault_move_success">Ebufere na ụlọ akwụkwọ onwe. Ihe ndekọ ebufere mbụ anaghị agbanwe.</string>
+    <string name="vault_restore_success">Ebufere na ụlọ akwụkwọ nkịtị</string>
+    <string name="vault_move_failure">Enweghị ike ibufe vidiyo ndị ahụ. Biko nwalee ọzọ.</string>
+    <string name="vault_empty_title">Enweghi vidiyo onwe</string>
+    <string name="vault_empty_description">Họrọ vidiyo dị na ụlọ akwụkwọ nkịtị gị ma bugharịa ha ebe a</string>
+</resources>

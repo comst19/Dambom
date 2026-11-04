@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.repository.PlaybackHistoryRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,12 +15,14 @@ import kotlinx.coroutines.SupervisorJob
 internal fun testVideoPlayerViewModel(
     context: Context,
     history: PlaybackHistoryRepository = LibraryTestPlaybackHistory(),
+    session: PrivateVideoSession = PrivateVideoSession(),
 ) = VideoPlayerViewModel(
     context,
     history,
     LibraryTestSettings,
     CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
     AppEventBus(),
+    session,
 )
 
 internal fun VideoPlayerViewModel.closeForTest() {

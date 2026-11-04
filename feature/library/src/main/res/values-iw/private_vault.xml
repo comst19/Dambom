@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">ספרייה פרטית</string>
+    <string name="vault_locked_title">ספריית הווידאו הפרטית שלך</string>
+    <string name="vault_locked_description">פתח כדי לצפות בסרטונים הפרטיים שלך</string>
+    <string name="vault_unlock">פתח</string>
+    <string name="vault_lock">נעל</string>
+    <string name="vault_auth_subtitle">השתמש בביומטריה או בנעילת המסך של המכשיר שלך</string>
+    <string name="vault_use_device_lock">השתמש בנעילת המסך</string>
+    <string name="vault_setup_lock">קבע קוד PIN, דפוס או סיסמה בהגדרות הטלפון שלך כדי להשתמש בספרייה הפרטית.</string>
+    <string name="vault_open_settings">פתח הגדרות</string>
+    <string name="vault_auth_unavailable">לא ניתן להפעיל אימות במכשיר זה. נסה שוב.</string>
+    <string name="vault_move">העבר לספרייה פרטית</string>
+    <string name="vault_restore">העבר לספרייה רגילה</string>
+    <string name="vault_move_success">הועבר לספרייה פרטית. העותקים שיוצאו קודם לא השתנו.</string>
+    <string name="vault_restore_success">הועבר לספרייה רגילה</string>
+    <string name="vault_move_failure">לא ניתן להעביר את הסרטונים. נסה שוב.</string>
+    <string name="vault_empty_title">אין סרטונים פרטיים</string>
+    <string name="vault_empty_description">בחר סרטונים בספרייה הרגילה שלך והעבר אותם לכאן</string>
+</resources>

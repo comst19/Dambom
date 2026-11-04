@@ -73,7 +73,7 @@ android {
                 "ru",
             )
         versionCode = 13
-        versionName = "1.3.3"
+        versionName = "1.4.0"
         manifestPlaceholders["crashlyticsCollectionEnabled"] = false
     }
 

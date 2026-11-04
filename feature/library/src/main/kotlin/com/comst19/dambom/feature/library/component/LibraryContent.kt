@@ -52,7 +52,7 @@ internal fun LibraryPane(
     }
     val emptyContent: @Composable () -> Unit = {
         when {
-            !uiState.hasVideos -> if (showInlineEmptyState) EmptyLibrary()
+            !uiState.hasVideos -> if (showInlineEmptyState) EmptyLibrary(isPrivateVault = uiState.isPrivateVault)
             uiState.query.isNotBlank() -> EmptySearchResults(uiState.query)
             uiState.recentlyPlayedOnly -> EmptyRecentlyPlayed()
             uiState.favoritesOnly -> EmptyFavorites()

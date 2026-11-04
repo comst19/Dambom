@@ -12,6 +12,7 @@ import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
@@ -58,6 +59,7 @@ class LibraryDeletionTest {
                     LibraryFileManager(context, dispatcherRule.dispatcher),
                     events,
                     LibraryTestPlaybackHistory(),
+                    privateVideoSession = PrivateVideoSession(),
                 )
             backgroundScope.launch { viewModel.uiState.collect() }
             runCurrent()
@@ -114,6 +116,7 @@ class LibraryDeletionTest {
                     LibraryFileManager(context, dispatcherRule.dispatcher),
                     AppEventBus(),
                     LibraryTestPlaybackHistory(),
+                    privateVideoSession = PrivateVideoSession(),
                 )
             backgroundScope.launch { viewModel.uiState.collect() }
             runCurrent()
@@ -166,6 +169,7 @@ class LibraryDeletionTest {
                     LibraryFileManager(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
                     AppEventBus(),
                     LibraryTestPlaybackHistory(),
+                    privateVideoSession = PrivateVideoSession(),
                 )
             backgroundScope.launch { viewModel.uiState.collect() }
             runCurrent()
@@ -191,6 +195,11 @@ private class DeletionRepository : DownloadRepository {
         if (id == "failed" && fail) throw IOException("Deletion failed")
         downloads.value = downloads.value.filterNot { it.id == id }
     }
+
+    override suspend fun setPrivate(
+        ids: Set<String>,
+        isPrivate: Boolean,
+    ) = Unit
 
     override suspend fun enqueue(requests: List<DownloadRequest>) = EnqueueDownloadsResult(0, 0)
 

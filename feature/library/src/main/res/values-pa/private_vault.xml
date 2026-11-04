@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">ਪ੍ਰਾਈਵੇਟ ਲਾਇਬ੍ਰੇਰੀ</string>
+    <string name="vault_locked_title">ਤੁਹਾਡੀ ਪ੍ਰਾਈਵੇਟ ਵੀਡੀਓ ਲਾਇਬ੍ਰੇਰੀ</string>
+    <string name="vault_locked_description">ਆਪਣੀਆਂ ਪ੍ਰਾਈਵੇਟ ਵੀਡੀਓਜ਼ ਦੇਖਣ ਲਈ ਅਨਲੌਕ ਕਰੋ</string>
+    <string name="vault_unlock">ਅਨਲੌਕ ਕਰੋ</string>
+    <string name="vault_lock">ਲਾਕ ਕਰੋ</string>
+    <string name="vault_auth_subtitle">ਬਾਇਓਮੇਟ੍ਰਿਕਸ ਜਾਂ ਆਪਣੇ ਡਿਵਾਈਸ ਸਕਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ</string>
+    <string name="vault_use_device_lock">ਸਕਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਕਰੋ</string>
+    <string name="vault_setup_lock">ਪ੍ਰਾਈਵੇਟ ਲਾਇਬ੍ਰੇਰੀ ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਆਪਣੇ ਫੋਨ ਸੈਟਿੰਗਜ਼ ਵਿੱਚ ਪਿਨ, ਪੈਟਰਨ ਜਾਂ ਪਾਸਵਰਡ ਸੈੱਟ ਕਰੋ।</string>
+    <string name="vault_open_settings">ਸੈਟਿੰਗਜ਼ ਖੋਲ੍ਹੋ</string>
+    <string name="vault_auth_unavailable">ਇਸ ਡਿਵਾਈਸ \'ਤੇ ਪਰਖ ਸ਼ੁਰੂ ਨਹੀਂ ਹੋ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="vault_move">ਪ੍ਰਾਈਵੇਟ ਲਾਇਬ੍ਰੇਰੀ ਵਿੱਚ ਸ਼ਿਫਟ ਕਰੋ</string>
+    <string name="vault_restore">ਸਧਾਰਣ ਲਾਇਬ੍ਰੇਰੀ ਵਿੱਚ ਸ਼ਿਫਟ ਕਰੋ</string>
+    <string name="vault_move_success">ਪ੍ਰਾਈਵੇਟ ਲਾਇਬ੍ਰੇਰੀ ਵਿੱਚ ਸ਼ਿਫਟ ਕੀਤਾ ਗਿਆ। ਪਹਿਲਾਂ ਐਕਸਪੋਰਟ ਕੀਤੀਆਂ ਕਾਪੀਆਂ ਬਦਲੀ ਨਹੀਂ ਗਈਆਂ।</string>
+    <string name="vault_restore_success">ਸਧਾਰਣ ਲਾਇਬ੍ਰੇਰੀ ਵਿੱਚ ਸ਼ਿਫਟ ਕੀਤਾ ਗਿਆ</string>
+    <string name="vault_move_failure">ਵੀਡੀਓਜ਼ ਨੂੰ ਸ਼ਿਫਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="vault_empty_title">ਕੋਈ ਪ੍ਰਾਈਵੇਟ ਵੀਡੀਓਜ਼ ਨਹੀਂ</string>
+    <string name="vault_empty_description">ਆਪਣੇ ਸਧਾਰਣ ਲਾਇਬ੍ਰੇਰੀ ਵਿੱਚੋਂ ਵੀਡੀਓਜ਼ ਚੁਣੋ ਅਤੇ ਇੱਥੇ ਲਿਆਓ</string>
+</resources>

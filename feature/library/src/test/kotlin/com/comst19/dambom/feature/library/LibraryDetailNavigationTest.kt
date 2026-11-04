@@ -3,6 +3,7 @@ package com.comst19.dambom.feature.library
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
 import com.comst19.dambom.core.testing.MainDispatcherRule
@@ -41,6 +42,7 @@ class LibraryDetailNavigationTest {
                     LibraryFileManager(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
                     AppEventBus(),
                     LibraryTestPlaybackHistory(),
+                    privateVideoSession = PrivateVideoSession(),
                 )
             backgroundScope.launch { viewModel.uiState.collect() }
             runCurrent()

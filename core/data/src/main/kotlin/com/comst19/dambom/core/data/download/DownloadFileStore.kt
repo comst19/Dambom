@@ -3,7 +3,9 @@
 package com.comst19.dambom.core.data.download
 
 import android.content.Context
+import android.content.Intent
 import android.os.StatFs
+import androidx.core.content.FileProvider
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.cache.SimpleCache
 import com.comst19.dambom.core.common.io.videoThumbnailFile
@@ -15,10 +17,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+@Suppress("TooManyFunctions")
 internal open class DownloadFileStore
     @Inject
     constructor(
-        @ApplicationContext context: Context,
+        @ApplicationContext private val context: Context,
     ) {
         private val partialDirectory = context.filesDir.resolve("download-parts").apply(File::mkdirs)
         private val videoDirectory = context.filesDir.resolve("videos").apply(File::mkdirs)
@@ -66,6 +69,16 @@ internal open class DownloadFileStore
             url: String,
             mimeType: String?,
         ): File = videoDirectory.resolve(id + fileExtension(url, mimeType))
+
+        open fun revokeSharing(localFileName: String) {
+            val uri =
+                FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    videoDirectory.resolve(localFileName),
+                )
+            context.revokeUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
 
         fun completedFilePath(localFileName: String?): String? =
             localFileName

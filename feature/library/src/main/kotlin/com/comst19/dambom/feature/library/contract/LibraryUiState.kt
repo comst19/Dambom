@@ -22,6 +22,7 @@ internal data class LibraryUiState(
     val favoritesOnly: Boolean = false,
     val recentlyPlayedOnly: Boolean = false,
     val hasTagFilter: Boolean = false,
+    val isPrivateVault: Boolean = false,
 ) {
     val hiddenSelectedCount: Int
         get() = selectedIds.size - videos.count { it.id in selectedIds }

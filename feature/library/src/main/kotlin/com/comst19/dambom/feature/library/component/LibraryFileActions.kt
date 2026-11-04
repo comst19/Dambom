@@ -41,6 +41,7 @@ internal data class LibraryFileActions(
     val onDelete: (DownloadTask) -> Unit,
     val onTrim: ((DownloadTask) -> Unit)? = null,
     val onCompress: ((DownloadTask) -> Unit)? = null,
+    val onChangePrivacy: ((DownloadTask) -> Unit)? = null,
 )
 
 @Composable

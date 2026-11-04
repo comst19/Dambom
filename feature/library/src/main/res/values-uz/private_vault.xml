@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Shaxsiy kutubxona</string>
+    <string name="vault_locked_title">Sizning shaxsiy video kutubxonangiz</string>
+    <string name="vault_locked_description">Shaxsiy videolaringizni ko‘rish uchun blokni oching</string>
+    <string name="vault_unlock">Ochish</string>
+    <string name="vault_lock">Qulf</string>
+    <string name="vault_auth_subtitle">Biometrik ma’lumot yoki qurilmangiz ekran qulfi orqali foydalaning</string>
+    <string name="vault_use_device_lock">Ekran qulfi orqali foydalaning</string>
+    <string name="vault_setup_lock">Shaxsiy kutubxonadan foydalanish uchun telefoningiz sozlamalarida PIN-kod, naqsh yoki parol o‘rnating.</string>
+    <string name="vault_open_settings">Sozlamalarni ochish</string>
+    <string name="vault_auth_unavailable">Bu qurilmada autentifikatsiya boshlanishi mumkin emas. Iltimos, qayta urinib ko‘ring.</string>
+    <string name="vault_move">Shaxsiy kutubxonaga ko‘chirish</string>
+    <string name="vault_restore">Oddiy kutubxonaga ko‘chirish</string>
+    <string name="vault_move_success">Shaxsiy kutubxonaga ko‘chirilgan. Oldin eksport qilingan nusxalar o‘zgarmaydi.</string>
+    <string name="vault_restore_success">Oddiy kutubxonaga ko‘chirildi</string>
+    <string name="vault_move_failure">Videolarni ko‘chirish mumkin bo‘lmadi. Iltimos, qayta urinib ko‘ring.</string>
+    <string name="vault_empty_title">Hech qanday shaxsiy video yo‘q</string>
+    <string name="vault_empty_description">Oddiy kutubxonangizdagi videolarni tanlang va ularni bu yerga ko‘chiring</string>
+</resources>

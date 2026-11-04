@@ -30,6 +30,7 @@ object DatabaseModule {
                 DambomDatabase.MIGRATION_4_5,
                 DambomDatabase.MIGRATION_5_6,
                 DambomDatabase.MIGRATION_6_7,
+                DambomDatabase.MIGRATION_7_8,
             ).build()
 
     @Provides

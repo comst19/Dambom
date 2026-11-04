@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Ile-ikawe aladani</string>
+    <string name="vault_locked_title">Ile-ikawe fidio ikọkọ rẹ</string>
+    <string name="vault_locked_description">Ṣii lati wo awọn fidio ikọkọ rẹ</string>
+    <string name="vault_unlock">Ṣii</string>
+    <string name="vault_lock">Titiipa</string>
+    <string name="vault_auth_subtitle">Lo biometrics tabi titiipa iboju ẹrọ rẹ</string>
+    <string name="vault_use_device_lock">Lo titiipa iboju</string>
+    <string name="vault_setup_lock">Ṣeto PIN kan, apẹrẹ, tabi ọrọ igbaniwọle ninu awọn eto foonu rẹ lati lo ile-ikawe ikọkọ.</string>
+    <string name="vault_open_settings">Ṣii awọn eto</string>
+    <string name="vault_auth_unavailable">Ijẹrisi ko le bẹrẹ lori ẹrọ yii. Jọwọ gbiyanju lẹẹkansi.</string>
+    <string name="vault_move">Ñëàâà Áîãó â Ìîñêâå</string>
+    <string name="vault_restore">Ñëàâà Áîãó â Ìîñêâå</string>
+    <string name="vault_move_success">Gbe lọ si ile-ikawe ikọkọ. Awọn adakọ ti a ti gbe tẹlẹ tẹlẹ ko yipada.</string>
+    <string name="vault_restore_success">Ñëàâà Áîãó â Ìîñêâå</string>
+    <string name="vault_move_failure">Ko le gbe awọn fidio naa. Jọwọ gbiyanju lẹẹkansi.</string>
+    <string name="vault_empty_title">Ko si awọn fidio ikọkọ</string>
+    <string name="vault_empty_description">Yan awọn fidio ninu ile-ikawe deede rẹ ki o gbe wọn nibi</string>
+</resources>

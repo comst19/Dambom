@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Ilayibrari yabucala</string>
+    <string name="vault_locked_title">Ilayibrari yakho yevidiyo yabucala</string>
+    <string name="vault_locked_description">Vula ukuze ubone iividiyo zakho zabucala</string>
+    <string name="vault_unlock">Vula</string>
+    <string name="vault_lock">Vala</string>
+    <string name="vault_auth_subtitle">Sebenzisa i-biometrics okanye ukuvalwa kwesikrini sesixhobo sakho</string>
+    <string name="vault_use_device_lock">Sebenzisa ukuvalwa kwesikrini</string>
+    <string name="vault_setup_lock">Setha i-PIN, iphethini, okanye igama lokugqitha kwisethingi zefowuni yakho ukuze usebenzise ilayibrari yabucala.</string>
+    <string name="vault_open_settings">Vula izicwangciso</string>
+    <string name="vault_auth_unavailable">Ukuqinisekiswa akunakwenzeka ukuqala kulesi sixhobo. Nceda uzame kwakhona.</string>
+    <string name="vault_move">Hambisa ukuya kulayibrari wabucala</string>
+    <string name="vault_restore">Hambisa ukuya kulayibrari eqhelekileyo</string>
+    <string name="vault_move_success">Ihambisiwe kulayibrari yabucala. Iikopi ezithunyelweyo ngaphambili azitshintshanga.</string>
+    <string name="vault_restore_success">Ihambisiwe kulayibrari eqhelekileyo</string>
+    <string name="vault_move_failure">Akuvunyelwanga ukuhambisa iividiyo. Nceda uzame kwakhona.</string>
+    <string name="vault_empty_title">Akukho vidiyo yabucala</string>
+    <string name="vault_empty_description">Khetha iividiyo kulayibrari yakho eqhelekileyo kwaye uzihambise apha</string>
+</resources>

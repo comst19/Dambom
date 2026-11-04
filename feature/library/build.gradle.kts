@@ -3,6 +3,8 @@ plugins { id("dambom.android.feature") }
 android { namespace = "com.comst19.dambom.feature.library" }
 
 dependencies {
+    implementation(libs.androidx.biometric)
+    implementation(libs.androidx.appcompat)
     implementation(projects.core.common)
     implementation(projects.core.coroutine)
     implementation(libs.androidx.activity.compose)

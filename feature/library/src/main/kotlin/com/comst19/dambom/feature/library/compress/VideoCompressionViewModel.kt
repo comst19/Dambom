@@ -55,7 +55,7 @@ internal class VideoCompressionViewModel
                     mutableState.update { it.copy(loading = true, loadFailed = false) }
                     suspendRunCatching {
                         val task = checkNotNull(repository.observeDownload(id).first())
-                        check(task.status == DownloadStatus.COMPLETED && !task.deletePending)
+                        check(!task.isPrivate && task.status == DownloadStatus.COMPLETED && !task.deletePending)
                         val source = compressor.inspect(checkNotNull(task.localFilePath))
                         mutableState.update { it.copy(task = task, source = source, loading = false) }
                     }.onFailure { mutableState.update { it.copy(loading = false, loadFailed = true) } }

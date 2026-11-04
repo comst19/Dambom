@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Privaat biblioteek</string>
+    <string name="vault_locked_title">Jou privaat videobiblioteek</string>
+    <string name="vault_locked_description">Ontsluit om jou privaat video\'s te kyk</string>
+    <string name="vault_unlock">Ontsluit</string>
+    <string name="vault_lock">Sluit</string>
+    <string name="vault_auth_subtitle">Gebruik biometrie of jou toestel se skermsluiting</string>
+    <string name="vault_use_device_lock">Gebruik skermsluiting</string>
+    <string name="vault_setup_lock">Stel \'n PIN, patroon of wagwoord in jou fooninstellings in om die privaat biblioteek te gebruik.</string>
+    <string name="vault_open_settings">Maak instellings oop</string>
+    <string name="vault_auth_unavailable">Verifikasie kon nie op hierdie toestel begin word nie. Probeer asseblief weer.</string>
+    <string name="vault_move">Verskuif na privaat biblioteek</string>
+    <string name="vault_restore">Verskuif na gewone biblioteek</string>
+    <string name="vault_move_success">Verskuif na privaat biblioteek. Voorheen uitgevoerde kopieë is onveranderd.</string>
+    <string name="vault_restore_success">Verskuif na gewone biblioteek</string>
+    <string name="vault_move_failure">Kon nie die video\'s verskuif nie. Probeer asseblief weer.</string>
+    <string name="vault_empty_title">Geen privaat video\'s nie</string>
+    <string name="vault_empty_description">Kies video\'s in jou gewone biblioteek en verskuif dit hierheen</string>
+</resources>

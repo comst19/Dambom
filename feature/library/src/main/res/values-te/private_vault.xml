@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">ప్రైవేట్ లైబ్రరీ</string>
+    <string name="vault_locked_title">మీ ప్రైవేట్ వీడియో లైబ్రరీ</string>
+    <string name="vault_locked_description">మీ ప్రైవేట్ వీడియోలను వీక్షించడానికి అన్‌లాక్ చేయండి</string>
+    <string name="vault_unlock">అన్‌లాక్ చేయండి</string>
+    <string name="vault_lock">లాక్ చేయండి</string>
+    <string name="vault_auth_subtitle">బయోమెట్రిక్స్ లేదా మీ డివైస్ స్క్రీన్ లాక్ ఉపయోగించండి</string>
+    <string name="vault_use_device_lock">స్క్రీన్ లాక్ ఉపయోగించండి</string>
+    <string name="vault_setup_lock">ప్రైవేట్ లైబ్రరీ ఉపయోగించడానికి మీ ఫోన్ సెట్టింగులో PIN, ప్యాటర్న్ లేదా పాస్వర్డ్ సెట్ చేయండి.</string>
+    <string name="vault_open_settings">సెట్టింగులు తెరవండి</string>
+    <string name="vault_auth_unavailable">ఆ థా డివైస్‌పై ఆథెంటికేషన్ ప్రారంభించలేకపోయింది. దయచేసి మళ్లీ ప్రయత్నించండి.</string>
+    <string name="vault_move">ప్రైవేట్ లైబ్రరీకు తరలించండి</string>
+    <string name="vault_restore">సాధారణ లైబ్రరీకు తరలించండి</string>
+    <string name="vault_move_success">ప్రైవేట్ లైబ్రరీకు మార్చబడింది. మునుపటి ఎగుమతి చేసిన కాపీలు మారలేదు.</string>
+    <string name="vault_restore_success">సాధారణ లైబ్రరీకు మార్చబడింది</string>
+    <string name="vault_move_failure">వీడియోలను తరలించలేకపోయాం. దయచేసి మళ్లీ ప్రయత్నించండి.</string>
+    <string name="vault_empty_title">ప్రైవేట్ వీడియోలు లేవు</string>
+    <string name="vault_empty_description">మీ సాధారణ లైబ్రరీలో వీడియోలను ఎంచుకొని ఇక్కడ తరలించండి</string>
+</resources>

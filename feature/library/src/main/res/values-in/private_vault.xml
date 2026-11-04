@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Perpustakaan pribadi</string>
+    <string name="vault_locked_title">Perpustakaan video pribadi Anda</string>
+    <string name="vault_locked_description">Buka untuk melihat video pribadi Anda</string>
+    <string name="vault_unlock">Buka</string>
+    <string name="vault_lock">Kunci</string>
+    <string name="vault_auth_subtitle">Gunakan biometrik atau kunci layar perangkat Anda</string>
+    <string name="vault_use_device_lock">Gunakan kunci layar</string>
+    <string name="vault_setup_lock">Atur PIN, pola, atau kata sandi di pengaturan ponsel Anda untuk menggunakan perpustakaan pribadi.</string>
+    <string name="vault_open_settings">Buka pengaturan</string>
+    <string name="vault_auth_unavailable">Autentikasi tidak dapat dimulai di perangkat ini. Silakan coba lagi.</string>
+    <string name="vault_move">Pindahkan ke perpustakaan pribadi</string>
+    <string name="vault_restore">Pindahkan ke perpustakaan biasa</string>
+    <string name="vault_move_success">Dipindahkan ke perpustakaan pribadi. Salinan yang sebelumnya diekspor tidak berubah.</string>
+    <string name="vault_restore_success">Dipindahkan ke perpustakaan biasa</string>
+    <string name="vault_move_failure">Tidak dapat memindahkan video. Silakan coba lagi.</string>
+    <string name="vault_empty_title">Tidak ada video pribadi</string>
+    <string name="vault_empty_description">Pilih video di perpustakaan biasa Anda dan pindahkan ke sini</string>
+</resources>

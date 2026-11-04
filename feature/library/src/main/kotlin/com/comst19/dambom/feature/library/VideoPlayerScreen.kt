@@ -47,6 +47,7 @@ import com.comst19.dambom.feature.library.file.isLocalVideoAvailable
 import com.comst19.dambom.feature.library.file.rememberLocalVideoAvailable
 import com.comst19.dambom.feature.library.pip.PipPlatformEffect
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
+import com.comst19.dambom.feature.library.vault.PrivateVideoWindowProtection
 
 @Composable
 @Suppress("LongParameterList", "LongMethod")
@@ -63,6 +64,7 @@ internal fun VideoPlayerRoute(
             libraryViewModel.observeVideo(id)
         }.collectAsStateWithLifecycle(initialValue = VideoDetailState.Loading).value
     val task = (detailState as? VideoDetailState.Ready)?.task
+    if (task?.isPrivate == true) PrivateVideoWindowProtection()
     var isLocalVideoAvailable by rememberLocalVideoAvailable(task)
 
     fun refreshLocalVideoAvailability() {
@@ -111,7 +113,7 @@ internal fun VideoPlayerRoute(
             },
         )
     }
-    VideoPlayerMediaSessionEffect(playerViewModel.player)
+    if (task != null && !task.isPrivate) VideoPlayerMediaSessionEffect(playerViewModel.player)
     LaunchedEffect(detailState, task?.id, task?.localFilePath, isLocalVideoAvailable) {
         if (detailState == VideoDetailState.Loading) return@LaunchedEffect
         if (isLocalVideoAvailable) {
@@ -132,7 +134,7 @@ internal fun VideoPlayerRoute(
 
     PipPlatformEffect(
         player = playerViewModel.player,
-        task = playableTask,
+        task = playableTask?.takeUnless(DownloadTask::isPrivate),
         isFullscreen = isVideoFullscreen,
         onPictureInPictureModeChanged = { inPictureInPictureMode ->
             if (inPictureInPictureMode) {
@@ -148,7 +150,7 @@ internal fun VideoPlayerRoute(
             detailState = detailState,
             fileActions = fileActions,
             onBack = libraryViewModel::goBack,
-            showBack = !multiplePanes,
+            showBack = task?.isPrivate == true || !multiplePanes,
             isVideoFullscreen = isVideoFullscreen,
             onVideoFullscreenChange = onVideoFullscreenChange,
             onVideoRotate = onVideoRotate,

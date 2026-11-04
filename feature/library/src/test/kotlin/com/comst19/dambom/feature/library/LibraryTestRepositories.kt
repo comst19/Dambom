@@ -16,6 +16,13 @@ internal class LibraryTestDownloads(
 ) : DownloadRepository {
     override val downloads = MutableStateFlow(initial)
 
+    override suspend fun setPrivate(
+        ids: Set<String>,
+        isPrivate: Boolean,
+    ) {
+        downloads.value = downloads.value.map { if (it.id in ids) it.copy(isPrivate = isPrivate) else it }
+    }
+
     override suspend fun enqueue(requests: List<DownloadRequest>) = EnqueueDownloadsResult(0, 0)
 
     override suspend fun pause(id: String) = Unit

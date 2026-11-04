@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">প্রাইভেট লাইব্রেরি</string>
+    <string name="vault_locked_title">আপনার প্রাইভেট ভিডিও লাইব্রেরি</string>
+    <string name="vault_locked_description">আপনার প্রাইভেট ভিডিও দেখতে আনলক করুন</string>
+    <string name="vault_unlock">আনলক করুন</string>
+    <string name="vault_lock">লক করুন</string>
+    <string name="vault_auth_subtitle">বায়োমেট্রিক বা আপনার ডিভাইসের স্ক্রিন লক ব্যবহার করুন</string>
+    <string name="vault_use_device_lock">স্ক্রিন লক ব্যবহার করুন</string>
+    <string name="vault_setup_lock">প্রাইভেট লাইব্রেরি ব্যবহার করতে আপনার ফোন সেটিংসে একটি পিন, প্যাটার্ন, বা পাসওয়ার্ড সেট করুন।</string>
+    <string name="vault_open_settings">সেটিংস খুলুন</string>
+    <string name="vault_auth_unavailable">এই ডিভাইসে প্রমাণীকরণ শুরু করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।</string>
+    <string name="vault_move">প্রাইভেট লাইব্রেরিতে স্থানান্তর করুন</string>
+    <string name="vault_restore">সাধারণ লাইব্রেরিতে স্থানান্তর করুন</string>
+    <string name="vault_move_success">প্রাইভেট লাইব্রেরিতে স্থানান্তরিত হয়েছে। পূর্বে রপ্তানি করা কপিগুলি অপরিবর্তিত আছে।</string>
+    <string name="vault_restore_success">সাধারণ লাইব্রেরিতে স্থানান্তরিত হয়েছে</string>
+    <string name="vault_move_failure">ভিডিও স্থানান্তর করতে পারিনি। অনুগ্রহ করে আবার চেষ্টা করুন।</string>
+    <string name="vault_empty_title">কোনো প্রাইভেট ভিডিও নেই</string>
+    <string name="vault_empty_description">আপনার সাধারণ লাইব্রেরির ভিডিওগুলি নির্বাচন করুন এবং এখানে স্থানান্তর করুন</string>
+</resources>

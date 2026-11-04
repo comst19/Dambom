@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Bibliothèque privée</string>
+    <string name="vault_locked_title">Votre bibliothèque vidéo privée</string>
+    <string name="vault_locked_description">Déverrouillez pour voir vos vidéos privées</string>
+    <string name="vault_unlock">Déverrouiller</string>
+    <string name="vault_lock">Verrouiller</string>
+    <string name="vault_auth_subtitle">Utilisez l\'authentification biométrique ou le verrouillage de l\'écran de votre appareil</string>
+    <string name="vault_use_device_lock">Utiliser le verrouillage de l\'écran</string>
+    <string name="vault_setup_lock">Définissez un code PIN, un schéma ou un mot de passe dans les paramètres de votre téléphone pour utiliser la bibliothèque privée.</string>
+    <string name="vault_open_settings">Ouvrir les paramètres</string>
+    <string name="vault_auth_unavailable">L\'authentification n\'a pas pu démarrer sur cet appareil. Veuillez réessayer.</string>
+    <string name="vault_move">Déplacer vers la bibliothèque privée</string>
+    <string name="vault_restore">Déplacer vers la bibliothèque normale</string>
+    <string name="vault_move_success">Déplacé vers la bibliothèque privée. Les copies exportées précédemment ne sont pas modifiées.</string>
+    <string name="vault_restore_success">Déplacé vers la bibliothèque normale</string>
+    <string name="vault_move_failure">Impossible de déplacer les vidéos. Veuillez réessayer.</string>
+    <string name="vault_empty_title">Aucune vidéo privée</string>
+    <string name="vault_empty_description">Sélectionnez des vidéos dans votre bibliothèque normale et déplacez-les ici</string>
+</resources>

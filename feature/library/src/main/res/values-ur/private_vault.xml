@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">نجی لائبریری</string>
+    <string name="vault_locked_title">آپ کی نجی ویڈیو لائبریری</string>
+    <string name="vault_locked_description">اپنی نجی ویڈیوز دیکھنے کے لیے ان لاک کریں</string>
+    <string name="vault_unlock">ان لاک کریں</string>
+    <string name="vault_lock">لاک کریں</string>
+    <string name="vault_auth_subtitle">بایومیٹرکس یا اپنے ڈیوائس کی اسکرین لاک استعمال کریں</string>
+    <string name="vault_use_device_lock">اسکرین لاک استعمال کریں</string>
+    <string name="vault_setup_lock">نجی لائبریری استعمال کرنے کے لیے اپنے فون کی سیٹنگز میں PIN، پیٹرن، یا پاسورڈ سیٹ کریں۔</string>
+    <string name="vault_open_settings">سیٹنگز کھولیں</string>
+    <string name="vault_auth_unavailable">اس ڈیوائس پر اتھنٹیکیشن شروع نہیں ہو سکی۔ دوبارہ کوشش کریں۔</string>
+    <string name="vault_move">نجی لائبریری میں منتقل کریں</string>
+    <string name="vault_restore">عام لائبریری میں منتقل کریں</string>
+    <string name="vault_move_success">نجی لائبریری میں منتقل ہو گئی۔ پہلے سے برآمد شدہ کاپیاں بغیر تبدیلی کے رہیں گی۔</string>
+    <string name="vault_restore_success">عام لائبریری میں منتقل ہو گئی</string>
+    <string name="vault_move_failure">ویڈیوز کو منتقل نہیں کیا جا سکا۔ دوبارہ کوشش کریں۔</string>
+    <string name="vault_empty_title">کوئی نجی ویڈیوز نہیں</string>
+    <string name="vault_empty_description">اپنی عام لائبریری میں ویڈیوز منتخب کریں اور انہیں یہاں منتقل کریں</string>
+</resources>

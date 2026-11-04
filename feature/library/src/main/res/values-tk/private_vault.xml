@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Şahsy kitaphana</string>
+    <string name="vault_locked_title">Siziň şahsy wideo kitaphananyňyz</string>
+    <string name="vault_locked_description">Şahsy wideolaryňyzy görmek üçin açyň</string>
+    <string name="vault_unlock">Açmak</string>
+    <string name="vault_lock">Ýapmak</string>
+    <string name="vault_auth_subtitle">Biyometriki ýa-da enjamyňyzyň ekran gapagyny ulanyň</string>
+    <string name="vault_use_device_lock">Ekran gapagyny ulanyň</string>
+    <string name="vault_setup_lock">Şahsy kitaphanany ulanmak üçin telefon sazlamalaryňyzda PIN, usul ýa-da parol taýýarlanyň.</string>
+    <string name="vault_open_settings">Sazlamalary açyň</string>
+    <string name="vault_auth_unavailable">Bu enjamda tassyklama başlanylmasy mümkin bolmady. Gaýtadan synanyşyň.</string>
+    <string name="vault_move">Şahsy kitaphanaya göçür</string>
+    <string name="vault_restore">Adaty kitaphanaya göçür</string>
+    <string name="vault_move_success">Şahsy kitaphanaya göçürildi. Ilki eksport edilen nusgalar üýtgemeýär.</string>
+    <string name="vault_restore_success">Adaty kitaphanaya göçürildi</string>
+    <string name="vault_move_failure">Wideolary göçürip bolmady. Gaýtadan synanyşyň.</string>
+    <string name="vault_empty_title">Hiç hili şahsy wideo ýok</string>
+    <string name="vault_empty_description">Adaty kitaphananyňyzda wideolary saýlap, bu ýere göçüriň</string>
+</resources>

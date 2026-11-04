@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">ଘରୋଇ ଲାଇବ୍ରେରୀ</string>
+    <string name="vault_locked_title">ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ଭିଡିଓ ଲାଇବ୍ରେରୀ</string>
+    <string name="vault_locked_description">ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ଭିଡିଓ ଗୁଡିକ ଦର୍ଶନ କରିବାକୁ ଅନଲକ୍ କରନ୍ତୁ</string>
+    <string name="vault_unlock">ଅନଲକ୍</string>
+    <string name="vault_lock">ଲକ୍</string>
+    <string name="vault_auth_subtitle">ବାୟୋମେଟ୍ରିକ୍ସ କିମ୍ୱା ଆପଣଙ୍କ ଡିଭାଇସ୍ ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ</string>
+    <string name="vault_use_device_lock">ସ୍କ୍ରିନ୍ ଲକ୍ ବ୍ୟବହାର କରନ୍ତୁ</string>
+    <string name="vault_setup_lock">ବ୍ୟକ୍ତିଗତ ଲାଇବ୍ରେରୀ ବ୍ୟବହାର କରିବାକୁ ଆପଣଙ୍କ ଫୋନ୍ ସେଟିଂସରେ ଏକ PIN, ଶୈଳୀ, କିମ୍ୱା ପାସୱାର୍ଡ୍ ସେଟ୍ କରନ୍ତୁ।</string>
+    <string name="vault_open_settings">ସେଟିଂସ୍ ଖୋଲନ୍ତୁ</string>
+    <string name="vault_auth_unavailable">ଏହି ଡିଭାଇସରେ ପ୍ରାମାଣିକରଣ ଆରମ୍ଭ ହୋଇପାରିବ ନାହିଁ। ଦୟାକରି ପୁନର୍ବାର ଚେଷ୍ଟା କରନ୍ତୁ।</string>
+    <string name="vault_move">ବ୍ୟକ୍ତିଗତ ଲାଇବ୍ରେରୀକୁ ସ୍ଥାନାନ୍ତରିତ କରନ୍ତୁ</string>
+    <string name="vault_restore">ନିୟମିତ ଲାଇବ୍ରେରୀକୁ ଯାଆନ୍ତୁ</string>
+    <string name="vault_move_success">ଘରୋଇ ଲାଇବ୍ରେରୀକୁ ସ୍ଥାନାନ୍ତରିତ ହୋଇଛି । ପୂର୍ବରୁ ରପ୍ତାନି ହୋଇଥିବା ନକଲ ଅପରିବର୍ତ୍ତିତ ଅଛି ।</string>
+    <string name="vault_restore_success">ନିୟମିତ ଲାଇବ୍ରେରୀକୁ ସ୍ଥାନାନ୍ତରିତ</string>
+    <string name="vault_move_failure">ଭିଡିଓ ଗୁଡିକ ଘୁଞ୍ଚାଇ ପାରିଲା ନାହିଁ । ଦୟାକରି ପୁନର୍ବାର ଚେଷ୍ଟା କରନ୍ତୁ ।</string>
+    <string name="vault_empty_title">କୌଣସି ବ୍ୟକ୍ତିଗତ ଭିଡିଓ ନାହିଁ</string>
+    <string name="vault_empty_description">ଆପଣଙ୍କ ନିୟମିତ ଲାଇବ୍ରେରୀରେ ଭିଡିଓ ଗୁଡିକ ଚୟନ କରନ୍ତୁ ଏବଂ ସେଗୁଡିକୁ ଏଠାରେ ଘୁଞ୍ଚାନ୍ତୁ</string>
+</resources>

@@ -36,6 +36,9 @@ sealed interface SettingsGraph : AppNavKey {
 
 sealed interface LibraryGraph : AppNavKey {
     @Serializable
+    data object PrivateLibraryKey : LibraryGraph
+
+    @Serializable
     data object LibraryKey : LibraryGraph, TopLevelNavKey
 
     @Serializable

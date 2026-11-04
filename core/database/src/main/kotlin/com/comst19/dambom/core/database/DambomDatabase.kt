@@ -19,7 +19,7 @@ import com.comst19.dambom.core.database.tag.VideoTagEntity
         VideoTagAssignmentEntity::class,
         PlaybackHistoryEntity::class,
     ],
-    version = STREAM_DATABASE_VERSION,
+    version = PRIVATE_VAULT_DATABASE_VERSION,
     exportSchema = true,
 )
 abstract class DambomDatabase : RoomDatabase() {
@@ -30,6 +30,13 @@ abstract class DambomDatabase : RoomDatabase() {
     abstract fun playbackHistoryDao(): PlaybackHistoryDao
 
     internal companion object {
+        val MIGRATION_7_8 =
+            object : Migration(STREAM_DATABASE_VERSION, PRIVATE_VAULT_DATABASE_VERSION) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("ALTER TABLE download_tasks ADD COLUMN isPrivate INTEGER NOT NULL DEFAULT 0")
+                }
+            }
+
         val MIGRATION_6_7 =
             object : Migration(PLAYBACK_DATABASE_VERSION, STREAM_DATABASE_VERSION) {
                 override fun migrate(db: SupportSQLiteDatabase) {
@@ -108,3 +115,5 @@ private const val TAG_DATABASE_VERSION = 5
 private const val PLAYBACK_DATABASE_VERSION = 6
 
 private const val STREAM_DATABASE_VERSION = 7
+
+private const val PRIVATE_VAULT_DATABASE_VERSION = 8

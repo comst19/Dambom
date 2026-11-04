@@ -21,7 +21,10 @@ import androidx.compose.ui.unit.dp
 import com.comst19.dambom.feature.library.R
 
 @Composable
-internal fun EmptyLibrary(modifier: Modifier = Modifier) {
+internal fun EmptyLibrary(
+    modifier: Modifier = Modifier,
+    isPrivateVault: Boolean = false,
+) {
     Column(
         modifier = modifier.fillMaxWidth().padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
@@ -34,11 +37,14 @@ internal fun EmptyLibrary(modifier: Modifier = Modifier) {
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            text = stringResource(R.string.library_empty_title),
+            text = stringResource(if (isPrivateVault) R.string.vault_empty_title else R.string.library_empty_title),
             style = MaterialTheme.typography.titleMedium,
         )
         Text(
-            text = stringResource(R.string.library_empty_description),
+            text =
+                stringResource(
+                    if (isPrivateVault) R.string.vault_empty_description else R.string.library_empty_description,
+                ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
         )

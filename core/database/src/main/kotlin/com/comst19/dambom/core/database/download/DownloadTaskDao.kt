@@ -266,6 +266,15 @@ interface DownloadTaskDao {
         """,
     )
     suspend fun toggleFavorite(id: String): Int
+
+    @Query(
+        "UPDATE download_tasks SET isPrivate = :isPrivate " +
+            "WHERE id IN (:ids) AND status = 'COMPLETED' AND deletePending = 0 AND localFileName IS NOT NULL",
+    )
+    suspend fun setPrivate(
+        ids: Set<String>,
+        isPrivate: Boolean,
+    )
 }
 
 data class QueuedDownloadCandidate(

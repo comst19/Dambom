@@ -3,8 +3,7 @@ package com.comst19.dambom.feature.settings.platform
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
+import com.comst19.dambom.core.common.ui.locale.AppLanguagePreferences
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -31,7 +30,7 @@ internal class AndroidSettingsPlatformActions
         @ApplicationContext private val context: Context,
     ) : SettingsPlatformActions {
         override val currentLanguageTags: String
-            get() = AppCompatDelegate.getApplicationLocales().toLanguageTags()
+            get() = AppLanguagePreferences.selectedLanguageTags(context)
 
         override val versionName: String =
             context.packageManager
@@ -41,7 +40,7 @@ internal class AndroidSettingsPlatformActions
                 .ifBlank { "-" }
 
         override fun applyLanguage(languageTag: String) {
-            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(languageTag))
+            AppLanguagePreferences.apply(context, languageTag)
         }
 
         override fun takePersistedDownloadDirectory(treeUri: String): Boolean =

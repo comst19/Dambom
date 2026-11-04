@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Недостаточно памяти. Освободите место и попробуйте снова: %1$s</string>
+    <string name="download_notification_channel">Загрузки</string>
+    <string name="download_notification_title">Dambom загружает видео</string>
+    <string name="download_notification_description">Загрузки продолжаются с сохранённой точки после восстановления соединения.</string>
+    <string name="download_result_notification_channel">Результаты загрузки</string>
+    <string name="download_notification_progress_title">Загрузка %1$s</string>
+    <string name="download_notification_progress">%1$d %% завершено</string>
+    <string name="download_notification_completed">Загрузка завершена</string>
+    <string name="download_notification_completed_description">%1$s сохранено в вашей библиотеке.</string>
+    <string name="download_notification_failed">Загрузка не удалась</string>
+    <string name="download_notification_failed_description">Попробуйте скачать %1$s снова.</string>
+    <string name="download_notification_failed_network">Проверьте сетевое соединение для %1$s .</string>
+    <string name="download_notification_failed_storage">Проверьте доступное место для %1$s .</string>
+</resources>

@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Kaydinta kuma filna. Bannaanka banneeya oo isku day.</string>
+    <string name="downloads_summary_waiting">Sugitaanka soo dejinta</string>
+    <string name="downloads_summary_paused">Soodejintu waa la hakiyay</string>
+    <string name="downloads_summary_attention">Soodejintu waxay u baahan tahay feejignaan</string>
+    <string name="downloads_quality_original">Asalka</string>
+    <string name="downloads_title">Soodejin</string>
+    <string name="downloads_back">Dib u noqo</string>
+    <string name="downloads_view_as_list">U eeg liis ahaan</string>
+    <string name="downloads_view_as_grid">U eeg sida shabaqlaha</string>
+    <string name="downloads_empty_title">Wax soo dejin ah ma socdo</string>
+    <string name="downloads_empty_description">Soodejintii dhammaatay waxay diyaar u yihiin in lagu daawado maktabadaada.</string>
+    <string name="downloads_open_library">Maktabad furan</string>
+    <string name="downloads_summary">%1$d soo dejinta</string>
+    <string name="downloads_summary_remaining">%1$d haray</string>
+    <string name="downloads_pause_all">Jooji dhammaan</string>
+    <string name="downloads_resume_all">Dib u bilow dhammaan</string>
+    <string name="downloads_group_active">Soo dejinta</string>
+    <string name="downloads_group_queued">Kuyuu galay</string>
+    <string name="downloads_group_paused">Hakin</string>
+    <string name="downloads_group_failed">Fashilmay</string>
+    <string name="downloads_group_completed">Dhammaystiran</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s thumbnail</string>
+    <string name="downloads_unknown_size">Tirada guud ee aan la garanayn</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Horumarka soo dejinta haray</string>
+    <string name="downloads_pause">Jooji</string>
+    <string name="downloads_resume">Dib u bilaw</string>
+    <string name="downloads_cancel">Jooji</string>
+    <string name="downloads_retry">Isku day</string>
+    <string name="downloads_remove">Ka saar liiska</string>
+    <string name="downloads_error_access">Fiidiyowgu wuxuu u baahan yahay ogolaansho gelitaanka.</string>
+    <string name="downloads_error_format">Qaab muuqaaleedkan lama taageero.</string>
+    <string name="downloads_error_network">Xidhiidhku ma soo kabsan Isku day mar kale</string>
+    <string name="downloads_error_storage">Waa la kaydin kari waayay faylka Hubi booska kaydinta</string>
+    <string name="downloads_error_server">Seerfarku wuu socodsiin kari waayay soo dejinta.</string>
+    <string name="downloads_error_unknown">Wax baa khaldamay markii la soo dejinayay</string>
+    <string name="downloads_command_failed">Ma cusboonaysiin kari waayay soo dejinta Isku day mar kale</string>
+    <string name="downloads_delete_pending">Nadiifinta tirtirka ayaa loo baahan yahay</string>
+    <string name="downloads_delete_retry">Isku day in aad tirtirto</string>
+    <string name="downloads_delete_group_count">Nadiifinta tirtirka %1$d</string>
+    <string name="downloads_error_drm">Fiidyowyada la ilaaliyo lama soo dejin karo</string>
+</resources>

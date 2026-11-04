@@ -15,6 +15,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.library.LibraryTestDownloads
 import com.comst19.dambom.feature.library.LibraryTestPlaybackHistory
@@ -67,12 +68,15 @@ class LibraryExportRestorationTest {
                                 LibraryFileManager(context, Dispatchers.Unconfined),
                                 AppEventBus(),
                                 LibraryTestPlaybackHistory(),
+                                privateVideoSession = PrivateVideoSession(),
+                                defaultDispatcher = Dispatchers.Unconfined,
                             )
                         },
                     )
             }
         }
         compose.runOnIdle { actions.onExport(task) }
+        compose.waitUntil { registry.launchCount == 1 }
         assertEquals(1, registry.launchCount)
         restoration.emulateSavedInstanceStateRestore()
         compose.runOnIdle {

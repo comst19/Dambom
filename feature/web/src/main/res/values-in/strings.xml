@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Tutup web</string>
+    <string name="web_address_placeholder">Masukkan alamat web</string>
+    <string name="web_start_title">Temukan video di web</string>
+    <string name="web_start_description">Biarkan banyak tab tetap terbuka dan deteksi video hanya di tab saat ini.</string>
+    <string name="web_open">Buka halaman</string>
+    <string name="web_recent">Halaman terkini</string>
+    <string name="web_recent_empty">Tidak ada halaman yang baru dikunjungi.</string>
+    <string name="web_go_back">Halaman sebelumnya</string>
+    <string name="web_go_forward">Halaman selanjutnya</string>
+    <string name="web_refresh">Segarkan</string>
+    <string name="web_detecting">Mendeteksi</string>
+    <string name="web_open_detected_count">Buka video %1$d</string>
+    <string name="web_no_detected_video">Tidak ada video yang terdeteksi</string>
+    <string name="web_rescan">Pindai lagi</string>
+    <string name="web_playback_hint">Jika tidak ada video yang terdeteksi, putar video tersebut di halaman dan coba lagi.</string>
+    <string name="web_connection_error_title">Tidak dapat terhubung ke situs</string>
+    <string name="web_connection_error_description">Situs menutup koneksi atau tidak tersedia di jaringan saat ini.</string>
+    <string name="web_timeout_error_title">Situs ini membutuhkan waktu terlalu lama untuk merespons</string>
+    <string name="web_timeout_error_description">Tunggu sebentar dan coba lagi.</string>
+    <string name="web_unsupported_url_error_title">Alamat web tidak didukung</string>
+    <string name="web_unsupported_url_error_description">Periksa apakah ini alamat web HTTP atau HTTPS .</string>
+    <string name="web_access_error_title">Akses halaman gagal</string>
+    <string name="web_access_error_description">Halaman tidak ada atau Anda tidak mempunyai izin untuk melihatnya.</string>
+    <string name="web_server_error_title">Situs untuk sementara tidak tersedia</string>
+    <string name="web_server_error_description">Situs mengalami masalah server. Tunggu sebentar dan coba lagi.</string>
+    <string name="web_security_error_title">Situs tidak dapat dibuka dengan aman</string>
+    <string name="web_security_error_description">Sertifikat keamanannya tidak valid atau halaman terdeteksi tidak aman.</string>
+    <string name="web_unknown_error_title">Halaman tidak dapat dibuka</string>
+    <string name="web_unknown_error_description">Periksa alamatnya dan buka lagi.</string>
+    <string name="web_retry">Coba lagi</string>
+    <string name="web_external_download_notice">Dambom tidak dapat mendeteksi atau mengunduh video dari browser eksternal.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d membuka tab</item>
+        <item quantity="other">%1$d membuka tab</item>
+    </plurals>
+    <string name="web_new_tab">Tab baru</string>
+    <string name="web_close_tab">Tutup tab %1$s</string>
+    <string name="web_empty_tab">Tab kosong</string>
+    <string name="web_tab_actions">Tindakan tab saat ini</string>
+    <string name="web_open_external">Buka di browser bawaan</string>
+    <string name="web_copy_link">Salin tautan</string>
+    <string name="web_share_link">Bagikan tautan</string>
+    <string name="web_link_copied">Tautan disalin.</string>
+    <string name="web_action_failure">Tidak ada aplikasi yang dapat menangani permintaan ini.</string>
+    <string name="web_share_chooser">Bagikan tautan</string>
+    <string name="web_drm_protected">Media ini dilindungi dan tidak dapat diunduh.</string>
+    <string name="web_unsupported_service">Pengunduhan video YouTube tidak didukung.</string>
+    <string name="web_drm_excluded">Video yang dilindungi disembunyikan dari daftar ini.</string>
+</resources>

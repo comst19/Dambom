@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">ကြည့်ဆက်မလား?</string>
+    <string name="player_resume_message">သင်သည် %1$s အထိ ကြည့်ပြီးဖြစ်သည်။</string>
+    <string name="player_resume_continue">ဆက်ကြည့်မယ်</string>
+    <string name="player_resume_restart">မပြန်မစဖြစ်စေမှု</string>
+    <string name="player_history_failure">ဖွင့်ကြည့်မှု သမိုင်းကို Load သို့မဟုတ် သိမ်းရန် မအောင်မြင်ပါ။</string>
+    <string name="player_settings_failure">ဖွင့်ကြည့်မှု ဆက်တင်များကို သိမ်းရန် မအောင်မြင်ပါ။</string>
+    <string name="player_speed">ဖွင့်ကြည့်မှု အမြန်နှုန်း</string>
+    <string name="player_speed_value">ဖွင့်ကြည့်မှု အမြန်နှုန်း · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">ဗီဒီယိုကို ထပ်ဖွင့်ကြည့်ပါ</string>
+    <string name="player_options_close">ပိတ်မယ်</string>
+</resources>

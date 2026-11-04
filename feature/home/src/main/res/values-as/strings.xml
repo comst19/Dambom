@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">আকৌ এবাৰ চোৱাৰ যোগ্য?\nইয়াক এটা লিংকৰ সৈতে সংৰক্ষণ কৰক।</string>
+    <string name="home_description">এটা পৃষ্ঠাৰ লিংকৰ পৰা সংৰক্ষণ কৰিবলৈ ভিডিঅ\' বিচাৰি উলিয়াওক।</string>
+    <string name="home_url_label">ৱেব ঠিকনা</string>
+    <string name="home_invalid_url">http:// বা https://. ৰ পৰা আৰম্ভ হোৱা এটা লিংক সুমুৱাওক</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">পেষ্ট কৰক</string>
+    <string name="home_analyze">ভিডিঅ\' বিচাৰি উলিয়াওক</string>
+    <string name="home_open_settings">ছেটিংছ</string>
+    <string name="home_hide_results">ফলাফল লুকুৱাওক</string>
+    <string name="home_show_results">ইনপুটৰ কাষত ফলাফল দেখুৱাওক</string>
+    <string name="home_web_prompt_title">এতিয়াও কোনো লিংক নাই নেকি?</string>
+    <string name="home_web_prompt_description">লিংক নথকা এটা পৃষ্ঠা বিচাৰি উলিয়াওক।</string>
+    <string name="home_browse_web">ৱেব ব্ৰাউজ কৰক</string>
+    <string name="home_current_activity">বৰ্তমানৰ কাৰ্য্যকলাপ</string>
+    <string name="home_clipboard_found">এটা কপি কৰা লিংক উপলব্ধ</string>
+    <string name="home_use_link">পেষ্ট কৰক</string>
+    <string name="home_dismiss">চাকৰিৰ পৰা বৰ্খাস্ত কৰা</string>
+    <string name="home_clipboard_consent_title">কপি কৰা লিংকসমূহৰ পৰামৰ্শ দিয়ক?</string>
+    <string name="home_clipboard_consent_description">যেতিয়া Dambom খোল খায়, ই এটা ৱেব ঠিকনাৰ বাবে ক্লিপবৰ্ড পৰীক্ষা কৰিব পাৰে আৰু ইয়াক পূৰণ কৰাৰ পৰামৰ্শ দিব পাৰে। ই কেতিয়াও স্বয়ংক্ৰিয়ভাৱে বিশ্লেষণ বা ডাউনলোড নকৰে।</string>
+    <string name="home_clipboard_consent_allow">পৰামৰ্শৰ অনুমতি দিয়ক</string>
+    <string name="home_clipboard_consent_deny">হাতেৰে পেষ্ট কৰক</string>
+    <string name="home_clipboard_save_failed">আপোনাৰ পছন্দ সংৰক্ষণ কৰিব পৰা নগ\'ল। অনুগ্ৰহ কৰি পুনৰ চেষ্টা কৰক।</string>
+    <string name="home_shared_url_title">শ্বেয়াৰ কৰা লিংক লাভ কৰা হৈছে</string>
+    <string name="home_shared_url_description">লিংকটো পৰ্যালোচনা কৰক, তাৰ পিছত ভিডিঅ\' বিচাৰিবলৈ আৰম্ভ কৰক।</string>
+    <string name="home_analyze_now">ভিডিঅ\' বিচাৰি উলিয়াওক</string>
+    <string name="home_cancel">বাতিল কৰক</string>
+    <string name="home_download_active">%1$d ডাউনলোড কৰা হৈছে</string>
+    <string name="home_download_paused">%1$d ৰৈ গ\'ল</string>
+    <string name="home_download_failed">%1$d ডাউনলোডসমূহৰ বাবে মনোযোগৰ প্ৰয়োজন</string>
+    <string name="home_download_open">ডাউনলোডৰ অৱস্থা চাওক</string>
+</resources>

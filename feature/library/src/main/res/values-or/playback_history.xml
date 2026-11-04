@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">ସାମ୍ପ୍ରତିକ ଭାବେ ଖେଳାଯାଇଥିବା</string>
+    <string name="library_recently_played_empty_title">ସାମ୍ପ୍ରତିକ ଭାବେ ଚାଳନ ହୋଇଥିବା କୌଣସି ଭିଡିଓ ନାହିଁ</string>
+    <string name="library_recently_played_empty_description">ଏହାକୁ ଏଠାରେ ଦେଖିବା ପାଇଁ ଏକ ଭିଡିଓ ଚାଳନ କରନ୍ତୁ । ଯଦି ଫିଲ୍ଟରଗୁଡିକ ସକ୍ରିୟ ଅଛି, ତେବେ ସେଗୁଡିକ ପରିବର୍ତ୍ତନ କରିବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ ।</string>
+</resources>

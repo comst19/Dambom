@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">ଦେଖିବା ଜାରି ରଖିବେ?</string>
+    <string name="player_resume_message">ଆପଣ %1$s ପର୍ଯ୍ୟନ୍ତ ଦେଖିଛନ୍ତି।</string>
+    <string name="player_resume_continue">ଜାରି ରଖନ୍ତୁ</string>
+    <string name="player_resume_restart">ପୁନଃ ଆରମ୍ଭ କରନ୍ତୁ</string>
+    <string name="player_history_failure">ପ୍ଲେବ୍ୟାକ୍ ଇତିହାସ ଲୋଡ୍ କିମ୍ୱା ସଞ୍ଚୟ କରିପାରିବେ ନାହିଁ।</string>
+    <string name="player_settings_failure">ପ୍ଲେବ୍ୟାକ୍ ସେଟିଂସ୍ ସଞ୍ଚୟ କରିପାରିବେ ନାହିଁ।</string>
+    <string name="player_speed">ପ୍ଲେବ୍ୟାକ୍ ବେଗ</string>
+    <string name="player_speed_value">ପ୍ଲେବ୍ୟାକ୍ ବେଗ · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">ଏହି ଭିଡିଓ ପୁନରାବୃତ୍ତି କରନ୍ତୁ</string>
+    <string name="player_options_close">ବନ୍ଦ କରନ୍ତୁ</string>
+</resources>

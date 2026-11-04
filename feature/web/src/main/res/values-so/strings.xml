@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Xidh shabakada</string>
+    <string name="web_address_placeholder">Geli ciwaan shabakad</string>
+    <string name="web_start_title">Ka hel fiidiyowyada shabakadda</string>
+    <string name="web_start_description">Ka dhig tabsyo badan oo fur oo ogow fiidiyowyada kaliya ee tabka hadda jira.</string>
+    <string name="web_open">Bog furan</string>
+    <string name="web_recent">Bogagga ugu dambeeyay</string>
+    <string name="web_recent_empty">Ma jiraan bogag dhawaan la booqday.</string>
+    <string name="web_go_back">Boggii hore</string>
+    <string name="web_go_forward">Bogga xiga</string>
+    <string name="web_refresh">Cusbooneysii</string>
+    <string name="web_detecting">Ogaanshaha</string>
+    <string name="web_open_detected_count">Fur muuqaalada %1$d</string>
+    <string name="web_no_detected_video">Ma jiro muuqaallo la arkay</string>
+    <string name="web_rescan">Mar labaad baadh</string>
+    <string name="web_playback_hint">Haddii aan muuqaal la helin, ku ciyaar bogga oo isku day mar kale.</string>
+    <string name="web_connection_error_title">Laguma xidhi karo goobta</string>
+    <string name="web_connection_error_description">Goobtu way xidhay xidhiidhka ama lagama heli karo shabakada hadda jirta.</string>
+    <string name="web_timeout_error_title">Goobtu waxay qaadatay waqti aad u dheer in laga jawaabo</string>
+    <string name="web_timeout_error_description">Sug in yar oo mar kale isku day.</string>
+    <string name="web_unsupported_url_error_title">Ciwaanka shabakada aan la taageerin</string>
+    <string name="web_unsupported_url_error_description">Hubi inuu kani yahay ciwaanka shabakada HTTP ama HTTPS .</string>
+    <string name="web_access_error_title">Gelitaanka bogga ayaa fashilmay</string>
+    <string name="web_access_error_description">Boggu ma jiro ama ma haysatid fasax aad ku aragto.</string>
+    <string name="web_server_error_title">Goobta si ku meel gaar ah looma hayo</string>
+    <string name="web_server_error_description">Mareegtu waxa ay haysataa cilad server ah. Sug in yar oo isku day mar kale.</string>
+    <string name="web_security_error_title">Goobta si ammaan ah looma furi karin</string>
+    <string name="web_security_error_description">Shahaadadeeda ammaanku waa mid khaldan ama bogga waxaa loo arkay mid aan ammaan ahayn.</string>
+    <string name="web_unknown_error_title">Bogga waa la furi waayay</string>
+    <string name="web_unknown_error_description">Hubi cinwaanka oo mar kale fur.</string>
+    <string name="web_retry">Isku day mar kale</string>
+    <string name="web_external_download_notice">Dambom kama ogaan karto ama kama soo dejisan karo fiidiyowyada browserka dibadda ah.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d tab furan</item>
+        <item quantity="other">%1$d tabs furan</item>
+    </plurals>
+    <string name="web_new_tab">Tabo cusub</string>
+    <string name="web_close_tab">Xir tab %1$s</string>
+    <string name="web_empty_tab">Tabab madhan</string>
+    <string name="web_tab_actions">Falalka tab ee hadda</string>
+    <string name="web_open_external">Ku fur browserka caadiga ah</string>
+    <string name="web_copy_link">Koobi isku xidhka</string>
+    <string name="web_share_link">La wadaag xiriirka</string>
+    <string name="web_link_copied">Linkiga waa la guuriyay.</string>
+    <string name="web_action_failure">Ma jiro app xamili kara codsigan.</string>
+    <string name="web_share_chooser">La wadaag xiriirka</string>
+    <string name="web_drm_protected">Warbaahintan waa la ilaaliyaa lamana soo dejisan karo.</string>
+    <string name="web_unsupported_service">Soodejisyada fiidyaha YouTube lama taageero</string>
+    <string name="web_drm_excluded">Fiidiyowyo dhawrsan ayaa ka qarsoon liiskan.</string>
+</resources>

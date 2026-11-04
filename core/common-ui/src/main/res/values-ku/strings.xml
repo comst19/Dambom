@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Helwesta lîstikê</string>
+    <string name="playback_rewind">Paş 10 çirke</string>
+    <string name="playback_play">Play</string>
+    <string name="playback_pause">Raweste</string>
+    <string name="playback_forward">Ber 10 seconds</string>
+</resources>

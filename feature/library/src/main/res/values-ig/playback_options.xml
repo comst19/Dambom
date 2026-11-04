@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Gara n\'ihu ile?</string>
+    <string name="player_resume_message">Ị lere ruo %1$s .</string>
+    <string name="player_resume_continue">Gara n\'ihu</string>
+    <string name="player_resume_restart">Malitegharịa</string>
+    <string name="player_history_failure">Enweghị ike ibudata ma ọ bụ chekwaa akụkọ egwu.</string>
+    <string name="player_settings_failure">Enweghị ike ịchekwa ntọala egwu.</string>
+    <string name="player_speed">Ọsọ egwu</string>
+    <string name="player_speed_value">Ọsọ egwu · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Megharị vidiyo a</string>
+    <string name="player_options_close">Mechie</string>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Tevnê bigire</string>
+    <string name="web_address_placeholder">Navnîşana înternetê binivîsin</string>
+    <string name="web_start_title">Vîdyoyên li ser înternetê bibînin</string>
+    <string name="web_start_description">Gelek taban vekirî bihêlin û vîdyoyan tenê li ser taba heyî tespît bikin.</string>
+    <string name="web_open">Rûpela vekirî</string>
+    <string name="web_recent">Rûpelên dawî</string>
+    <string name="web_recent_empty">Rûpelên ku di demên dawî de hatine ziyaret kirin tune ne.</string>
+    <string name="web_go_back">Rûpela berê</string>
+    <string name="web_go_forward">Rûpela din</string>
+    <string name="web_refresh">Nûkirin</string>
+    <string name="web_detecting">Tespîtkirin</string>
+    <string name="web_open_detected_count">Vîdyoyên %1$d vekirî</string>
+    <string name="web_no_detected_video">Vîdyoyên nehatine tespîtkirin</string>
+    <string name="web_rescan">Dîsa scan bike</string>
+    <string name="web_playback_hint">Ger vîdeo neyê tespîtkirin, wê li ser rûpelê bilîzin û dîsa biceribînin.</string>
+    <string name="web_connection_error_title">Nekarî bi malperê ve were girêdan</string>
+    <string name="web_connection_error_description">Malperê girêdan girt an jî li ser tora heyî tune ye.</string>
+    <string name="web_timeout_error_title">Malperê pir dirêj kir ku bersiv bide</string>
+    <string name="web_timeout_error_description">Deqîqeyekê bisekine û dîsa biceribîne.</string>
+    <string name="web_unsupported_url_error_title">Navnîşana webê ya nepiştgirî</string>
+    <string name="web_unsupported_url_error_description">Kontrol bikin ku ev navnîşana înternetê HTTP an HTTPS e.</string>
+    <string name="web_access_error_title">Gihîştina rûpelê têk çû</string>
+    <string name="web_access_error_description">Rûpel tune ye an jî destûra we tune ku hûn wê bibînin.</string>
+    <string name="web_server_error_title">Malper bi demkî ne guncaw e</string>
+    <string name="web_server_error_description">Malper pirsgirêka serverê dijî. Ji kerema xwe deqîqeyekê bisekinin û dîsa biceribînin.</string>
+    <string name="web_security_error_title">Malper bi ewlehî nehat vekirin.</string>
+    <string name="web_security_error_description">Sertîfîkaya ewlehiya wê nederbasdar e, an jî rûpel wekî neewle hate tespîtkirin.</string>
+    <string name="web_unknown_error_title">Rûpel nehat vekirin.</string>
+    <string name="web_unknown_error_description">Navnîşanê kontrol bikin û dîsa vekin.</string>
+    <string name="web_retry">Dîsa biceribînin.</string>
+    <string name="web_external_download_notice">Dambom nikare vîdyoyên ji geroka derveyî tespît bike an jî dakêşe.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d vekirî</item>
+        <item quantity="other">%1$d rûpelên vekirî</item>
+    </plurals>
+    <string name="web_new_tab">Taba nû</string>
+    <string name="web_close_tab">Tabê %1$s bigire</string>
+    <string name="web_empty_tab">Taba vala</string>
+    <string name="web_tab_actions">Çalakiyên tabê yên heyî</string>
+    <string name="web_open_external">Di geroka xwerû de vekin</string>
+    <string name="web_copy_link">Girêdanê kopî bikin</string>
+    <string name="web_share_link">Zencîreya parvekirinê</string>
+    <string name="web_link_copied">Girêdan hate kopîkirin.</string>
+    <string name="web_action_failure">Tu sepan nikare vê daxwazê pêk bîne.</string>
+    <string name="web_share_chooser">Zencîreya parvekirinê</string>
+    <string name="web_drm_protected">Ev medya tê parastin û nikare were daxistin.</string>
+    <string name="web_unsupported_service">Daxistina vîdyoya YouTube nayê piştgirî kirin.</string>
+    <string name="web_drm_excluded">Vîdyoyên parastî ji vê navnîşê veşartî ne.</string>
+</resources>

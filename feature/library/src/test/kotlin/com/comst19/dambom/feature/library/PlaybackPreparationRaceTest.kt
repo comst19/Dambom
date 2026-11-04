@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.domain.model.PlaybackHistory
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.repository.PlaybackHistoryRepository
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import kotlinx.coroutines.CompletableDeferred
@@ -41,6 +42,7 @@ class PlaybackPreparationRaceTest {
                         LibraryTestSettings,
                         backgroundScope,
                         AppEventBus(),
+                        privateVideoSession = PrivateVideoSession(),
                     )
                 try {
                     model.prepare(savedVideo("video").copy(localFilePath = "/files/video.mp4"))
@@ -75,6 +77,7 @@ class PlaybackPreparationRaceTest {
                     LibraryTestSettings,
                     backgroundScope,
                     AppEventBus(),
+                    privateVideoSession = PrivateVideoSession(),
                 )
             try {
                 model.prepare(savedVideo("video").copy(localFilePath = "/files/video.mp4"))

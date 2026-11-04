@@ -63,32 +63,36 @@ internal class LibraryFileManager
             }
         }
 
-        fun hasPersistedTreePermission(treeUri: Uri): Boolean =
-            hasPersistedTreePermission(
-                treeUri = treeUri,
-                persistedPermissions =
-                    context.contentResolver.persistedUriPermissions.map {
-                        PersistedTreePermission(
-                            uri = it.uri,
-                            canRead = it.isReadPermission,
-                            canWrite = it.isWritePermission,
-                        )
-                    },
-            )
+        suspend fun hasPersistedTreePermission(treeUri: Uri): Boolean =
+            withContext(ioDispatcher) {
+                hasPersistedTreePermission(
+                    treeUri = treeUri,
+                    persistedPermissions =
+                        context.contentResolver.persistedUriPermissions.map {
+                            PersistedTreePermission(
+                                uri = it.uri,
+                                canRead = it.isReadPermission,
+                                canWrite = it.isWritePermission,
+                            )
+                        },
+                )
+            }
 
-        fun createShareIntent(task: DownloadTask): Intent? =
-            task.localFileOrNull()?.shareUriOrNull()?.let { uri ->
-                val sendIntent =
-                    Intent(Intent.ACTION_SEND)
-                        .setType(task.mimeType ?: "video/*")
-                        .putExtra(Intent.EXTRA_STREAM, uri)
-                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        .apply {
-                            clipData = ClipData.newUri(context.contentResolver, task.title, uri)
-                        }
-                Intent
-                    .createChooser(sendIntent, context.getString(R.string.library_share_chooser))
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        suspend fun createShareIntent(task: DownloadTask): Intent? =
+            withContext(ioDispatcher) {
+                task.localFileOrNull()?.shareUriOrNull()?.let { uri ->
+                    val sendIntent =
+                        Intent(Intent.ACTION_SEND)
+                            .setType(task.mimeType ?: "video/*")
+                            .putExtra(Intent.EXTRA_STREAM, uri)
+                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            .apply {
+                                clipData = ClipData.newUri(context.contentResolver, task.title, uri)
+                            }
+                    Intent
+                        .createChooser(sendIntent, context.getString(R.string.library_share_chooser))
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
             }
 
         private fun File.shareUriOrNull(): Uri? =

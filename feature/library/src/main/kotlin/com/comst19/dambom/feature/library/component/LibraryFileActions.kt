@@ -41,6 +41,7 @@ internal data class LibraryFileActions(
     val onDelete: (DownloadTask) -> Unit,
     val onTrim: ((DownloadTask) -> Unit)? = null,
     val onCompress: ((DownloadTask) -> Unit)? = null,
+    val onChangePrivacy: ((DownloadTask) -> Unit)? = null,
 )
 
 @Composable
@@ -82,44 +83,48 @@ internal fun rememberLibraryFileActions(
             onToggleFavorite = viewModel::toggleFavorite,
             onFavoritesOnlyChange = viewModel::setFavoritesOnly,
             onExport = { task ->
-                val downloadSettings = currentSettings.value
-                when {
-                    !downloadSettings.useConfiguredDownloadLocation -> {
-                        pendingExport = task.id
-                        exportLauncher.launch(task.suggestedFileName())
-                    }
+                scope.launch {
+                    val downloadSettings = currentSettings.value
+                    when {
+                        !downloadSettings.useConfiguredDownloadLocation -> {
+                            pendingExport = task.id
+                            exportLauncher.launch(task.suggestedFileName())
+                        }
 
-                    !viewModel.hasValidConfiguredDownloadLocation(downloadSettings.downloadTreeUri) -> {
-                        viewModel.clearInvalidDownloadLocation()
-                        pendingExport = task.id
-                        exportLauncher.launch(task.suggestedFileName())
-                    }
+                        !viewModel.hasValidConfiguredDownloadLocation(downloadSettings.downloadTreeUri) -> {
+                            viewModel.clearInvalidDownloadLocation()
+                            pendingExport = task.id
+                            exportLauncher.launch(task.suggestedFileName())
+                        }
 
-                    Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
-                        downloadSettings.downloadTreeUri == null &&
-                        ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
-                        PackageManager.PERMISSION_GRANTED -> {
-                        pendingDefaultExport = task.id
-                        legacyStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    }
+                        Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
+                            downloadSettings.downloadTreeUri == null &&
+                            ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
+                            PackageManager.PERMISSION_GRANTED -> {
+                            pendingDefaultExport = task.id
+                            legacyStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        }
 
-                    else -> {
-                        viewModel.exportToConfiguredLocation(task)
+                        else -> {
+                            viewModel.exportToConfiguredLocation(task)
+                        }
                     }
                 }
             },
             onShareVideo = { task ->
-                val intent = viewModel.createShareIntent(task)
-                if (intent == null) {
-                    viewModel.notifyShareFailure()
-                    return@LibraryFileActions
-                }
-                try {
-                    context.startActivity(intent)
-                } catch (_: ActivityNotFoundException) {
-                    viewModel.notifyShareFailure()
-                } catch (_: IllegalArgumentException) {
-                    viewModel.notifyShareFailure()
+                scope.launch {
+                    val intent = viewModel.createShareIntent(task)
+                    if (intent == null) {
+                        viewModel.notifyShareFailure()
+                        return@launch
+                    }
+                    try {
+                        context.startActivity(intent)
+                    } catch (_: ActivityNotFoundException) {
+                        viewModel.notifyShareFailure()
+                    } catch (_: IllegalArgumentException) {
+                        viewModel.notifyShareFailure()
+                    }
                 }
             },
             onShareLink = { task ->

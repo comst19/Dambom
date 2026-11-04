@@ -3,6 +3,7 @@ package com.comst19.dambom.feature.settings
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.comst19.dambom.core.common.locale.AppLanguage
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.feature.settings.component.DeviceSaveActions
@@ -11,7 +12,6 @@ import com.comst19.dambom.feature.settings.component.GeneralSettingsActions
 import com.comst19.dambom.feature.settings.component.SettingsActions
 import com.comst19.dambom.feature.settings.component.SettingsContentState
 import com.comst19.dambom.feature.settings.component.SupportSettingsActions
-import com.comst19.dambom.feature.settings.contract.AppLanguage
 import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 import org.junit.Assert.assertEquals
 import org.junit.Rule

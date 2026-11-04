@@ -46,7 +46,14 @@ class PlaybackHistoryPersistenceTest {
                 close()
             }
             helper.runMigrationsAndValidate(name, 6, true, DambomDatabase.MIGRATION_5_6).close()
-            val first = Room.databaseBuilder(context, DambomDatabase::class.java, name).addMigrations(DambomDatabase.MIGRATION_6_7).build()
+            val first =
+                Room
+                    .databaseBuilder(
+                        context,
+                        DambomDatabase::class.java,
+                        name,
+                    ).addMigrations(DambomDatabase.MIGRATION_6_7, DambomDatabase.MIGRATION_7_8)
+                    .build()
             try {
                 assertTrue(
                     first
@@ -68,7 +75,7 @@ class PlaybackHistoryPersistenceTest {
                         context,
                         DambomDatabase::class.java,
                         name,
-                    ).addMigrations(DambomDatabase.MIGRATION_6_7)
+                    ).addMigrations(DambomDatabase.MIGRATION_6_7, DambomDatabase.MIGRATION_7_8)
                     .build()
             try {
                 val row =

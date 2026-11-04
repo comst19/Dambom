@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Nsukami oyo esalemi</string>
+    <string name="library_recently_played_empty_title">Te video oyo esalemaki nsukami oyo</string>
+    <string name="library_recently_played_empty_description">Salelá video moko mpo oyoka yango awa. Soki filtresi ezali lisusu, leka kobongisela yango.</string>
+</resources>

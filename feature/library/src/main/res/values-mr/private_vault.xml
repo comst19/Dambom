@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">खाजगी लायब्ररी</string>
+    <string name="vault_locked_title">तुमची खाजगी व्हिडिओ लायब्ररी</string>
+    <string name="vault_locked_description">तुमचे खाजगी व्हिडिओ पाहण्यासाठी अनलॉक करा</string>
+    <string name="vault_unlock">अनलॉक करा</string>
+    <string name="vault_lock">लॉक करा</string>
+    <string name="vault_auth_subtitle">बायोमेट्रिक्स किंवा तुमच्या डिव्हाइसचा स्क्रीन लॉक वापरा</string>
+    <string name="vault_use_device_lock">स्क्रीन लॉक वापरा</string>
+    <string name="vault_setup_lock">खाजगी लायब्ररी वापरण्यासाठी तुमच्या फोन सेटिंग्जमध्ये PIN, पॅटर्न किंवा पासवर्ड सेट करा.</string>
+    <string name="vault_open_settings">सेटिंग्ज उघडा</string>
+    <string name="vault_auth_unavailable">या डिव्हाइसवर प्रमाणीकरण सुरू करू शकत नाही. कृपया पुन्हा प्रयत्न करा.</string>
+    <string name="vault_move">खाजगी लायब्ररीकडे हलवा</string>
+    <string name="vault_restore">सामान्य लायब्ररीकडे हलवा</string>
+    <string name="vault_move_success">खाजगी लायब्ररीकडे हलवले गेले. यापूर्वी एक्सपोर्ट केलेल्या प्रती अपरिवर्तित आहेत.</string>
+    <string name="vault_restore_success">सामान्य लायब्ररीकडे हलवले</string>
+    <string name="vault_move_failure">व्हिडिओ हलवता आले नाहीत. कृपया पुन्हा प्रयत्न करा.</string>
+    <string name="vault_empty_title">खाजगी व्हिडिओ नाहीत</string>
+    <string name="vault_empty_description">तुमच्या सामान्य लायब्ररीतील व्हिडिओ निवडा आणि येथे हलवा</string>
+</resources>

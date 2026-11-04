@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">کافي ذخیره نه ده. ځای خالي کړئ او بیا هڅه وکړئ: %1$s</string>
+    <string name="download_notification_channel">ډاونلوډونه</string>
+    <string name="download_notification_title">Dambom ویډیوګانې ډاونلوډ کوي</string>
+    <string name="download_notification_description">د بیا نښلولو وروسته ډاونلوډونه د خوندي شوي نقطې څخه بیا پیل کیږي.</string>
+    <string name="download_result_notification_channel">پایلې ډاونلوډ کړئ</string>
+    <string name="download_notification_progress_title">د %1$s ډاونلوډ کول</string>
+    <string name="download_notification_progress">%1$d %% بشپړ شو</string>
+    <string name="download_notification_completed">ډاونلوډ بشپړ شو</string>
+    <string name="download_notification_completed_description">%1$s ستاسو په کتابتون کې خوندي شو.</string>
+    <string name="download_notification_failed">ډاونلوډ ناکام شو</string>
+    <string name="download_notification_failed_description">بیا د %1$s ډاونلوډ کولو هڅه وکړئ.</string>
+    <string name="download_notification_failed_network">د %1$s لپاره د شبکې پیوستون وګورئ.</string>
+    <string name="download_notification_failed_storage">د %1$s لپاره موجود ذخیره چیک کړئ.</string>
+</resources>

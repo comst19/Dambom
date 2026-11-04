@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Saklamak ýeterlik däl. Boş ýer boşadyň we gaýtadan synanyşyň: %1$s</string>
+    <string name="download_notification_channel">süklemeler</string>
+    <string name="download_notification_title">Dambom wideo göçürip alýar</string>
+    <string name="download_notification_description">süklemeler täzeden birikdirilenden soň saklanan nokatdan dowam edýär.</string>
+    <string name="download_result_notification_channel">Netijeleri göçürip alyň</string>
+    <string name="download_notification_progress_title">%1$s göçürip almak</string>
+    <string name="download_notification_progress">%1$d %% gutardy</string>
+    <string name="download_notification_completed">Göçürip al</string>
+    <string name="download_notification_completed_description">%1$s kitaphanaňyza ýazdyryldy.</string>
+    <string name="download_notification_failed">Göçürip almak başa barmady</string>
+    <string name="download_notification_failed_description">%1$s -ni täzeden göçürip görüň.</string>
+    <string name="download_notification_failed_network">%1$s üçin tor birikmesini barlaň.</string>
+    <string name="download_notification_failed_storage">%1$s üçin elýeterli ammary barlaň.</string>
+</resources>

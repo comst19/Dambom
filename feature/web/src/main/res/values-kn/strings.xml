@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">ವೆಬ್ ಅನ್ನು ಮುಚ್ಚಿ</string>
+    <string name="web_address_placeholder">ವೆಬ್ ವಿಳಾಸವನ್ನು ನಮೂದಿಸಿ</string>
+    <string name="web_start_title">ವೆಬ್‌ನಲ್ಲಿ ವೀಡಿಯೊಗಳನ್ನು ಹುಡುಕಿ</string>
+    <string name="web_start_description">ಬಹು ಟ್ಯಾಬ್‌ಗಳನ್ನು ತೆರೆದಿಡಿ ಮತ್ತು ಪ್ರಸ್ತುತ ಟ್ಯಾಬ್‌ನಲ್ಲಿ ಮಾತ್ರ ವೀಡಿಯೊಗಳನ್ನು ಪತ್ತೆ ಮಾಡಿ.</string>
+    <string name="web_open">ಪುಟವನ್ನು ತೆರೆಯಿರಿ</string>
+    <string name="web_recent">ಇತ್ತೀಚಿನ ಪುಟಗಳು</string>
+    <string name="web_recent_empty">ಇತ್ತೀಚೆಗೆ ಭೇಟಿ ನೀಡಿದ ಪುಟಗಳಿಲ್ಲ.</string>
+    <string name="web_go_back">ಹಿಂದಿನ ಪುಟ</string>
+    <string name="web_go_forward">ಮುಂದಿನ ಪುಟ</string>
+    <string name="web_refresh">ರಿಫ್ರೆಶ್ ಮಾಡಿ</string>
+    <string name="web_detecting">ಪತ್ತೆಹಚ್ಚುವಿಕೆ</string>
+    <string name="web_open_detected_count">%1$d ವೀಡಿಯೊಗಳನ್ನು ತೆರೆಯಿರಿ</string>
+    <string name="web_no_detected_video">ಯಾವುದೇ ಪತ್ತೆಯಾದ ವೀಡಿಯೊಗಳಿಲ್ಲ</string>
+    <string name="web_rescan">ಮತ್ತೊಮ್ಮೆ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ</string>
+    <string name="web_playback_hint">ಯಾವುದೇ ವೀಡಿಯೊ ಪತ್ತೆಯಾಗದಿದ್ದರೆ, ಅದನ್ನು ಪುಟದಲ್ಲಿ ಪ್ಲೇ ಮಾಡಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="web_connection_error_title">ಸೈಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ</string>
+    <string name="web_connection_error_description">ಸೈಟ್ ಸಂಪರ್ಕವನ್ನು ಮುಚ್ಚಿದೆ ಅಥವಾ ಪ್ರಸ್ತುತ ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ಲಭ್ಯವಿಲ್ಲ.</string>
+    <string name="web_timeout_error_title">ಸೈಟ್ ಪ್ರತಿಕ್ರಿಯಿಸಲು ತುಂಬಾ ಸಮಯ ತೆಗೆದುಕೊಂಡಿತು</string>
+    <string name="web_timeout_error_description">ಒಂದು ಕ್ಷಣ ನಿರೀಕ್ಷಿಸಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="web_unsupported_url_error_title">ಬೆಂಬಲಿಸದ ವೆಬ್ ವಿಳಾಸ</string>
+    <string name="web_unsupported_url_error_description">ಇದು HTTP ಅಥವಾ HTTPS ವೆಬ್ ವಿಳಾಸವೇ ಎಂಬುದನ್ನು ಪರಿಶೀಲಿಸಿ.</string>
+    <string name="web_access_error_title">ಪುಟ ಪ್ರವೇಶ ವಿಫಲವಾಗಿದೆ</string>
+    <string name="web_access_error_description">ಪುಟವು ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ ಅಥವಾ ಅದನ್ನು ವೀಕ್ಷಿಸಲು ನಿಮಗೆ ಅನುಮತಿ ಇಲ್ಲ.</string>
+    <string name="web_server_error_title">ಸೈಟ್ ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ</string>
+    <string name="web_server_error_description">ಸೈಟ್ ಸರ್ವರ್ ಸಮಸ್ಯೆಯನ್ನು ಹೊಂದಿದೆ. ಒಂದು ಕ್ಷಣ ನಿರೀಕ್ಷಿಸಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="web_security_error_title">ಸೈಟ್ ಅನ್ನು ಸುರಕ್ಷಿತವಾಗಿ ತೆರೆಯಲಾಗಲಿಲ್ಲ</string>
+    <string name="web_security_error_description">ಇದರ ಭದ್ರತಾ ಪ್ರಮಾಣಪತ್ರವು ಅಮಾನ್ಯವಾಗಿದೆ ಅಥವಾ ಪುಟವು ಅಸುರಕ್ಷಿತವಾಗಿದೆ ಎಂದು ಪತ್ತೆಹಚ್ಚಲಾಗಿದೆ.</string>
+    <string name="web_unknown_error_title">ಪುಟವನ್ನು ತೆರೆಯಲಾಗಲಿಲ್ಲ</string>
+    <string name="web_unknown_error_description">ವಿಳಾಸವನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಅದನ್ನು ಮತ್ತೆ ತೆರೆಯಿರಿ.</string>
+    <string name="web_retry">ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</string>
+    <string name="web_external_download_notice">Dambom ಬಾಹ್ಯ ಬ್ರೌಸರ್‌ನಿಂದ ವೀಡಿಯೊಗಳನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಅಥವಾ ಡೌನ್‌ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d ತೆರೆದ ಟ್ಯಾಬ್</item>
+        <item quantity="other">%1$d ತೆರೆದ ಟ್ಯಾಬ್‌ಗಳು</item>
+    </plurals>
+    <string name="web_new_tab">ಹೊಸ ಟ್ಯಾಬ್</string>
+    <string name="web_close_tab">%1$s ಟ್ಯಾಬ್ ಮುಚ್ಚಿ</string>
+    <string name="web_empty_tab">ಖಾಲಿ ಟ್ಯಾಬ್</string>
+    <string name="web_tab_actions">ಪ್ರಸ್ತುತ ಟ್ಯಾಬ್ ಕ್ರಿಯೆಗಳು</string>
+    <string name="web_open_external">ಡೀಫಾಲ್ಟ್ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ತೆರೆಯಿರಿ</string>
+    <string name="web_copy_link">ಲಿಂಕ್ ನಕಲಿಸಿ</string>
+    <string name="web_share_link">ಲಿಂಕ್ ಹಂಚಿಕೊಳ್ಳಿ</string>
+    <string name="web_link_copied">ಲಿಂಕ್ ಅನ್ನು ನಕಲಿಸಲಾಗಿದೆ.</string>
+    <string name="web_action_failure">ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್ ಈ ವಿನಂತಿಯನ್ನು ನಿಭಾಯಿಸುವುದಿಲ್ಲ.</string>
+    <string name="web_share_chooser">ಲಿಂಕ್ ಹಂಚಿಕೊಳ್ಳಿ</string>
+    <string name="web_drm_protected">ಈ ಮಾಧ್ಯಮವನ್ನು ರಕ್ಷಿಸಲಾಗಿದೆ ಮತ್ತು ಡೌನ್‌ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ.</string>
+    <string name="web_unsupported_service">YouTube ವೀಡಿಯೊ ಡೌನ್‌ಲೋಡ್‌ಗಳು ಬೆಂಬಲಿತವಾಗಿಲ್ಲ.</string>
+    <string name="web_drm_excluded">ಸಂರಕ್ಷಿತ ವೀಡಿಯೊಗಳನ್ನು ಈ ಪಟ್ಟಿಯಿಂದ ಮರೆಮಾಡಲಾಗಿದೆ.</string>
+</resources>

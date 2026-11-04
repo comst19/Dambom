@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">ব্যক্তিগত গ্ৰন্থাগাৰ</string>
+    <string name="vault_locked_title">আপোনাৰ ব্যক্তিগত ভিডিঅ\' গ্ৰন্থাগাৰ</string>
+    <string name="vault_locked_description">আপোনাৰ ব্যক্তিগত ভিডিঅ\' চাবলৈ আনলক কৰক</string>
+    <string name="vault_unlock">আনলক কৰক</string>
+    <string name="vault_lock">তালা কৰক</string>
+    <string name="vault_auth_subtitle">বায়\'মেট্ৰিক বা আপোনাৰ ডিভাইচৰ স্ক্ৰীণ লক ব্যৱহাৰ কৰক</string>
+    <string name="vault_use_device_lock">স্ক্ৰীণ লক ব্যৱহাৰ কৰক</string>
+    <string name="vault_setup_lock">ব্যক্তিগত গ্ৰন্থাগাৰ ব্যৱহাৰ কৰিবলৈ আপোনাৰ ফোনৰ ছেটিংছত PIN, পেটাৰ্ন, বা পাছৱৰ্ড নিৰ্ধাৰণ কৰক।</string>
+    <string name="vault_open_settings">ছেটিংছ খোলক</string>
+    <string name="vault_auth_unavailable">এই ডিভাইচত প্ৰমাণীকৰণ আৰম্ভ কৰিব পৰা নগ’ল। অনুগ্ৰহ কৰি পুনৰ চেষ্টা কৰক।</string>
+    <string name="vault_move">ব্যক্তিগত গ্ৰন্থাগাৰলৈ স্থানান্তৰ কৰক</string>
+    <string name="vault_restore">নিয়মীয়া গ্ৰন্থাগাৰলৈ স্থানান্তৰ কৰক</string>
+    <string name="vault_move_success">ব্যক্তিগত গ্ৰন্থাগাৰলৈ স্থানান্তৰিত। পূৰ্বতে এক্সপোৰ্ট কৰা কপিসমূহ অচলিত আছে।</string>
+    <string name="vault_restore_success">নিয়মীয়া গ্ৰন্থাগাৰলৈ স্থানান্তৰিত</string>
+    <string name="vault_move_failure">ভিডিঅ\'সমূহ স্থানান্তৰ কৰিব পৰা নগ’ল। অনুগ্ৰহ কৰি পুনৰ চেষ্টা কৰক।</string>
+    <string name="vault_empty_title">কোনো ব্যক্তিগত ভিডিঅ\' নাই</string>
+    <string name="vault_empty_description">আপোনাৰ নিয়মীয়া গ্ৰন্থাগাৰৰ ভিডিঅ\'সমূহ চয়ন কৰক আৰু ইয়াত স্থানান্তৰ কৰক</string>
+</resources>

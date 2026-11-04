@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Ma kaydin ku filan. Bannaanka bixi oo dib u tijaabi: %1$s</string>
+    <string name="download_notification_channel">Soodejin</string>
+    <string name="download_notification_title">Dambom waxay soo dejinaysaa fiidiyowyada</string>
+    <string name="download_notification_description">Soodejintu waxay dib uga bilaabataa barta la kaydiyay ka dib markii dib loo xidhay.</string>
+    <string name="download_result_notification_channel">Soo deji natiijooyinka</string>
+    <string name="download_notification_progress_title">Soo dejinta %1$s</string>
+    <string name="download_notification_progress">%1$d %% dhamaystiran</string>
+    <string name="download_notification_completed">Soo dejintu waa dhammaatay</string>
+    <string name="download_notification_completed_description">%1$s waxaa lagu kaydiyay maktabadaada.</string>
+    <string name="download_notification_failed">Soo dejintu way fashilantay</string>
+    <string name="download_notification_failed_description">Isku day inaad soo dejiso %1$s markale.</string>
+    <string name="download_notification_failed_network">Hubi xidhiidhka shabakada %1$s .</string>
+    <string name="download_notification_failed_storage">Hubi kaydinta la heli karo ee %1$s .</string>
+</resources>

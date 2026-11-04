@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">পর্যাপ্ত স্টোরেজ নেই। জায়গা খালি করুন এবং আবার চেষ্টা করুন: %1$s</string>
+    <string name="download_notification_channel">ডাউনলোড</string>
+    <string name="download_notification_title">Dambom ভিডিও ডাউনলোড করছে</string>
+    <string name="download_notification_description">পুনরায় সংযোগ করার পরে সংরক্ষিত পয়েন্ট থেকে ডাউনলোডগুলি পুনরায় শুরু হয়।</string>
+    <string name="download_result_notification_channel">ফলাফল ডাউনলোড করুন</string>
+    <string name="download_notification_progress_title">%1$s ডাউনলোড হচ্ছে</string>
+    <string name="download_notification_progress">%1$d %% সম্পূর্ণ</string>
+    <string name="download_notification_completed">ডাউনলোড সম্পূর্ণ</string>
+    <string name="download_notification_completed_description">%1$s আপনার লাইব্রেরিতে সংরক্ষিত হয়েছে।</string>
+    <string name="download_notification_failed">ডাউনলোড ব্যর্থ হয়েছে</string>
+    <string name="download_notification_failed_description">আবার %1$s ডাউনলোড করার চেষ্টা করুন।</string>
+    <string name="download_notification_failed_network">%1$s এর জন্য নেটওয়ার্ক সংযোগ পরীক্ষা করুন।</string>
+    <string name="download_notification_failed_storage">%1$s এর জন্য উপলব্ধ স্টোরেজ পরীক্ষা করুন।</string>
+</resources>

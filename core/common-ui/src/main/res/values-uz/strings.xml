@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Ijro holati</string>
+    <string name="playback_rewind">10 soniya orqaga</string>
+    <string name="playback_play">Oʻynang</string>
+    <string name="playback_pause">Pauza</string>
+    <string name="playback_forward">10 soniya oldinga</string>
+</resources>

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,26 +34,59 @@ import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
 import com.comst19.dambom.feature.library.tag.LibraryTagViewModel
 import com.comst19.dambom.feature.library.tag.component.LibraryTagControls
+import com.comst19.dambom.feature.library.tag.component.rememberTagFilteredVideos
+import com.comst19.dambom.feature.library.vault.PrivateVaultLockedScreen
+import com.comst19.dambom.feature.library.vault.PrivateVideoWindowProtection
+import com.comst19.dambom.feature.library.vault.rememberPrivateVaultAuthentication
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 @Composable
+@Suppress("LongMethod")
 internal fun LibraryRoute(
     isDetailPaneVisible: Boolean,
     onDetailPaneVisibilityChange: (Boolean) -> Unit,
     activeVideoId: String?,
+    privateVault: Boolean = false,
 ) {
     val viewModel: LibraryViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val unlocked by viewModel.privateVideoSession.isUnlocked.collectAsStateWithLifecycle()
+    var pendingPrivacyIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    val authenticate =
+        rememberPrivateVaultAuthentication {
+            viewModel.privateVideoSession.unlock()
+            if (pendingPrivacyIds.isNotEmpty()) {
+                viewModel.changePrivacy(pendingPrivacyIds, !privateVault)
+                pendingPrivacyIds = emptySet()
+            }
+        }
+    DisposableEffect(viewModel, privateVault) {
+        viewModel.setPrivateVault(privateVault)
+        onDispose { }
+    }
+    if (privateVault) {
+        PrivateVideoWindowProtection()
+        BackHandler(onBack = viewModel::leavePrivateVault)
+        if (!unlocked) {
+            PrivateVaultLockedScreen(authenticate, viewModel::leavePrivateVault)
+            return
+        }
+    }
+
+    fun changePrivacy(ids: Set<String>) {
+        if (unlocked) {
+            viewModel.changePrivacy(ids, !privateVault)
+        } else {
+            pendingPrivacyIds = ids
+            authenticate()
+        }
+    }
     val tagViewModel: LibraryTagViewModel = hiltViewModel()
     val tagState by tagViewModel.state.collectAsStateWithLifecycle()
-    val visibleVideos =
-        remember(uiState.videos, tagState.selectedTagIds, tagState.matchedVideoIds) {
-            uiState.videos.filter { tagState.matches(it.id) }.toPersistentList()
-        }
-    val fileActions = rememberLibraryFileActions(viewModel)
+    val visibleVideos = rememberTagFilteredVideos(uiState.videos, tagState, tagViewModel::filterVideos)
+    val fileActions = rememberLibraryFileActions(viewModel).copy(onChangePrivacy = { changePrivacy(setOf(it.id)) })
     val multiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
     val focusManager = LocalFocusManager.current
 
@@ -63,6 +97,7 @@ internal fun LibraryRoute(
     LibraryScreen(
         uiState =
             uiState.copy(
+                isPrivateVault = privateVault,
                 videos = visibleVideos,
                 selectedVideo = uiState.videos.firstOrNull { it.id == activeVideoId },
                 hasTagFilter = tagState.selectedTagIds.isNotEmpty(),
@@ -88,14 +123,17 @@ internal fun LibraryRoute(
         onSelectAll = { viewModel.selectAllVisible(visibleVideos.map(DownloadTask::id)) },
         onClearSelection = viewModel::clearSelection,
         onDeleteSelected = viewModel::deleteSelected,
+        onVaultClick = if (privateVault) viewModel::lockPrivateVault else viewModel::openPrivateVault,
+        onBack = if (privateVault) viewModel::leavePrivateVault else null,
+        onChangeSelectedPrivacy = { changePrivacy(uiState.selectedIds) },
         onVideoClick = { task ->
-            if (multiplePanes && !isDetailPaneVisible) onDetailPaneVisibilityChange(true)
+            if (!privateVault && multiplePanes && !isDetailPaneVisible) onDetailPaneVisibilityChange(true)
             if (task.id != activeVideoId) {
                 viewModel.openVideo(task.id, replaceDetail = activeVideoId != null)
             }
         },
         showInlineEmptyState = !multiplePanes || !isDetailPaneVisible,
-        showDetailPaneControl = multiplePanes,
+        showDetailPaneControl = multiplePanes && !privateVault,
         isDetailPaneVisible = isDetailPaneVisible,
         onDetailPaneVisibilityChange = onDetailPaneVisibilityChange,
     )
@@ -121,6 +159,9 @@ internal fun LibraryScreen(
     isDetailPaneVisible: Boolean = true,
     onDetailPaneVisibilityChange: (Boolean) -> Unit = {},
     tagControls: @Composable () -> Unit = {},
+    onVaultClick: () -> Unit = {},
+    onBack: (() -> Unit)? = null,
+    onChangeSelectedPrivacy: () -> Unit = {},
 ) {
     var deleteSelectedOpen by remember { mutableStateOf(false) }
     BackHandler(enabled = uiState.isSelecting, onBack = onClearSelection)
@@ -139,6 +180,10 @@ internal fun LibraryScreen(
                 onSelectAll = onSelectAll,
                 onDeleteSelected = { deleteSelectedOpen = true },
                 onClearSelection = onClearSelection,
+                isPrivateVault = uiState.isPrivateVault,
+                onVaultClick = onVaultClick,
+                onBack = onBack,
+                onChangeSelectedPrivacy = onChangeSelectedPrivacy,
             )
         },
     ) { innerPadding ->
@@ -210,6 +255,48 @@ private fun LibraryScreenPreview() {
             onQueryChange = ::previewNoOp,
             onViewModeChange = ::previewNoOp,
             onVideoClick = ::previewNoOp,
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(
+    name = "Korean private library",
+    locale = "ko",
+    widthDp = 393,
+    heightDp = 852,
+)
+@FormFactorPreviews
+@Composable
+private fun PrivateLibraryScreenPreview() {
+    DambomTheme {
+        LibraryScreen(
+            uiState =
+                LibraryUiState(
+                    videos =
+                        persistentListOf(
+                            previewTask("여행 기록").copy(isPrivate = true),
+                            previewTask("겨울 산행").copy(isPrivate = true),
+                        ),
+                    hasVideos = true,
+                    totalVideoCount = 2,
+                    totalBytes = 8_000_000L,
+                    isPrivateVault = true,
+                ),
+            fileActions =
+                LibraryFileActions(
+                    onRename = ::previewNoOp,
+                    onExport = ::previewNoOp,
+                    onShareVideo = ::previewNoOp,
+                    onShareLink = ::previewNoOp,
+                    onCopyLink = ::previewNoOp,
+                    onOpenOriginal = ::previewNoOp,
+                    onDelete = ::previewNoOp,
+                    onChangePrivacy = ::previewNoOp,
+                ),
+            onQueryChange = ::previewNoOp,
+            onViewModeChange = ::previewNoOp,
+            onVideoClick = ::previewNoOp,
+            onBack = ::previewNoOp,
         )
     }
 }

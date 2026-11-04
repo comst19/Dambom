@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Tẹsiwaju wiwo?</string>
+    <string name="player_resume_message">Â ýòîì ñëó÷àå â ýòîì ñëó÷àå %1$s .</string>
+    <string name="player_resume_continue">Tẹsiwaju</string>
+    <string name="player_resume_restart">Bẹrẹ lori</string>
+    <string name="player_history_failure">Ko le fifuye tabi fi itan ṣiṣiṣẹsẹhin pamọ.</string>
+    <string name="player_settings_failure">Ko le fi awọn eto ṣiṣiṣẹsẹhin pamọ.</string>
+    <string name="player_speed">Ṣiṣiṣẹsẹhin iyara</string>
+    <string name="player_speed_value">Iyara ṣiṣiṣẹsẹhin · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Tun fidio yii ṣe</string>
+    <string name="player_options_close">Sunmọ</string>
+</resources>

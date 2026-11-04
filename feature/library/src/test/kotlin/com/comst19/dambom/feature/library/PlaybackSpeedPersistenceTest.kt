@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.domain.model.AppSettings
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,6 +38,7 @@ class PlaybackSpeedPersistenceTest {
                     settings,
                     backgroundScope,
                     AppEventBus(),
+                    privateVideoSession = PrivateVideoSession(),
                 )
             val scopeJob = checkNotNull(viewModel.viewModelScope.coroutineContext[Job])
             try {

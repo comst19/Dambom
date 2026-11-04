@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Pirtûkxaneya taybet</string>
+    <string name="vault_locked_title">Pirtûkxaneya vîdyoya we ya taybet</string>
+    <string name="vault_locked_description">Ji bo dîtina vîdyoyên xwe yên taybet vekin</string>
+    <string name="vault_unlock">Vekirin</string>
+    <string name="vault_lock">Kilîd</string>
+    <string name="vault_auth_subtitle">Biyometrîk an kilîta ekrana cîhaza xwe bikar bînin</string>
+    <string name="vault_use_device_lock">Kilîta ekranê bikar bînin</string>
+    <string name="vault_setup_lock">Di mîhengên telefona xwe de PIN, nimûne an şîfreyek saz bikin da ku pirtûkxaneya taybet bikar bînin.</string>
+    <string name="vault_open_settings">Mîhengên vekirî</string>
+    <string name="vault_auth_unavailable">Nasnameya nasnameyê li ser vê cîhazê dest pê nekir. Ji kerema xwe dîsa biceribînin.</string>
+    <string name="vault_move">Derbasî pirtûkxaneya taybet bibe</string>
+    <string name="vault_restore">Derbasî pirtûkxaneya birêkûpêk bibe</string>
+    <string name="vault_move_success">Veguhestin pirtûkxaneya taybet. Kopiyên berê yên hinardekirî nehatine guhertin.</string>
+    <string name="vault_restore_success">Veguhestin pirtûkxaneya birêkûpêk</string>
+    <string name="vault_move_failure">Vîdeo nehatin veguhastin. Ji kerema xwe dîsa biceribînin.</string>
+    <string name="vault_empty_title">Vîdyoyên taybet tune</string>
+    <string name="vault_empty_description">Vîdyoyên di pirtûkxaneya xwe ya asayî de hilbijêrin û wan li vir veguhezînin</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Oxutma mövqeyi</string>
+    <string name="playback_rewind">10 saniyə geri</string>
+    <string name="playback_play">Oynayın</string>
+    <string name="playback_pause">Fasilə</string>
+    <string name="playback_forward">10 saniyə irəli</string>
+</resources>

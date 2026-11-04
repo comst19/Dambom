@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">بەم دواییانە لێدراوە</string>
+    <string name="library_recently_played_empty_title">هیچ ڤیدیۆیەک بەم دواییانە پەخش نەکراوە</string>
+    <string name="library_recently_played_empty_description">ڤیدیۆیەک لێبدە بۆ بینینی لێرە. ئەگەر فلتەرەکان چالاکن، هەوڵ بدە بیانگۆڕن.</string>
+</resources>

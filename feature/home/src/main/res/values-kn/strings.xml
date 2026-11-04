@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">ಮತ್ತೊಮ್ಮೆ ವೀಕ್ಷಿಸಲು ಯೋಗ್ಯವಾಗಿದೆಯೇ?\nಅದನ್ನು ಲಿಂಕ್‌ನೊಂದಿಗೆ ಉಳಿಸಿ.</string>
+    <string name="home_description">ಪುಟದ ಲಿಂಕ್‌ನಿಂದ ಉಳಿಸಲು ವೀಡಿಯೊಗಳನ್ನು ಹುಡುಕಿ.</string>
+    <string name="home_url_label">ವೆಬ್ ವಿಳಾಸ</string>
+    <string name="home_invalid_url">http:// ಅಥವಾ https://. ನೊಂದಿಗೆ ಪ್ರಾರಂಭವಾಗುವ ಲಿಂಕ್ ಅನ್ನು ನಮೂದಿಸಿ</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">ಅಂಟಿಸಿ</string>
+    <string name="home_analyze">ವೀಡಿಯೊಗಳನ್ನು ಹುಡುಕಿ</string>
+    <string name="home_open_settings">ಸೆಟ್ಟಿಂಗ್‌ಗಳು</string>
+    <string name="home_hide_results">ಫಲಿತಾಂಶಗಳನ್ನು ಮರೆಮಾಡಿ</string>
+    <string name="home_show_results">ಇನ್‌ಪುಟ್ ಜೊತೆಗೆ ಫಲಿತಾಂಶಗಳನ್ನು ತೋರಿಸಿ</string>
+    <string name="home_web_prompt_title">ಇನ್ನೂ ಲಿಂಕ್ ಹೊಂದಿಲ್ಲವೇ?</string>
+    <string name="home_web_prompt_description">ಲಿಂಕ್ ಇಲ್ಲದ ಪುಟವನ್ನು ಹುಡುಕಿ.</string>
+    <string name="home_browse_web">ವೆಬ್ ಬ್ರೌಸ್ ಮಾಡಿ</string>
+    <string name="home_current_activity">ಪ್ರಸ್ತುತ ಚಟುವಟಿಕೆ</string>
+    <string name="home_clipboard_found">ನಕಲು ಮಾಡಿದ ಲಿಂಕ್ ಲಭ್ಯವಿದೆ</string>
+    <string name="home_use_link">ಅಂಟಿಸಿ</string>
+    <string name="home_dismiss">ವಜಾಗೊಳಿಸಿ</string>
+    <string name="home_clipboard_consent_title">ನಕಲು ಮಾಡಿದ ಲಿಂಕ್‌ಗಳನ್ನು ಸೂಚಿಸುವುದೇ?</string>
+    <string name="home_clipboard_consent_description">Dambom ತೆರೆದಾಗ, ಅದು ವೆಬ್ ವಿಳಾಸಕ್ಕಾಗಿ ಕ್ಲಿಪ್‌ಬೋರ್ಡ್ ಅನ್ನು ಪರಿಶೀಲಿಸಬಹುದು ಮತ್ತು ಅದನ್ನು ಭರ್ತಿ ಮಾಡಲು ಸೂಚಿಸಬಹುದು. ಅದು ಎಂದಿಗೂ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ವಿಶ್ಲೇಷಿಸುವುದಿಲ್ಲ ಅಥವಾ ಡೌನ್‌ಲೋಡ್ ಮಾಡುವುದಿಲ್ಲ.</string>
+    <string name="home_clipboard_consent_allow">ಸಲಹೆಗಳನ್ನು ಅನುಮತಿಸಿ</string>
+    <string name="home_clipboard_consent_deny">ಹಸ್ತಚಾಲಿತವಾಗಿ ಅಂಟಿಸಿ</string>
+    <string name="home_clipboard_save_failed">ನಿಮ್ಮ ಆದ್ಯತೆಯನ್ನು ಉಳಿಸಲಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="home_shared_url_title">ಹಂಚಿಕೊಂಡ ಲಿಂಕ್ ಸ್ವೀಕರಿಸಲಾಗಿದೆ</string>
+    <string name="home_shared_url_description">ಲಿಂಕ್ ಅನ್ನು ಪರಿಶೀಲಿಸಿ, ನಂತರ ವೀಡಿಯೊಗಳನ್ನು ಹುಡುಕಲು ಪ್ರಾರಂಭಿಸಿ.</string>
+    <string name="home_analyze_now">ವೀಡಿಯೊಗಳನ್ನು ಹುಡುಕಿ</string>
+    <string name="home_cancel">ರದ್ದುಮಾಡಿ</string>
+    <string name="home_download_active">%1$d ಡೌನ್‌ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ</string>
+    <string name="home_download_paused">%1$d ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ</string>
+    <string name="home_download_failed">%1$d ಡೌನ್‌ಲೋಡ್‌ಗಳಿಗೆ ಗಮನ ಬೇಕು</string>
+    <string name="home_download_open">ಡೌನ್‌ಲೋಡ್ ಸ್ಥಿತಿಯನ್ನು ವೀಕ್ಷಿಸಿ</string>
+</resources>

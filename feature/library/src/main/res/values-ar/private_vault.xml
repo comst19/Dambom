@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">مكتبة خاصة</string>
+    <string name="vault_locked_title">مكتبتك الخاصة للفيديو</string>
+    <string name="vault_locked_description">افتح القفل لعرض مقاطع الفيديو الخاصة بك</string>
+    <string name="vault_unlock">فتح القفل</string>
+    <string name="vault_lock">قفل</string>
+    <string name="vault_auth_subtitle">استخدم القياسات الحيوية أو قفل شاشة جهازك</string>
+    <string name="vault_use_device_lock">استخدم قفل الشاشة</string>
+    <string name="vault_setup_lock">اضبط رمز PIN أو نمط أو كلمة مرور في إعدادات هاتفك لاستخدام المكتبة الخاصة.</string>
+    <string name="vault_open_settings">افتح الإعدادات</string>
+    <string name="vault_auth_unavailable">لم يتمكن المصادقة من البدء على هذا الجهاز. يرجى المحاولة مرة أخرى.</string>
+    <string name="vault_move">نقل إلى المكتبة الخاصة</string>
+    <string name="vault_restore">نقل إلى المكتبة العادية</string>
+    <string name="vault_move_success">تم النقل إلى المكتبة الخاصة. النسخ التي تم تصديرها مسبقًا غير متغيرة.</string>
+    <string name="vault_restore_success">تم النقل إلى المكتبة العادية</string>
+    <string name="vault_move_failure">لم يتمكن من نقل مقاطع الفيديو. يرجى المحاولة مرة أخرى.</string>
+    <string name="vault_empty_title">لا توجد مقاطع فيديو خاصة</string>
+    <string name="vault_empty_description">اختر مقاطع الفيديو في مكتبتك العادية وانقلها إلى هنا</string>
+</resources>

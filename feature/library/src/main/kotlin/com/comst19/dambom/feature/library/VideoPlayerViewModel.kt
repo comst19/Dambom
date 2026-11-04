@@ -17,6 +17,7 @@ import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.coroutine.ApplicationScope
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.repository.PlaybackHistoryRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.feature.library.player.PlaybackHistoryRecorder
@@ -46,10 +47,12 @@ internal class VideoPlayerViewModel
         private val settingsRepository: SettingsRepository,
         @ApplicationScope private val applicationScope: CoroutineScope,
         private val appEventBus: AppEventBus,
+        private val privateVideoSession: PrivateVideoSession,
     ) : ViewModel() {
         private val visibilityState = PlaybackVisibilityState()
         private var preparation: Job? = null
         private var requestedId: String? = null
+        private var privatePlayback = false
         private var playRequestedWhilePreparing = false
         private var progressJob: Job? = null
         private val speedWrites = Mutex()
@@ -82,6 +85,11 @@ internal class VideoPlayerViewModel
                 }
 
         init {
+            viewModelScope.launch {
+                privateVideoSession.isUnlocked.collect { unlocked ->
+                    if (!unlocked && privatePlayback) stopUnavailableVideo()
+                }
+            }
             player.addListener(
                 object : Player.Listener {
                     override fun onPlayWhenReadyChanged(
@@ -146,7 +154,13 @@ internal class VideoPlayerViewModel
             }
         }
 
+        @Suppress("ReturnCount")
         fun prepare(task: DownloadTask) {
+            if (task.isPrivate && !privateVideoSession.isUnlocked.value) {
+                stopUnavailableVideo()
+                return
+            }
+            privatePlayback = task.isPrivate
             val path = task.localFilePath ?: return
             val uri = Uri.fromFile(File(path))
             if (!shouldReplaceMediaItem(
@@ -201,6 +215,10 @@ internal class VideoPlayerViewModel
         }
 
         fun requestPlayPause() {
+            if (privatePlayback && !privateVideoSession.isUnlocked.value) {
+                stopUnavailableVideo()
+                return
+            }
             if (preparation?.isActive == true && player.currentMediaItem == null) {
                 playRequestedWhilePreparing = true
                 return

@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Vebi bağla</string>
+    <string name="web_address_placeholder">Veb ünvan daxil edin</string>
+    <string name="web_start_title">Vebdə videolar tapın</string>
+    <string name="web_start_description">Bir neçə nişanı açıq saxlayın və yalnız cari nişanda videoları aşkarlayın.</string>
+    <string name="web_open">Səhifəni açın</string>
+    <string name="web_recent">Son səhifələr</string>
+    <string name="web_recent_empty">Son vaxtlar ziyarət olunan səhifə yoxdur.</string>
+    <string name="web_go_back">Əvvəlki səhifə</string>
+    <string name="web_go_forward">Sonrakı səhifə</string>
+    <string name="web_refresh">Yenilə</string>
+    <string name="web_detecting">Aşkarlanır</string>
+    <string name="web_open_detected_count">%1$d videolarını açın</string>
+    <string name="web_no_detected_video">Heç bir video aşkarlanmır</string>
+    <string name="web_rescan">Yenidən skan edin</string>
+    <string name="web_playback_hint">Əgər heç bir video aşkarlanmasa, onu səhifədə oynadın və yenidən cəhd edin.</string>
+    <string name="web_connection_error_title">Sayta qoşulmaq mümkün olmadı</string>
+    <string name="web_connection_error_description">Sayt bağlantını bağladı və ya cari şəbəkədə mövcud deyil.</string>
+    <string name="web_timeout_error_title">Sayt cavab verməkdə çox gecikdi</string>
+    <string name="web_timeout_error_description">Bir dəqiqə gözləyin və yenidən cəhd edin.</string>
+    <string name="web_unsupported_url_error_title">Dəstəklənməyən veb ünvan</string>
+    <string name="web_unsupported_url_error_description">Bunun bir HTTP və ya HTTPS veb ünvanı olduğunu yoxlayın.</string>
+    <string name="web_access_error_title">Səhifəyə giriş uğursuz oldu</string>
+    <string name="web_access_error_description">Səhifə mövcud deyil və ya onu görmək icazəniz yoxdur.</string>
+    <string name="web_server_error_title">Sayt müvəqqəti olaraq mövcud deyil</string>
+    <string name="web_server_error_description">Saytda server problemi var. Bir dəqiqə gözləyin və yenidən cəhd edin.</string>
+    <string name="web_security_error_title">Saytı təhlükəsiz şəkildə açmaq mümkün olmadı</string>
+    <string name="web_security_error_description">Onun təhlükəsizlik sertifikatı etibarsızdır və ya səhifə təhlükəli kimi aşkarlandı.</string>
+    <string name="web_unknown_error_title">Səhifəni açmaq mümkün olmadı</string>
+    <string name="web_unknown_error_description">Ünvanı yoxlayın və yenidən açın.</string>
+    <string name="web_retry">Yenidən cəhd edin</string>
+    <string name="web_external_download_notice">Dambom xarici brauzerdən video aşkarlaya və ya yükləyə bilmir.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d nişanını aç</item>
+        <item quantity="other">%1$d nişanlarını aç</item>
+    </plurals>
+    <string name="web_new_tab">Yeni nişan</string>
+    <string name="web_close_tab">%1$s nişanını bağla</string>
+    <string name="web_empty_tab">Boş nişan</string>
+    <string name="web_tab_actions">Cari nişan əməliyyatları</string>
+    <string name="web_open_external">Varsayılan brauzerdə aç</string>
+    <string name="web_copy_link">Linki kopyalayın</string>
+    <string name="web_share_link">Linki paylaşın</string>
+    <string name="web_link_copied">Link kopyalandı.</string>
+    <string name="web_action_failure">Heç bir tətbiq bu sorğunu icra edə bilmir.</string>
+    <string name="web_share_chooser">Linki paylaşın</string>
+    <string name="web_drm_protected">Bu media qorunur və yüklənə bilməz.</string>
+    <string name="web_unsupported_service">YouTube video yükləmələri dəstəklənmir.</string>
+    <string name="web_drm_excluded">Qorunan videolar bu siyahıdan gizlədilib.</string>
+</resources>

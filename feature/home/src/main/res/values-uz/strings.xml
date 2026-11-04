@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Yana ko\'rishga arziydimi?\nUni havola bilan saqlang.</string>
+    <string name="home_description">Saqlash uchun videolarni sahifa havolasidan toping.</string>
+    <string name="home_url_label">Veb-manzil</string>
+    <string name="home_invalid_url">http:// yoki https://. bilan boshlanadigan havolani kiriting</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Yopish</string>
+    <string name="home_analyze">Videolarni toping</string>
+    <string name="home_open_settings">Sozlamalar</string>
+    <string name="home_hide_results">Natijalarni yashirish</string>
+    <string name="home_show_results">Natijalarni kiritish bilan birga ko\'rsatish</string>
+    <string name="home_web_prompt_title">Hali havola yo\'qmi?</string>
+    <string name="home_web_prompt_description">Havolasiz sahifani toping.</string>
+    <string name="home_browse_web">Internetni ko\'rib chiqing</string>
+    <string name="home_current_activity">Joriy faoliyat</string>
+    <string name="home_clipboard_found">Nusxalangan havola mavjud</string>
+    <string name="home_use_link">Yopish</string>
+    <string name="home_dismiss">Rad etish</string>
+    <string name="home_clipboard_consent_title">Nusxalangan havolalarni taklif qilasizmi?</string>
+    <string name="home_clipboard_consent_description">Dambom ochilganda, u buferdan veb-manzilni tekshirishi va uni toʻldirishni taklif qilishi mumkin. U hech qachon avtomatik ravishda tahlil qilmaydi yoki yuklab olmaydi.</string>
+    <string name="home_clipboard_consent_allow">Takliflarga ruxsat bering</string>
+    <string name="home_clipboard_consent_deny">Qo\'lda joylashtirish</string>
+    <string name="home_clipboard_save_failed">Sizning afzalliklaringizni saqlab bo\'lmadi. Iltimos, qayta urinib koʻring.</string>
+    <string name="home_shared_url_title">Umumiy havola qabul qilindi</string>
+    <string name="home_shared_url_description">Havolani koʻrib chiqing, soʻng videolarni topishni boshlang.</string>
+    <string name="home_analyze_now">Videolarni toping</string>
+    <string name="home_cancel">Bekor qilish</string>
+    <string name="home_download_active">%1$d yuklanmoqda</string>
+    <string name="home_download_paused">%1$d pauza qilindi</string>
+    <string name="home_download_failed">%1$d yuklab olishlarga e\'tibor kerak</string>
+    <string name="home_download_open">Yuklab olish holatini ko\'rish</string>
+</resources>

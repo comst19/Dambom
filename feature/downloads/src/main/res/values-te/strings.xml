@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">తగినంత నిల్వ లేదు. స్థలాన్ని ఖాళీ చేసి, మళ్లీ ప్రయత్నించండి.</string>
+    <string name="downloads_summary_waiting">డౌన్‌లోడ్ చేయడానికి వేచి ఉంది</string>
+    <string name="downloads_summary_paused">డౌన్‌లోడ్‌లు పాజ్ చేయబడ్డాయి</string>
+    <string name="downloads_summary_attention">డౌన్‌లోడ్‌లపై శ్రద్ధ అవసరం</string>
+    <string name="downloads_quality_original">అసలైనది</string>
+    <string name="downloads_title">డౌన్‌లోడ్‌లు</string>
+    <string name="downloads_back">వెనుకకు</string>
+    <string name="downloads_view_as_list">జాబితాగా వీక్షించండి</string>
+    <string name="downloads_view_as_grid">గ్రిడ్ వలె వీక్షించండి</string>
+    <string name="downloads_empty_title">డౌన్‌లోడ్‌లు ఏవీ ప్రోగ్రెస్‌లో లేవు</string>
+    <string name="downloads_empty_description">పూర్తయిన డౌన్‌లోడ్‌లు మీ లైబ్రరీలో చూడటానికి సిద్ధంగా ఉన్నాయి.</string>
+    <string name="downloads_open_library">లైబ్రరీని తెరవండి</string>
+    <string name="downloads_summary">%1$d డౌన్‌లోడ్ అవుతోంది</string>
+    <string name="downloads_summary_remaining">%1$d మిగిలి ఉంది</string>
+    <string name="downloads_pause_all">అన్నింటినీ పాజ్ చేయండి</string>
+    <string name="downloads_resume_all">అన్నీ పునఃప్రారంభించండి</string>
+    <string name="downloads_group_active">డౌన్‌లోడ్ చేస్తోంది</string>
+    <string name="downloads_group_queued">క్యూలో ఉంది</string>
+    <string name="downloads_group_paused">పాజ్ చేయబడింది</string>
+    <string name="downloads_group_failed">విఫలమైంది</string>
+    <string name="downloads_group_completed">పూర్తయింది</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s సూక్ష్మచిత్రం</string>
+    <string name="downloads_unknown_size">మొత్తం పరిమాణం తెలియదు</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">మిగిలిన డౌన్‌లోడ్‌ల పురోగతి</string>
+    <string name="downloads_pause">పాజ్</string>
+    <string name="downloads_resume">పునఃప్రారంభం</string>
+    <string name="downloads_cancel">రద్దు</string>
+    <string name="downloads_retry">మళ్లీ ప్రయత్నించండి</string>
+    <string name="downloads_remove">జాబితా నుండి తీసివేయండి</string>
+    <string name="downloads_error_access">ఈ వీడియోకి యాక్సెస్ అనుమతి అవసరం.</string>
+    <string name="downloads_error_format">ఈ వీడియో ఆకృతికి మద్దతు లేదు.</string>
+    <string name="downloads_error_network">కనెక్షన్ పునరుద్ధరించబడలేదు. మళ్లీ ప్రయత్నించండి.</string>
+    <string name="downloads_error_storage">ఫైల్‌ని సేవ్ చేయడం సాధ్యపడలేదు. నిల్వ స్థలాన్ని తనిఖీ చేయండి.</string>
+    <string name="downloads_error_server">సర్వర్ డౌన్‌లోడ్‌ను ప్రాసెస్ చేయలేకపోయింది.</string>
+    <string name="downloads_error_unknown">డౌన్‌లోడ్ చేస్తున్నప్పుడు ఏదో తప్పు జరిగింది.</string>
+    <string name="downloads_command_failed">డౌన్‌లోడ్‌ను అప్‌డేట్ చేయడం సాధ్యపడలేదు. మళ్లీ ప్రయత్నించండి.</string>
+    <string name="downloads_delete_pending">తొలగింపు క్లీనప్ అవసరం</string>
+    <string name="downloads_delete_retry">తొలగింపును మళ్లీ ప్రయత్నించండి</string>
+    <string name="downloads_delete_group_count">తొలగింపు క్లీనప్ %1$d</string>
+    <string name="downloads_error_drm">రక్షిత వీడియోలు డౌన్‌లోడ్ చేయబడవు.</string>
+</resources>

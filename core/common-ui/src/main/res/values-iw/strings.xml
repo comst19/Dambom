@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">מיקום השמעה</string>
+    <string name="playback_rewind">אחורה 10 שניות</string>
+    <string name="playback_play">שחק</string>
+    <string name="playback_pause">הפסקה</string>
+    <string name="playback_forward">קדימה 10 שניות</string>
+</resources>

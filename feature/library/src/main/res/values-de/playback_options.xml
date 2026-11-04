@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Weiter schauen?</string>
+    <string name="player_resume_message">Du hast bis zu %1$s gesehen.</string>
+    <string name="player_resume_continue">Weiter</string>
+    <string name="player_resume_restart">Von vorne beginnen</string>
+    <string name="player_history_failure">Wiedergabeverlauf konnte nicht geladen oder gespeichert werden.</string>
+    <string name="player_settings_failure">Wiedergabeeinstellungen konnten nicht gespeichert werden.</string>
+    <string name="player_speed">Wiedergabegeschwindigkeit</string>
+    <string name="player_speed_value">Wiedergabegeschwindigkeit · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Dieses Video wiederholen</string>
+    <string name="player_options_close">Schließen</string>
+</resources>

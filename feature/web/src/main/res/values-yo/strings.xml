@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Pa ayelujara</string>
+    <string name="web_address_placeholder">Tẹ adirẹsi ayelujara sii</string>
+    <string name="web_start_title">Wa awọn fidio lori ayelujara</string>
+    <string name="web_start_description">Jeki ọpọ awọn taabu ṣii ati rii awọn fidio nikan lori taabu lọwọlọwọ.</string>
+    <string name="web_open">Ṣii oju-iwe</string>
+    <string name="web_recent">to šẹšẹ ojúewé</string>
+    <string name="web_recent_empty">Ko si awọn oju-iwe ti a ṣabẹwo laipe.</string>
+    <string name="web_go_back">Ti tẹlẹ iwe</string>
+    <string name="web_go_forward">Oju-iwe ti o tẹle</string>
+    <string name="web_refresh">Sọtun</string>
+    <string name="web_detecting">Ṣiṣawari</string>
+    <string name="web_open_detected_count">Ṣii awọn fidio %1$d</string>
+    <string name="web_no_detected_video">Ko si awọn fidio ti a rii</string>
+    <string name="web_rescan">Ṣayẹwo lẹẹkansi</string>
+    <string name="web_playback_hint">Ti ko ba ri fidio, mu ṣiṣẹ sori oju-iwe naa ki o tun gbiyanju lẹẹkansi.</string>
+    <string name="web_connection_error_title">Ko le sopọ si aaye naa</string>
+    <string name="web_connection_error_description">Aaye naa ti paade asopọ tabi ko si lori nẹtiwọki lọwọlọwọ.</string>
+    <string name="web_timeout_error_title">Aaye naa ti pẹ ju lati dahun</string>
+    <string name="web_timeout_error_description">Duro fun iṣẹju diẹ ki o tun gbiyanju lẹẹkansi.</string>
+    <string name="web_unsupported_url_error_title">Adirẹsi wẹẹbu ti ko ni atilẹyin</string>
+    <string name="web_unsupported_url_error_description">Ṣayẹwo pe eyi jẹ HTTP tabi adirẹsi wẹẹbu HTTPS .</string>
+    <string name="web_access_error_title">Wiwọle oju-iwe kuna</string>
+    <string name="web_access_error_description">Oju-iwe naa ko si tabi o ko ni igbanilaaye lati wo.</string>
+    <string name="web_server_error_title">Aaye naa ko si fun igba diẹ</string>
+    <string name="web_server_error_description">Aaye naa n ni iṣoro olupin kan. Duro fun iṣẹju diẹ ki o tun gbiyanju lẹẹkansi.</string>
+    <string name="web_security_error_title">Aaye naa ko le ṣii ni aabo</string>
+    <string name="web_security_error_description">Ijẹrisi aabo rẹ ko wulo tabi oju-iwe naa ti rii bi ailewu.</string>
+    <string name="web_unknown_error_title">Oju-iwe naa ko le ṣii</string>
+    <string name="web_unknown_error_description">Ṣayẹwo adirẹsi naa ki o tun ṣi i lẹẹkansi.</string>
+    <string name="web_retry">Gbiyanju lẹẹkansi</string>
+    <string name="web_external_download_notice">Dambom ko le ṣe awari tabi ṣe igbasilẹ awọn fidio lati ẹrọ aṣawakiri ita.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d ìmọ taabu</item>
+        <item quantity="other">%1$d ìmọ awọn taabu</item>
+    </plurals>
+    <string name="web_new_tab">Titun taabu</string>
+    <string name="web_close_tab">Pa %1$s taabu</string>
+    <string name="web_empty_tab">Ofo taabu</string>
+    <string name="web_tab_actions">Awọn iṣẹ taabu lọwọlọwọ</string>
+    <string name="web_open_external">Ṣii ni ẹrọ aṣawakiri aiyipada</string>
+    <string name="web_copy_link">Daakọ ọna asopọ</string>
+    <string name="web_share_link">Pin ọna asopọ</string>
+    <string name="web_link_copied">Ọna asopọ daakọ.</string>
+    <string name="web_action_failure">Ko si ohun elo ti o le mu ibeere yii mu.</string>
+    <string name="web_share_chooser">Pin ọna asopọ</string>
+    <string name="web_drm_protected">Media yi wa ni idaabobo ko si le ṣe igbasilẹ.</string>
+    <string name="web_unsupported_service">Awọn igbasilẹ fidio YouTube ko ni atilẹyin.</string>
+    <string name="web_drm_excluded">Awọn fidio ti o ni aabo ti wa ni pamọ lati atokọ yii.</string>
+</resources>

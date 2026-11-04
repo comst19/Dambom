@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Ha ho na polokelo e lekaneng. Lokolla sebaka ebe o leka hape: %1$s</string>
+    <string name="download_notification_channel">Likhophi</string>
+    <string name="download_notification_title">Dambom e ntse e jarolla livideo</string>
+    <string name="download_notification_description">Ho jarolla ho qale hape sebakeng se bolokiloeng kamora ho hokela hape.</string>
+    <string name="download_result_notification_channel">Liphetho tsa ho jarolla</string>
+    <string name="download_notification_progress_title">Ho jarolla %1$s</string>
+    <string name="download_notification_progress">%1$d %% e felile</string>
+    <string name="download_notification_completed">Ho jarolla ho felile</string>
+    <string name="download_notification_completed_description">%1$s e bolokiloe Laebraring ea hau.</string>
+    <string name="download_notification_failed">Ho jarolla ho hlolehile</string>
+    <string name="download_notification_failed_description">Leka ho jarolla %1$s hape.</string>
+    <string name="download_notification_failed_network">Hlahloba khokahano ea marang-rang bakeng sa %1$s .</string>
+    <string name="download_notification_failed_storage">Hlahloba sebaka se fumanehang bakeng sa %1$s .</string>
+</resources>

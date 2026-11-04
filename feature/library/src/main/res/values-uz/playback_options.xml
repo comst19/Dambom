@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Tomosha qilishni davom ettirasizmi?</string>
+    <string name="player_resume_message">Siz %1$s gacha tomosha qildingiz.</string>
+    <string name="player_resume_continue">Davom ettirish</string>
+    <string name="player_resume_restart">Boshidan boshlash</string>
+    <string name="player_history_failure">O\'tgan o\'yin tarixini yuklash yoki saqlashning iloji bo\'lmadi.</string>
+    <string name="player_settings_failure">O\'yin sozlamalarini saqlab bo\'lmadi.</string>
+    <string name="player_speed">O\'yin tezligi</string>
+    <string name="player_speed_value">O\'yin tezligi · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Ushbu videoni takrorlash</string>
+    <string name="player_options_close">Yopish</string>
+</resources>

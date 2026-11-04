@@ -28,9 +28,12 @@ import androidx.media3.transformer.EditedMediaItem
 import androidx.media3.transformer.ExoPlayerAssetLoader
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
+import androidx.media3.transformer.FrameworkMuxer
 import androidx.media3.transformer.Transformer
+import com.comst19.dambom.core.common.util.VideoExportGate
 import com.comst19.dambom.core.domain.model.DownloadFailureReason
 import com.comst19.dambom.core.network.header.mediaRequestClient
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
@@ -48,6 +51,8 @@ internal class StreamDownloadEngine(
     private val context: Context,
     private val client: OkHttpClient,
     private val fileStore: DownloadFileStore,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val exportGate: VideoExportGate = VideoExportGate.shared,
 ) {
     // Keep the transfer boundary explicit for worker and instrumentation callers.
     @Suppress("LongParameterList")
@@ -59,7 +64,7 @@ internal class StreamDownloadEngine(
         output: File,
         videoHeight: Int? = null,
         onProgress: suspend (Long, Long?) -> Unit,
-    ) {
+    ) = withContext(ioDispatcher) {
         val cache = SimpleCache(fileStore.streamDirectory(id), NoOpCacheEvictor(), fileStore.streamDatabaseProvider)
         var completed = false
         try {
@@ -89,7 +94,7 @@ internal class StreamDownloadEngine(
                     .setUpstreamDataSourceFactory(null)
                     .setCacheWriteDataSinkFactory(null)
             output.delete()
-            export(request.toMediaItem(), cachedSource, output)
+            exportGate.run { export(request.toMediaItem(), cachedSource, output) }
             requireCompletedOutput(output)
             completed = true
         } catch (failure: IOException) {
@@ -234,7 +239,12 @@ internal class StreamDownloadEngine(
                 Clock.DEFAULT,
                 DefaultMediaSourceFactory(context).setDataSourceFactory(source),
             )
-        val transformer = Transformer.Builder(context).setAssetLoaderFactory(assetLoader).build()
+        val transformer =
+            Transformer
+                .Builder(context)
+                .setAssetLoaderFactory(assetLoader)
+                .setMuxerFactory(FrameworkMuxer.Factory())
+                .build()
         try {
             suspendCancellableCoroutine { continuation ->
                 transformer.addListener(

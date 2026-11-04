@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">آیا ارزش دیدن دوباره را دارد؟\nآن را با یک پیوند ذخیره کنید.</string>
+    <string name="home_description">ویدیوهایی را برای ذخیره از پیوند صفحه پیدا کنید.</string>
+    <string name="home_url_label">آدرس وب</string>
+    <string name="home_invalid_url">پیوندی را وارد کنید که با http:// یا https://. شروع می شود</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">چسباندن</string>
+    <string name="home_analyze">ویدیوها را پیدا کنید</string>
+    <string name="home_open_settings">تنظیمات</string>
+    <string name="home_hide_results">نتایج را پنهان کنید</string>
+    <string name="home_show_results">نمایش نتایج در کنار ورودی</string>
+    <string name="home_web_prompt_title">هنوز پیوندی ندارید؟</string>
+    <string name="home_web_prompt_description">صفحه بدون پیوند را پیدا کنید.</string>
+    <string name="home_browse_web">وب را مرور کنید</string>
+    <string name="home_current_activity">فعالیت فعلی</string>
+    <string name="home_clipboard_found">پیوند کپی شده موجود است</string>
+    <string name="home_use_link">چسباندن</string>
+    <string name="home_dismiss">اخراج</string>
+    <string name="home_clipboard_consent_title">پیوندهای کپی شده را پیشنهاد کنید؟</string>
+    <string name="home_clipboard_consent_description">وقتی Dambom باز می‌شود، می‌تواند کلیپ بورد را برای یک آدرس وب بررسی کند و پر کردن آن را پیشنهاد کند. هرگز به صورت خودکار تجزیه و تحلیل یا دانلود نمی‌شود.</string>
+    <string name="home_clipboard_consent_allow">پیشنهادات را مجاز کنید</string>
+    <string name="home_clipboard_consent_deny">چسباندن دستی</string>
+    <string name="home_clipboard_save_failed">تنظیمات برگزیده شما ذخیره نشد. لطفا دوباره امتحان کنید.</string>
+    <string name="home_shared_url_title">پیوند مشترک دریافت شد</string>
+    <string name="home_shared_url_description">پیوند را مرور کنید، سپس شروع به یافتن ویدیو کنید.</string>
+    <string name="home_analyze_now">ویدیوها را پیدا کنید</string>
+    <string name="home_cancel">لغو</string>
+    <string name="home_download_active">دانلود %1$d</string>
+    <string name="home_download_paused">%1$d مکث شد</string>
+    <string name="home_download_failed">دانلودهای %1$d نیاز به توجه دارند</string>
+    <string name="home_download_open">مشاهده وضعیت دانلود</string>
+</resources>

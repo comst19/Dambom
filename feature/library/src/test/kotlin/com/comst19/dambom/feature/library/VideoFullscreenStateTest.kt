@@ -185,25 +185,30 @@ class VideoFullscreenStateTest {
     }
 
     @Test
-    fun `completed task with a missing local file is unavailable and clears fullscreen`() {
-        val missingTask = task().copy(localFilePath = File(videoFile.parentFile, "missing.mp4").path)
+    fun `completed task with a missing local file is unavailable and clears fullscreen`() =
+        kotlinx.coroutines.runBlocking {
+            val missingTask = task().copy(localFilePath = File(videoFile.parentFile, "missing.mp4").path)
 
-        assertFalse(isLocalVideoAvailable(missingTask))
-        assertTrue(shouldClearVideoFullscreen(isVideoFullscreen = true, hasVideo = isLocalVideoAvailable(missingTask)))
-    }
-
-    @Test
-    fun `completed task with a regular local file is playable`() {
-        assertTrue(isLocalVideoAvailable(task()))
-    }
+            assertFalse(isLocalVideoAvailable(missingTask))
+            assertTrue(
+                shouldClearVideoFullscreen(isVideoFullscreen = true, hasVideo = isLocalVideoAvailable(missingTask)),
+            )
+        }
 
     @Test
-    fun `non-file path is unavailable without deleting the database task`() {
-        val directoryTask = task().copy(localFilePath = requireNotNull(videoFile.parentFile).path)
+    fun `completed task with a regular local file is playable`() =
+        kotlinx.coroutines.runBlocking {
+            assertTrue(isLocalVideoAvailable(task()))
+        }
 
-        assertFalse(isLocalVideoAvailable(directoryTask))
-        assertEquals("video", directoryTask.id)
-    }
+    @Test
+    fun `non-file path is unavailable without deleting the database task`() =
+        kotlinx.coroutines.runBlocking {
+            val directoryTask = task().copy(localFilePath = requireNotNull(videoFile.parentFile).path)
+
+            assertFalse(isLocalVideoAvailable(directoryTask))
+            assertEquals("video", directoryTask.id)
+        }
 
     @Test
     fun `expanded crop resets to fit for PiP media change and fullscreen reentry`() {

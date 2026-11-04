@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">വീണ്ടും കാണേണ്ടതുണ്ടോ?\nഒരു ലിങ്ക് ഉപയോഗിച്ച് ഇത് സംരക്ഷിക്കുക.</string>
+    <string name="home_description">ഒരു പേജ് ലിങ്കിൽ നിന്ന് സംരക്ഷിക്കാൻ വീഡിയോകൾ കണ്ടെത്തുക.</string>
+    <string name="home_url_label">വെബ് വിലാസം</string>
+    <string name="home_invalid_url">http:// അല്ലെങ്കിൽ https://. എന്നതിൽ ആരംഭിക്കുന്ന ഒരു ലിങ്ക് നൽകുക</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">ഒട്ടിക്കുക</string>
+    <string name="home_analyze">വീഡിയോകൾ കണ്ടെത്തുക</string>
+    <string name="home_open_settings">ക്രമീകരണങ്ങൾ</string>
+    <string name="home_hide_results">ഫലങ്ങൾ മറയ്ക്കുക</string>
+    <string name="home_show_results">ഇൻപുട്ടിനൊപ്പം ഫലങ്ങൾ കാണിക്കുക</string>
+    <string name="home_web_prompt_title">ഇതുവരെ ഒരു ലിങ്ക് ഇല്ലേ?</string>
+    <string name="home_web_prompt_description">ലിങ്കില്ലാത്ത ഒരു പേജ് കണ്ടെത്തുക.</string>
+    <string name="home_browse_web">വെബ് ബ്രൗസ് ചെയ്യുക</string>
+    <string name="home_current_activity">നിലവിലെ പ്രവർത്തനം</string>
+    <string name="home_clipboard_found">പകർത്തിയ ഒരു ലിങ്ക് ലഭ്യമാണ്</string>
+    <string name="home_use_link">ഒട്ടിക്കുക</string>
+    <string name="home_dismiss">പിരിച്ചുവിടുക</string>
+    <string name="home_clipboard_consent_title">പകർത്തിയ ലിങ്കുകൾ നിർദ്ദേശിക്കണോ?</string>
+    <string name="home_clipboard_consent_description">Dambom തുറക്കുമ്പോൾ, അതിന് ഒരു വെബ് വിലാസത്തിനായി ക്ലിപ്പ്ബോർഡ് പരിശോധിക്കുകയും അത് പൂരിപ്പിക്കാൻ നിർദ്ദേശിക്കുകയും ചെയ്യാം. അത് ഒരിക്കലും സ്വയം വിശകലനം ചെയ്യുകയോ ഡൗൺലോഡ് ചെയ്യുകയോ ചെയ്യുന്നില്ല.</string>
+    <string name="home_clipboard_consent_allow">നിർദ്ദേശങ്ങൾ അനുവദിക്കുക</string>
+    <string name="home_clipboard_consent_deny">സ്വമേധയാ ഒട്ടിക്കുക</string>
+    <string name="home_clipboard_save_failed">നിങ്ങളുടെ മുൻഗണന സംരക്ഷിക്കാൻ കഴിഞ്ഞില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="home_shared_url_title">പങ്കിട്ട ലിങ്ക് ലഭിച്ചു</string>
+    <string name="home_shared_url_description">ലിങ്ക് അവലോകനം ചെയ്യുക, തുടർന്ന് വീഡിയോകൾ കണ്ടെത്താൻ ആരംഭിക്കുക.</string>
+    <string name="home_analyze_now">വീഡിയോകൾ കണ്ടെത്തുക</string>
+    <string name="home_cancel">റദ്ദാക്കുക</string>
+    <string name="home_download_active">%1$d ഡൗൺലോഡ് ചെയ്യുന്നു</string>
+    <string name="home_download_paused">%1$d താൽക്കാലികമായി നിർത്തി</string>
+    <string name="home_download_failed">%1$d ഡൗൺലോഡുകൾക്ക് ശ്രദ്ധ ആവശ്യമാണ്</string>
+    <string name="home_download_open">ഡൗൺലോഡ് നില കാണുക</string>
+</resources>

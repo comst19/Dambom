@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Ma hêja ye dîsa were temaşe kirin?\nWê bi girêdanek tomar bike.</string>
+    <string name="home_description">Vîdyoyan bibînin ku ji girêdanek rûpelê hilînin.</string>
+    <string name="home_url_label">Navnîşana malperê</string>
+    <string name="home_invalid_url">Têkeve girêdanek ku bi http:// an https://. dest pê dike</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Paste</string>
+    <string name="home_analyze">Vîdyoyan bibînin</string>
+    <string name="home_open_settings">Mîhengên</string>
+    <string name="home_hide_results">Encaman veşêre</string>
+    <string name="home_show_results">Encaman li gel têketinê nîşan bide</string>
+    <string name="home_web_prompt_title">Ma hîna girêdanek tune?</string>
+    <string name="home_web_prompt_description">Rûpelek bê girêdan bibînin.</string>
+    <string name="home_browse_web">Li tevnê bigerin</string>
+    <string name="home_current_activity">Çalakiya niha</string>
+    <string name="home_clipboard_found">Girêdana kopîkirî heye</string>
+    <string name="home_use_link">Paste</string>
+    <string name="home_dismiss">Dûrxistin</string>
+    <string name="home_clipboard_consent_title">Zencîreyên kopîkirî pêşniyar bikin?</string>
+    <string name="home_clipboard_consent_description">Dema ku Dambom vedibe, ew dikare ji bo navnîşanek webê paşîn kontrol bike û pêşniyara dagirtina wê bike. Ew qet bixweber analîz nake an dakêşîne.</string>
+    <string name="home_clipboard_consent_allow">Destûrê bide pêşniyaran</string>
+    <string name="home_clipboard_consent_deny">Bi destan bixin</string>
+    <string name="home_clipboard_save_failed">Nekarî tercîha te biparêze. Ji kerema xwe dîsa biceribîne.</string>
+    <string name="home_shared_url_title">Girêdana parvekirî hat wergirtin</string>
+    <string name="home_shared_url_description">Zencîreyê binihêrin, dûv re dest bi dîtina vîdyoyan bikin.</string>
+    <string name="home_analyze_now">Vîdyoyan bibînin</string>
+    <string name="home_cancel">Betal bike</string>
+    <string name="home_download_active">%1$d dakêşin</string>
+    <string name="home_download_paused">%1$d sekinî</string>
+    <string name="home_download_failed">Daxistinên %1$d hewceyê balê ne</string>
+    <string name="home_download_open">Rewşa dakêşanê bibînin</string>
+</resources>

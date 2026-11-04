@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Temaşekirina xwe bidomînin?</string>
+    <string name="player_resume_message">Te heta %1$s temaşe kir.</string>
+    <string name="player_resume_continue">Berdewam bike</string>
+    <string name="player_resume_restart">Ji nû ve dest pê bike</string>
+    <string name="player_history_failure">Dîroka playbackê nehat barkirin an tomarkirin.</string>
+    <string name="player_settings_failure">Mîhengên playbackê nehatin tomarkirin.</string>
+    <string name="player_speed">Leza playback</string>
+    <string name="player_speed_value">Leza playback · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Vê vîdeoyê dubare bike</string>
+    <string name="player_options_close">Nêzîk</string>
+</resources>

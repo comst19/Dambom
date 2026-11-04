@@ -2,10 +2,12 @@ package com.comst19.dambom.feature.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.comst19.dambom.core.common.locale.AppLanguage
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
+import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.SharedLinkQuality
 import com.comst19.dambom.core.domain.model.ThemeMode
@@ -14,11 +16,11 @@ import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.SettingsGraph.HelpKey
-import com.comst19.dambom.feature.settings.contract.AppLanguage
 import com.comst19.dambom.feature.settings.contract.SaveLocationMode
 import com.comst19.dambom.feature.settings.platform.SettingsPlatformActions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -40,6 +42,7 @@ internal class SettingsViewModel
         private val navigation: NavigationDispatcher,
         private val appEventBus: AppEventBus,
         private val platformActions: SettingsPlatformActions,
+        @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         private val downloadLocationMutex = Mutex()
         private val mutableLanguage = MutableStateFlow(AppLanguage.from(platformActions.currentLanguageTags))
@@ -55,6 +58,10 @@ internal class SettingsViewModel
 
         fun setThemeMode(mode: ThemeMode) {
             launchSettingUpdate { repository.setThemeMode(mode) }
+        }
+
+        fun refreshLanguage() {
+            mutableLanguage.value = AppLanguage.from(platformActions.currentLanguageTags)
         }
 
         fun setLanguage(language: AppLanguage) {
@@ -100,7 +107,7 @@ internal class SettingsViewModel
         }
 
         fun setDownloadDirectory(treeUri: String) {
-            viewModelScope.launch {
+            viewModelScope.launch(ioDispatcher) {
                 downloadLocationMutex.withLock {
                     val previousTreeUri = repository.settings.first().downloadTreeUri
                     if (!platformActions.takePersistedDownloadDirectory(treeUri)) {

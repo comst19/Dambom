@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Yaqinda o\'ynaganlar</string>
+    <string name="library_recently_played_empty_title">Yaqinda o\'ynagan videolar yo\'q</string>
+    <string name="library_recently_played_empty_description">Videoni shu yerda ko\'rish uchun o\'ynating. Agar filtrlar faol bo\'lsa, ularni o\'zgartirib ko\'ring.</string>
+</resources>

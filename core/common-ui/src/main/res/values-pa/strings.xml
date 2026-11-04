@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">ਪਲੇਬੈਕ ਸਥਿਤੀ</string>
+    <string name="playback_rewind">10 ਸਕਿੰਟ ਪਿੱਛੇ</string>
+    <string name="playback_play">ਚਲਾਓ</string>
+    <string name="playback_pause">ਵਿਰਾਮ</string>
+    <string name="playback_forward">10 ਸਕਿੰਟ ਅੱਗੇ</string>
+</resources>

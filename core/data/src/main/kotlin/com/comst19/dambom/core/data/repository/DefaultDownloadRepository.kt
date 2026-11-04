@@ -12,10 +12,12 @@ import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadStatusSnapshot
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.network.header.encodeMediaHeaders
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -36,6 +38,7 @@ class DefaultDownloadRepository
         private val scheduler: DownloadWorkScheduler,
         private val fileStore: DownloadFileStore,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+        private val privateVideoSession: PrivateVideoSession,
     ) : DownloadRepository {
         private val deletionMutex = Mutex()
 
@@ -72,7 +75,7 @@ class DefaultDownloadRepository
             dao
                 .observeAll()
                 .map { entities ->
-                    entities.filterNot(DownloadTaskEntity::deletePending).map(::toDownloadTask)
+                    entities.filter { !it.deletePending && !it.isPrivate }.map(::toDownloadTask)
                 }.distinctUntilChanged()
                 .flowOn(ioDispatcher)
 
@@ -80,8 +83,8 @@ class DefaultDownloadRepository
             dao
                 .observeById(id)
                 .distinctUntilChanged()
-                .map { entity ->
-                    entity?.let(::toDownloadTask)
+                .combine(privateVideoSession.isUnlocked) { entity, unlocked ->
+                    entity?.takeIf { !it.isPrivate || unlocked }?.let(::toDownloadTask)
                 }.flowOn(ioDispatcher)
 
         override val completedDownloads: Flow<List<DownloadTask>> =
@@ -89,7 +92,7 @@ class DefaultDownloadRepository
                 .observeCompleted()
                 .distinctUntilChanged()
                 .map { entities ->
-                    entities.map(::toDownloadTask)
+                    entities.filterNot(DownloadTaskEntity::isPrivate).map(::toDownloadTask)
                 }.distinctUntilChanged()
                 .flowOn(ioDispatcher)
 
@@ -98,9 +101,36 @@ class DefaultDownloadRepository
                 .observePendingDeletions()
                 .distinctUntilChanged()
                 .map { entities ->
-                    entities.map(::toDownloadTask)
+                    entities.filterNot(DownloadTaskEntity::isPrivate).map(::toDownloadTask)
                 }.distinctUntilChanged()
                 .flowOn(ioDispatcher)
+
+        override val privateCompletedDownloads: Flow<List<DownloadTask>> =
+            combine(
+                dao.observeCompleted(),
+                dao.observePendingDeletions(),
+                privateVideoSession.isUnlocked,
+            ) { completed, pending, unlocked ->
+                if (unlocked) {
+                    (completed + pending)
+                        .filter { it.isPrivate && it.status == DownloadStatus.COMPLETED.name }
+                        .distinctBy(DownloadTaskEntity::id)
+                        .map(::toDownloadTask)
+                } else {
+                    emptyList()
+                }
+            }.distinctUntilChanged().flowOn(ioDispatcher)
+
+        override suspend fun setPrivate(
+            ids: Set<String>,
+            isPrivate: Boolean,
+        ) = withContext(ioDispatcher) {
+            check(privateVideoSession.isUnlocked.value) { "Private library is locked" }
+            ids.forEach { id ->
+                dao.getById(id)?.localFileName?.let(fileStore::revokeSharing)
+            }
+            dao.setPrivate(ids, isPrivate)
+        }
 
         override suspend fun enqueue(requests: List<DownloadRequest>): EnqueueDownloadsResult =
             withContext(ioDispatcher) {
@@ -131,16 +161,19 @@ class DefaultDownloadRepository
             id: String,
             title: String,
         ) = withContext(ioDispatcher) {
+            requireAccessible(id)
             dao.updateTitle(id, title, System.currentTimeMillis())
         }
 
         override suspend fun delete(id: String) =
             withContext(ioDispatcher) {
+                requireAccessible(id)
                 deletionMutex.withLock { cleanupDeletion(id, recordIntent = true) }
             }
 
         override suspend fun toggleFavorite(id: String) =
             withContext(ioDispatcher) {
+                requireAccessible(id)
                 check(dao.toggleFavorite(id) == 1) { "Video is no longer available" }
             }
 
@@ -171,6 +204,12 @@ class DefaultDownloadRepository
 
         override suspend fun refreshNetworkPolicy() {
             if (dao.countSchedulable() > 0) scheduler.reschedule()
+        }
+
+        private suspend fun requireAccessible(id: String) {
+            check(dao.getById(id)?.isPrivate != true || privateVideoSession.isUnlocked.value) {
+                "Private library is locked"
+            }
         }
 
         private fun toDownloadTask(entity: DownloadTaskEntity): DownloadTask =
@@ -235,6 +274,7 @@ private fun DownloadTaskEntity.toDomain(localFilePath: String?): DownloadTask =
         updatedAtMillis = updatedAtMillis,
         deletePending = deletePending,
         isFavorite = isFavorite,
+        isPrivate = isPrivate,
     )
 
 private inline fun <reified T : Enum<T>> enumValueOrDefault(

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">שוחקה לאחרונה</string>
+    <string name="library_recently_played_empty_title">אין סרטונים ששוחקו לאחרונה</string>
+    <string name="library_recently_played_empty_description">נגן סרטון כדי לראותו כאן. אם יש מסננים פעילים, נסה לשנות אותם.</string>
+</resources>

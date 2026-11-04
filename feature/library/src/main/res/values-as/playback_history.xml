@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">ৰিচেণ্টলি প্লে কৰা</string>
+    <string name="library_recently_played_empty_title">কোনো ৰিচেণ্টলি প্লে কৰা ভিডিঅ\' নাই</string>
+    <string name="library_recently_played_empty_description">ইয়াত চাবলৈ এবাৰ ভিডিঅ\' প Include কৰক. যদি ফিল্টাৰ সক্ৰিয় থাকে, তেনেহ\'লে সলনি কৰি চাওক.</string>
+</resources>

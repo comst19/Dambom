@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">ویب بند کریں۔</string>
+    <string name="web_address_placeholder">ویب ایڈریس درج کریں۔</string>
+    <string name="web_start_title">ویب پر ویڈیوز تلاش کریں۔</string>
+    <string name="web_start_description">متعدد ٹیبز کو کھلا رکھیں اور صرف موجودہ ٹیب پر ہی ویڈیوز کا پتہ لگائیں۔</string>
+    <string name="web_open">صفحہ کھولیں۔</string>
+    <string name="web_recent">حالیہ صفحات</string>
+    <string name="web_recent_empty">حال ہی میں دیکھے گئے صفحات نہیں۔</string>
+    <string name="web_go_back">پچھلا صفحہ</string>
+    <string name="web_go_forward">اگلا صفحہ</string>
+    <string name="web_refresh">ریفریش کریں۔</string>
+    <string name="web_detecting">کھوج لگانا</string>
+    <string name="web_open_detected_count">%1$d ویڈیوز کھولیں۔</string>
+    <string name="web_no_detected_video">کوئی ویڈیو نہیں ملی</string>
+    <string name="web_rescan">دوبارہ اسکین کریں۔</string>
+    <string name="web_playback_hint">اگر کوئی ویڈیو نہیں ملی تو اسے صفحہ پر چلائیں اور دوبارہ کوشش کریں۔</string>
+    <string name="web_connection_error_title">سائٹ سے رابطہ نہیں ہو سکا</string>
+    <string name="web_connection_error_description">سائٹ نے کنکشن بند کر دیا ہے یا موجودہ نیٹ ورک پر دستیاب نہیں ہے۔</string>
+    <string name="web_timeout_error_title">سائٹ نے جواب دینے میں بہت زیادہ وقت لیا۔</string>
+    <string name="web_timeout_error_description">ایک لمحہ انتظار کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="web_unsupported_url_error_title">غیر تعاون یافتہ ویب ایڈریس</string>
+    <string name="web_unsupported_url_error_description">چیک کریں کہ یہ HTTP یا HTTPS ویب ایڈریس ہے۔</string>
+    <string name="web_access_error_title">صفحہ تک رسائی ناکام ہوگئی</string>
+    <string name="web_access_error_description">صفحہ موجود نہیں ہے یا آپ کو اسے دیکھنے کی اجازت نہیں ہے۔</string>
+    <string name="web_server_error_title">سائٹ عارضی طور پر دستیاب نہیں ہے۔</string>
+    <string name="web_server_error_description">سائٹ میں سرور کا مسئلہ ہے۔ ایک لمحہ انتظار کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="web_security_error_title">سائٹ کو محفوظ طریقے سے نہیں کھولا جا سکا</string>
+    <string name="web_security_error_description">اس کا سیکورٹی سرٹیفکیٹ غلط ہے یا صفحہ غیر محفوظ پایا گیا تھا۔</string>
+    <string name="web_unknown_error_title">صفحہ نہیں کھل سکا</string>
+    <string name="web_unknown_error_description">ایڈریس چیک کریں اور اسے دوبارہ کھولیں۔</string>
+    <string name="web_retry">دوبارہ کوشش کریں۔</string>
+    <string name="web_external_download_notice">Dambom کسی بیرونی براؤزر سے ویڈیوز کا پتہ یا ڈاؤن لوڈ نہیں کر سکتا۔</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d کھلا ٹیب</item>
+        <item quantity="other">%1$d کھلی ٹیبز</item>
+    </plurals>
+    <string name="web_new_tab">نیا ٹیب</string>
+    <string name="web_close_tab">%1$s ٹیب بند کریں۔</string>
+    <string name="web_empty_tab">خالی ٹیب</string>
+    <string name="web_tab_actions">موجودہ ٹیب کے اعمال</string>
+    <string name="web_open_external">ڈیفالٹ براؤزر میں کھولیں۔</string>
+    <string name="web_copy_link">لنک کاپی کریں۔</string>
+    <string name="web_share_link">لنک شیئر کریں۔</string>
+    <string name="web_link_copied">لنک کاپی کر دیا گیا۔</string>
+    <string name="web_action_failure">کوئی بھی ایپ اس درخواست کو سنبھال نہیں سکتی۔</string>
+    <string name="web_share_chooser">لنک شیئر کریں۔</string>
+    <string name="web_drm_protected">یہ میڈیا محفوظ ہے اور اسے ڈاؤن لوڈ نہیں کیا جا سکتا۔</string>
+    <string name="web_unsupported_service">YouTube ویڈیو ڈاؤن لوڈز تعاون یافتہ نہیں ہیں۔</string>
+    <string name="web_drm_excluded">محفوظ ویڈیوز اس فہرست سے پوشیدہ ہیں۔</string>
+</resources>

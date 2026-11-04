@@ -16,6 +16,7 @@ import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
+import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
@@ -64,6 +65,8 @@ class VideoPlayerLifecycleTest {
                 LibraryFileManager(context, Dispatchers.IO),
                 AppEventBus(),
                 LibraryTestPlaybackHistory(),
+                privateVideoSession = PrivateVideoSession(),
+                defaultDispatcher = Dispatchers.Unconfined,
             )
         playerViewModel = testVideoPlayerViewModel(context)
         val owner =
@@ -89,7 +92,9 @@ class VideoPlayerLifecycleTest {
         }
         composeRule.waitUntil { repository.updates.subscriptionCount.value == 1 }
         composeRule.runOnIdle { assertTrue(repository.updates.tryEmit(video)) }
-        composeRule.waitForIdle()
+        composeRule.waitUntil {
+            composeRule.runOnIdle { playerViewModel.player.currentMediaItem?.mediaId == video.id }
+        }
         composeRule.runOnIdle {
             assertEquals("video", playerViewModel.player.currentMediaItem?.mediaId)
             assertFalse(playerViewModel.player.playWhenReady)
@@ -139,6 +144,11 @@ private class LifecycleDownloadRepository : DownloadRepository {
     override val downloads = flowOf(emptyList<DownloadTask>())
 
     override fun observeDownload(id: String) = updates
+
+    override suspend fun setPrivate(
+        ids: Set<String>,
+        isPrivate: Boolean,
+    ) = Unit
 
     override suspend fun enqueue(requests: List<DownloadRequest>) = EnqueueDownloadsResult(0, 0)
 

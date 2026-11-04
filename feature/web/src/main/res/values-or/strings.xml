@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">କ୍ଲୋଜ୍ ୱେବ୍</string>
+    <string name="web_address_placeholder">ଏକ ୱେବ୍ ଠିକଣା ପ୍ରବେଶ କରନ୍ତୁ</string>
+    <string name="web_start_title">ୱେବରେ ଭିଡିଓ ଗୁଡିକ ସନ୍ଧାନ କରନ୍ତୁ</string>
+    <string name="web_start_description">ଏକାଧିକ ଟ୍ୟାବ୍ ଖୋଲା ରଖନ୍ତୁ ଏବଂ କେବଳ ସମ୍ପ୍ରତି ଟ୍ୟାବରେ ଭିଡିଓ ଗୁଡିକ ଚିହ୍ନଟ କରନ୍ତୁ।</string>
+    <string name="web_open">ଖୋଲା ପୃଷ୍ଠା</string>
+    <string name="web_recent">ସାମ୍ପ୍ରତିକ ପୃଷ୍ଠା</string>
+    <string name="web_recent_empty">ନିକଟରେ ପରିଦର୍ଶନ କରାଯାଇଥିବା କୌଣସି ପୃଷ୍ଠା ନାହିଁ ।</string>
+    <string name="web_go_back">ପୂର୍ବ ପୃଷ୍ଠା</string>
+    <string name="web_go_forward">ପରବର୍ତ୍ତୀ ପୃଷ୍ଠା</string>
+    <string name="web_refresh">ସତେଜ କରନ୍ତୁ</string>
+    <string name="web_detecting">ଚିହ୍ନଟ ହେଉଛି</string>
+    <string name="web_open_detected_count">%1$d ଭିଡିଓ ଖୋଲନ୍ତୁ</string>
+    <string name="web_no_detected_video">କୌଣସି ଚିହ୍ନଟ ହୋଇଥିବା ଭିଡିଓ ନାହିଁ</string>
+    <string name="web_rescan">ପୁନର୍ବାର ସ୍କାନ୍ କରନ୍ତୁ</string>
+    <string name="web_playback_hint">ଯଦି କୌଣସି ଭିଡିଓ ଚିହ୍ନଟ ହୋଇନାହିଁ, ତେବେ ଏହାକୁ ପୃଷ୍ଠାରେ ଚାଳନ କରନ୍ତୁ ଏବଂ ପୁନଃଚେଷ୍ଟା କରନ୍ତୁ।</string>
+    <string name="web_connection_error_title">ସାଇଟକୁ ସଂଯୋଗ କରାଯାଇ ପାରିଲା ନାହିଁ</string>
+    <string name="web_connection_error_description">ସାଇଟ୍ ସଂଯୋଗ ବନ୍ଦ କରିଛି କିମ୍ବା ସାମ୍ପ୍ରତିକ ନେଟୱାର୍କରେ ଅନୁପଲବ୍ଧ ।</string>
+    <string name="web_timeout_error_title">ସାଇଟ୍ ପ୍ରତିକ୍ରିୟା କରିବାକୁ ବହୁତ ସମୟ ନେଇଥିଲା</string>
+    <string name="web_timeout_error_description">କିଛି ସମୟ ଅପେକ୍ଷା କରନ୍ତୁ ଏବଂ ପୁନଃଚେଷ୍ଟା କରନ୍ତୁ।</string>
+    <string name="web_unsupported_url_error_title">ଅସମର୍ଥିତ ୱେବ୍ ଠିକଣା</string>
+    <string name="web_unsupported_url_error_description">ଯାଞ୍ଚ କରନ୍ତୁ ଯେ ଏହା ଏକ HTTP କିମ୍ୱା HTTPS ୱେବ୍ ଠିକଣା।</string>
+    <string name="web_access_error_title">ପୃଷ୍ଠା ଆକସେସ୍ ବିଫଳ ହୋଇଛି</string>
+    <string name="web_access_error_description">ପୃଷ୍ଠା ବିଦ୍ୟମାନ ନାହିଁ କିମ୍ୱା ଆପଣ ଏହାକୁ ଦେଖିବା ପାଇଁ ଅନୁମତି ନାହିଁ।</string>
+    <string name="web_server_error_title">ଏହି ସାଇଟ୍ ସାମୟିକ ଭାବରେ ଅନୁପଲବ୍ଧ</string>
+    <string name="web_server_error_description">ସାଇଟରେ ଏକ ସର୍ଭର ସମସ୍ୟା ରହିଛି। କିଛି ସମୟ ଅପେକ୍ଷା କରନ୍ତୁ ଏବଂ ପୁନର୍ବାର ଚେଷ୍ଟା କରନ୍ତୁ।</string>
+    <string name="web_security_error_title">ଏହି ସ୍ଥାନଟି ନିରାପଦରେ ଖୋଲାଯାଇ ପାରିଲା ନାହିଁ</string>
+    <string name="web_security_error_description">ଏହାର ସୁରକ୍ଷା ସାର୍ଟିଫିକେଟ୍ ଅବୈଧ କିମ୍ୱା ପୃଷ୍ଠା ଅସୁରକ୍ଷିତ ଭାବରେ ଚିହ୍ନଟ ହୋଇଛି।</string>
+    <string name="web_unknown_error_title">ପୃଷ୍ଠା ଖୋଲାଯାଇ ପାରିଲା ନାହିଁ</string>
+    <string name="web_unknown_error_description">ଠିକଣା ଯାଞ୍ଚ କରନ୍ତୁ ଏବଂ ଏହାକୁ ପୁନଃ ଖୋଲନ୍ତୁ।</string>
+    <string name="web_retry">ପୁନଃଚେଷ୍ଟା କରନ୍ତୁ</string>
+    <string name="web_external_download_notice">Dambom ଏକ ବାହ୍ୟ ବ୍ରାଉଜରରୁ ଭିଡିଓ ଗୁଡିକ ଚିହ୍ନଟ କିମ୍ୱା ଡାଉନଲୋଡ୍ କରିପାରିବେ ନାହିଁ।</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d ଖୋଲା ଟ୍ୟାବ୍</item>
+        <item quantity="other">%1$d ଖୋଲା ଟ୍ୟାବ୍</item>
+    </plurals>
+    <string name="web_new_tab">ନୂତନ ଟ୍ୟାବ୍</string>
+    <string name="web_close_tab">%1$s ଟ୍ୟାବ୍ ବନ୍ଦ କରନ୍ତୁ</string>
+    <string name="web_empty_tab">ଶୂନ୍ୟ ଟ୍ୟାବ୍</string>
+    <string name="web_tab_actions">ସମ୍ପ୍ରତି ଟ୍ୟାବ୍ କ୍ରିୟା</string>
+    <string name="web_open_external">ଡିଫଲ୍ଟ ବ୍ରାଉଜରରେ ଖୋଲନ୍ତୁ</string>
+    <string name="web_copy_link">ଲିଙ୍କ୍ କପି କରନ୍ତୁ |</string>
+    <string name="web_share_link">ଲିଙ୍କ୍ ଅଂଶୀଦାର କରନ୍ତୁ |</string>
+    <string name="web_link_copied">ଲିଙ୍କ୍ କପି ହୋଇଛି ।</string>
+    <string name="web_action_failure">କୌଣସି ଆପ୍ ଏହି ଅନୁରୋଧ ହ୍ୟାଣ୍ଡେଲ୍ କରିପାରିବ ନାହିଁ।</string>
+    <string name="web_share_chooser">ଲିଙ୍କ୍ ଅଂଶୀଦାର କରନ୍ତୁ |</string>
+    <string name="web_drm_protected">ଏହି ମିଡିଆ ସୁରକ୍ଷିତ ଏବଂ ଡାଉନଲୋଡ୍ କରିପାରିବେ ନାହିଁ।</string>
+    <string name="web_unsupported_service">YouTube ଭିଡିଓ ଡାଉନଲୋଡ୍ ସମର୍ଥିତ ନୁହେଁ |</string>
+    <string name="web_drm_excluded">ସଂରକ୍ଷିତ ଭିଡିଓଗୁଡିକ ଏହି ତାଲିକାରୁ ଲୁକ୍କାୟିତ |</string>
+</resources>

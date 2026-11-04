@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Недостаточно памяти. Освободите место и повторите попытку.</string>
+    <string name="downloads_summary_waiting">Ожидание загрузки</string>
+    <string name="downloads_summary_paused">Загрузки приостановлены</string>
+    <string name="downloads_summary_attention">Загрузки требуют внимания</string>
+    <string name="downloads_quality_original">Оригинал</string>
+    <string name="downloads_title">Загрузки</string>
+    <string name="downloads_back">Назад</string>
+    <string name="downloads_view_as_list">Смотреть списком</string>
+    <string name="downloads_view_as_grid">Смотреть сеткой</string>
+    <string name="downloads_empty_title">Загрузки не выполняются</string>
+    <string name="downloads_empty_description">Завершённые загрузки готовы к просмотру в вашей библиотеке.</string>
+    <string name="downloads_open_library">Открыть библиотеку</string>
+    <string name="downloads_summary">%1$d загружается</string>
+    <string name="downloads_summary_remaining">%1$d осталось</string>
+    <string name="downloads_pause_all">Приостановить все</string>
+    <string name="downloads_resume_all">Возобновить все</string>
+    <string name="downloads_group_active">Загрузка</string>
+    <string name="downloads_group_queued">В очереди</string>
+    <string name="downloads_group_paused">Приостановлено</string>
+    <string name="downloads_group_failed">Не удалось</string>
+    <string name="downloads_group_completed">Завершено</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s миниатюра</string>
+    <string name="downloads_unknown_size">Общий размер неизвестен</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Прогресс оставшихся загрузок</string>
+    <string name="downloads_pause">Пауза</string>
+    <string name="downloads_resume">Возобновить</string>
+    <string name="downloads_cancel">Отменить</string>
+    <string name="downloads_retry">Повторить</string>
+    <string name="downloads_remove">Удалить из списка</string>
+    <string name="downloads_error_access">Для просмотра этого видео требуется разрешение.</string>
+    <string name="downloads_error_format">Этот формат видео не поддерживается.</string>
+    <string name="downloads_error_network">Соединение не восстановлено. Попробуйте снова.</string>
+    <string name="downloads_error_storage">Не удалось сохранить файл. Проверьте место в хранилище.</string>
+    <string name="downloads_error_server">Сервер не смог обработать загрузку.</string>
+    <string name="downloads_error_unknown">Произошла ошибка при загрузке.</string>
+    <string name="downloads_command_failed">Не удалось обновить загрузку. Попробуйте снова.</string>
+    <string name="downloads_delete_pending">Требуется очистка удаления</string>
+    <string name="downloads_delete_retry">Повторить удаление</string>
+    <string name="downloads_delete_group_count">Очистка удаления %1$d</string>
+    <string name="downloads_error_drm">Защищенные видео невозможно скачать.</string>
+</resources>

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">மீண்டும் பார்க்கத் தகுதியானதா?\nஒரு இணைப்புடன் சேமிக்கவும்.</string>
+    <string name="home_description">பக்க இணைப்பிலிருந்து சேமிக்க வீடியோக்களைக் கண்டறியவும்.</string>
+    <string name="home_url_label">இணைய முகவரி</string>
+    <string name="home_invalid_url">http:// அல்லது https://. உடன் தொடங்கும் இணைப்பை உள்ளிடவும்</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">ஒட்டவும்</string>
+    <string name="home_analyze">வீடியோக்களைக் கண்டறியவும்</string>
+    <string name="home_open_settings">அமைப்புகள்</string>
+    <string name="home_hide_results">முடிவுகளை மறை</string>
+    <string name="home_show_results">உள்ளீட்டுடன் முடிவுகளைக் காட்டு</string>
+    <string name="home_web_prompt_title">இன்னும் இணைப்பு இல்லையா?</string>
+    <string name="home_web_prompt_description">இணைப்பு இல்லாத பக்கத்தைக் கண்டறியவும்.</string>
+    <string name="home_browse_web">இணையத்தில் உலாவவும்</string>
+    <string name="home_current_activity">தற்போதைய செயல்பாடு</string>
+    <string name="home_clipboard_found">நகலெடுக்கப்பட்ட இணைப்பு உள்ளது</string>
+    <string name="home_use_link">ஒட்டவும்</string>
+    <string name="home_dismiss">நிராகரிக்கவும்</string>
+    <string name="home_clipboard_consent_title">நகலெடுக்கப்பட்ட இணைப்புகளைப் பரிந்துரைக்கவா?</string>
+    <string name="home_clipboard_consent_description">Dambom திறக்கும் போது, ​​அது இணைய முகவரிக்கான கிளிப்போர்டைச் சரிபார்த்து, அதை நிரப்புமாறு பரிந்துரைக்கலாம். அது தானாகவே பகுப்பாய்வு செய்யாது அல்லது பதிவிறக்கம் செய்யாது.</string>
+    <string name="home_clipboard_consent_allow">பரிந்துரைகளை அனுமதி</string>
+    <string name="home_clipboard_consent_deny">கைமுறையாக ஒட்டவும்</string>
+    <string name="home_clipboard_save_failed">உங்கள் விருப்பத்தை சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="home_shared_url_title">பகிரப்பட்ட இணைப்பு பெறப்பட்டது</string>
+    <string name="home_shared_url_description">இணைப்பை மதிப்பாய்வு செய்து, வீடியோக்களைக் கண்டறியத் தொடங்கவும்.</string>
+    <string name="home_analyze_now">வீடியோக்களைக் கண்டறியவும்</string>
+    <string name="home_cancel">ரத்துசெய்</string>
+    <string name="home_download_active">%1$d பதிவிறக்கம்</string>
+    <string name="home_download_paused">%1$d இடைநிறுத்தப்பட்டது</string>
+    <string name="home_download_failed">%1$d பதிவிறக்கங்களுக்கு கவனம் தேவை</string>
+    <string name="home_download_open">பதிவிறக்க நிலையைப் பார்க்கவும்</string>
+</resources>

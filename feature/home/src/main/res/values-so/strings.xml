@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Ma mudan tahay in dib loo daawado?\nKu keydi xiriiriye</string>
+    <string name="home_description">Ka hel fiidiyowyada si aad uga kaydiso bogga isku xidhka</string>
+    <string name="home_url_label">Ciwaanka shabakada</string>
+    <string name="home_invalid_url">Geli xiriirinta ka bilaabma http:// ama https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Ku dheji</string>
+    <string name="home_analyze">Soo hel fiidiyowyo</string>
+    <string name="home_open_settings">Dejinta</string>
+    <string name="home_hide_results">Qari natiijooyinka</string>
+    <string name="home_show_results">Muuji natiijooyinka garab gelinta</string>
+    <string name="home_web_prompt_title">Wali ma lihid xiriiriye?</string>
+    <string name="home_web_prompt_description">Raadi bog aan lahayn xiriiriye.</string>
+    <string name="home_browse_web">Ka baadho shabakada</string>
+    <string name="home_current_activity">Dhaqdhaqaaqa hadda jira</string>
+    <string name="home_clipboard_found">Xiriiriye la koobiyay ayaa diyaar ah</string>
+    <string name="home_use_link">Ku dheji</string>
+    <string name="home_dismiss">Eryi</string>
+    <string name="home_clipboard_consent_title">Soo jeedi xiriiriyeyaasha la guuriyay?</string>
+    <string name="home_clipboard_consent_description">Marka Dambom furmo, waxay ka eegi kartaa sabuuradda ciwaanka webka waxayna soo jeedin kartaa buuxinta. Waligeed si toos ah uma falanqayso ama uma soo dejinayso.</string>
+    <string name="home_clipboard_consent_allow">Oggolow talooyinka</string>
+    <string name="home_clipboard_consent_deny">Ku dheji gacanta</string>
+    <string name="home_clipboard_save_failed">Ma badbaadin karin dookhaaga. Fadlan isku day mar kale</string>
+    <string name="home_shared_url_title">Xiriirinta la wadaago ayaa la helay</string>
+    <string name="home_shared_url_description">Dib u eeg isku xirka, ka dibna billow helida muuqaalada.</string>
+    <string name="home_analyze_now">Soo hel fiidiyowyo</string>
+    <string name="home_cancel">Jooji</string>
+    <string name="home_download_active">%1$d soo dejinta</string>
+    <string name="home_download_paused">%1$d wuu hakiyay</string>
+    <string name="home_download_failed">Soodejisyada %1$d waxay u baahan yihiin fiiro gaar ah</string>
+    <string name="home_download_open">Eeg heerka soo dejinta</string>
+</resources>

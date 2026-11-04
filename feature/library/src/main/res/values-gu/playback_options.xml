@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">જોવાનું ચાલુ રાખવું છે?</string>
+    <string name="player_resume_message">તમે %1$s સુધી જોયું છે.</string>
+    <string name="player_resume_continue">ચાલુ રાખો</string>
+    <string name="player_resume_restart">ફરીથી શરૂ કરો</string>
+    <string name="player_history_failure">પ્લેબેક ઇતિહાસ લોડ અથવા સાચવી શકાયો નહીં.</string>
+    <string name="player_settings_failure">પ્લેબેક સેટિંગ્સ સાચવી શકાઈ નથી.</string>
+    <string name="player_speed">પ્લેબેક ગતિ</string>
+    <string name="player_speed_value">પ્લેબેક ગતિ · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">આ વિડિઓને ફરીથી વગાડો</string>
+    <string name="player_options_close">બંધ કરો</string>
+</resources>

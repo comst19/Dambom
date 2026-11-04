@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">هەڵگرتنی بەس نییە. شوێن ئازاد بکە و دووبارە هەوڵبدەرەوە: %1$s</string>
+    <string name="download_notification_channel">دابەزاندنەکان</string>
+    <string name="download_notification_title">Dambom ڤیدیۆکان دابەزێنێت</string>
+    <string name="download_notification_description">دابەزاندنەکان لە خاڵە پاشەکەوتکراوەکانەوە دەست پێدەکاتەوە دوای دووبارە پەیوەندیکردنەوە.</string>
+    <string name="download_result_notification_channel">ئەنجامەکانی دابەزاندن</string>
+    <string name="download_notification_progress_title">دابەزاندنی %1$s</string>
+    <string name="download_notification_progress">%1$d %% تەواو بووە</string>
+    <string name="download_notification_completed">داگرتن تەواو بوو</string>
+    <string name="download_notification_completed_description">%1$s لە کتێبخانەکەتدا هەڵگیرا.</string>
+    <string name="download_notification_failed">داگرتن شکستی هێنا</string>
+    <string name="download_notification_failed_description">دووبارە هەوڵی دابەزاندنی %1$s بدە.</string>
+    <string name="download_notification_failed_network">گرێدانی تۆڕ بپشکنە بۆ %1$s .</string>
+    <string name="download_notification_failed_storage">پشکنینی هەمارگەی بەردەست بۆ %1$s .</string>
+</resources>

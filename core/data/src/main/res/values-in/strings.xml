@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Penyimpanan tidak cukup. Kosongkan ruang dan coba lagi: %1$s</string>
+    <string name="download_notification_channel">Unduhan</string>
+    <string name="download_notification_title">Dambom sedang mengunduh video</string>
+    <string name="download_notification_description">Pengunduhan dilanjutkan dari titik yang disimpan setelah tersambung kembali.</string>
+    <string name="download_result_notification_channel">Unduh hasil</string>
+    <string name="download_notification_progress_title">Mengunduh %1$s</string>
+    <string name="download_notification_progress">%1$d %% selesai</string>
+    <string name="download_notification_completed">Pengunduhan selesai</string>
+    <string name="download_notification_completed_description">%1$s telah disimpan ke Perpustakaan Anda.</string>
+    <string name="download_notification_failed">Pengunduhan gagal</string>
+    <string name="download_notification_failed_description">Coba unduh %1$s lagi.</string>
+    <string name="download_notification_failed_network">Periksa koneksi jaringan untuk %1$s .</string>
+    <string name="download_notification_failed_storage">Periksa penyimpanan yang tersedia untuk %1$s .</string>
+</resources>

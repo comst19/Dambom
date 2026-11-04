@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">பின்னணி நிலை</string>
+    <string name="playback_rewind">பின் 10 வினாடிகள்</string>
+    <string name="playback_play">விளையாடு</string>
+    <string name="playback_pause">இடைநிறுத்தம்</string>
+    <string name="playback_forward">முன்னோக்கி 10 வினாடிகள்</string>
+</resources>

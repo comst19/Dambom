@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">మళ్లీ చూడటం విలువైనదేనా?\nదీన్ని లింక్‌తో సేవ్ చేయండి.</string>
+    <string name="home_description">పేజీ లింక్ నుండి సేవ్ చేయడానికి వీడియోలను కనుగొనండి.</string>
+    <string name="home_url_label">వెబ్ చిరునామా</string>
+    <string name="home_invalid_url">http:// లేదా https://. తో ప్రారంభమయ్యే లింక్‌ను నమోదు చేయండి</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">అతికించండి</string>
+    <string name="home_analyze">వీడియోలను కనుగొనండి</string>
+    <string name="home_open_settings">సెట్టింగ్‌లు</string>
+    <string name="home_hide_results">ఫలితాలను దాచు</string>
+    <string name="home_show_results">ఇన్‌పుట్‌తో పాటు ఫలితాలను చూపండి</string>
+    <string name="home_web_prompt_title">ఇంకా లింక్ లేదా?</string>
+    <string name="home_web_prompt_description">లింక్ లేని పేజీని కనుగొనండి.</string>
+    <string name="home_browse_web">వెబ్‌ని బ్రౌజ్ చేయండి</string>
+    <string name="home_current_activity">ప్రస్తుత కార్యాచరణ</string>
+    <string name="home_clipboard_found">కాపీ చేయబడిన లింక్ అందుబాటులో ఉంది</string>
+    <string name="home_use_link">అతికించండి</string>
+    <string name="home_dismiss">తొలగించు</string>
+    <string name="home_clipboard_consent_title">కాపీ చేసిన లింక్‌లను సూచించాలా?</string>
+    <string name="home_clipboard_consent_description">Dambom తెరిచినప్పుడు, అది వెబ్ చిరునామా కోసం క్లిప్‌బోర్డ్‌ని తనిఖీ చేయవచ్చు మరియు దాన్ని పూరించమని సూచించవచ్చు. ఇది స్వయంచాలకంగా విశ్లేషించదు లేదా డౌన్‌లోడ్ చేయదు.</string>
+    <string name="home_clipboard_consent_allow">సూచనలను అనుమతించండి</string>
+    <string name="home_clipboard_consent_deny">మాన్యువల్‌గా అతికించండి</string>
+    <string name="home_clipboard_save_failed">మీ ప్రాధాన్యతను సేవ్ చేయడం సాధ్యపడలేదు. దయచేసి మళ్లీ ప్రయత్నించండి.</string>
+    <string name="home_shared_url_title">షేర్డ్ లింక్ స్వీకరించబడింది</string>
+    <string name="home_shared_url_description">లింక్‌ని సమీక్షించి, ఆపై వీడియోలను కనుగొనడం ప్రారంభించండి.</string>
+    <string name="home_analyze_now">వీడియోలను కనుగొనండి</string>
+    <string name="home_cancel">రద్దు</string>
+    <string name="home_download_active">%1$d డౌన్‌లోడ్ అవుతోంది</string>
+    <string name="home_download_paused">%1$d పాజ్ చేయబడింది</string>
+    <string name="home_download_failed">%1$d డౌన్‌లోడ్‌లపై శ్రద్ధ అవసరం</string>
+    <string name="home_download_open">డౌన్‌లోడ్ స్థితిని వీక్షించండి</string>
+</resources>

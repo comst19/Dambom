@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">দেখানো চালিয়ে যেতে চান?</string>
+    <string name="player_resume_message">আপনি %1$s পর্যন্ত দেখেছেন।</string>
+    <string name="player_resume_continue">চালিয়ে যান</string>
+    <string name="player_resume_restart">নতুনভাবে শুরু করুন</string>
+    <string name="player_history_failure">প্লেব্যাক ইতিহাস লোড বা সংরক্ষণ করা যায়নি।</string>
+    <string name="player_settings_failure">প্লেব্যাক সেটিংস সংরক্ষণ করা যায়নি।</string>
+    <string name="player_speed">প্লেব্যাক স্পিড</string>
+    <string name="player_speed_value">প্লেব্যাক স্পিড · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">এই ভিডিওটি পুনরায় চালান</string>
+    <string name="player_options_close">বন্ধ করুন</string>
+</resources>

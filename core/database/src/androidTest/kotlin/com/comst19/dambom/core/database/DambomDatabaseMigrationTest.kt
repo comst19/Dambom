@@ -15,6 +15,30 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class DambomDatabaseMigrationTest {
     @Test
+    fun privateVaultMigrationKeepsExistingVideosPublic() {
+        val name = "private-vault-migration-test"
+        helper.createDatabase(name, 7).apply {
+            execSQL(
+                "INSERT INTO download_tasks (id,url,sourcePageUrl,host,title,mimeType,expectedBytes,downloadedBytes," +
+                    "quality,status,failureReason,retryCount,deletePending,localFileName,createdAtMillis,updatedAtMillis,isFavorite) " +
+                    "VALUES ('kept','https://example.com/v.mp4','https://example.com','example.com','Kept'," +
+                    "'video/mp4',100,100,'original','COMPLETED',NULL,0,0,'kept.mp4',1,2,1)",
+            )
+            close()
+        }
+        helper.runMigrationsAndValidate(name, 8, true, DambomDatabase.MIGRATION_7_8).use { db ->
+            db.query("SELECT title, downloadedBytes, isFavorite, isPrivate, updatedAtMillis FROM download_tasks").use { cursor ->
+                assertTrue(cursor.moveToFirst())
+                assertEquals("Kept", cursor.getString(0))
+                assertEquals(100L, cursor.getLong(1))
+                assertEquals(1, cursor.getInt(2))
+                assertEquals(0, cursor.getInt(3))
+                assertEquals(2L, cursor.getLong(4))
+            }
+        }
+    }
+
+    @Test
     fun streamHeadersMigrationPreservesDownloadsAndDefaultsToEmptyContext() {
         val name = "stream-headers-migration-test"
         helper.createDatabase(name, 6).apply {
@@ -109,7 +133,7 @@ class DambomDatabaseMigrationTest {
             val first =
                 Room
                     .databaseBuilder(context, DambomDatabase::class.java, name)
-                    .addMigrations(DambomDatabase.MIGRATION_5_6, DambomDatabase.MIGRATION_6_7)
+                    .addMigrations(DambomDatabase.MIGRATION_5_6, DambomDatabase.MIGRATION_6_7, DambomDatabase.MIGRATION_7_8)
                     .build()
             try {
                 val dao = first.downloadTaskDao()
@@ -123,7 +147,7 @@ class DambomDatabaseMigrationTest {
             val reopened =
                 Room
                     .databaseBuilder(context, DambomDatabase::class.java, name)
-                    .addMigrations(DambomDatabase.MIGRATION_5_6, DambomDatabase.MIGRATION_6_7)
+                    .addMigrations(DambomDatabase.MIGRATION_5_6, DambomDatabase.MIGRATION_6_7, DambomDatabase.MIGRATION_7_8)
                     .build()
             try {
                 val dao = reopened.downloadTaskDao()

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Lohnt es sich noch einmal anzusehen?\nSpeichern Sie es mit einem Link.</string>
+    <string name="home_description">Suchen Sie Videos zum Speichern über einen Seitenlink.</string>
+    <string name="home_url_label">Webadresse</string>
+    <string name="home_invalid_url">Geben Sie einen Link ein, der mit http:// oder https://. beginnt</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Einfügen</string>
+    <string name="home_analyze">Videos finden</string>
+    <string name="home_open_settings">Einstellungen</string>
+    <string name="home_hide_results">Ergebnisse ausblenden</string>
+    <string name="home_show_results">Ergebnisse neben der Eingabe anzeigen</string>
+    <string name="home_web_prompt_title">Sie haben noch keinen Link?</string>
+    <string name="home_web_prompt_description">Finden Sie eine Seite ohne Link.</string>
+    <string name="home_browse_web">Durchsuchen Sie das Internet</string>
+    <string name="home_current_activity">Aktuelle Aktivität</string>
+    <string name="home_clipboard_found">Ein kopierter Link ist verfügbar</string>
+    <string name="home_use_link">Einfügen</string>
+    <string name="home_dismiss">Ablehnen</string>
+    <string name="home_clipboard_consent_title">Kopierte Links vorschlagen?</string>
+    <string name="home_clipboard_consent_description">Wenn Dambom geöffnet wird, kann es in der Zwischenablage nach einer Webadresse suchen und vorschlagen, diese auszufüllen. Es wird nie automatisch analysiert oder heruntergeladen.</string>
+    <string name="home_clipboard_consent_allow">Vorschläge zulassen</string>
+    <string name="home_clipboard_consent_deny">Manuell einfügen</string>
+    <string name="home_clipboard_save_failed">Ihre Präferenz konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.</string>
+    <string name="home_shared_url_title">Geteilter Link empfangen</string>
+    <string name="home_shared_url_description">Überprüfen Sie den Link und beginnen Sie dann mit der Suche nach Videos.</string>
+    <string name="home_analyze_now">Videos finden</string>
+    <string name="home_cancel">Abbrechen</string>
+    <string name="home_download_active">%1$d Herunterladen</string>
+    <string name="home_download_paused">%1$d pausierte</string>
+    <string name="home_download_failed">%1$d -Downloads erfordern Aufmerksamkeit</string>
+    <string name="home_download_open">Download-Status anzeigen</string>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Bokanga web</string>
+    <string name="web_address_placeholder">Tyá adresi ya web</string>
+    <string name="web_start_title">Luka ba vidéos na web</string>
+    <string name="web_start_description">Bomba ba onglets ebele polele mpe bo détecter ba vidéos kaka na onglet ya lelo.</string>
+    <string name="web_open">Fungola lokasa</string>
+    <string name="web_recent">Nkasa ya sika</string>
+    <string name="web_recent_empty">Nkasa oyo euti kotalama te.</string>
+    <string name="web_go_back">Lokasa ya liboso</string>
+    <string name="web_go_forward">Lokasa oyo elandi</string>
+    <string name="web_refresh">Kozongisa sika</string>
+    <string name="web_detecting">Koyeba</string>
+    <string name="web_open_detected_count">Fungola ba vidéos ya %1$d</string>
+    <string name="web_no_detected_video">Ba vidéos oyo ezwami te</string>
+    <string name="web_rescan">Scan lisusu</string>
+    <string name="web_playback_hint">Soki video moko te ezwami, beta yango na lokasa mpe meka lisusu.</string>
+    <string name="web_connection_error_title">Ekoki te kozala na boyokani na site</string>
+    <string name="web_connection_error_description">Site ekangaki boyokani to ezali te na réseau ya lelo.</string>
+    <string name="web_timeout_error_title">Site ezwaki ntango molai mingi mpo na koyanola</string>
+    <string name="web_timeout_error_description">Zela mwa moke mpe meka lisusu.</string>
+    <string name="web_unsupported_url_error_title">Addresse web oyo esungami te</string>
+    <string name="web_unsupported_url_error_description">Tala soki oyo ezali adresse web ya HTTP to HTTPS .</string>
+    <string name="web_access_error_title">Bokɔti ya lokasa elongi te</string>
+    <string name="web_access_error_description">Lokasa ezali te to ozali na ndingisa te ya kotala yango.</string>
+    <string name="web_server_error_title">Esika yango ezali mpo na mwa ntango te</string>
+    <string name="web_server_error_description">Site ezali na problème ya serveur. Zelá mwa moke mpe meká lisusu.</string>
+    <string name="web_security_error_title">Esika yango ekokaki kofungwama malamu te</string>
+    <string name="web_security_error_description">Mokanda ya bokengi na yango ezali ya malamu te to lokasa emonanaki lokola ezali na bokengi te.</string>
+    <string name="web_unknown_error_title">Lokasa yango ekokaki kofungwama te</string>
+    <string name="web_unknown_error_description">Tala adresse mpe fungola yango lisusu.</string>
+    <string name="web_retry">Meka lisusu</string>
+    <string name="web_external_download_notice">Dambom ekoki te ko détecter to ko télécharger ba vidéos na navigateur ya libanda.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d onglet ya kofungola</item>
+        <item quantity="other">%1$d kofungola ba onglets</item>
+    </plurals>
+    <string name="web_new_tab">Onglet ya sika</string>
+    <string name="web_close_tab">Bokanga onglet %1$s</string>
+    <string name="web_empty_tab">Onglet ya pamba</string>
+    <string name="web_tab_actions">Misala ya onglet ya lelo</string>
+    <string name="web_open_external">Fungola na navigateur par défaut</string>
+    <string name="web_copy_link">Lien ya kopi</string>
+    <string name="web_share_link">Lien ya kokabola</string>
+    <string name="web_link_copied">Lien esalemi kopi.</string>
+    <string name="web_action_failure">Application moko te ekoki kosimba bosenga oyo.</string>
+    <string name="web_share_chooser">Lien ya kokabola</string>
+    <string name="web_drm_protected">Media oyo ebatelami mpe ekoki kozwama te.</string>
+    <string name="web_unsupported_service">Ba téléchargements ya ba vidéos ya YouTube esimbami te.</string>
+    <string name="web_drm_excluded">Ba vidéos oyo ebatelami ebombami na liste oyo.</string>
+</resources>

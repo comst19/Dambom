@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">کافی ذخیرہ نہیں ہے۔ جگہ خالی کریں اور دوبارہ کوشش کریں۔</string>
+    <string name="downloads_summary_waiting">ڈاؤن لوڈ ہونے کا انتظار ہے۔</string>
+    <string name="downloads_summary_paused">ڈاؤن لوڈز روک دیے گئے۔</string>
+    <string name="downloads_summary_attention">ڈاؤن لوڈ پر توجہ کی ضرورت ہے۔</string>
+    <string name="downloads_quality_original">اصل</string>
+    <string name="downloads_title">ڈاؤن لوڈز</string>
+    <string name="downloads_back">واپس</string>
+    <string name="downloads_view_as_list">فہرست کے طور پر دیکھیں</string>
+    <string name="downloads_view_as_grid">گرڈ کے طور پر دیکھیں</string>
+    <string name="downloads_empty_title">کوئی ڈاؤن لوڈز جاری ہیں۔</string>
+    <string name="downloads_empty_description">مکمل ڈاؤن لوڈز آپ کی لائبریری میں دیکھنے کے لیے تیار ہیں۔</string>
+    <string name="downloads_open_library">لائبریری کھولیں۔</string>
+    <string name="downloads_summary">%1$d ڈاؤن لوڈ ہو رہا ہے۔</string>
+    <string name="downloads_summary_remaining">%1$d باقی</string>
+    <string name="downloads_pause_all">سب کو روک دیں۔</string>
+    <string name="downloads_resume_all">سب کو دوبارہ شروع کریں۔</string>
+    <string name="downloads_group_active">ڈاؤن لوڈ ہو رہا ہے۔</string>
+    <string name="downloads_group_queued">قطار</string>
+    <string name="downloads_group_paused">روک دیا گیا۔</string>
+    <string name="downloads_group_failed">ناکام</string>
+    <string name="downloads_group_completed">مکمل ہوا۔</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s تھمب نیل</string>
+    <string name="downloads_unknown_size">کل سائز نامعلوم</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">بقیہ ڈاؤن لوڈز کی پیشرفت</string>
+    <string name="downloads_pause">توقف کریں۔</string>
+    <string name="downloads_resume">دوبارہ شروع کریں۔</string>
+    <string name="downloads_cancel">منسوخ کریں۔</string>
+    <string name="downloads_retry">دوبارہ کوشش کریں۔</string>
+    <string name="downloads_remove">فہرست سے ہٹا دیں۔</string>
+    <string name="downloads_error_access">اس ویڈیو کو رسائی کی اجازت درکار ہے۔</string>
+    <string name="downloads_error_format">یہ ویڈیو فارمیٹ تعاون یافتہ نہیں ہے۔</string>
+    <string name="downloads_error_network">کنکشن بحال نہیں ہوا۔ دوبارہ کوشش کریں۔</string>
+    <string name="downloads_error_storage">فائل کو محفوظ نہیں کیا جا سکا۔ ذخیرہ کرنے کی جگہ چیک کریں۔</string>
+    <string name="downloads_error_server">سرور ڈاؤن لوڈ پر کارروائی نہیں کر سکا۔</string>
+    <string name="downloads_error_unknown">ڈاؤن لوڈ کرتے وقت کچھ غلط ہو گیا۔</string>
+    <string name="downloads_command_failed">ڈاؤن لوڈ کو اپ ڈیٹ نہیں کیا جا سکا۔ دوبارہ کوشش کریں۔</string>
+    <string name="downloads_delete_pending">حذف صفائی کی ضرورت ہے</string>
+    <string name="downloads_delete_retry">حذف کرنے کی دوبارہ کوشش کریں۔</string>
+    <string name="downloads_delete_group_count">حذف صفائی %1$d</string>
+    <string name="downloads_error_drm">محفوظ ویڈیوز کو ڈاؤن لوڈ نہیں کیا جا سکتا۔</string>
+</resources>

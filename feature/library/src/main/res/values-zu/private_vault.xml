@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Umtapo wolwazi wangasese</string>
+    <string name="vault_locked_title">Umtapo wakho wolwazi wevidiyo yangasese</string>
+    <string name="vault_locked_description">Vula ukuze ubuke amavidiyo akho angasese</string>
+    <string name="vault_unlock">Vula</string>
+    <string name="vault_lock">Vala</string>
+    <string name="vault_auth_subtitle">Sebenzisa ama-biometrics noma ukuvimba kwesikrini sedivayisi yakho</string>
+    <string name="vault_use_device_lock">Sebenzisa ukuvimba kwesikrini</string>
+    <string name="vault_setup_lock">Setha i-PIN, iphethini, noma iphasiwedi kuzilungiselelo zefoni yakho ukuze usebenzise umtapo wolwazi wangasese.</string>
+    <string name="vault_open_settings">Vula izilungiselelo</string>
+    <string name="vault_auth_unavailable">Ukuqinisekisa akukwazanga ukuqala kule divayisi. Sicela uzame futhi.</string>
+    <string name="vault_move">Hambisa uye emtatsheni wolwazi wangasese</string>
+    <string name="vault_restore">Hambisa uye emtatsheni wolwazi ojwayelekile</string>
+    <string name="vault_move_success">Kuthutshiwe uye emtatsheni wolwazi wangasese. Amakhophi athunyelwe ngaphambili awashintshanga.</string>
+    <string name="vault_restore_success">Kuthutshiwe uye emtatsheni wolwazi ojwayelekile</string>
+    <string name="vault_move_failure">Akuqinisekiswanga ukuthuthela amavidiyo. Sicela uzame futhi.</string>
+    <string name="vault_empty_title">Azikho izividiyo zangasese</string>
+    <string name="vault_empty_description">Khetha amavidiyo emtatsheni wakho ojwayelekile bese uwathuthela lapha</string>
+</resources>

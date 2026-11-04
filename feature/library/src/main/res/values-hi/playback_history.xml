@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">हाल ही में खेले गए</string>
+    <string name="library_recently_played_empty_title">हाल ही में कोई वीडियो नहीं खेला गया</string>
+    <string name="library_recently_played_empty_description">इसे यहाँ देखने के लिए कोई वीडियो चलाएँ। यदि फ़िल्टर सक्रिय हैं, तो उन्हें बदलने का प्रयास करें।</string>
+</resources>

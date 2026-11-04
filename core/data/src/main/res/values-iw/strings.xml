@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">אין מספיק אחסון. פנה מקום ונסה שוב: %1$s</string>
+    <string name="download_notification_channel">הורדות</string>
+    <string name="download_notification_title">Dambom מוריד סרטונים</string>
+    <string name="download_notification_description">ההורדות מתחדשות מהנקודה השמורה לאחר חיבור מחדש.</string>
+    <string name="download_result_notification_channel">תוצאות הורדה</string>
+    <string name="download_notification_progress_title">הורדת %1$s</string>
+    <string name="download_notification_progress">%1$d %% הושלם</string>
+    <string name="download_notification_completed">ההורדה הושלמה</string>
+    <string name="download_notification_completed_description">%1$s נשמר בספרייה שלך.</string>
+    <string name="download_notification_failed">ההורדה נכשלה</string>
+    <string name="download_notification_failed_description">נסה להוריד שוב את %1$s .</string>
+    <string name="download_notification_failed_network">בדוק את חיבור הרשת עבור %1$s .</string>
+    <string name="download_notification_failed_storage">בדוק אחסון זמין עבור %1$s .</string>
+</resources>

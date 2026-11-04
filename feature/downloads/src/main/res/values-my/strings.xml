@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">သိုလှောင်မှု မလုံလောက်ပါ။ နေရာလွတ်ပြီး ထပ်စမ်းကြည့်ပါ။</string>
+    <string name="downloads_summary_waiting">ဒေါင်းလုဒ်လုပ်ရန် စောင့်နေသည်။</string>
+    <string name="downloads_summary_paused">ဒေါင်းလုဒ်များကို ခေတ္တရပ်ထားသည်။</string>
+    <string name="downloads_summary_attention">ဒေါင်းလုဒ်များ အာရုံစိုက်ရန် လိုအပ်သည်။</string>
+    <string name="downloads_quality_original">မူရင်း</string>
+    <string name="downloads_title">ဒေါင်းလုဒ်များ</string>
+    <string name="downloads_back">နောက်သို့</string>
+    <string name="downloads_view_as_list">စာရင်းအဖြစ် ကြည့်ပါ။</string>
+    <string name="downloads_view_as_grid">ဇယားကွက်အဖြစ် ကြည့်ပါ။</string>
+    <string name="downloads_empty_title">ဒေါင်းလုဒ်များ လုပ်ဆောင်နေခြင်းမရှိပါ။</string>
+    <string name="downloads_empty_description">ပြီးသွားသော ဒေါင်းလုဒ်များကို သင့်ဒစ်ဂျစ်တိုက်တွင် ကြည့်ရှုရန် အဆင်သင့်ဖြစ်ပါပြီ။</string>
+    <string name="downloads_open_library">စာကြည့်တိုက်ဖွင့်ပါ။</string>
+    <string name="downloads_summary">%1$d ဒေါင်းလုဒ်လုပ်နေသည်</string>
+    <string name="downloads_summary_remaining">%1$d ကျန်ရှိသည်။</string>
+    <string name="downloads_pause_all">အားလုံးကို ခဏရပ်ပါ။</string>
+    <string name="downloads_resume_all">အားလုံးကို ပြန်လည်စတင်ပါ။</string>
+    <string name="downloads_group_active">ဒေါင်းလုဒ်လုပ်နေသည်</string>
+    <string name="downloads_group_queued">တန်းစီထားသည်။</string>
+    <string name="downloads_group_paused">ရပ်ထားသည်။</string>
+    <string name="downloads_group_failed">မအောင်မြင်ပါ။</string>
+    <string name="downloads_group_completed">ပြီးပါပြီ။</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s ပုံသေး</string>
+    <string name="downloads_unknown_size">စုစုပေါင်းအရွယ်အစား မသိပါ။</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">လက်ကျန်ဒေါင်းလုဒ်များ တိုးတက်မှု</string>
+    <string name="downloads_pause">ခဏရပ်ပါ။</string>
+    <string name="downloads_resume">ကိုယ်ရေးရာဇဝင်</string>
+    <string name="downloads_cancel">မလုပ်တော့</string>
+    <string name="downloads_retry">ထပ်စမ်းကြည့်ပါ။</string>
+    <string name="downloads_remove">စာရင်းမှ ဖယ်ရှားပါ။</string>
+    <string name="downloads_error_access">ဤဗီဒီယိုသည် ဝင်ရောက်အသုံးပြုခွင့် လိုအပ်ပါသည်။</string>
+    <string name="downloads_error_format">ဤဗီဒီယိုဖော်မတ်ကို မပံ့ပိုးပါ။</string>
+    <string name="downloads_error_network">ချိတ်ဆက်မှု ပြန်ကောင်းမလာပါ။ ထပ်ကြိုးစားပါ။</string>
+    <string name="downloads_error_storage">ဖိုင်ကို မသိမ်းဆည်းနိုင်ပါ။ သိုလှောင်မှုနေရာကို စစ်ဆေးပါ။</string>
+    <string name="downloads_error_server">ဆာဗာသည် ဒေါင်းလုဒ်ကို လုပ်ဆောင်၍မရပါ။</string>
+    <string name="downloads_error_unknown">ဒေါင်းလုဒ်လုပ်နေစဉ် တစ်ခုခုမှားသွားသည်။</string>
+    <string name="downloads_command_failed">ဒေါင်းလုဒ်ကို အပ်ဒိတ်လုပ်၍မရပါ။ ထပ်ကြိုးစားပါ။</string>
+    <string name="downloads_delete_pending">ဖျက်ပစ်ရန် ရှင်းလင်းမှု လိုအပ်သည်။</string>
+    <string name="downloads_delete_retry">ပြန်ဖျက်ရန် ကြိုးစားပါ။</string>
+    <string name="downloads_delete_group_count">ဖျက်ခြင်း %1$d ရှင်းလင်းခြင်း။</string>
+    <string name="downloads_error_drm">ကာကွယ်ထားသော ဗီဒီယိုများကို ဒေါင်းလုဒ်လုပ်၍မရပါ။</string>
+</resources>

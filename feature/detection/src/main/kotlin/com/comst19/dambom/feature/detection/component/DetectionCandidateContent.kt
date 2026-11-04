@@ -206,15 +206,18 @@ private fun DetectionActions(
     Column(Modifier.padding(horizontal = SCREEN_HORIZONTAL_PADDING)) {
         Spacer(Modifier.height(8.dp))
         DambomButton(
-            text =
-                stringResource(
-                    if (state.isSubmitting) R.string.detection_adding_to_queue else R.string.detection_download_selected,
-                    state.selectedIds.size,
-                ),
             onClick = onDownload,
             modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
             enabled = state.selectedIds.isNotEmpty() && !state.isSubmitting && networkAccess.canDownload,
-        )
+        ) {
+            Text(
+                text =
+                    stringResource(
+                        if (state.isSubmitting) R.string.detection_adding_to_queue else R.string.detection_download_selected,
+                        state.selectedIds.size,
+                    ),
+            )
+        }
         if (state.enqueueFailed) {
             Text(
                 text = stringResource(R.string.detection_enqueue_failed),

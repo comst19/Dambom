@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">ኣብዚ ቐረባ ግዜ እተጻወተ</string>
+    <string name="library_recently_played_empty_title">ኣብዚ ቐረባ ግዜ እተዳለወ ቪድዮታት የለን</string>
+    <string name="library_recently_played_empty_description">ኣብዚ ንምርኣይ ቪድዮ ኣወቅዕ። ማጣሪያታት ንጡፋት እንተ ዀይኖም ክትቅይርዎ ፈትኑ።</string>
+</resources>

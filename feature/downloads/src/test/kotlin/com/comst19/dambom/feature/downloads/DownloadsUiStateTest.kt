@@ -65,7 +65,13 @@ class DownloadsUiStateTest {
                     val navigation = SpyNavigationDispatcher()
                     val navigator = Navigator(state)
                     val viewModel =
-                        DownloadsViewModel(EmptyDownloadRepository, navigation, SavedStateHandle(), AppEventBus())
+                        DownloadsViewModel(
+                            EmptyDownloadRepository,
+                            navigation,
+                            SavedStateHandle(),
+                            AppEventBus(),
+                            defaultDispatcher = mainDispatcherRule.dispatcher,
+                        )
 
                     viewModel.openLibrary()
                     advanceUntilIdle()
@@ -192,6 +198,7 @@ class DownloadsUiStateTest {
                     SpyNavigationDispatcher(),
                     SavedStateHandle(),
                     AppEventBus(),
+                    defaultDispatcher = mainDispatcherRule.dispatcher,
                 )
 
             viewModel.uiState.test {
@@ -206,10 +213,22 @@ class DownloadsUiStateTest {
     @Test
     fun `view mode restores from saved state`() {
         val savedStateHandle = SavedStateHandle()
-        DownloadsViewModel(EmptyDownloadRepository, SpyNavigationDispatcher(), savedStateHandle, AppEventBus())
-            .setViewMode(DownloadsViewMode.LIST)
+        DownloadsViewModel(
+            EmptyDownloadRepository,
+            SpyNavigationDispatcher(),
+            savedStateHandle,
+            AppEventBus(),
+            defaultDispatcher = mainDispatcherRule.dispatcher,
+        ).setViewMode(DownloadsViewMode.LIST)
 
-        val restored = DownloadsViewModel(EmptyDownloadRepository, SpyNavigationDispatcher(), savedStateHandle, AppEventBus())
+        val restored =
+            DownloadsViewModel(
+                EmptyDownloadRepository,
+                SpyNavigationDispatcher(),
+                savedStateHandle,
+                AppEventBus(),
+                defaultDispatcher = mainDispatcherRule.dispatcher,
+            )
 
         assertEquals(DownloadsViewMode.LIST, restored.uiState.value.viewMode)
     }
@@ -240,6 +259,7 @@ class DownloadsUiStateTest {
                     SpyNavigationDispatcher(),
                     SavedStateHandle(),
                     events,
+                    defaultDispatcher = mainDispatcherRule.dispatcher,
                 )
 
             viewModel.pause("video")
@@ -254,6 +274,11 @@ class DownloadsUiStateTest {
 
 private object EmptyDownloadRepository : DownloadRepository {
     override val downloads: Flow<List<DownloadTask>> = flowOf(emptyList())
+
+    override suspend fun setPrivate(
+        ids: Set<String>,
+        isPrivate: Boolean,
+    ) = Unit
 
     override suspend fun enqueue(requests: List<DownloadRequest>): EnqueueDownloadsResult =
         EnqueueDownloadsResult(addedCount = 0, duplicateCount = 0)

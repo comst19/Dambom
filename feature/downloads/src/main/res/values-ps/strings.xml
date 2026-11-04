@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">کافي ذخیره نه ده. ځای خالي کړئ او بیا هڅه وکړئ.</string>
+    <string name="downloads_summary_waiting">د کښته کولو انتظار</string>
+    <string name="downloads_summary_paused">ډاونلوډونه ودرول شول</string>
+    <string name="downloads_summary_attention">ډاونلوډونه پاملرنې ته اړتیا لري</string>
+    <string name="downloads_quality_original">اصلي</string>
+    <string name="downloads_title">ډاونلوډونه</string>
+    <string name="downloads_back">شاته</string>
+    <string name="downloads_view_as_list">د لیست په توګه وګورئ</string>
+    <string name="downloads_view_as_grid">د گرډ په توګه وګورئ</string>
+    <string name="downloads_empty_title">هیڅ ډاونلوډ په پرمختګ کې دی</string>
+    <string name="downloads_empty_description">بشپړ شوي ډاونلوډونه ستاسو په کتابتون کې د لیدو لپاره چمتو دي.</string>
+    <string name="downloads_open_library">کتابتون خلاص کړئ</string>
+    <string name="downloads_summary">%1$d ډاونلوډ کول</string>
+    <string name="downloads_summary_remaining">%1$d پاتې</string>
+    <string name="downloads_pause_all">ټول ودرول</string>
+    <string name="downloads_resume_all">ټول بیا پیل کړئ</string>
+    <string name="downloads_group_active">کښته کول</string>
+    <string name="downloads_group_queued">کتار</string>
+    <string name="downloads_group_paused">ودرول</string>
+    <string name="downloads_group_failed">ناکام شو</string>
+    <string name="downloads_group_completed">بشپړ شو</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s تمبیل</string>
+    <string name="downloads_unknown_size">ټوله اندازه نامعلومه ده</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">د پاتې ډاونلوډونو پرمختګ</string>
+    <string name="downloads_pause">وقفه</string>
+    <string name="downloads_resume">بیا پیل کول</string>
+    <string name="downloads_cancel">لغوه</string>
+    <string name="downloads_retry">بیا هڅه وکړئ</string>
+    <string name="downloads_remove">له لیست څخه لرې کړئ</string>
+    <string name="downloads_error_access">دا ویډیو د لاسرسي اجازې ته اړتیا لري.</string>
+    <string name="downloads_error_format">دا ویډیو فارمیټ نه ملاتړ کیږي.</string>
+    <string name="downloads_error_network">پیوستون بیرته نه دی راغلی. بیا هڅه وکړئ.</string>
+    <string name="downloads_error_storage">فایل نشي خوندي کولی. د ذخیره کولو ځای چیک کړئ.</string>
+    <string name="downloads_error_server">سرور نشي کولی ډاونلوډ پروسس کړي.</string>
+    <string name="downloads_error_unknown">د ډاونلوډ کولو پرمهال یو څه غلط شو.</string>
+    <string name="downloads_command_failed">ډاونلوډ نشي کولی تازه کړي. بیا هڅه وکړئ.</string>
+    <string name="downloads_delete_pending">د پاکولو پاکولو ته اړتیا ده</string>
+    <string name="downloads_delete_retry">د حذف کولو بیا هڅه وکړئ</string>
+    <string name="downloads_delete_group_count">د پاکولو پاکول %1$d</string>
+    <string name="downloads_error_drm">خوندي ویډیوګانې نشي ډاونلوډ کیدی.</string>
+</resources>

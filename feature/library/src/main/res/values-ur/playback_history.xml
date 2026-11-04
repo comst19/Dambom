@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">حال ہی میں چلایا گیا</string>
+    <string name="library_recently_played_empty_title">حال ہی میں کوئی ویڈیوز نہیں چلائی گئیں</string>
+    <string name="library_recently_played_empty_description">اسے یہاں دیکھنے کے لیے ایک ویڈیو چلائیں۔ اگر فلٹرز فعال ہیں، تو انہیں تبدیل کرنے کی کوشش کریں۔</string>
+</resources>

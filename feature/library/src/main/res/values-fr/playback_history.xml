@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Joué récemment</string>
+    <string name="library_recently_played_empty_title">Aucun vidéo joué récemment</string>
+    <string name="library_recently_played_empty_description">Lisez une vidéo pour la voir ici. Si des filtres sont actifs, essayez de les modifier.</string>
+</resources>

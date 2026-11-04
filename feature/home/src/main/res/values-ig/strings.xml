@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Kwesịrị ikiri ọzọ?\nChekwaa ya na njikọ.</string>
+    <string name="home_description">Chọta vidiyo iji chekwaa site na njikọ ibe.</string>
+    <string name="home_url_label">Adreesị weebụ</string>
+    <string name="home_invalid_url">Tinye njikọ malite na http:// ma ọ bụ https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Tapawa</string>
+    <string name="home_analyze">Chọta vidiyo</string>
+    <string name="home_open_settings">Ntọala</string>
+    <string name="home_hide_results">Zoo nsonaazụ</string>
+    <string name="home_show_results">Gosi nsonaazụ n\'akụkụ ntinye</string>
+    <string name="home_web_prompt_title">O nwebeghị njikọ?</string>
+    <string name="home_web_prompt_description">Chọta ibe na-enweghị njikọ.</string>
+    <string name="home_browse_web">Chọgharịa na webụ</string>
+    <string name="home_current_activity">Ọrụ dị ugbu a</string>
+    <string name="home_clipboard_found">Njikọ e depụtaghachiri dị</string>
+    <string name="home_use_link">Tapawa</string>
+    <string name="home_dismiss">Wepụ</string>
+    <string name="home_clipboard_consent_title">Na-atụ aro njikọ e depụtaghachiri?</string>
+    <string name="home_clipboard_consent_description">Mgbe Dambom meghere, ọ nwere ike ịlele clipboard maka adreesị weebụ wee tụọ aro dejupụta ya. Ọ dịghị mgbe ọ na-enyocha ma ọ bụ budata na-akpaghị aka.</string>
+    <string name="home_clipboard_consent_allow">Kwe ka ntụnye</string>
+    <string name="home_clipboard_consent_deny">Tapawa na aka</string>
+    <string name="home_clipboard_save_failed">Enweghị ike ichekwa mmasị gị. Biko nwaa ọzọ.</string>
+    <string name="home_shared_url_title">Ekekọrịtara njikọ enwetara</string>
+    <string name="home_shared_url_description">Nyochaa njikọ ahụ wee malite ịchọta vidiyo.</string>
+    <string name="home_analyze_now">Chọta vidiyo</string>
+    <string name="home_cancel">Kagbuo</string>
+    <string name="home_download_active">%1$d nbudata</string>
+    <string name="home_download_paused">%1$d kwụsịtụrụ</string>
+    <string name="home_download_failed">Nbudata %1$d chọrọ nlebara anya</string>
+    <string name="home_download_open">Lelee ọkwa nbudata</string>
+</resources>

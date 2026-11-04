@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Isikhundla sokudlalwa</string>
+    <string name="playback_rewind">Buyela emuva imizuzwana engu-10</string>
+    <string name="playback_play">Dlala</string>
+    <string name="playback_pause">Misa</string>
+    <string name="playback_forward">Phambili imizuzwana engu-10</string>
+</resources>

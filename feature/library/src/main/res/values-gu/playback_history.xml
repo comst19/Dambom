@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">તાજેતરમાં રમાયું</string>
+    <string name="library_recently_played_empty_title">તાજેતરમાં રમાયેલા વિડિઓઝ નથી</string>
+    <string name="library_recently_played_empty_description">અહીં જોવા માટે કોઈ વિડિઓ રમાવો. જો ફિલ્ટર્સ સક્રિય છે, તો તેમને બદલવાનો પ્રયાસ કરો.</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Laebrari e ikemetseng</string>
+    <string name="vault_locked_title">Laebrari ea hau ea livideo e ikemetseng</string>
+    <string name="vault_locked_description">Bula ho sheba livideo tsa hau tse ikemetseng</string>
+    <string name="vault_unlock">Bula</string>
+    <string name="vault_lock">Koala</string>
+    <string name="vault_auth_subtitle">Sebelisa biometrics kapa senotlolo sa skrini sa sesebelisoa sa hau</string>
+    <string name="vault_use_device_lock">Sebelisa senotlolo sa skrini</string>
+    <string name="vault_setup_lock">Beha PIN, motif, kapa phasewete ho li-setting tsa fōne ea hau ho sebelisa laebrari e ikemetseng.</string>
+    <string name="vault_open_settings">Bula li-setting</string>
+    <string name="vault_auth_unavailable">Boitsebahatso ha boa ka ba qala sesebisong sena. Ka kopo leka hape.</string>
+    <string name="vault_move">Fetisetsa ho laebrari e ikemetseng</string>
+    <string name="vault_restore">Fetisetsa ho laebrari e tloaelehileng</string>
+    <string name="vault_move_success">E fetiselitsoe ho laebrari e ikemetseng. Likopi tse rometsoeng pele ha lia fetohu.</string>
+    <string name="vault_restore_success">E fetiselitsoe ho laebrari e tloaelehileng</string>
+    <string name="vault_move_failure">Livideo li sitoa ho fetisetsoa. Ka kopo leka hape.</string>
+    <string name="vault_empty_title">Ha ho livideo tse ikemetseng</string>
+    <string name="vault_empty_description">Khetha livideo ho laebrari ea hau e tloaelehileng \'me u li fetisele mona</string>
+</resources>

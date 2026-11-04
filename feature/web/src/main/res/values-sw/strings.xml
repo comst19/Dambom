@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Funga mtandao</string>
+    <string name="web_address_placeholder">Weka anwani ya tovuti</string>
+    <string name="web_start_title">Tafuta video kwenye wavuti</string>
+    <string name="web_start_description">Weka vichupo vingi wazi na utambue video kwenye kichupo cha sasa pekee.</string>
+    <string name="web_open">Fungua ukurasa</string>
+    <string name="web_recent">Kurasa za hivi majuzi</string>
+    <string name="web_recent_empty">Hakuna kurasa zilizotembelewa hivi majuzi.</string>
+    <string name="web_go_back">Ukurasa uliotangulia</string>
+    <string name="web_go_forward">Ukurasa unaofuata</string>
+    <string name="web_refresh">Onyesha upya</string>
+    <string name="web_detecting">Inagundua</string>
+    <string name="web_open_detected_count">Fungua video za %1$d</string>
+    <string name="web_no_detected_video">Hakuna video zilizogunduliwa</string>
+    <string name="web_rescan">Changanua tena</string>
+    <string name="web_playback_hint">Ikiwa hakuna video iliyotambuliwa, icheze kwenye ukurasa na ujaribu tena.</string>
+    <string name="web_connection_error_title">Haikuweza kuunganisha kwenye tovuti</string>
+    <string name="web_connection_error_description">Tovuti ilifunga muunganisho au haipatikani kwenye mtandao wa sasa.</string>
+    <string name="web_timeout_error_title">Tovuti ilichukua muda mrefu sana kujibu</string>
+    <string name="web_timeout_error_description">Subiri kidogo na ujaribu tena.</string>
+    <string name="web_unsupported_url_error_title">Anwani ya wavuti isiyotumika</string>
+    <string name="web_unsupported_url_error_description">Hakikisha kuwa hii ni anwani ya wavuti ya HTTP au HTTPS .</string>
+    <string name="web_access_error_title">Imeshindwa kufikia ukurasa</string>
+    <string name="web_access_error_description">Ukurasa haupo au huna ruhusa ya kuutazama.</string>
+    <string name="web_server_error_title">Tovuti haipatikani kwa muda</string>
+    <string name="web_server_error_description">Tovuti ina tatizo la seva. Subiri kidogo na ujaribu tena.</string>
+    <string name="web_security_error_title">Tovuti haikuweza kufunguliwa kwa usalama</string>
+    <string name="web_security_error_description">Cheti chake cha usalama ni batili au ukurasa ulitambuliwa kama si salama.</string>
+    <string name="web_unknown_error_title">Ukurasa haukuweza kufunguliwa</string>
+    <string name="web_unknown_error_description">Angalia anwani na uifungue tena.</string>
+    <string name="web_retry">Jaribu tena</string>
+    <string name="web_external_download_notice">Dambom haiwezi kugundua au kupakua video kutoka kwa kivinjari cha nje.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d kichupo wazi</item>
+        <item quantity="other">%1$d vichupo vilivyofunguliwa</item>
+    </plurals>
+    <string name="web_new_tab">Kichupo kipya</string>
+    <string name="web_close_tab">Funga kichupo cha %1$s</string>
+    <string name="web_empty_tab">Kichupo tupu</string>
+    <string name="web_tab_actions">Vitendo vya kichupo vya sasa</string>
+    <string name="web_open_external">Fungua katika kivinjari chaguo-msingi</string>
+    <string name="web_copy_link">Nakili kiungo</string>
+    <string name="web_share_link">Shiriki kiungo</string>
+    <string name="web_link_copied">Kiungo kimenakiliwa.</string>
+    <string name="web_action_failure">Hakuna programu inayoweza kushughulikia ombi hili.</string>
+    <string name="web_share_chooser">Shiriki kiungo</string>
+    <string name="web_drm_protected">Midia hii inalindwa na haiwezi kupakuliwa.</string>
+    <string name="web_unsupported_service">Upakuaji wa video wa YouTube hautumiki.</string>
+    <string name="web_drm_excluded">Video zilizolindwa zimefichwa kutoka kwenye orodha hii.</string>
+</resources>

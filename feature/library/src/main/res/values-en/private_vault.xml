@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">Private library</string>
+    <string name="vault_locked_title">Your private video library</string>
+    <string name="vault_locked_description">Unlock to view your private videos</string>
+    <string name="vault_unlock">Unlock</string>
+    <string name="vault_lock">Lock</string>
+    <string name="vault_auth_subtitle">Use biometrics or your device screen lock</string>
+    <string name="vault_use_device_lock">Use screen lock</string>
+    <string name="vault_setup_lock">Set a PIN, pattern, or password in your phone settings to use the private library.</string>
+    <string name="vault_open_settings">Open settings</string>
+    <string name="vault_auth_unavailable">Authentication could not start on this device. Please try again.</string>
+    <string name="vault_move">Move to private library</string>
+    <string name="vault_restore">Move to regular library</string>
+    <string name="vault_move_success">Moved to private library. Previously exported copies are unchanged.</string>
+    <string name="vault_restore_success">Moved to regular library</string>
+    <string name="vault_move_failure">Could not move the videos. Please try again.</string>
+    <string name="vault_empty_title">No private videos</string>
+    <string name="vault_empty_description">Select videos in your regular library and move them here</string>
+</resources>

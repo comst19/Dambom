@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Die moeite werd om weer te kyk?\nStoor dit met \'n skakel.</string>
+    <string name="home_description">Vind video\'s om te stoor vanaf \'n bladsy-skakel.</string>
+    <string name="home_url_label">Webadres</string>
+    <string name="home_invalid_url">Voer \'n skakel in wat begin met http:// of https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Plak</string>
+    <string name="home_analyze">Vind video\'s</string>
+    <string name="home_open_settings">Instellings</string>
+    <string name="home_hide_results">Versteek resultate</string>
+    <string name="home_show_results">Wys resultate langs invoer</string>
+    <string name="home_web_prompt_title">Het nog nie \'n skakel nie?</string>
+    <string name="home_web_prompt_description">Vind \'n bladsy sonder \'n skakel.</string>
+    <string name="home_browse_web">Blaai deur die web</string>
+    <string name="home_current_activity">Huidige aktiwiteit</string>
+    <string name="home_clipboard_found">\'n Gekopieerde skakel is beskikbaar</string>
+    <string name="home_use_link">Plak</string>
+    <string name="home_dismiss">Lewer af</string>
+    <string name="home_clipboard_consent_title">Stel gekopieerde skakels voor?</string>
+    <string name="home_clipboard_consent_description">Wanneer Dambom oopmaak, kan dit die knipbord vir \'n webadres nagaan en voorstel om dit in te vul. Dit ontleed of laai nooit outomaties af nie.</string>
+    <string name="home_clipboard_consent_allow">Laat voorstelle toe</string>
+    <string name="home_clipboard_consent_deny">Plak handmatig</string>
+    <string name="home_clipboard_save_failed">Kon nie jou voorkeur stoor nie. Probeer asseblief weer.</string>
+    <string name="home_shared_url_title">Gedeelde skakel ontvang</string>
+    <string name="home_shared_url_description">Hersien die skakel, en begin dan om video\'s te vind.</string>
+    <string name="home_analyze_now">Vind video\'s</string>
+    <string name="home_cancel">Kanselleer</string>
+    <string name="home_download_active">%1$d aflaai</string>
+    <string name="home_download_paused">%1$d gepouseer</string>
+    <string name="home_download_failed">%1$d aflaaie benodig aandag</string>
+    <string name="home_download_open">Kyk aflaaistatus</string>
+</resources>

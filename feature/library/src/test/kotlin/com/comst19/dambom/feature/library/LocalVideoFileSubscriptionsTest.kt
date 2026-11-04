@@ -55,7 +55,7 @@ class LocalVideoFileSubscriptionsTest {
         try {
             composeRule.setContent {
                 if (showAvailability.value) {
-                    available = rememberLocalVideoAvailable(libraryTestVideo(file.path)).value
+                    available = rememberLocalVideoAvailable(libraryTestVideo(file.path)).value == true
                 }
                 if (showMetadata.value) {
                     LaunchedEffect(file.path) {

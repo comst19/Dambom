@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Ma sii wadi doonaa daawashada?</string>
+    <string name="player_resume_message">Waxaad daawatay ilaa %1$s .</string>
+    <string name="player_resume_continue">Sii wad</string>
+    <string name="player_resume_restart">Ka bilaaw bilow</string>
+    <string name="player_history_failure">Lama soo dejin karo ama laguma kaydin karo taariikhda ciyaarista.</string>
+    <string name="player_settings_failure">Lama kaydin karo dejimaha ciyaarista.</string>
+    <string name="player_speed">Xawaaraha ciyaarista</string>
+    <string name="player_speed_value">Xawaaraha ciyaarista · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Ku celi fiidiyowgan</string>
+    <string name="player_options_close">Xidh</string>
+</resources>

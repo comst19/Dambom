@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Tsoela pele ho shebella?</string>
+    <string name="player_resume_message">U shebile ho fihlela ho %1$s .</string>
+    <string name="player_resume_continue">Tsoela pele</string>
+    <string name="player_resume_restart">Qala hape</string>
+    <string name="player_history_failure">E sitoa ho kenya kapa ho boloka nalane ea papali.</string>
+    <string name="player_settings_failure">E sitoa ho boloka li-setting tsa papali.</string>
+    <string name="player_speed">Lebelo la papali</string>
+    <string name="player_speed_value">Lebelo la papali · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Pheta video ena</string>
+    <string name="player_options_close">Koala</string>
+</resources>

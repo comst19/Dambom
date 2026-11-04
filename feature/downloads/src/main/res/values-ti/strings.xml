@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">እኹል መኽዘን የለን። ቦታ ነጻ ኣውጺእካ ዳግማይ ፈትን።</string>
+    <string name="downloads_summary_waiting">ንምውራድ ይጽበ ኣሎ።</string>
+    <string name="downloads_summary_paused">ምውራድ ደው ኢሉ</string>
+    <string name="downloads_summary_attention">ምውራድ ቆላሕታ የድልዮ</string>
+    <string name="downloads_quality_original">ኦሪጅናል</string>
+    <string name="downloads_title">ምውራድ</string>
+    <string name="downloads_back">ንድሕሪት ተመሊስና።</string>
+    <string name="downloads_view_as_list">ከም ዝርዝር ርአ</string>
+    <string name="downloads_view_as_grid">ከም ሽቦ ርአ</string>
+    <string name="downloads_empty_title">ዝኾነ ምውራድ ኣብ መስርሕ የለን</string>
+    <string name="downloads_empty_description">ዝተዛዘሙ ዳውንሎድ ኣብ ቤተ መጻሕፍትኹም ክትከታተሉ ድሉዋት እዮም።</string>
+    <string name="downloads_open_library">ክፉት ቤተ-መጻሕፍቲ</string>
+    <string name="downloads_summary">%1$d ምውራድ</string>
+    <string name="downloads_summary_remaining">%1$d ተሪፉ ኣሎ።</string>
+    <string name="downloads_pause_all">ኩሉ ደው ኣቢልኩም</string>
+    <string name="downloads_resume_all">ኩሉ ዳግማይ ጀምር</string>
+    <string name="downloads_group_active">ምውራድ</string>
+    <string name="downloads_group_queued">ኣብ ሪጋ ተሰሪዑ</string>
+    <string name="downloads_group_paused">ደው ኢሉ</string>
+    <string name="downloads_group_failed">ኣይተዓወተን</string>
+    <string name="downloads_group_completed">ተዛዚሙ</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s ንእሽቶ ስእሊ</string>
+    <string name="downloads_unknown_size">ጠቕላላ ስፍሓት ኣይፍለጥን</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">ምዕባለ ናይ ዝተረፉ ምውራድ</string>
+    <string name="downloads_pause">ደው ምባል</string>
+    <string name="downloads_resume">ዳግማይ ምጅማር</string>
+    <string name="downloads_cancel">ስርዝ ድልዝ</string>
+    <string name="downloads_retry">ዳግማይ ፈትን።</string>
+    <string name="downloads_remove">ካብ ዝርዝር ኣውጽእዎ።</string>
+    <string name="downloads_error_access">እዚ ቪድዮ ናይ ምእታው ፍቓድ የድልዮ።</string>
+    <string name="downloads_error_format">እዚ ቅርጺ ቪድዮ ኣይድገፍን’ዩ።</string>
+    <string name="downloads_error_network">እቲ ምትእስሳር ኣይተመልሰን። እንደገና ፈትን።</string>
+    <string name="downloads_error_storage">ነቲ ፋይል ክዕቅቦ ኣይከኣለን። መኽዘን ቦታ ምፍታሽ።</string>
+    <string name="downloads_error_server">እቲ ሰርቨር ነቲ ምውራድ ከሰላስሎ ኣይከኣለን።</string>
+    <string name="downloads_error_unknown">ኣብ ምውራድ ገለ ነገር ተጋግዩ።</string>
+    <string name="downloads_command_failed">ነቲ ምውራድ ከዘምኖ ኣይከኣለን። እንደገና ፈትን።</string>
+    <string name="downloads_delete_pending">ናይ ምድምሳስ ጽሬት የድሊ</string>
+    <string name="downloads_delete_retry">ምድምሳስ ዳግማይ ፈትን።</string>
+    <string name="downloads_delete_group_count">ምጽራይ ምድምሳስ %1$d</string>
+    <string name="downloads_error_drm">ዝተሓለዉ ቪድዮታት ክወርዱ ኣይክእሉን እዮም።</string>
+</resources>

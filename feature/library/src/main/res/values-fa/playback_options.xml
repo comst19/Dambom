@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">ادامه تماشا؟</string>
+    <string name="player_resume_message">تا زمان %1$s تماشا کرده‌اید.</string>
+    <string name="player_resume_continue">ادامه</string>
+    <string name="player_resume_restart">از ابتدا شروع کنید</string>
+    <string name="player_history_failure">بارگذاری یا ذخیره تاریخچه پخش ممکن نشد.</string>
+    <string name="player_settings_failure">ذخیره تنظیمات پخش ممکن نشد.</string>
+    <string name="player_speed">سرعت پخش</string>
+    <string name="player_speed_value">سرعت پخش · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">تکرار این ویدیو</string>
+    <string name="player_options_close">بستن</string>
+</resources>

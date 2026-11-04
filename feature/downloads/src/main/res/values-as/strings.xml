@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">পৰ্যাপ্ত সংৰক্ষণ নহয়। স্থান মুক্ত কৰক আৰু পুনৰ চেষ্টা কৰক।</string>
+    <string name="downloads_summary_waiting">ডাউনলোড কৰিবলৈ অপেক্ষা কৰি আছে</string>
+    <string name="downloads_summary_paused">ডাউনলোডসমূহ স্থগিত ৰখা হৈছে</string>
+    <string name="downloads_summary_attention">ডাউনলোডসমূহৰ বাবে মনোযোগৰ প্ৰয়োজন</string>
+    <string name="downloads_quality_original">মূল</string>
+    <string name="downloads_title">ডাউনলোডসমূহ</string>
+    <string name="downloads_back">পিছলৈ</string>
+    <string name="downloads_view_as_list">তালিকা হিচাপে চাওক</string>
+    <string name="downloads_view_as_grid">গ্ৰীড হিচাপে চাওক</string>
+    <string name="downloads_empty_title">কোনো ডাউনলোড চলি থকা নাই</string>
+    <string name="downloads_empty_description">সমাপ্ত ডাউনলোডসমূহ আপোনাৰ লাইব্ৰেৰীত চাবলৈ সাজু।</string>
+    <string name="downloads_open_library">লাইব্ৰেৰী খোলক</string>
+    <string name="downloads_summary">%1$d ডাউনলোড কৰা হৈছে</string>
+    <string name="downloads_summary_remaining">%1$d বাকী আছে</string>
+    <string name="downloads_pause_all">সকলো স্থগিত ৰাখক</string>
+    <string name="downloads_resume_all">সকলো পুনৰ আৰম্ভ কৰক</string>
+    <string name="downloads_group_active">ডাউনলোড কৰা হৈছে</string>
+    <string name="downloads_group_queued">শাৰী পাতিছে</string>
+    <string name="downloads_group_paused">স্থগিত ৰখা হৈছে</string>
+    <string name="downloads_group_failed">ব্যৰ্থ হৈছে</string>
+    <string name="downloads_group_completed">সম্পূৰ্ণ কৰা হৈছে</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s থাম্বনেইল</string>
+    <string name="downloads_unknown_size">মুঠ আকাৰ অজ্ঞাত</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">বাকী থকা ডাউনলোডসমূহৰ অগ্ৰগতি</string>
+    <string name="downloads_pause">থমকি ৰ\'ব</string>
+    <string name="downloads_resume">পুনৰ আৰম্ভ কৰক</string>
+    <string name="downloads_cancel">বাতিল কৰক</string>
+    <string name="downloads_retry">পুনৰ চেষ্টা কৰক</string>
+    <string name="downloads_remove">তালিকাৰ পৰা আঁতৰাই পেলাওক</string>
+    <string name="downloads_error_access">এই ভিডিঅ\'টোৰ বাবে প্ৰৱেশৰ অনুমতিৰ প্ৰয়োজন।</string>
+    <string name="downloads_error_format">এই ভিডিঅ’ বিন্যাস সমৰ্থিত নহয়।</string>
+    <string name="downloads_error_network">সংযোগটো পুনৰুদ্ধাৰ নহ’ল। আকৌ এবাৰ চেষ্টা কৰক।</string>
+    <string name="downloads_error_storage">ফাইলটো সংৰক্ষণ কৰিব পৰা নগ’ল। সংৰক্ষণ স্থান পৰীক্ষা কৰক।</string>
+    <string name="downloads_error_server">চাৰ্ভাৰে ডাউনলোড প্ৰক্ৰিয়া কৰিব পৰা নাছিল।</string>
+    <string name="downloads_error_unknown">ডাউনলোড কৰাৰ সময়ত কিবা এটা ভুল হৈছিল।</string>
+    <string name="downloads_command_failed">ডাউনলোড আপডেট কৰিব পৰা নগ’ল। আকৌ এবাৰ চেষ্টা কৰক।</string>
+    <string name="downloads_delete_pending">মচি পেলোৱা পৰিষ্কাৰ কৰাৰ প্ৰয়োজন</string>
+    <string name="downloads_delete_retry">মচি পেলাবলৈ পুনৰ চেষ্টা কৰক</string>
+    <string name="downloads_delete_group_count">মচি পেলোৱা পৰিষ্কাৰ কৰা %1$d</string>
+    <string name="downloads_error_drm">সুৰক্ষিত ভিডিঅ\'সমূহ ডাউনলোড কৰিব নোৱাৰি।</string>
+</resources>

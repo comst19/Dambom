@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Dhawaan la ciyaaray</string>
+    <string name="library_recently_played_empty_title">Ma jiraan fiidiyowyo dhawaan la ciyaaray</string>
+    <string name="library_recently_played_empty_description">Ciyaar fiidiyow si aad halkan u aragto. Haddii shaandhayntu firfircoon tahay, isku day inaad bedesho.</string>
+</resources>

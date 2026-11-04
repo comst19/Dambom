@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">Ça vaut le coup de revoir ?\nEnregistrez-le avec un lien.</string>
+    <string name="home_description">Rechercher des vidéos à enregistrer à partir d\'un lien de page.</string>
+    <string name="home_url_label">Adresse Internet</string>
+    <string name="home_invalid_url">Saisissez un lien commençant par http:// ou https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Coller</string>
+    <string name="home_analyze">Rechercher des vidéos</string>
+    <string name="home_open_settings">Paramètres</string>
+    <string name="home_hide_results">Masquer les résultats</string>
+    <string name="home_show_results">Afficher les résultats à côté de l\'entrée</string>
+    <string name="home_web_prompt_title">Vous n’avez pas encore de lien ?</string>
+    <string name="home_web_prompt_description">Rechercher une page sans lien.</string>
+    <string name="home_browse_web">Naviguer sur le Web</string>
+    <string name="home_current_activity">Activité actuelle</string>
+    <string name="home_clipboard_found">Un lien copié est disponible</string>
+    <string name="home_use_link">Coller</string>
+    <string name="home_dismiss">Rejeter</string>
+    <string name="home_clipboard_consent_title">Suggérer des liens copiés ?</string>
+    <string name="home_clipboard_consent_description">Lorsque Dambom s\'ouvre, il peut vérifier dans le presse-papiers une adresse Web et suggérer de la remplir. Il n\'analyse ni ne télécharge jamais automatiquement.</string>
+    <string name="home_clipboard_consent_allow">Autoriser les suggestions</string>
+    <string name="home_clipboard_consent_deny">Coller manuellement</string>
+    <string name="home_clipboard_save_failed">Impossible d\'enregistrer votre préférence. Veuillez réessayer.</string>
+    <string name="home_shared_url_title">Lien partagé reçu</string>
+    <string name="home_shared_url_description">Vérifiez le lien, puis commencez à rechercher des vidéos.</string>
+    <string name="home_analyze_now">Rechercher des vidéos</string>
+    <string name="home_cancel">Annuler</string>
+    <string name="home_download_active">Téléchargement %1$d</string>
+    <string name="home_download_paused">%1$d en pause</string>
+    <string name="home_download_failed">Les téléchargements %1$d nécessitent une attention particulière</string>
+    <string name="home_download_open">Afficher l\'état du téléchargement</string>
+</resources>

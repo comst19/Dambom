@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Bai isa wurin ajiya ba. Bayar da sarari kuma sake gwadawa.</string>
+    <string name="downloads_summary_waiting">Ana jiran saukewa</string>
+    <string name="downloads_summary_paused">An dakatar da zazzagewa</string>
+    <string name="downloads_summary_attention">Zazzagewa na buƙatar kulawa</string>
+    <string name="downloads_quality_original">Asalin</string>
+    <string name="downloads_title">Zazzagewa</string>
+    <string name="downloads_back">Baya</string>
+    <string name="downloads_view_as_list">Duba azaman jeri</string>
+    <string name="downloads_view_as_grid">Duba azaman grid</string>
+    <string name="downloads_empty_title">Babu zazzagewa da ke gudana</string>
+    <string name="downloads_empty_description">Abubuwan da aka gama zazzagewa suna shirye don kallo a cikin ɗakin karatu naku.</string>
+    <string name="downloads_open_library">Buɗe ɗakin karatu</string>
+    <string name="downloads_summary">Zazzagewar %1$d</string>
+    <string name="downloads_summary_remaining">%1$d saura</string>
+    <string name="downloads_pause_all">Dakata duka</string>
+    <string name="downloads_resume_all">Ci gaba duka</string>
+    <string name="downloads_group_active">Ana saukewa</string>
+    <string name="downloads_group_queued">An yi layi</string>
+    <string name="downloads_group_paused">An dakata</string>
+    <string name="downloads_group_failed">Ya kasa</string>
+    <string name="downloads_group_completed">An kammala</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s thumbnail</string>
+    <string name="downloads_unknown_size">Jimlar girman ba a sani ba</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Ci gaban sauran abubuwan zazzagewa</string>
+    <string name="downloads_pause">Dakata</string>
+    <string name="downloads_resume">Ci gaba</string>
+    <string name="downloads_cancel">Soke</string>
+    <string name="downloads_retry">Sake gwadawa</string>
+    <string name="downloads_remove">Cire daga lissafin</string>
+    <string name="downloads_error_access">Wannan bidiyon yana buƙatar izinin shiga.</string>
+    <string name="downloads_error_format">Wannan tsarin bidiyo ba shi da tallafi.</string>
+    <string name="downloads_error_network">Haɗin bai murmure ba. Gwada kuma.</string>
+    <string name="downloads_error_storage">An kasa ajiye fayil ɗin. Duba wurin ajiya.</string>
+    <string name="downloads_error_server">Sabar ta kasa aiwatar da zazzagewar.</string>
+    <string name="downloads_error_unknown">Wani abu ya yi kuskure yayin zazzagewa.</string>
+    <string name="downloads_command_failed">An kasa sabunta zazzagewar. Gwada kuma.</string>
+    <string name="downloads_delete_pending">Ana buƙatar gogewar gogewa</string>
+    <string name="downloads_delete_retry">Sake gwada gogewa</string>
+    <string name="downloads_delete_group_count">Gogewa %1$d</string>
+    <string name="downloads_error_drm">Ba za a iya sauke bidiyoyi masu kariya ba.</string>
+</resources>

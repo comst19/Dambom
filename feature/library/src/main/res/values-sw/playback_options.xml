@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">Endelea kuangalia?</string>
+    <string name="player_resume_message">Umeangalia hadi %1$s .</string>
+    <string name="player_resume_continue">Endelea</string>
+    <string name="player_resume_restart">Anza upya</string>
+    <string name="player_history_failure">Haiwezi kupakia au kuhifadhi historia ya uchezaji.</string>
+    <string name="player_settings_failure">Haiwezi kuhifadhi mipangilio ya uchezaji.</string>
+    <string name="player_speed">Kasi ya uchezaji</string>
+    <string name="player_speed_value">Kasi ya uchezaji · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Rudia video hii</string>
+    <string name="player_options_close">Funga</string>
+</resources>

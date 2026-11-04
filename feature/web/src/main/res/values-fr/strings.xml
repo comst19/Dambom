@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Fermer la page Web</string>
+    <string name="web_address_placeholder">Entrez une adresse Web</string>
+    <string name="web_start_title">Trouver des vidéos sur le web</string>
+    <string name="web_start_description">Gardez plusieurs onglets ouverts et détectez les vidéos uniquement sur l\'onglet actuel.</string>
+    <string name="web_open">Ouvrir la page</string>
+    <string name="web_recent">Pages récentes</string>
+    <string name="web_recent_empty">Aucune page récemment visitée.</string>
+    <string name="web_go_back">Page précédente</string>
+    <string name="web_go_forward">Page suivante</string>
+    <string name="web_refresh">Actualiser</string>
+    <string name="web_detecting">Détection</string>
+    <string name="web_open_detected_count">Ouvrir les vidéos %1$d</string>
+    <string name="web_no_detected_video">Aucune vidéo détectée</string>
+    <string name="web_rescan">Scannez à nouveau</string>
+    <string name="web_playback_hint">Si aucune vidéo n\'est détectée, lisez-la sur la page et réessayez.</string>
+    <string name="web_connection_error_title">Impossible de se connecter au site</string>
+    <string name="web_connection_error_description">Le site a fermé la connexion ou est indisponible sur le réseau actuel.</string>
+    <string name="web_timeout_error_title">Le site a mis trop de temps à répondre</string>
+    <string name="web_timeout_error_description">Attendez un moment et réessayez.</string>
+    <string name="web_unsupported_url_error_title">Adresse Web non prise en charge</string>
+    <string name="web_unsupported_url_error_description">Vérifiez qu\'il s\'agit d\'une adresse Web HTTP ou HTTPS .</string>
+    <string name="web_access_error_title">L\'accès à la page a échoué</string>
+    <string name="web_access_error_description">La page n\'existe pas ou vous n\'avez pas l\'autorisation de la visualiser.</string>
+    <string name="web_server_error_title">Le site est temporairement indisponible</string>
+    <string name="web_server_error_description">Le site rencontre un problème de serveur. Attendez un moment et réessayez.</string>
+    <string name="web_security_error_title">Le site n\'a pas pu être ouvert de manière sécurisée</string>
+    <string name="web_security_error_description">Son certificat de sécurité n\'est pas valide ou la page a été détectée comme dangereuse.</string>
+    <string name="web_unknown_error_title">La page n\'a pas pu être ouverte</string>
+    <string name="web_unknown_error_description">Vérifiez l\'adresse et ouvrez-la à nouveau.</string>
+    <string name="web_retry">Réessayez</string>
+    <string name="web_external_download_notice">Dambom ne peut pas détecter ou télécharger des vidéos à partir d\'un navigateur externe.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d onglet ouvert</item>
+        <item quantity="other">%1$d onglets ouverts</item>
+        <item quantity="many">%1$d onglets ouverts</item>
+    </plurals>
+    <string name="web_new_tab">Nouvel onglet</string>
+    <string name="web_close_tab">Fermer l\'onglet %1$s</string>
+    <string name="web_empty_tab">Onglet vide</string>
+    <string name="web_tab_actions">Actions de l\'onglet actuel</string>
+    <string name="web_open_external">Ouvrir dans le navigateur par défaut</string>
+    <string name="web_copy_link">Copier le lien</string>
+    <string name="web_share_link">Partager le lien</string>
+    <string name="web_link_copied">Lien copié.</string>
+    <string name="web_action_failure">Aucune application ne peut gérer cette requête.</string>
+    <string name="web_share_chooser">Partager le lien</string>
+    <string name="web_drm_protected">Ce média est protégé et ne peut pas être téléchargé.</string>
+    <string name="web_unsupported_service">Les téléchargements de vidéos YouTube ne sont pas pris en charge.</string>
+    <string name="web_drm_excluded">Les vidéos protégées sont masquées de cette liste.</string>
+</resources>

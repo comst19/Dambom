@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">کتێبخانەی تایبەت</string>
+    <string name="vault_locked_title">کتێبخانەی ڤیدیۆی تایبەتی خۆت</string>
+    <string name="vault_locked_description">کردنەوەی قوفڵ بۆ بینینی ڤیدیۆ تایبەتەکانت</string>
+    <string name="vault_unlock">قوفڵ بکە</string>
+    <string name="vault_lock">قفڵ</string>
+    <string name="vault_auth_subtitle">بایۆمەتری بەکاربێنە یان قفڵی شاشەی ئامێرەکەت</string>
+    <string name="vault_use_device_lock">بەکارهێنانی قفڵی شاشە</string>
+    <string name="vault_setup_lock">PIN یان شێوازێک یان نهێنوشەیەک لە رێکبەندەکانی تەلەفۆنەکەت دابنێ بۆ بەکارهێنانی کتێبخانەی تایبەت.</string>
+    <string name="vault_open_settings">کردنەوەی ڕێکبەندەکان</string>
+    <string name="vault_auth_unavailable">سەلماندن نەتوانرا لەسەر ئەم ئامێرە دەست پێبکات. تکایە دووبارە هەوڵدەوە.</string>
+    <string name="vault_move">گواستنەوە بۆ کتێبخانەی تایبەت</string>
+    <string name="vault_restore">گواستنەوە بۆ کتێبخانەی ئاسایی</string>
+    <string name="vault_move_success">گواسترایەوە بۆ کتێبخانەی تایبەت. کۆپیە هەناردەکراوەکانی پێشوو نەگۆڕاون.</string>
+    <string name="vault_restore_success">گواسترایەوە بۆ کتێبخانەی ئاسایی</string>
+    <string name="vault_move_failure">نەیتوانی ڤیدیۆکان بگوازرێتەوە. تکایە دووبارە هەوڵ بدە.</string>
+    <string name="vault_empty_title">ڤیدیۆی تایبەت قەدەغەیە</string>
+    <string name="vault_empty_description">ڤیدیۆکان لە کتێبخانەی ئاسایی خۆت دەسنیشان بکە و بیانگوازەوە بۆ ئێرە</string>
+</resources>

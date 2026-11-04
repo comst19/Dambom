@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">ପୁନର୍ବାର ଦେଖିବାର ମୂଲ୍ୟ?\nଏହାକୁ ଏକ ଲିଙ୍କ୍ ସହିତ ସେଭ୍ କରନ୍ତୁ |</string>
+    <string name="home_description">ଏକ ପୃଷ୍ଠା ଲିଙ୍କରୁ ସେଭ୍ କରିବାକୁ ଭିଡିଓ ଖୋଜ |</string>
+    <string name="home_url_label">ୱେବ୍ ଠିକଣା |</string>
+    <string name="home_invalid_url">http: // କିମ୍ବା https://. ରୁ ଆରମ୍ଭ ହୋଇଥିବା ଏକ ଲିଙ୍କ୍ ପ୍ରବେଶ କରନ୍ତୁ |</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">ଲେପନ କରନ୍ତୁ |</string>
+    <string name="home_analyze">ଭିଡିଓ ଖୋଜ |</string>
+    <string name="home_open_settings">ସେଟିଂସମୂହ |</string>
+    <string name="home_hide_results">ଫଳାଫଳ ଲୁଚାନ୍ତୁ |</string>
+    <string name="home_show_results">ଇନପୁଟ୍ ସହିତ ଫଳାଫଳ ଦେଖାନ୍ତୁ |</string>
+    <string name="home_web_prompt_title">ଏପର୍ଯ୍ୟନ୍ତ ଏକ ଲିଙ୍କ୍ ନାହିଁ କି?</string>
+    <string name="home_web_prompt_description">ଲିଙ୍କ୍ ବିନା ଏକ ପୃଷ୍ଠା ଖୋଜ |</string>
+    <string name="home_browse_web">ୱେବ୍ ବ୍ରାଉଜ୍ କରନ୍ତୁ |</string>
+    <string name="home_current_activity">ସାମ୍ପ୍ରତିକ କାର୍ଯ୍ୟକଳାପ |</string>
+    <string name="home_clipboard_found">ଏକ ନକଲ ଲିଙ୍କ ଉପଲବ୍ଧ |</string>
+    <string name="home_use_link">ଲେପନ କରନ୍ତୁ |</string>
+    <string name="home_dismiss">ବରଖାସ୍ତ |</string>
+    <string name="home_clipboard_consent_title">କପି ହୋଇଥିବା ଲିଙ୍କଗୁଡିକ ପରାମର୍ଶ କରନ୍ତୁ?</string>
+    <string name="home_clipboard_consent_description">ଯେତେବେଳେ Dambom ଖୋଲିବ, ଏହା ଏକ ୱେବ୍ ଠିକଣା ପାଇଁ କ୍ଲିପବୋର୍ଡ ଯାଞ୍ଚ କରିପାରିବ ଏବଂ ଏହାକୁ ପୂରଣ କରିବାକୁ ପରାମର୍ଶ ଦେବ | ଏହା ସ୍ୱୟଂଚାଳିତ ଭାବରେ ବିଶ୍ଳେଷଣ କିମ୍ବା ଡାଉନଲୋଡ୍ କରେ ନାହିଁ |</string>
+    <string name="home_clipboard_consent_allow">ପରାମର୍ଶକୁ ଅନୁମତି ଦିଅନ୍ତୁ |</string>
+    <string name="home_clipboard_consent_deny">ହସ୍ତକୃତ ଭାବରେ ଲେପନ କରନ୍ତୁ |</string>
+    <string name="home_clipboard_save_failed">ଆପଣଙ୍କର ପସନ୍ଦ ସଞ୍ଚୟ କରିପାରିଲା ନାହିଁ | ଦୟାକରି ପୁନର୍ବାର ଚେଷ୍ଟା କରନ୍ତୁ |</string>
+    <string name="home_shared_url_title">ଅଂଶୀଦାର ଲିଙ୍କ୍ ପ୍ରାପ୍ତ ହେଲା |</string>
+    <string name="home_shared_url_description">ଲିଙ୍କ୍ ସମୀକ୍ଷା କରନ୍ତୁ, ତାପରେ ଭିଡିଓ ଖୋଜିବା ଆରମ୍ଭ କରନ୍ତୁ |</string>
+    <string name="home_analyze_now">ଭିଡିଓ ଖୋଜ |</string>
+    <string name="home_cancel">ବାତିଲ୍ କରନ୍ତୁ |</string>
+    <string name="home_download_active">%1$d ଡାଉନଲୋଡ୍ |</string>
+    <string name="home_download_paused">%1$d ଅଟକି ଗଲା |</string>
+    <string name="home_download_failed">%1$d ଡାଉନଲୋଡ୍ ଧ୍ୟାନ ଆବଶ୍ୟକ କରେ |</string>
+    <string name="home_download_open">ଡାଉନଲୋଡ୍ ସ୍ଥିତି ଦେଖନ୍ତୁ |</string>
+</resources>

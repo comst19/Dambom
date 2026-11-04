@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">Sluit web</string>
+    <string name="web_address_placeholder">Voer \'n webadres in</string>
+    <string name="web_start_title">Vind video\'s op die web</string>
+    <string name="web_start_description">Hou verskeie oortjies oop en herken slegs video\'s op die huidige oortjie.</string>
+    <string name="web_open">Maak bladsy oop</string>
+    <string name="web_recent">Onlangse bladsye</string>
+    <string name="web_recent_empty">Geen onlangs besoekte bladsye nie.</string>
+    <string name="web_go_back">Vorige bladsy</string>
+    <string name="web_go_forward">Volgende bladsy</string>
+    <string name="web_refresh">Vernu</string>
+    <string name="web_detecting">Besig om op te spoor</string>
+    <string name="web_open_detected_count">Maak %1$d video\'s oop</string>
+    <string name="web_no_detected_video">Geen opgetekende video\'s nie</string>
+    <string name="web_rescan">Skandeer weer</string>
+    <string name="web_playback_hint">As geen video opgespoor word nie, speel dit op die bladsy af en probeer weer.</string>
+    <string name="web_connection_error_title">Kon nie aan die webwerf koppel nie</string>
+    <string name="web_connection_error_description">Die webwerf het die verbinding gesluit of is nie beskikbaar op die huidige netwerk nie.</string>
+    <string name="web_timeout_error_title">Die webwerf het te lank geneem om te reageer</string>
+    <string name="web_timeout_error_description">Wag \'n oomblik en probeer weer.</string>
+    <string name="web_unsupported_url_error_title">Nie-ondersteunde webadres</string>
+    <string name="web_unsupported_url_error_description">Kontroleer dat dit \'n HTTP of HTTPS webadres is.</string>
+    <string name="web_access_error_title">Bladsy toegang het misluk</string>
+    <string name="web_access_error_description">Die bladsy bestaan nie of jy het nie toestemming om dit te sien nie.</string>
+    <string name="web_server_error_title">Die webwerf is tydelik onbeskikbaar</string>
+    <string name="web_server_error_description">Die webwerf ondervind ’n bedienerprobleem. Wag ’n oomblik en probeer weer.</string>
+    <string name="web_security_error_title">Die webwerf kon nie veilig geopen word nie</string>
+    <string name="web_security_error_description">Sy sekuriteitssertifikaat is ongeldig of die bladsy is as onveilig opgespoor.</string>
+    <string name="web_unknown_error_title">Die bladsy kon nie geopen word nie</string>
+    <string name="web_unknown_error_description">Kontroleer die adres en open dit weer.</string>
+    <string name="web_retry">Probeer weer</string>
+    <string name="web_external_download_notice">Dambom kan nie video\'s van \'n eksterne blaaier opspoor of aflaai nie.</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d oop tab</item>
+        <item quantity="other">%1$d oop tabs</item>
+    </plurals>
+    <string name="web_new_tab">Nuwe tab</string>
+    <string name="web_close_tab">Sluit %1$s tab</string>
+    <string name="web_empty_tab">Leë tab</string>
+    <string name="web_tab_actions">Huidige tab aksies</string>
+    <string name="web_open_external">Open in standaard blaaier</string>
+    <string name="web_copy_link">Kopieer skakel</string>
+    <string name="web_share_link">Deel skakel</string>
+    <string name="web_link_copied">Skakel gekopieer.</string>
+    <string name="web_action_failure">Geen app kan hierdie versoek hanteer nie.</string>
+    <string name="web_share_chooser">Deel skakel</string>
+    <string name="web_drm_protected">Hierdie media is beskerm en kan nie afgelaai word nie.</string>
+    <string name="web_unsupported_service">YouTube video-aflaaie word nie ondersteun nie.</string>
+    <string name="web_drm_excluded">Beskermde video\'s word van hierdie lys weggesteek.</string>
+</resources>

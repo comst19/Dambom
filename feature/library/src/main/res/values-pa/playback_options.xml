@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">ਦੇਖਣਾ جاري ਰੱਖਣਾ ਹੈ?</string>
+    <string name="player_resume_message">ਤੁਸੀਂ ਦੇਖਿਆ ਸੀ %1$s ਤੱਕ।</string>
+    <string name="player_resume_continue">جاري ਰੱਖੋ</string>
+    <string name="player_resume_restart">ਮੁੜ ਸ਼ੁਰੂ ਕਰੋ</string>
+    <string name="player_history_failure">ਪਲੇਬੈਕ ਇਤਿਹਾਸ ਲੋਡ ਜਾਂ ਸੇਵ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ।</string>
+    <string name="player_settings_failure">ਪਲੇਬੈਕ ਸੈਟਿੰਗਜ਼ ਸੇਵ ਨਹੀਂ ਕੀਤੀਆਂ ਜਾ ਸਕੀਆਂ।</string>
+    <string name="player_speed">ਪਲੇਬੈਕ ਗਤੀ</string>
+    <string name="player_speed_value">ਪਲੇਬੈਕ ਗਤੀ · %1$s ×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">ਇਸ ਵੀਡੀਓ ਨੂੰ ਦੁਹਰਾਓ</string>
+    <string name="player_options_close">ਬੰਦ ਕਰੋ</string>
+</resources>

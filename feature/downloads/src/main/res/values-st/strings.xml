@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Ha ho na sebaka se lekaneng. Sefa sebaka \'me o leke hape.</string>
+    <string name="downloads_summary_waiting">E emetse ho khoasolla</string>
+    <string name="downloads_summary_paused">Khoasollo e emisitsoe</string>
+    <string name="downloads_summary_attention">Khoasollo e hloka tlhokomelo</string>
+    <string name="downloads_quality_original">Ea mantlha</string>
+    <string name="downloads_title">Likhophi</string>
+    <string name="downloads_back">Morao</string>
+    <string name="downloads_view_as_list">Sheba ka lethathamo</string>
+    <string name="downloads_view_as_grid">Sheba ka grid</string>
+    <string name="downloads_empty_title">Ha ho li-download tse etsahalang</string>
+    <string name="downloads_empty_description">Li-download tse felileng li se li loketse ho shejoa laeboraring ea hau.</string>
+    <string name="downloads_open_library">Bula laeborari</string>
+    <string name="downloads_summary">%1$d e jarolla</string>
+    <string name="downloads_summary_remaining">%1$d e setseng</string>
+    <string name="downloads_pause_all">Emisa tsohle</string>
+    <string name="downloads_resume_all">Qala tsohle hape</string>
+    <string name="downloads_group_active">E jarollang</string>
+    <string name="downloads_group_queued">E le moleng</string>
+    <string name="downloads_group_paused">E eme</string>
+    <string name="downloads_group_failed">E hlolehile</string>
+    <string name="downloads_group_completed">E felile</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s setšoantšo se senyenyane</string>
+    <string name="downloads_unknown_size">Boholo bo felletseng ha boa tsejoe</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Nts\'etsopele ea li-download tse setseng</string>
+    <string name="downloads_pause">Emisa</string>
+    <string name="downloads_resume">Qala hape</string>
+    <string name="downloads_cancel">Hlola</string>
+    <string name="downloads_retry">Leka hape</string>
+    <string name="downloads_remove">Tlosa lethathamong</string>
+    <string name="downloads_error_access">Video ena e hloka tumello ea phihlello.</string>
+    <string name="downloads_error_format">Sebopeho sa video ena ha se tšehetsoe.</string>
+    <string name="downloads_error_network">Khokahano ha ea ka ea fola. Leka hape.</string>
+    <string name="downloads_error_storage">Ha ho ka bolokoa faele. Hlahloba sebaka sa polokelo.</string>
+    <string name="downloads_error_server">Seva e ne e ke ke ea sebetsa ho khoasolla.</string>
+    <string name="downloads_error_unknown">Ho na le ntho e sa nepahalang ha ho ntse ho khoasolla.</string>
+    <string name="downloads_command_failed">Ha ea ka ea ntlafatsa khoasollo. Leka hape.</string>
+    <string name="downloads_delete_pending">Tlosa ho lokisa ho hlokahala</string>
+    <string name="downloads_delete_retry">Leka hape ho hlakola</string>
+    <string name="downloads_delete_group_count">Tlosa ho lokisa %1$d</string>
+    <string name="downloads_error_drm">Li-video tse sirelelitsoeng ha li khone ho khoasolloa.</string>
+</resources>

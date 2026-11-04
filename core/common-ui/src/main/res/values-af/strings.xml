@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Weergawesposisie</string>
+    <string name="playback_rewind">Terug 10 sekondes</string>
+    <string name="playback_play">Speel</string>
+    <string name="playback_pause">Pauzeer</string>
+    <string name="playback_forward">Vorentoe 10 sekondes</string>
+</resources>

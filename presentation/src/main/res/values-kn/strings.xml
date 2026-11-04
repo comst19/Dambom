@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="root_back_hint">ನಿರ್ಗಮಿಸಲು ಮತ್ತೆ ಹಿಂದಕ್ಕೆ ಒತ್ತಿರಿ.</string>
+    <string name="startup_initialization_failed">ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
+    <string name="destination_home">ಮನೆ</string>
+    <string name="destination_library">ಗ್ರಂಥಾಲಯ</string>
+    <string name="network_offline_banner">ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವಿಲ್ಲ. ನೆಟ್‌ವರ್ಕ್ ವೈಶಿಷ್ಟ್ಯಗಳು ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ.</string>
+    <string name="network_unmetered_banner">Wi-Fi ಗಾಗಿ ನಿರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ . ಡೌನ್‌ಲೋಡ್‌ಗಳು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಪುನರಾರಂಭಗೊಳ್ಳುತ್ತವೆ.</string>
+    <string name="download_feedback_failed">%1$s ಡೌನ್‌ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
+    <string name="download_feedback_failed_multiple">%1$d ವೀಡಿಯೊಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
+    <string name="download_recovery_failed">ಬಾಕಿ ಉಳಿದಿರುವ ಡೌನ್‌ಲೋಡ್‌ಗಳನ್ನು ಮರುಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಡೌನ್‌ಲೋಡ್‌ಗಳಿಂದ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">സ്വകാര്യ ലൈബ്രറി</string>
+    <string name="vault_locked_title">നിങ്ങളുടെ സ്വകാര്യ വീഡിയോ ലൈബ്രറി</string>
+    <string name="vault_locked_description">നിങ്ങളുടെ സ്വകാര്യ വീഡിയോ കാണുന്നതിന് അൺലോക്ക് ചെയ്യുക</string>
+    <string name="vault_unlock">അൺലോക്ക് ചെയ്യുക</string>
+    <string name="vault_lock">പൂട്ടുക</string>
+    <string name="vault_auth_subtitle">ബയോമെട്രിക് അല്ലെങ്കിൽ നിങ്ങളുടെ ഡിവൈസ് സ്ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക</string>
+    <string name="vault_use_device_lock">സ്ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക</string>
+    <string name="vault_setup_lock">സ്വകാര്യ ലൈബ്രറി ഉപയോഗിക്കാൻ നിങ്ങളുടെ ഫോൺ സെറ്റിങ്ങ്സിൽ പിന്, പാറ്റേൺ, അല്ലെങ്കിൽ പാസ്‌വേഡ് സജ്ജമാക്കുക.</string>
+    <string name="vault_open_settings">സെറ്റിങ്ങുകൾ തുറക്കുക</string>
+    <string name="vault_auth_unavailable">ഈ ഡിവൈസിൽ അംഗീകാരം ആരംഭിക്കാൻ സാധിച്ചില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="vault_move">സ്വകാര്യ ലൈബ്രറിയിലേക്ക് മാറ്റുക</string>
+    <string name="vault_restore">സാധാരണ ലൈബ്രറിയിലേക്ക് മാറ്റുക</string>
+    <string name="vault_move_success">സ്വകാര്യ ലൈബ്രറിയിലേക്ക് മാറ്റി. മുമ്പ് എക്സ്പോർട്ട് ചെയ്ത പകർപ്പുകൾ മാറ്റമില്ല.</string>
+    <string name="vault_restore_success">സാധാരണ ലൈബ്രറിയിലേക്ക് മാറ്റി</string>
+    <string name="vault_move_failure">വീഡിയോകൾ മാറ്റാൻ കഴിയുന്നില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="vault_empty_title">സ്വകാര്യ വീഡിയോകൾ ഇല്ല</string>
+    <string name="vault_empty_description">നിങ്ങളുടെ സാധാരണ ലൈബ്രറിയിൽ നിന്നുള്ള വീഡിയോകൾ തിരഞ്ഞെടുക്കുക, ഇവിടെ മാറ്റുക</string>
+</resources>

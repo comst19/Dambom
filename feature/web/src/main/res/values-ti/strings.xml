@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">መርበብ ሓበሬታ ምዕጻው</string>
+    <string name="web_address_placeholder">ናይ መርበብ ሓበሬታ ኣድራሻ ኣእቱ</string>
+    <string name="web_start_title">ኣብ መርበብ ሓበሬታ ቪድዮታት ርኸቡ።</string>
+    <string name="web_start_description">ብዙሓት ትቦታት ክፉታት ምግባርን ቪድዮታት ኣብቲ ሕጂ ዘሎ ትብ ጥራይ ምልላይን።</string>
+    <string name="web_open">ገጽ ክፈት</string>
+    <string name="web_recent">ናይ ቀረባ እዋን ገጻት።</string>
+    <string name="web_recent_empty">ኣብ ቀረባ እዋን ዝተበጽሐ ገጻት የለን።</string>
+    <string name="web_go_back">ዝሓለፈ ገጽ</string>
+    <string name="web_go_forward">ዝቕጽል ገጽ</string>
+    <string name="web_refresh">ምሕዳስ</string>
+    <string name="web_detecting">ምፍላጥ</string>
+    <string name="web_open_detected_count">%1$d ቪድዮታት ክፈት</string>
+    <string name="web_no_detected_video">ዝኾነ ዝተረኽበ ቪድዮ የለን</string>
+    <string name="web_rescan">እንደገና ስካን ግበር</string>
+    <string name="web_playback_hint">ዝኾነ ቪድዮ እንተዘይተረኺቡ ኣብቲ ገጽ ኣጻወቶ እሞ እንደገና ፈትኖ።</string>
+    <string name="web_connection_error_title">ምስቲ መርበብ ሓበሬታ ክራኸብ ኣይከኣለን</string>
+    <string name="web_connection_error_description">እቲ ሳይት ነቲ ምትእስሳር ዓጽይዎ ወይ ኣብቲ ሕጂ ዘሎ መርበብ ኣይርከብን።</string>
+    <string name="web_timeout_error_title">እቲ ሳይት መልሲ ንምሃብ ኣዝዩ ነዊሕ ግዜ ወሲዱሉ።</string>
+    <string name="web_timeout_error_description">ንሓጺር እዋን ተጸበዩ እሞ እንደገና ፈትኑ።</string>
+    <string name="web_unsupported_url_error_title">ዘይተደገፈ መርበብ ሓበሬታ</string>
+    <string name="web_unsupported_url_error_description">እዚ HTTP ወይ HTTPS መርበብ ሓበሬታ ምዃኑ ኣረጋግጽ።</string>
+    <string name="web_access_error_title">ገጽ ምብጻሕ ኣይተዓወተን</string>
+    <string name="web_access_error_description">እቲ ገጽ የለን ወይ ክትሪኦ ፍቓድ የብልካን።</string>
+    <string name="web_server_error_title">እቲ ቦታ ንግዚኡ ኣይርከብን።</string>
+    <string name="web_server_error_description">እቲ ሳይት ናይ ሰርቨር ጸገም ኣለዎ። ንሓጺር እዋን ተጸበዩ እሞ እንደገና ፈትኑ።</string>
+    <string name="web_security_error_title">እቲ ቦታ ብውሑስ መንገዲ ክኽፈት ኣይከኣለን</string>
+    <string name="web_security_error_description">ናይ ጸጥታ ምስክር ወረቐትኡ ቅኑዕ ኣይኮነን ወይ እቲ ገጽ ውሑስ ከምዘይኮነ ተረኺቡ።</string>
+    <string name="web_unknown_error_title">እቲ ገጽ ክኽፈት ኣይከኣለን</string>
+    <string name="web_unknown_error_description">ነቲ ኣድራሻ መርምሮ እሞ እንደገና ክፈቶ።</string>
+    <string name="web_retry">እንደገና ፈትን።</string>
+    <string name="web_external_download_notice">Dambom ካብ ግዳማዊ መርበብ ሓበሬታ ቪድዮታት ክፈልጥ ወይ ከውርድ ኣይክእልን።</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d ክፉት ትብ</item>
+        <item quantity="other">%1$d ክፉት ትቦታት</item>
+    </plurals>
+    <string name="web_new_tab">ሓድሽ ትብ</string>
+    <string name="web_close_tab">%1$s ትብ ዕጸዎ።</string>
+    <string name="web_empty_tab">ባዶ ትብ</string>
+    <string name="web_tab_actions">ናይ ሕጂ ናይ ትብ ተግባራት</string>
+    <string name="web_open_external">ኣብ ነባሪ መርበብ ሓበሬታ ክፈት</string>
+    <string name="web_copy_link">ቅዳሕ ሊንክ</string>
+    <string name="web_share_link">ሼር ሊንክ</string>
+    <string name="web_link_copied">ሊንክ ተቐዲሑ።</string>
+    <string name="web_action_failure">ዝኾነ ኣፕ ነዚ ሕቶ ክሕዞ ኣይክእልን እዩ።</string>
+    <string name="web_share_chooser">ሼር ሊንክ</string>
+    <string name="web_drm_protected">እዚ ሚድያ ዝተሓለወ ኮይኑ ክወርድ ኣይክእልን።</string>
+    <string name="web_unsupported_service">YouTube ቪድዮ ምውራድ ኣይድገፍን እዩ።</string>
+    <string name="web_drm_excluded">ዝተሓለዉ ቪድዮታት ካብዚ ዝርዝር ተሓቢኦም ኣለዉ።</string>
+</resources>

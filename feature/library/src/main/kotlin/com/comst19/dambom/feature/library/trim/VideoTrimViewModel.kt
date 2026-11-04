@@ -48,7 +48,7 @@ internal class VideoTrimViewModel
             mutableState.update { it.copy(loading = true, loadFailed = false) }
             suspendRunCatching {
                 val task = checkNotNull(repository.observeDownload(id).first())
-                check(task.status == DownloadStatus.COMPLETED && !task.deletePending)
+                check(!task.isPrivate && task.status == DownloadStatus.COMPLETED && !task.deletePending)
                 val duration = exporter.durationMillis(checkNotNull(task.localFilePath))
                 val restored = TrimSelection(savedState["trim-start"] ?: 0L, savedState["trim-end"] ?: duration)
                 mutableState.update {

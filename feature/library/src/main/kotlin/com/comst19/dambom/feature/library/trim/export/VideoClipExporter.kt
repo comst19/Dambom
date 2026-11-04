@@ -8,8 +8,10 @@ import androidx.media3.transformer.Composition
 import androidx.media3.transformer.EditedMediaItem
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
+import androidx.media3.transformer.FrameworkMuxer
 import androidx.media3.transformer.ProgressHolder
 import androidx.media3.transformer.Transformer
+import com.comst19.dambom.core.common.util.VideoExportGate
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.feature.library.export.VideoExportFiles
 import com.comst19.dambom.feature.library.trim.contract.TrimSelection
@@ -53,7 +55,7 @@ internal class VideoClipExporter
         ) {
             files.save(destination, "trim") { output ->
                 require(selection.isValidFor(durationMillis(path)))
-                transform(path, selection, output, onProgress)
+                VideoExportGate.shared.run { transform(path, selection, output, onProgress) }
                 onProgress(null)
             }
         }
@@ -70,6 +72,7 @@ internal class VideoClipExporter
             val transformer =
                 Transformer
                     .Builder(context)
+                    .setMuxerFactory(FrameworkMuxer.Factory())
                     .setVideoMimeType(MimeTypes.VIDEO_H264)
                     .setAudioMimeType(MimeTypes.AUDIO_AAC)
                     .addListener(

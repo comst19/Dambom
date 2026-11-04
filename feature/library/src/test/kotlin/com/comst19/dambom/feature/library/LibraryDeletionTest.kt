@@ -60,6 +60,7 @@ class LibraryDeletionTest {
                     events,
                     LibraryTestPlaybackHistory(),
                     privateVideoSession = PrivateVideoSession(),
+                    defaultDispatcher = dispatcherRule.dispatcher,
                 )
             backgroundScope.launch { viewModel.uiState.collect() }
             runCurrent()
@@ -117,6 +118,7 @@ class LibraryDeletionTest {
                     AppEventBus(),
                     LibraryTestPlaybackHistory(),
                     privateVideoSession = PrivateVideoSession(),
+                    defaultDispatcher = dispatcherRule.dispatcher,
                 )
             backgroundScope.launch { viewModel.uiState.collect() }
             runCurrent()
@@ -170,6 +172,7 @@ class LibraryDeletionTest {
                     AppEventBus(),
                     LibraryTestPlaybackHistory(),
                     privateVideoSession = PrivateVideoSession(),
+                    defaultDispatcher = dispatcherRule.dispatcher,
                 )
             backgroundScope.launch { viewModel.uiState.collect() }
             runCurrent()

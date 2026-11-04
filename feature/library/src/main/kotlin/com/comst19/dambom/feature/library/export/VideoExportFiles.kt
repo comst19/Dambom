@@ -26,7 +26,7 @@ internal class VideoExportFiles
             prefix: String,
             transform: suspend (File) -> Unit,
         ): Long {
-            val temporary = File(context.cacheDir, "$prefix-${UUID.randomUUID()}.mp4")
+            val temporary = withContext(ioDispatcher) { File(context.cacheDir, "$prefix-${UUID.randomUUID()}.mp4") }
             var saved = false
             try {
                 transform(temporary)

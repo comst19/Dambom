@@ -189,25 +189,27 @@ class LibraryFileManagerTest {
     }
 
     @Test
-    fun `missing local file returns no share intent instead of throwing`() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val manager = LibraryFileManager(context, Dispatchers.IO)
+    fun `missing local file returns no share intent instead of throwing`() =
+        kotlinx.coroutines.runBlocking {
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val manager = LibraryFileManager(context, Dispatchers.IO)
 
-        assertNull(manager.createShareIntent(missingFileTask()))
-    }
+            assertNull(manager.createShareIntent(missingFileTask()))
+        }
 
     @Test
-    fun `file outside configured provider path returns no share intent`() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val manager = LibraryFileManager(context, Dispatchers.IO)
-        val unsupportedFile = context.cacheDir.resolve("outside-provider.mp4").apply { writeBytes(byteArrayOf(1)) }
+    fun `file outside configured provider path returns no share intent`() =
+        kotlinx.coroutines.runBlocking {
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val manager = LibraryFileManager(context, Dispatchers.IO)
+            val unsupportedFile = context.cacheDir.resolve("outside-provider.mp4").apply { writeBytes(byteArrayOf(1)) }
 
-        try {
-            assertNull(manager.createShareIntent(taskWithPath(unsupportedFile.path)))
-        } finally {
-            unsupportedFile.delete()
+            try {
+                assertNull(manager.createShareIntent(taskWithPath(unsupportedFile.path)))
+            } finally {
+                unsupportedFile.delete()
+            }
         }
-    }
 
     @Test
     fun `input open failure does not open the output stream`() =

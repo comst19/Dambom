@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -43,7 +44,6 @@ import com.comst19.dambom.feature.library.component.VideoActionsButton
 import com.comst19.dambom.feature.library.component.VideoFavoriteButton
 import com.comst19.dambom.feature.library.component.VideoPlayerPanel
 import com.comst19.dambom.feature.library.component.rememberLibraryFileActions
-import com.comst19.dambom.feature.library.file.isLocalVideoAvailable
 import com.comst19.dambom.feature.library.file.rememberLocalVideoAvailable
 import com.comst19.dambom.feature.library.pip.PipPlatformEffect
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
@@ -65,10 +65,12 @@ internal fun VideoPlayerRoute(
         }.collectAsStateWithLifecycle(initialValue = VideoDetailState.Loading).value
     val task = (detailState as? VideoDetailState.Ready)?.task
     if (task?.isPrivate == true) PrivateVideoWindowProtection()
-    var isLocalVideoAvailable by rememberLocalVideoAvailable(task)
+    var fileCheckRevision by remember { mutableIntStateOf(0) }
+    val fileAvailability by rememberLocalVideoAvailable(task, fileCheckRevision)
+    val isLocalVideoAvailable = fileAvailability == true
 
     fun refreshLocalVideoAvailability() {
-        isLocalVideoAvailable = isLocalVideoAvailable(task)
+        fileCheckRevision++
     }
     val multiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
     val fileActions =
@@ -114,16 +116,14 @@ internal fun VideoPlayerRoute(
         )
     }
     if (task != null && !task.isPrivate) VideoPlayerMediaSessionEffect(playerViewModel.player)
-    LaunchedEffect(detailState, task?.id, task?.localFilePath, isLocalVideoAvailable) {
+    LaunchedEffect(detailState, isVideoFullscreen, task, fileAvailability) {
         if (detailState == VideoDetailState.Loading) return@LaunchedEffect
+        if (fileAvailability == null) return@LaunchedEffect
         if (isLocalVideoAvailable) {
             task?.let(playerViewModel::prepare)
         } else {
             playerViewModel.stopUnavailableVideo()
         }
-    }
-    LaunchedEffect(detailState, isVideoFullscreen, task, isLocalVideoAvailable) {
-        if (detailState == VideoDetailState.Loading) return@LaunchedEffect
         refreshLocalVideoAvailability()
         if (shouldClearVideoFullscreen(isVideoFullscreen, isLocalVideoAvailable)) {
             onVideoFullscreenChange(false)
@@ -147,7 +147,7 @@ internal fun VideoPlayerRoute(
         VideoPlayerScreen(
             task = playableTask,
             player = playerViewModel.player,
-            detailState = detailState,
+            detailState = if (task != null && fileAvailability == null) VideoDetailState.Loading else detailState,
             fileActions = fileActions,
             onBack = libraryViewModel::goBack,
             showBack = task?.isPrivate == true || !multiplePanes,

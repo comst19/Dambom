@@ -69,12 +69,14 @@ class LibraryExportRestorationTest {
                                 AppEventBus(),
                                 LibraryTestPlaybackHistory(),
                                 privateVideoSession = PrivateVideoSession(),
+                                defaultDispatcher = Dispatchers.Unconfined,
                             )
                         },
                     )
             }
         }
         compose.runOnIdle { actions.onExport(task) }
+        compose.waitUntil { registry.launchCount == 1 }
         assertEquals(1, registry.launchCount)
         restoration.emulateSavedInstanceStateRestore()
         compose.runOnIdle {

@@ -198,5 +198,6 @@ class PrivateVideoVaultTest {
         AppEventBus(),
         LibraryTestPlaybackHistory(),
         session,
+        defaultDispatcher = dispatcherRule.dispatcher,
     )
 }

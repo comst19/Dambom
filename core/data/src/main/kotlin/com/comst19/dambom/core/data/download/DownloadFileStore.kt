@@ -23,9 +23,9 @@ internal open class DownloadFileStore
     constructor(
         @ApplicationContext private val context: Context,
     ) {
-        private val partialDirectory = context.filesDir.resolve("download-parts").apply(File::mkdirs)
-        private val videoDirectory = context.filesDir.resolve("videos").apply(File::mkdirs)
-        private val streamRoot = context.filesDir.resolve("download-streams")
+        private val partialDirectory by lazy { context.filesDir.resolve("download-parts").apply(File::mkdirs) }
+        private val videoDirectory by lazy { context.filesDir.resolve("videos").apply(File::mkdirs) }
+        private val streamRoot by lazy { context.filesDir.resolve("download-streams") }
         val streamDatabaseProvider by lazy { StandaloneDatabaseProvider(context) }
 
         fun streamDirectory(id: String): File = streamRoot.resolve(id)

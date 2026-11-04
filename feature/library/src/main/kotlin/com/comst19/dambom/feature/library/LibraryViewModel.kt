@@ -9,6 +9,7 @@ import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
+import com.comst19.dambom.core.coroutine.DefaultDispatcher
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
@@ -27,12 +28,14 @@ import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
 import com.comst19.dambom.feature.library.file.LibraryFileManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -52,6 +55,7 @@ internal class LibraryViewModel
         private val appEventBus: AppEventBus,
         private val playbackHistoryRepository: PlaybackHistoryRepository,
         val privateVideoSession: PrivateVideoSession,
+        @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         private val privateVault = MutableStateFlow(false)
         private val selectedId = savedStateHandle.getStateFlow<String?>(SELECTED_ID_KEY, null)
@@ -140,7 +144,7 @@ internal class LibraryViewModel
                     favoritesOnly = preferences.favoritesOnly,
                     recentlyPlayedOnly = preferences.recentlyPlayedOnly,
                 ).copy(isPrivateVault = tasks.first.isPrivateVault)
-            }
+            }.flowOn(defaultDispatcher)
         val uiState: StateFlow<LibraryUiState> =
             combine(mappedUiState, privateVault, privateVideoSession.isUnlocked) { state, privateScope, unlocked ->
                 if ((privateScope && !unlocked) || state.isPrivateVault != privateScope) {
@@ -387,8 +391,8 @@ internal class LibraryViewModel
             }
         }
 
-        fun hasValidConfiguredDownloadLocation(treeUri: String?): Boolean =
-            treeUri?.let(Uri::parse)?.let(fileManager::hasPersistedTreePermission) ?: true
+        suspend fun hasValidConfiguredDownloadLocation(treeUri: String?): Boolean =
+            treeUri?.let(Uri::parse)?.let { fileManager.hasPersistedTreePermission(it) } ?: true
 
         fun clearInvalidDownloadLocation() {
             viewModelScope.launch {
@@ -397,10 +401,10 @@ internal class LibraryViewModel
             }
         }
 
-        fun createShareIntent(task: DownloadTask): Intent? =
+        suspend fun createShareIntent(task: DownloadTask): Intent? =
             task
                 .takeIf { !it.isPrivate && !it.deletePending && it.localFilePath != null }
-                ?.let(fileManager::createShareIntent)
+                ?.let { fileManager.createShareIntent(it) }
 
         fun notifyShareFailure() {
             viewModelScope.launch { showMessage(R.string.library_share_failure) }

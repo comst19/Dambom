@@ -159,5 +159,6 @@ class LibraryFavoritesTest {
         events,
         LibraryTestPlaybackHistory(),
         privateVideoSession = PrivateVideoSession(),
+        defaultDispatcher = dispatcherRule.dispatcher,
     )
 }

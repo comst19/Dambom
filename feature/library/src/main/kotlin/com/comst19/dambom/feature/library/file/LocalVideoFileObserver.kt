@@ -1,9 +1,11 @@
 package com.comst19.dambom.feature.library.file
 
 import android.os.FileObserver
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.flowOn
 import java.io.File
 
 private val videoFileObservers = LocalVideoFileObservers()
@@ -15,7 +17,7 @@ internal fun observeLocalVideoChanges(
     val unsubscribe = observers.subscribe(File(path)) { trySend(Unit) }
     trySend(Unit)
     awaitClose { unsubscribe() }
-}.conflate()
+}.conflate().flowOn(Dispatchers.IO)
 
 internal class LocalVideoFileObservers(
     private val createObserver: (File, (String?) -> Unit) -> FileObserver = { directory, onChange ->

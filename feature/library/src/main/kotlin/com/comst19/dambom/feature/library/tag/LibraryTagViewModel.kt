@@ -7,17 +7,24 @@ import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
+import com.comst19.dambom.core.coroutine.DefaultDispatcher
+import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.repository.VideoTagRepository
 import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.tag.contract.LibraryTagState
 import com.comst19.dambom.feature.library.tag.contract.indexTagAssignments
 import com.comst19.dambom.feature.library.tag.contract.toLibraryTagState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,6 +34,7 @@ internal class LibraryTagViewModel
         private val repository: VideoTagRepository,
         private val savedStateHandle: SavedStateHandle,
         private val appEventBus: AppEventBus,
+        @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         private val selected = savedStateHandle.getStateFlow(TAG_FILTER_KEY, arrayListOf<String>())
         val state =
@@ -36,7 +44,16 @@ internal class LibraryTagViewModel
                 selected,
             ) { tags, index, selected ->
                 toLibraryTagState(tags, index, selected)
-            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(TAG_STOP_TIMEOUT_MILLIS), LibraryTagState())
+            }.flowOn(defaultDispatcher)
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(TAG_STOP_TIMEOUT_MILLIS), LibraryTagState())
+
+        suspend fun filterVideos(
+            videos: PersistentList<DownloadTask>,
+            tags: LibraryTagState,
+        ): PersistentList<DownloadTask> =
+            withContext(defaultDispatcher) {
+                videos.filter { tags.matches(it.id) }.toPersistentList()
+            }
 
         fun toggleFilter(id: String) {
             val ids = selected.value.toMutableSet()

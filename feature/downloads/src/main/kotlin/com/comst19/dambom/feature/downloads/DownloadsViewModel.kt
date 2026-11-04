@@ -7,6 +7,7 @@ import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
+import com.comst19.dambom.core.coroutine.DefaultDispatcher
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.repository.DownloadRepository
@@ -17,10 +18,12 @@ import com.comst19.dambom.feature.downloads.contract.DownloadsUiState
 import com.comst19.dambom.feature.downloads.contract.DownloadsViewMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,6 +36,7 @@ internal class DownloadsViewModel
         private val navigation: NavigationDispatcher,
         private val savedStateHandle: SavedStateHandle,
         private val appEventBus: AppEventBus,
+        @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         private val viewMode =
             MutableStateFlow(
@@ -55,7 +59,7 @@ internal class DownloadsViewModel
                         ).distinctBy(DownloadTask::id),
                     viewMode = currentViewMode,
                 )
-            }.stateIn(
+            }.flowOn(defaultDispatcher).stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
                 initialValue = DownloadsUiState(viewMode = viewMode.value),

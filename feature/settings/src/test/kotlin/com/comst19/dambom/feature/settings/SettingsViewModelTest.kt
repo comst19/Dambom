@@ -433,6 +433,7 @@ class SettingsViewModelTest {
         navigation = EmptyNavigationDispatcher,
         appEventBus = appEventBus,
         platformActions = platformActions,
+        ioDispatcher = mainDispatcherRule.dispatcher,
     )
 }
 

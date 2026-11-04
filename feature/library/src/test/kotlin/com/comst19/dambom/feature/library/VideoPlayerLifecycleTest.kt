@@ -66,6 +66,7 @@ class VideoPlayerLifecycleTest {
                 AppEventBus(),
                 LibraryTestPlaybackHistory(),
                 privateVideoSession = PrivateVideoSession(),
+                defaultDispatcher = Dispatchers.Unconfined,
             )
         playerViewModel = testVideoPlayerViewModel(context)
         val owner =
@@ -91,7 +92,9 @@ class VideoPlayerLifecycleTest {
         }
         composeRule.waitUntil { repository.updates.subscriptionCount.value == 1 }
         composeRule.runOnIdle { assertTrue(repository.updates.tryEmit(video)) }
-        composeRule.waitForIdle()
+        composeRule.waitUntil {
+            composeRule.runOnIdle { playerViewModel.player.currentMediaItem?.mediaId == video.id }
+        }
         composeRule.runOnIdle {
             assertEquals("video", playerViewModel.player.currentMediaItem?.mediaId)
             assertFalse(playerViewModel.player.playWhenReady)

@@ -3,6 +3,7 @@
 package com.comst19.dambom.core.data.download
 
 import android.content.Context
+import android.content.ContextWrapper
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.test.core.app.ApplicationProvider
@@ -15,11 +16,30 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class StreamDownloadFileStoreTest {
     private lateinit var store: DownloadFileStore
+
+    @Test
+    fun `constructing file store defers directory access until first file operation`() {
+        var accessedFiles = false
+        val context =
+            object : ContextWrapper(ApplicationProvider.getApplicationContext<Context>()) {
+                override fun getFilesDir(): File {
+                    accessedFiles = true
+                    return super.getFilesDir()
+                }
+            }
+
+        val deferred = DownloadFileStore(context)
+
+        assertFalse(accessedFiles)
+        assertTrue(checkNotNull(deferred.partialFile("deferred-init").parentFile).isDirectory)
+        assertTrue(accessedFiles)
+    }
 
     @Before
     fun setUp() {

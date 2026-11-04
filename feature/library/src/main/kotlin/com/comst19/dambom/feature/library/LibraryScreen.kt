@@ -34,11 +34,11 @@ import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
 import com.comst19.dambom.feature.library.tag.LibraryTagViewModel
 import com.comst19.dambom.feature.library.tag.component.LibraryTagControls
+import com.comst19.dambom.feature.library.tag.component.rememberTagFilteredVideos
 import com.comst19.dambom.feature.library.vault.PrivateVaultLockedScreen
 import com.comst19.dambom.feature.library.vault.PrivateVideoWindowProtection
 import com.comst19.dambom.feature.library.vault.rememberPrivateVaultAuthentication
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -85,10 +85,7 @@ internal fun LibraryRoute(
     }
     val tagViewModel: LibraryTagViewModel = hiltViewModel()
     val tagState by tagViewModel.state.collectAsStateWithLifecycle()
-    val visibleVideos =
-        remember(uiState.videos, tagState.selectedTagIds, tagState.matchedVideoIds) {
-            uiState.videos.filter { tagState.matches(it.id) }.toPersistentList()
-        }
+    val visibleVideos = rememberTagFilteredVideos(uiState.videos, tagState, tagViewModel::filterVideos)
     val fileActions = rememberLibraryFileActions(viewModel).copy(onChangePrivacy = { changePrivacy(setOf(it.id)) })
     val multiplePanes = currentAdaptiveLayoutInfo().supportsMultiplePanes
     val focusManager = LocalFocusManager.current

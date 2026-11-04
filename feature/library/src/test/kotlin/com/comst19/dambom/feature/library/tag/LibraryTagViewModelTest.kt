@@ -39,7 +39,7 @@ class LibraryTagViewModelTest {
             val repository = TagRepository()
             repository.assignments.value = assignments
             val handle = SavedStateHandle(mapOf("library-tag-filter" to arrayListOf("a", "deleted")))
-            val viewModel = LibraryTagViewModel(repository, handle, AppEventBus())
+            val viewModel = LibraryTagViewModel(repository, handle, AppEventBus(), dispatcherRule.dispatcher)
             backgroundScope.launch { viewModel.state.collect() }
             runCurrent()
             assertEquals(5_000, assignments.reads)
@@ -68,7 +68,7 @@ class LibraryTagViewModelTest {
             val events = AppEventBus()
             val received = mutableListOf<AppEvent>()
             backgroundScope.launch { events.events.collect { received.add(it) } }
-            val viewModel = LibraryTagViewModel(repository, SavedStateHandle(), events)
+            val viewModel = LibraryTagViewModel(repository, SavedStateHandle(), events, dispatcherRule.dispatcher)
             val results = mutableListOf<Boolean>()
             repository.fail = true
             viewModel.create("Trips") { results.add(it) }

@@ -15,9 +15,11 @@ import androidx.media3.transformer.EditedMediaItem
 import androidx.media3.transformer.Effects
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
+import androidx.media3.transformer.FrameworkMuxer
 import androidx.media3.transformer.ProgressHolder
 import androidx.media3.transformer.Transformer
 import androidx.media3.transformer.VideoEncoderSettings
+import com.comst19.dambom.core.common.util.VideoExportGate
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.feature.library.export.VideoExportFiles
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -93,7 +95,7 @@ internal class Media3VideoCompressor
             files.save(destination, "compress") { output ->
                 val source = inspect(path)
                 val settings = source.settings(profile)
-                transform(path, settings, output, onProgress)
+                VideoExportGate.shared.run { transform(path, settings, output, onProgress) }
                 withContext(ioDispatcher) {
                     if (output.length() >= source.bytes) {
                         throw CompressionNotSmallerException(
@@ -129,6 +131,7 @@ internal class Media3VideoCompressor
             val transformer =
                 Transformer
                     .Builder(context)
+                    .setMuxerFactory(FrameworkMuxer.Factory())
                     .setEncoderFactory(encoder)
                     .setVideoMimeType(MimeTypes.VIDEO_H264)
                     .setAudioMimeType(MimeTypes.AUDIO_AAC)

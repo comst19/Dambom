@@ -126,6 +126,50 @@ class PreferencesSettingsDataSourceTest {
             }
         }
 
+    @Test fun `read failure after successful settings does not temporarily reset user preferences`() =
+        runTest {
+            val values =
+                androidx.datastore.preferences.core.mutablePreferencesOf(
+                    androidx.datastore.preferences.core
+                        .booleanPreferencesKey("wifi_only_downloads") to true,
+                    androidx.datastore.preferences.core
+                        .stringPreferencesKey("theme_mode") to "DARK",
+                )
+            val failRead = kotlinx.coroutines.CompletableDeferred<Unit>()
+            val recovered = kotlinx.coroutines.CompletableDeferred<Unit>()
+            var reads = 0
+            val store =
+                object : androidx.datastore.core.DataStore<Preferences> {
+                    override val data =
+                        flow {
+                            reads++
+                            if (reads == 1) {
+                                emit(values)
+                                failRead.await()
+                                throw IOException("Read failed after a valid snapshot")
+                            }
+                            emit(values)
+                            recovered.await()
+                        }
+
+                    override suspend fun updateData(transform: suspend (Preferences) -> Preferences): Preferences {
+                        error("Not used")
+                    }
+                }
+            val source = PreferencesSettingsDataSource(store)
+            source.settings.test {
+                val expected = StoredSettings(themeMode = "DARK", wifiOnlyDownloads = true)
+                assertEquals(expected, awaitItem())
+                failRead.complete(Unit)
+                runCurrent()
+                expectNoEvents()
+                advanceTimeBy(1_000)
+                runCurrent()
+                assertEquals(expected, awaitItem())
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
     @Test
     fun `read IOException emits the system theme default`() =
         runTest {

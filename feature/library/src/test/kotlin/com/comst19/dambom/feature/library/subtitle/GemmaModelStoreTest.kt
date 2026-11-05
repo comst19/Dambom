@@ -1,6 +1,7 @@
 package com.comst19.dambom.feature.library.subtitle
 
 import com.comst19.dambom.feature.library.subtitle.data.GemmaModelDescriptor
+import com.comst19.dambom.feature.library.subtitle.data.ModelTransferException
 import com.comst19.dambom.feature.library.subtitle.data.downloadVerifiedModel
 import com.comst19.dambom.feature.library.subtitle.data.parseGemmaCatalog
 import kotlinx.coroutines.CompletableDeferred
@@ -13,6 +14,7 @@ import okhttp3.OkHttpClient
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -98,6 +100,44 @@ class GemmaModelStoreTest {
         assertTrue(result.url.startsWith("https://huggingface.co/litert-community/"))
         assertTrue(runCatching { parseGemmaCatalog(catalog.replace(revision, "../../other")) }.isFailure)
     }
+
+    @Test fun `temporary server failure is retryable`() =
+        runBlocking {
+            server.enqueue(MockResponse().setResponseCode(503))
+            val failure =
+                runCatching { downloadVerifiedModel(client, descriptor("model"), output) {} }.exceptionOrNull()
+            assertTrue(failure is ModelTransferException)
+            assertFalse(File(output.path + ".part").exists())
+        }
+
+    @Test fun `disconnected response is retryable without publishing partial model`() =
+        runBlocking {
+            val body = "x".repeat(100_000)
+            server.enqueue(MockResponse().setBody(body).setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY))
+            val failure =
+                runCatching { downloadVerifiedModel(client, descriptor(body), output) {} }.exceptionOrNull()
+            assertTrue(failure is ModelTransferException)
+            assertFalse(output.exists())
+            assertFalse(File(output.path + ".part").exists())
+        }
+
+    @Test fun `missing model is a permanent failure`() =
+        runBlocking {
+            server.enqueue(MockResponse().setResponseCode(404))
+            val failure =
+                runCatching { downloadVerifiedModel(client, descriptor("model"), output) {} }.exceptionOrNull()
+            assertTrue(failure is IllegalStateException)
+        }
+
+    @Test fun `destination failure is not classified as a network failure`() =
+        runBlocking {
+            server.enqueue(MockResponse().setBody("model"))
+            File(output.path + ".part").mkdir()
+            val failure =
+                runCatching { downloadVerifiedModel(client, descriptor("model"), output) {} }.exceptionOrNull()
+            assertTrue(failure is java.io.IOException)
+            assertFalse(failure is ModelTransferException)
+        }
 
     private fun descriptor(body: String) =
         GemmaModelDescriptor(

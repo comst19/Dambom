@@ -13,6 +13,7 @@ import androidx.work.WorkerParameters
 import androidx.work.testing.TestListenableWorkerBuilder
 import androidx.work.testing.WorkManagerTestInitHelper
 import androidx.work.workDataOf
+import com.comst19.dambom.feature.library.subtitle.data.ModelTransferException
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleEngine
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleModelStatus
 import com.comst19.dambom.feature.library.subtitle.model.ModelDownloadProgress
@@ -34,6 +35,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import java.io.IOException
 import java.util.UUID
 
 @RunWith(RobolectricTestRunner::class)
@@ -44,6 +46,7 @@ class SubtitleModelDownloadWorkerTest {
     private val release = CompletableDeferred<Unit>()
     private var cancelled = false
     private var result = SubtitleModelStatus.AVAILABLE
+    private var failure: Exception? = null
 
     @Before fun setup() {
         val component = ComponentName(context.packageName, "TestLauncher")
@@ -92,7 +95,28 @@ class SubtitleModelDownloadWorkerTest {
         assertEquals(ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC, info.foregroundServiceType)
     }
 
-    private fun worker(): SubtitleModelDownloadWorker {
+    @Test fun `transient transfer failure retries within limit`() =
+        runTest {
+            failure = ModelTransferException(IOException("Connection reset"))
+            release.complete(Unit)
+            assertEquals(ListenableWorker.Result.retry(), worker().doWork())
+        }
+
+    @Test fun `transient transfer failure stops after retry limit`() =
+        runTest {
+            failure = ModelTransferException(IOException("Connection reset"))
+            release.complete(Unit)
+            assertEquals(ListenableWorker.Result.failure(), worker(attempts = 3).doWork())
+        }
+
+    @Test fun `storage IO failure is not retried as a network failure`() =
+        runTest {
+            failure = IOException("No space left on device")
+            release.complete(Unit)
+            assertEquals(ListenableWorker.Result.failure(), worker().doWork())
+        }
+
+    private fun worker(attempts: Int = 0): SubtitleModelDownloadWorker {
         val engine =
             object : SubtitleEngine {
                 override suspend fun deleteModel() = Unit
@@ -115,6 +139,7 @@ class SubtitleModelDownloadWorkerTest {
                     started.complete(Unit)
                     try {
                         release.await()
+                        failure?.let { throw it }
                         onBytes(ModelDownloadProgress(100, 100))
                         return result
                     } finally {
@@ -123,6 +148,7 @@ class SubtitleModelDownloadWorkerTest {
                 }
             }
         return TestListenableWorkerBuilder<SubtitleModelDownloadWorker>(context)
+            .setRunAttemptCount(attempts)
             .setInputData(workDataOf(SUBTITLE_PAIR to SubtitleLanguagePair.ENGLISH_KOREAN.name))
             .setWorkerFactory(
                 object : WorkerFactory() {

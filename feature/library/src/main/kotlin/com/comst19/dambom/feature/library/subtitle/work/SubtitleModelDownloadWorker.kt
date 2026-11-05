@@ -7,6 +7,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import com.comst19.dambom.feature.library.subtitle.data.ModelTransferException
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleEngine
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleModelStatus
 import com.comst19.dambom.feature.library.subtitle.model.ModelDownloadProgress
@@ -80,6 +81,13 @@ internal class SubtitleModelDownloadWorker
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled
+            } catch (_: ModelTransferException) {
+                if (runAttemptCount < MAX_MODEL_RETRIES) {
+                    Result.retry()
+                } else {
+                    notifier.modelFinished(false)
+                    Result.failure()
+                }
             } catch (_: Exception) {
                 notifier.modelFinished(false)
                 Result.failure()

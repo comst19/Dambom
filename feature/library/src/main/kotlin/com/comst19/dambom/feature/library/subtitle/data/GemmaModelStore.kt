@@ -36,6 +36,7 @@ import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import javax.net.ssl.SSLException
 
 internal data class GemmaModelDescriptor(
     val revision: String,
@@ -67,7 +68,7 @@ internal fun parseGemmaCatalog(content: String): GemmaModelDescriptor {
 
 internal fun parseGemmaCatalog(body: ResponseBody): GemmaModelDescriptor {
     val source = body.source()
-    source.request(MAX_MODEL_CATALOG_BYTES + 1)
+    modelNetworkRead { source.request(MAX_MODEL_CATALOG_BYTES + 1) }
     require(source.buffer.size <= MAX_MODEL_CATALOG_BYTES) { "Model catalog is too large" }
     return parseGemmaCatalog(source.buffer.readUtf8())
 }
@@ -104,7 +105,7 @@ internal class GemmaModelStore
         ) = access.withLock {
             val catalog =
                 withResponse(client, Request.Builder().url(GEMMA_CATALOG).build()) { response ->
-                    check(response.isSuccessful)
+                    checkModelResponse(response)
                     parseGemmaCatalog(response.body)
                 }
             if (installed() && withContext(io) { receipt.readLines().first() == catalog.sha256 }) return@withLock
@@ -153,6 +154,7 @@ internal suspend fun downloadVerifiedModel(
     val temporary = File(destination.path + ".part")
     try {
         withResponse(client, Request.Builder().url(descriptor.url).build()) { response ->
+            checkModelResponse(response)
             check(response.code == HttpURLConnection.HTTP_OK)
             val digest = MessageDigest.getInstance("SHA-256")
             var bytes = 0L
@@ -162,8 +164,13 @@ internal suspend fun downloadVerifiedModel(
                     val buffer = ByteArray(MODEL_COPY_BUFFER)
                     while (true) {
                         currentCoroutineContext().ensureActive()
-                        val count = input.read(buffer)
-                        if (count < 0) break
+                        val count = modelNetworkRead { input.read(buffer) }
+                        if (count < 0) {
+                            if (bytes < descriptor.bytes) {
+                                throw ModelTransferException(IOException("Incomplete model response"))
+                            }
+                            break
+                        }
                         bytes += count
                         check(bytes <= descriptor.bytes)
                         digest.update(buffer, 0, count)
@@ -201,7 +208,7 @@ private suspend fun <T> withResponse(
                 }
             }
         try {
-            withContext(Dispatchers.IO) { call.execute().use { block(it) } }
+            withContext(Dispatchers.IO) { modelNetworkRead { call.execute() }.use { block(it) } }
         } catch (failure: IOException) {
             currentCoroutineContext().ensureActive()
             throw failure
@@ -222,3 +229,34 @@ private const val MODEL_PROGRESS_BYTES = 1_048_576L
 private const val MODEL_READ_TIMEOUT_SECONDS = 30L
 
 private const val MAX_MODEL_CATALOG_BYTES = 2L * 1024 * 1024
+
+internal class ModelTransferException(
+    cause: IOException,
+) : IOException(cause)
+
+private fun checkModelResponse(response: Response) {
+    if (response.code in
+        setOf(
+            HttpURLConnection.HTTP_CLIENT_TIMEOUT,
+            HTTP_TOO_MANY_REQUESTS,
+            HttpURLConnection.HTTP_INTERNAL_ERROR,
+            HttpURLConnection.HTTP_BAD_GATEWAY,
+            HttpURLConnection.HTTP_UNAVAILABLE,
+            HttpURLConnection.HTTP_GATEWAY_TIMEOUT,
+        )
+    ) {
+        throw ModelTransferException(IOException("Model server returned HTTP ${response.code}"))
+    }
+    check(response.isSuccessful) { "Model server returned HTTP ${response.code}" }
+}
+
+private inline fun <T> modelNetworkRead(read: () -> T): T =
+    try {
+        read()
+    } catch (failure: SSLException) {
+        throw failure
+    } catch (failure: IOException) {
+        throw ModelTransferException(failure)
+    }
+
+private const val HTTP_TOO_MANY_REQUESTS = 429

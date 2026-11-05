@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -44,9 +45,11 @@ class LibraryTagViewModelTest {
             runCurrent()
             assertEquals(5_000, assignments.reads)
             assertEquals(setOf("a"), viewModel.state.value.selectedTagIds)
+            val tagList = viewModel.state.value.tags
             repeat(20) {
                 viewModel.toggleFilter("a")
                 runCurrent()
+                assertSame(tagList, viewModel.state.value.tags)
                 repeat(1_000) { assertTrue(viewModel.state.value.matches("video$it")) }
             }
             repository.tags.value = listOf(VideoTag("a", "Renamed"))

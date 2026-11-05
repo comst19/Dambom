@@ -70,13 +70,11 @@ internal class LibraryViewModel
         private var deletingSelection = false
         private val displayPreferences =
             combine(
-                viewMode,
                 sourceFilter,
                 favoritesOnly,
                 recentlyPlayedOnly,
-            ) { viewMode, sourceFilter, favoritesOnly, recentlyPlayedOnly ->
+            ) { sourceFilter, favoritesOnly, recentlyPlayedOnly ->
                 LibraryDisplayPreferences(
-                    viewMode = LibraryViewMode.entries.firstOrNull { it.name == viewMode } ?: LibraryViewMode.GRID,
                     sourceFilter = LibrarySourceFilter.entries.firstOrNull { it.name == sourceFilter } ?: LibrarySourceFilter.ALL,
                     favoritesOnly = favoritesOnly,
                     recentlyPlayedOnly = recentlyPlayedOnly,
@@ -127,25 +125,27 @@ internal class LibraryViewModel
                 },
             ) { tasks, history -> tasks to history }
 
+        private val filteredLibrary =
+            combine(libraryWithHistory, query, displayPreferences) { tasks, query, preferences ->
+                tasks.first to
+                    toLibraryUiState(
+                        tasks = tasks.first,
+                        playbackHistory = tasks.second,
+                        selectedId = null,
+                        query = query,
+                        sourceFilter = preferences.sourceFilter,
+                        favoritesOnly = preferences.favoritesOnly,
+                        recentlyPlayedOnly = preferences.recentlyPlayedOnly,
+                    ).copy(isPrivateVault = tasks.first.isPrivateVault)
+            }
         private val mappedUiState =
-            combine(
-                libraryWithHistory,
-                selectedId,
-                query,
-                displayPreferences,
-                selection,
-            ) { tasks, selectedId, query, preferences, selection ->
-                toLibraryUiState(
-                    tasks = tasks.first,
-                    playbackHistory = tasks.second,
+            combine(filteredLibrary, selectedId, viewMode, selection) { (tasks, state), selectedId, mode, selection ->
+                state.withSelection(
+                    tasks = tasks,
                     selectedId = selectedId,
-                    query = query,
-                    viewMode = preferences.viewMode,
-                    sourceFilter = preferences.sourceFilter,
+                    viewMode = LibraryViewMode.entries.firstOrNull { it.name == mode } ?: LibraryViewMode.GRID,
                     selection = selection,
-                    favoritesOnly = preferences.favoritesOnly,
-                    recentlyPlayedOnly = preferences.recentlyPlayedOnly,
-                ).copy(isPrivateVault = tasks.first.isPrivateVault)
+                )
             }.flowOn(defaultDispatcher)
         val uiState: StateFlow<LibraryUiState> =
             combine(mappedUiState, privateVault, privateVideoSession.isUnlocked) { state, privateScope, unlocked ->
@@ -458,7 +458,6 @@ internal class LibraryViewModel
     }
 
 private data class LibraryDisplayPreferences(
-    val viewMode: LibraryViewMode,
     val sourceFilter: LibrarySourceFilter,
     val favoritesOnly: Boolean,
     val recentlyPlayedOnly: Boolean,

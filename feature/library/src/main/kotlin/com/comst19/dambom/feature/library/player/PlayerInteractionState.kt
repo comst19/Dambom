@@ -14,6 +14,7 @@ internal class PlayerInteractionState(
     panX: Float = 0f,
     panY: Float = 0f,
     locked: Boolean = false,
+    subtitlesEnabled: Boolean = true,
 ) {
     var scale by mutableFloatStateOf(scale)
         private set
@@ -22,6 +23,8 @@ internal class PlayerInteractionState(
     var panY by mutableFloatStateOf(panY)
         private set
     var locked by mutableStateOf(locked)
+    var subtitlesEnabled by mutableStateOf(subtitlesEnabled)
+    var hasSubtitles by mutableStateOf(false)
 
     fun resetZoom() {
         scale = 1f
@@ -55,10 +58,19 @@ internal class PlayerInteractionState(
     companion object {
         val Saver =
             listSaver<PlayerInteractionState, Any>(
-                save = { listOf(it.scale, it.panX, it.panY, it.locked) },
-                restore = { PlayerInteractionState(it[0] as Float, it[1] as Float, it[2] as Float, it[3] as Boolean) },
+                save = { listOf(it.scale, it.panX, it.panY, it.locked, it.subtitlesEnabled) },
+                restore = {
+                    PlayerInteractionState(
+                        it[0] as Float,
+                        it[1] as Float,
+                        it[2] as Float,
+                        it[3] as Boolean,
+                        it.getOrNull(SUBTITLE_VISIBILITY_INDEX) as? Boolean ?: true,
+                    )
+                },
             )
     }
 }
 
 private const val MAX_PLAYER_ZOOM = 4f
+private const val SUBTITLE_VISIBILITY_INDEX = 4

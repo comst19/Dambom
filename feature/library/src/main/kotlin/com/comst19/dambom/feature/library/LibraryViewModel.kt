@@ -22,6 +22,8 @@ import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.PrivateLibraryKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoCompressionKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoSubtitleExportKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoSubtitleKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoTrimKey
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryUiState
@@ -219,6 +221,12 @@ internal class LibraryViewModel
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoCompressionKey(task.id))) }
         }
 
+        fun translateVideo(task: DownloadTask) {
+            if (task.isPrivate) return
+            if (task.deletePending || task.localFilePath == null || task.status != DownloadStatus.COMPLETED) return
+            viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoSubtitleKey(task.id))) }
+        }
+
         fun trimVideo(task: DownloadTask) {
             if (task.isPrivate || task.deletePending || task.localFilePath == null) return
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoTrimKey(task.id))) }
@@ -362,6 +370,15 @@ internal class LibraryViewModel
             viewModelScope.launch {
                 suspendRunCatching { fileManager.export(task, destination) }
                     .notifyResult(R.string.library_export_success, R.string.library_export_failure)
+            }
+        }
+
+        suspend fun hasSubtitles(task: DownloadTask): Boolean = fileManager.hasSubtitles(task)
+
+        fun exportWithSubtitles(task: DownloadTask) {
+            if (task.isPrivate || task.deletePending || task.localFilePath == null) return
+            viewModelScope.launch {
+                navigation.dispatch(NavigationEvent.Navigate(VideoSubtitleExportKey(task.id)))
             }
         }
 

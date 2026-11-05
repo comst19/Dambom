@@ -12,6 +12,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
+import com.comst19.dambom.core.common.io.videoSubtitleFile
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
@@ -25,12 +26,18 @@ import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
 
+@Suppress("TooManyFunctions")
 internal class LibraryFileManager
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) {
+        suspend fun hasSubtitles(task: DownloadTask): Boolean =
+            withContext(ioDispatcher) {
+                task.localFilePath?.let(::File)?.let { it.videoSubtitleFile().isFile } == true
+            }
+
         suspend fun export(
             task: DownloadTask,
             destination: Uri,

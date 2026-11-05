@@ -11,16 +11,21 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import com.comst19.dambom.core.common.io.videoSubtitleFile
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.domain.model.PrivateVideoSession
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoSubtitleExportKey
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.library.LibraryTestDownloads
 import com.comst19.dambom.feature.library.LibraryTestPlaybackHistory
 import com.comst19.dambom.feature.library.LibraryTestSettings
 import com.comst19.dambom.feature.library.LibraryViewModel
+import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.file.LibraryFileManager
 import com.comst19.dambom.feature.library.libraryTestVideo
 import kotlinx.coroutines.Dispatchers
@@ -86,6 +91,57 @@ class LibraryExportRestorationTest {
         compose.waitUntil { output.size() == 3 }
         assertArrayEquals(source.readBytes(), output.toByteArray())
         source.delete()
+    }
+
+    @Test
+    fun `subtitle export choice survives recreation and opens the rendered video route`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val source = context.filesDir.resolve("choice-export.mp4").apply { writeText("original") }
+        source.videoSubtitleFile().writeText("1\n00:00:00,000 --> 00:00:01,000\nHello\n")
+        val task = libraryTestVideo(source.path)
+        val navigation = SpyNavigationDispatcher()
+        val registry = ExportRegistry()
+        val owner =
+            object : ActivityResultRegistryOwner {
+                override val activityResultRegistry = registry
+            }
+        lateinit var actions: LibraryFileActions
+        val restoration = StateRestorationTester(compose)
+        restoration.setContent {
+            CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) {
+                actions =
+                    rememberLibraryFileActions(
+                        androidx.compose.runtime.remember {
+                            LibraryViewModel(
+                                LibraryTestDownloads(listOf(task)),
+                                LibraryTestSettings,
+                                navigation,
+                                SavedStateHandle(),
+                                LibraryFileManager(context, Dispatchers.Unconfined),
+                                AppEventBus(),
+                                LibraryTestPlaybackHistory(),
+                                privateVideoSession = PrivateVideoSession(),
+                                defaultDispatcher = Dispatchers.Unconfined,
+                            )
+                        },
+                    )
+            }
+        }
+        try {
+            compose.runOnIdle { actions.onExport(task) }
+            compose.waitForIdle()
+            assertEquals(0, registry.launchCount)
+            restoration.emulateSavedInstanceStateRestore()
+            compose.onNodeWithText(context.getString(R.string.subtitle_video_export)).performClick()
+            compose.waitUntil { navigation.dispatched.isNotEmpty() }
+            val event = navigation.dispatched.single() as com.comst19.dambom.core.navigation.NavigationEvent.Navigate
+            assertEquals(VideoSubtitleExportKey(task.id), event.key)
+            assertEquals(0, registry.launchCount)
+            assertEquals("original", source.readText())
+        } finally {
+            source.videoSubtitleFile().delete()
+            source.delete()
+        }
     }
 
     private class ExportRegistry : ActivityResultRegistry() {

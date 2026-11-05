@@ -7,6 +7,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import androidx.work.await
 import androidx.work.workDataOf
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleFailure
@@ -78,13 +79,13 @@ internal class WorkManagerSubtitleJobs
                         .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                         .addTag(CREATED_TAG + System.currentTimeMillis())
                         .build()
-                manager.enqueueUniqueWork(MODEL_WORK_NAME, ExistingWorkPolicy.KEEP, request).result.get()
+                manager.enqueueUniqueWork(MODEL_WORK_NAME, ExistingWorkPolicy.KEEP, request).await()
                 Unit
             }
 
         override suspend fun cancelModelDownload() =
             withContext(io) {
-                manager.cancelUniqueWork(MODEL_WORK_NAME).result.get()
+                manager.cancelUniqueWork(MODEL_WORK_NAME).await()
                 Unit
             }
 
@@ -128,13 +129,13 @@ internal class WorkManagerSubtitleJobs
                     .addTag(CREATED_TAG + System.currentTimeMillis())
                     .addTag(PAIR_TAG + pair.name)
                     .build()
-            manager.enqueueUniqueWork(subtitleWorkName(videoId), ExistingWorkPolicy.KEEP, request).result.get()
+            manager.enqueueUniqueWork(subtitleWorkName(videoId), ExistingWorkPolicy.KEEP, request).await()
             Unit
         }
 
         override suspend fun cancel(videoId: String) =
             withContext(io) {
-                manager.cancelUniqueWork(subtitleWorkName(videoId)).result.get()
+                manager.cancelUniqueWork(subtitleWorkName(videoId)).await()
                 Unit
             }
     }

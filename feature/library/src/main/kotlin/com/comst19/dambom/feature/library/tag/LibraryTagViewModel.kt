@@ -39,7 +39,7 @@ internal class LibraryTagViewModel
         private val selected = savedStateHandle.getStateFlow(TAG_FILTER_KEY, arrayListOf<String>())
         val state =
             combine(
-                repository.tags,
+                repository.tags.map { it.toPersistentList() },
                 repository.assignments.map(::indexTagAssignments),
                 selected,
             ) { tags, index, selected ->

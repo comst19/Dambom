@@ -6,6 +6,9 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -42,6 +45,7 @@ internal data class LibraryFileActions(
     val onTrim: ((DownloadTask) -> Unit)? = null,
     val onCompress: ((DownloadTask) -> Unit)? = null,
     val onChangePrivacy: ((DownloadTask) -> Unit)? = null,
+    val onTranslate: ((DownloadTask) -> Unit)? = null,
 )
 
 @Composable
@@ -77,71 +81,103 @@ internal fun rememberLibraryFileActions(
             }
         }
     val currentOnDelete = rememberUpdatedState(onDelete)
-    return remember(viewModel, context, shareLinkChooserTitle, exportLauncher, legacyStoragePermissionLauncher) {
-        LibraryFileActions(
-            onRename = viewModel::rename,
-            onToggleFavorite = viewModel::toggleFavorite,
-            onFavoritesOnlyChange = viewModel::setFavoritesOnly,
-            onExport = { task ->
-                scope.launch {
-                    val downloadSettings = currentSettings.value
-                    when {
-                        !downloadSettings.useConfiguredDownloadLocation -> {
-                            pendingExport = task.id
-                            exportLauncher.launch(task.suggestedFileName())
-                        }
+    val originalActions =
+        remember(viewModel, context, shareLinkChooserTitle, exportLauncher, legacyStoragePermissionLauncher) {
+            LibraryFileActions(
+                onRename = viewModel::rename,
+                onToggleFavorite = viewModel::toggleFavorite,
+                onFavoritesOnlyChange = viewModel::setFavoritesOnly,
+                onExport = { task ->
+                    scope.launch {
+                        val downloadSettings = currentSettings.value
+                        when {
+                            !downloadSettings.useConfiguredDownloadLocation -> {
+                                pendingExport = task.id
+                                exportLauncher.launch(task.suggestedFileName())
+                            }
 
-                        !viewModel.hasValidConfiguredDownloadLocation(downloadSettings.downloadTreeUri) -> {
-                            viewModel.clearInvalidDownloadLocation()
-                            pendingExport = task.id
-                            exportLauncher.launch(task.suggestedFileName())
-                        }
+                            !viewModel.hasValidConfiguredDownloadLocation(downloadSettings.downloadTreeUri) -> {
+                                viewModel.clearInvalidDownloadLocation()
+                                pendingExport = task.id
+                                exportLauncher.launch(task.suggestedFileName())
+                            }
 
-                        Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
-                            downloadSettings.downloadTreeUri == null &&
-                            ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) !=
-                            PackageManager.PERMISSION_GRANTED -> {
-                            pendingDefaultExport = task.id
-                            legacyStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        }
+                            Build.VERSION.SDK_INT <= Build.VERSION_CODES.P &&
+                                downloadSettings.downloadTreeUri == null &&
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                ) !=
+                                PackageManager.PERMISSION_GRANTED -> {
+                                pendingDefaultExport = task.id
+                                legacyStoragePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            }
 
-                        else -> {
-                            viewModel.exportToConfiguredLocation(task)
+                            else -> {
+                                viewModel.exportToConfiguredLocation(task)
+                            }
                         }
                     }
-                }
-            },
-            onShareVideo = { task ->
-                scope.launch {
-                    val intent = viewModel.createShareIntent(task)
-                    if (intent == null) {
-                        viewModel.notifyShareFailure()
-                        return@launch
+                },
+                onShareVideo = { task ->
+                    scope.launch {
+                        val intent = viewModel.createShareIntent(task)
+                        if (intent == null) {
+                            viewModel.notifyShareFailure()
+                            return@launch
+                        }
+                        try {
+                            context.startActivity(intent)
+                        } catch (_: ActivityNotFoundException) {
+                            viewModel.notifyShareFailure()
+                        } catch (_: IllegalArgumentException) {
+                            viewModel.notifyShareFailure()
+                        }
                     }
-                    try {
-                        context.startActivity(intent)
-                    } catch (_: ActivityNotFoundException) {
-                        viewModel.notifyShareFailure()
-                    } catch (_: IllegalArgumentException) {
-                        viewModel.notifyShareFailure()
+                },
+                onShareLink = { task ->
+                    if (!shareOriginalLink(context, task.sourcePageUrl, shareLinkChooserTitle)) {
+                        viewModel.notifyShareLinkFailure()
                     }
-                }
+                },
+                onCopyLink = { task ->
+                    copyOriginalLink(context, task.sourcePageUrl)
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) viewModel.notifyLinkCopied()
+                },
+                onOpenOriginal = { task ->
+                    if (!openOriginalLink(context, task.sourcePageUrl)) viewModel.notifyOpenOriginalFailure()
+                },
+                onDelete = { task -> currentOnDelete.value?.invoke(task) ?: viewModel.delete(task) },
+                onTrim = viewModel::trimVideo,
+                onCompress = viewModel::compressVideo,
+                onTranslate = viewModel::translateVideo,
+            )
+        }
+    var choosingExport by rememberSaveable { mutableStateOf<String?>(null) }
+    if (choosingExport != null) {
+        AlertDialog(
+            onDismissRequest = { choosingExport = null },
+            title = { Text(stringResource(R.string.library_export)) },
+            text = { Text(stringResource(R.string.subtitle_export_choice_hint)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    val id = choosingExport
+                    choosingExport = null
+                    scope.launch { viewModel.findExportTask(id)?.let(viewModel::exportWithSubtitles) }
+                }) { Text(stringResource(R.string.subtitle_video_export)) }
             },
-            onShareLink = { task ->
-                if (!shareOriginalLink(context, task.sourcePageUrl, shareLinkChooserTitle)) {
-                    viewModel.notifyShareLinkFailure()
-                }
+            dismissButton = {
+                TextButton(onClick = {
+                    val id = choosingExport
+                    choosingExport = null
+                    scope.launch { viewModel.findExportTask(id)?.let(originalActions.onExport) }
+                }) { Text(stringResource(R.string.subtitle_export_original)) }
             },
-            onCopyLink = { task ->
-                copyOriginalLink(context, task.sourcePageUrl)
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) viewModel.notifyLinkCopied()
-            },
-            onOpenOriginal = { task ->
-                if (!openOriginalLink(context, task.sourcePageUrl)) viewModel.notifyOpenOriginalFailure()
-            },
-            onDelete = { task -> currentOnDelete.value?.invoke(task) ?: viewModel.delete(task) },
-            onTrim = viewModel::trimVideo,
-            onCompress = viewModel::compressVideo,
         )
     }
+    return originalActions.copy(onExport = { task ->
+        scope.launch {
+            if (viewModel.hasSubtitles(task)) choosingExport = task.id else originalActions.onExport(task)
+        }
+    })
 }

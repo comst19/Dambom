@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,6 +48,8 @@ import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.media.rememberLocalVideoMetadata
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
 import com.comst19.dambom.feature.library.player.component.PlaybackOptionsButton
+import com.comst19.dambom.feature.library.subtitle.playback.SubtitleToggleButton
+import com.comst19.dambom.feature.library.subtitle.playback.TranslatedSubtitleOverlay
 
 @Composable
 internal fun MissingVideo(modifier: Modifier = Modifier) {
@@ -111,7 +114,10 @@ internal fun VideoPlayerPanel(
             onControlsInteraction = controls::onInteraction,
             onControlsInteractionChanged = controls::onInteractionChanged,
         )
-        PlaybackOptionsButton(player)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            PlaybackOptionsButton(player)
+            SubtitleToggleButton(interaction)
+        }
         Text(
             text = task.title,
             style = MaterialTheme.typography.headlineSmall,
@@ -182,6 +188,11 @@ private fun InlineVideoSurface(
                         true
                     }
                 }.fullscreenPlayerGestures(toggleControlsLabel, onToggleControls, {}, interaction),
+        )
+        TranslatedSubtitleOverlay(
+            player,
+            interaction.subtitlesEnabled,
+            bottomPadding = if (controlsVisible) 64.dp else 20.dp,
         )
         AnimatedVisibility(
             visible = controlsVisible,

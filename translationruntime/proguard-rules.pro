@@ -1,0 +1,1 @@
+-keep class com.comst19.dambom.translationruntime.GemmaRuntime { public <init>(); }

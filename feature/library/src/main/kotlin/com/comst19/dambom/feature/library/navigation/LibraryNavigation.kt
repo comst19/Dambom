@@ -8,11 +8,17 @@ import com.comst19.dambom.core.navigation.contract.LibraryGraph.LibraryKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.PrivateLibraryKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoCompressionKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoSubtitleExportKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoSubtitleKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoSubtitleTranscriptKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoTrimKey
 import com.comst19.dambom.feature.library.LibraryDetailPlaceholderRoute
 import com.comst19.dambom.feature.library.LibraryRoute
 import com.comst19.dambom.feature.library.VideoPlayerRoute
 import com.comst19.dambom.feature.library.compress.VideoCompressionRoute
+import com.comst19.dambom.feature.library.subtitle.SubtitleRoute
+import com.comst19.dambom.feature.library.subtitle.SubtitleTranscriptRoute
+import com.comst19.dambom.feature.library.subtitle.export.SubtitleExportRoute
 import com.comst19.dambom.feature.library.trim.VideoTrimRoute
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -32,6 +38,12 @@ fun EntryProviderScope<NavKey>.libraryEntries(
             privateVault = true,
         )
     }
+    entry<VideoSubtitleTranscriptKey> { key -> SubtitleTranscriptRoute(key.id) }
+    entry<VideoSubtitleExportKey> { key ->
+        com.comst19.dambom.feature.library.subtitle.export
+            .SubtitleExportRoute(key.id)
+    }
+    entry<VideoSubtitleKey> { key -> SubtitleRoute(key.id) }
     entry<VideoCompressionKey> { key -> VideoCompressionRoute(key.id) }
     entry<VideoTrimKey> { key -> VideoTrimRoute(key.id) }
     entry<LibraryKey>(

@@ -10,7 +10,10 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.retryWhen
 import java.io.IOException
 import javax.inject.Inject
@@ -23,14 +26,21 @@ class PreferencesSettingsDataSource
         private val dataStore: DataStore<Preferences>,
     ) : SettingsDataSource {
         private val preferences =
-            dataStore.data.retryWhen { throwable, _ ->
-                if (throwable is IOException) {
-                    emit(emptyPreferences())
-                    delay(READ_RETRY_DELAY_MILLIS)
-                    true
-                } else {
-                    false
-                }
+            flow {
+                var hasStoredPreferences = false
+                emitAll(
+                    dataStore.data
+                        .onEach { hasStoredPreferences = true }
+                        .retryWhen { throwable, _ ->
+                            if (throwable is IOException) {
+                                if (!hasStoredPreferences) emit(emptyPreferences())
+                                delay(READ_RETRY_DELAY_MILLIS)
+                                true
+                            } else {
+                                false
+                            }
+                        },
+                )
             }
 
         override val settings: Flow<StoredSettings> =

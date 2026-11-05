@@ -24,6 +24,7 @@ if (crashlyticsEnabled) {
 }
 
 android {
+    dynamicFeatures += setOf(":translationruntime")
     namespace = "com.comst19.dambom"
     defaultConfig {
         applicationId = "com.comst19.dambom"
@@ -72,8 +73,8 @@ android {
                 "st",
                 "ru",
             )
-        versionCode = 13
-        versionName = "1.4.0"
+        versionCode = 14
+        versionName = "1.5.0"
         manifestPlaceholders["crashlyticsCollectionEnabled"] = false
     }
 
@@ -135,6 +136,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.play.feature.delivery)
     "releaseImplementation"(platform(libs.firebase.bom))
     "releaseImplementation"(libs.firebase.crashlytics)
     implementation(projects.presentation)
@@ -147,6 +149,8 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.profileinstaller)
     testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.ext)
+    androidTestImplementation(libs.androidx.test.runner)
 }
 
 baselineProfile {

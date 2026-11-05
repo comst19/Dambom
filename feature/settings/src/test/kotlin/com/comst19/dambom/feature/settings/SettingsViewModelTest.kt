@@ -19,6 +19,8 @@ import com.comst19.dambom.feature.settings.platform.SettingsPlatformActions
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
@@ -352,6 +354,31 @@ class SettingsViewModelTest {
             assertEquals(emptyList<Int>(), received.resourceIds())
         }
 
+    @Test fun `cancellation after a location commit keeps its grant and releases the previous one`() =
+        runTest {
+            val persisted =
+                RecordingSettingsRepository(
+                    initialSettings = AppSettings(downloadTreeUri = OLD_DOWNLOAD_TREE_URI),
+                )
+            val repository =
+                object : SettingsRepository by persisted {
+                    override suspend fun setDownloadLocation(
+                        enabled: Boolean,
+                        treeUri: String?,
+                    ) {
+                        persisted.setDownloadLocation(enabled, treeUri)
+                        currentCoroutineContext().cancel()
+                        throw CancellationException("cancelled after commit")
+                    }
+                }
+            val platform = FakeSettingsPlatformActions()
+            val model = createViewModel(repository = repository, platformActions = platform)
+            model.setDownloadDirectory(DOWNLOAD_TREE_URI)
+            advanceUntilIdle()
+            assertEquals(DOWNLOAD_TREE_URI, persisted.currentSettings.downloadTreeUri)
+            assertEquals(listOf("take:$DOWNLOAD_TREE_URI", "release:$OLD_DOWNLOAD_TREE_URI"), platform.calls)
+        }
+
     @Test
     fun `overlapping directory changes release every superseded grant in order`() =
         runTest {
@@ -423,7 +450,7 @@ class SettingsViewModelTest {
         }
 
     private fun createViewModel(
-        repository: RecordingSettingsRepository = RecordingSettingsRepository(),
+        repository: SettingsRepository = RecordingSettingsRepository(),
         downloadRepository: DownloadRepository = RecordingDownloadRepository(),
         platformActions: FakeSettingsPlatformActions = FakeSettingsPlatformActions(),
         appEventBus: AppEventBus = AppEventBus(),

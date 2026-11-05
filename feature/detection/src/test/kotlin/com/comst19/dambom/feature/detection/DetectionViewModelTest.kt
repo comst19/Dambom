@@ -46,6 +46,30 @@ import org.junit.Test
 class DetectionViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
+    @Test fun `selected requests retain source order and original title numbering`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val candidates =
+                (1..3).map {
+                    MediaCandidate("id$it", "https://example.com/$it.mp4", "", "video/mp4", null)
+                }
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String) = MediaDetectionResult.Success("Page", candidates)
+                }
+            val downloads = RecordingDownloadRepository()
+            val model = testDetectionViewModel(repository, downloads, SpyNavigationDispatcher(), AppEventBus())
+            model.detect(SOURCE_URL)
+            advanceUntilIdle()
+            model.toggleCandidate("id3")
+            model.toggleCandidate("id1")
+            model.downloadSelected("Video")
+            advanceUntilIdle()
+            val requests = downloads.enqueued.single()
+            assertEquals(listOf("Page · 1", "Page · 3"), requests.map { it.title })
+            assertEquals(listOf(candidates[0].url, candidates[2].url), requests.map { it.url })
+            assertTrue(requests.all { it.sourcePageUrl == SOURCE_URL })
+        }
+
     @Test
     fun `mixed results preserve clear downloads`() =
         runTest(mainDispatcherRule.dispatcher) {

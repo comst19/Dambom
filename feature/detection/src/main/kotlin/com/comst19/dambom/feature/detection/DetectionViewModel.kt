@@ -2,15 +2,12 @@ package com.comst19.dambom.feature.detection
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.comst19.dambom.core.common.net.hasVideoFileExtension
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
-import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.EnqueueDownloadsResult
 import com.comst19.dambom.core.domain.model.MediaDetectionResult
-import com.comst19.dambom.core.domain.model.MediaVariant
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
@@ -20,7 +17,6 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.HomeGraph.DownloadsKey
 import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
-import com.comst19.dambom.core.network.header.mediaHeadersForUrl
 import com.comst19.dambom.feature.detection.contract.DetectionUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.mutate
@@ -34,7 +30,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -189,39 +184,7 @@ internal class DetectionViewModel
             mutableUiState.value = state.copy(isSubmitting = true)
             viewModelScope.launch {
                 suspendRunCatching {
-                    val requests =
-                        state.candidates
-                            .filter { it.id in state.selectedIds }
-                            .map { candidate ->
-                                val selectedUrl = state.selectedVariantUrls[candidate.id]
-                                val selected =
-                                    candidate.downloadVariants.firstOrNull { it.selectionId == selectedUrl }
-                                        ?: candidate.downloadVariants.first()
-                                val headers =
-                                    mediaHeadersForUrl(
-                                        selected.requestHeaders.ifEmpty { candidate.requestHeaders },
-                                        if (selected.requestHeaders.isEmpty()) candidate.url else selected.url,
-                                        selected.url,
-                                    )
-                                val variant = repository.resolveDownloadVariant(selected.copy(requestHeaders = headers))
-                                DownloadRequest(
-                                    id = UUID.randomUUID().toString(),
-                                    url = variant.url,
-                                    sourcePageUrl = sourcePageUrl,
-                                    title =
-                                        candidate.displayTitle(
-                                            fallbackTitle,
-                                            state.candidates.indexOf(candidate),
-                                            state.candidates.size,
-                                            state.pageTitle,
-                                        ),
-                                    mimeType = variant.mimeType,
-                                    expectedBytes = variant.contentLength,
-                                    quality = variant.quality,
-                                    videoHeight = variant.videoHeight,
-                                    requestHeaders = variant.requestHeaders,
-                                )
-                            }
+                    val requests = repository.selectedDownloadRequests(state, sourcePageUrl, fallbackTitle)
                     downloadRepository.enqueue(requests)
                 }.onSuccess { result ->
                     appEventBus.send(AppEvent.ShowSnackbar(result.feedbackMessage))
@@ -234,27 +197,6 @@ internal class DetectionViewModel
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Back) }
         }
     }
-
-private suspend fun MediaDetectionRepository.resolveDownloadVariant(variant: MediaVariant): MediaVariant {
-    if (variant.mimeType != null || variant.url.hasVideoFileExtension()) return variant
-    val result = detectRequest(variant.url, variant.requestHeaders)
-    if (result is MediaDetectionResult.Unsupported) throw MediaDownloadUnavailable(result.reason)
-    val resolved =
-        (result as? MediaDetectionResult.Success)
-            ?.candidates
-            ?.firstOrNull()
-            ?.downloadVariants
-            ?.firstOrNull()
-    val headers =
-        resolved?.let {
-            it.requestHeaders.ifEmpty { mediaHeadersForUrl(variant.requestHeaders, variant.url, it.url) }
-        }
-    return resolved?.copy(
-        quality = variant.quality,
-        videoHeight = variant.videoHeight ?: resolved.videoHeight,
-        requestHeaders = headers.orEmpty(),
-    ) ?: variant
-}
 
 private val EnqueueDownloadsResult.feedbackMessage: UiText
     get() =
@@ -274,10 +216,6 @@ private val EnqueueDownloadsResult.feedbackMessage: UiText
                 UiText.Resource(R.string.detection_enqueue_duplicates)
             }
         }
-
-private class MediaDownloadUnavailable(
-    val reason: UnsupportedReason,
-) : Exception()
 
 private fun DetectionUiState.withDownloadFailure(failure: Throwable): DetectionUiState {
     val reason = (failure as? MediaDownloadUnavailable)?.reason

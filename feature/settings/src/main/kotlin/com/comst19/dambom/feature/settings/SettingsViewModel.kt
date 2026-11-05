@@ -21,6 +21,7 @@ import com.comst19.dambom.feature.settings.platform.SettingsPlatformActions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @Suppress("TooManyFunctions")
@@ -121,9 +123,7 @@ internal class SettingsViewModel
                                 repository.setDownloadLocation(enabled = true, treeUri = treeUri)
                             }
                         } catch (cancellation: CancellationException) {
-                            if (acquiredNewGrant) {
-                                platformActions.releasePersistedDownloadDirectory(treeUri)
-                            }
+                            releaseUnusedDirectoryAfterCancellation(previousTreeUri, treeUri)
                             throw cancellation
                         }
                     if (result.isFailure) {
@@ -138,6 +138,20 @@ internal class SettingsViewModel
                         ?.let(platformActions::releasePersistedDownloadDirectory)
                 }
             }
+        }
+
+        private suspend fun releaseUnusedDirectoryAfterCancellation(
+            previousTreeUri: String?,
+            requestedTreeUri: String,
+        ) = withContext(NonCancellable) {
+            val savedTreeUri = repository.settings.first().downloadTreeUri
+            val unusedTreeUri =
+                if (savedTreeUri == requestedTreeUri) {
+                    previousTreeUri?.takeIf { it != requestedTreeUri }
+                } else {
+                    requestedTreeUri.takeIf { it != previousTreeUri }
+                }
+            unusedTreeUri?.let(platformActions::releasePersistedDownloadDirectory)
         }
 
         private fun launchSettingUpdate(update: suspend () -> Unit) {

@@ -65,6 +65,7 @@ import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
 import com.comst19.dambom.feature.library.player.component.PlayerLockButton
 import com.comst19.dambom.feature.library.player.component.PlayerSettingsButton
+import com.comst19.dambom.feature.library.subtitle.playback.SubtitleCueSource
 import com.comst19.dambom.feature.library.subtitle.playback.SubtitleToggleButton
 import com.comst19.dambom.feature.library.subtitle.playback.TranslatedSubtitleOverlay
 import kotlin.math.roundToInt
@@ -76,6 +77,7 @@ internal fun FullscreenVideoPlayer(
     task: DownloadTask,
     player: Player,
     interaction: PlayerInteractionState,
+    subtitleSource: SubtitleCueSource,
     fileActions: LibraryFileActions,
     onDismiss: () -> Unit,
     onRotate: () -> Unit,
@@ -116,6 +118,7 @@ internal fun FullscreenVideoPlayer(
                 )
                 TranslatedSubtitleOverlay(
                     player,
+                    subtitleSource,
                     interaction.subtitlesEnabled,
                     bottomPadding = if (controls.isVisible && !interaction.locked) 80.dp else 28.dp,
                     fontSize = 18.sp,

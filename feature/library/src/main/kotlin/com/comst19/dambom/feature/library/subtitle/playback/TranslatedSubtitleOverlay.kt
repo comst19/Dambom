@@ -15,7 +15,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,13 +39,12 @@ import kotlinx.coroutines.delay
 @Suppress("LongParameterList")
 internal fun BoxScope.TranslatedSubtitleOverlay(
     player: Player,
+    source: SubtitleCueSource,
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
     bottomPadding: Dp = 20.dp,
     fontSize: TextUnit = 14.sp,
-    onAvailability: (Boolean) -> Unit = {},
 ) {
-    val currentOnAvailability by rememberUpdatedState(onAvailability)
     var uri by remember(player) { mutableStateOf(player.currentMediaItem?.localConfiguration?.uri) }
     var playing by remember(player) { mutableStateOf(player.isPlaying) }
     var positionRevision by remember(player) { mutableIntStateOf(0) }
@@ -75,10 +73,9 @@ internal fun BoxScope.TranslatedSubtitleOverlay(
         player.addListener(listener)
         onDispose { player.removeListener(listener) }
     }
-    val cues by rememberSubtitleCues(uri)
+    val cues = if (uri == source.uri) source.cues else emptyList()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    var text by remember(uri) { mutableStateOf("") }
-    LaunchedEffect(uri, cues) { currentOnAvailability(cues.isNotEmpty()) }
+    var text by remember(uri, cues) { mutableStateOf("") }
     val timeline = remember(cues) { SubtitleTimeline(cues) }
     LaunchedEffect(player, timeline, lifecycle, enabled, playing, positionRevision) {
         text = ""
@@ -91,7 +88,7 @@ internal fun BoxScope.TranslatedSubtitleOverlay(
             }
         }
     }
-    if (text.isNotBlank()) SubtitleCaption(text, modifier, bottomPadding, fontSize)
+    if (enabled && uri == source.uri && text.isNotBlank()) SubtitleCaption(text, modifier, bottomPadding, fontSize)
 }
 
 @Composable

@@ -4,7 +4,9 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -23,23 +25,28 @@ import java.io.IOException
 
 @Composable
 internal fun rememberSubtitleCues(uri: Uri?): State<List<SubtitleCue>> {
-    var revision by remember { mutableIntStateOf(0) }
-    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { revision++ }
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    return produceState(emptyList<SubtitleCue>(), uri, revision, lifecycle) {
-        value = emptyList()
-        val path = uri?.takeIf { it.scheme == "file" }?.path ?: return@produceState
-        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            withContext(Dispatchers.IO) {
-                val file = File(path).videoSubtitleFile()
-                var previousStamp: Pair<Long, Long>? = null
-                while (true) {
-                    val stamp = file.lastModified() to file.length()
-                    if (stamp != previousStamp) {
-                        value = readSubtitleCues(file)
-                        previousStamp = stamp
+    var revision by remember(lifecycle) { mutableIntStateOf(0) }
+    var hasResumed by remember(lifecycle) { mutableStateOf(false) }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (hasResumed) revision++ else hasResumed = true
+    }
+    return key(uri) {
+        produceState(emptyList<SubtitleCue>(), revision, lifecycle) {
+            value = emptyList()
+            val path = uri?.takeIf { it.scheme == "file" }?.path ?: return@produceState
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                withContext(Dispatchers.IO) {
+                    val file = File(path).videoSubtitleFile()
+                    var previousStamp: Pair<Long, Long>? = null
+                    while (true) {
+                        val stamp = file.lastModified() to file.length()
+                        if (stamp != previousStamp) {
+                            value = readSubtitleCues(file)
+                            previousStamp = stamp
+                        }
+                        delay(SUBTITLE_FILE_CHECK_MILLIS)
                     }
-                    delay(SUBTITLE_FILE_CHECK_MILLIS)
                 }
             }
         }

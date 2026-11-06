@@ -48,6 +48,7 @@ import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.media.rememberLocalVideoMetadata
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
 import com.comst19.dambom.feature.library.player.component.PlaybackOptionsButton
+import com.comst19.dambom.feature.library.subtitle.playback.SubtitleCueSource
 import com.comst19.dambom.feature.library.subtitle.playback.SubtitleToggleButton
 import com.comst19.dambom.feature.library.subtitle.playback.TranslatedSubtitleOverlay
 
@@ -69,6 +70,7 @@ internal fun VideoPlayerPanel(
     task: DownloadTask,
     player: Player,
     interaction: PlayerInteractionState,
+    subtitleSource: SubtitleCueSource,
     onOpenOriginal: () -> Unit,
     onCopyLink: () -> Unit,
     onShareLink: () -> Unit,
@@ -105,6 +107,7 @@ internal fun VideoPlayerPanel(
         InlineVideoSurface(
             player = player,
             interaction = interaction,
+            subtitleSource = subtitleSource,
             surfaceDescription = surfaceDescription,
             controlsVisible = controls.isVisible,
             showPlay = playPauseState.showPlay,
@@ -146,6 +149,7 @@ internal fun VideoPlayerPanel(
 private fun InlineVideoSurface(
     player: Player,
     interaction: PlayerInteractionState,
+    subtitleSource: SubtitleCueSource,
     surfaceDescription: String,
     controlsVisible: Boolean,
     showPlay: Boolean,
@@ -191,6 +195,7 @@ private fun InlineVideoSurface(
         )
         TranslatedSubtitleOverlay(
             player,
+            subtitleSource,
             interaction.subtitlesEnabled,
             bottomPadding = if (controlsVisible) 64.dp else 20.dp,
         )

@@ -210,6 +210,10 @@ internal fun SettingsScreen(
     }
 }
 
+@Preview(name = "Chinese simplified", locale = "b+zh+Hans", widthDp = 320, heightDp = 640)
+@Preview(name = "Chinese traditional", locale = "b+zh+Hant", widthDp = 320, heightDp = 640)
+@Preview(name = "Japanese", locale = "ja", widthDp = 320, heightDp = 640)
+@Preview(name = "Spanish", locale = "es", widthDp = 320, heightDp = 640)
 @FormFactorPreviews
 @Preview(name = "Arabic", locale = "ar", widthDp = 320, heightDp = 640)
 @Preview(name = "Hindi", locale = "hi", widthDp = 320, heightDp = 640)

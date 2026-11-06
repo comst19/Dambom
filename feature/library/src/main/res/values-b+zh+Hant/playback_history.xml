@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">最近播放</string>
+    <string name="library_recently_played_empty_title">沒有最近播放的視頻</string>
+    <string name="library_recently_played_empty_description">播放影片以在此處查看。如果過濾器處於活動狀態，請嘗試變更它們。</string>
+</resources>

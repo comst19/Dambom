@@ -32,6 +32,10 @@ android {
             listOf(
                 "en",
                 "ko",
+                "b+zh+Hans",
+                "b+zh+Hant",
+                "ja",
+                "es",
                 "ur",
                 "hi",
                 "fr",

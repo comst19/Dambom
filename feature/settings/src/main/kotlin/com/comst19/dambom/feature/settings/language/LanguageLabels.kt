@@ -9,6 +9,10 @@ internal val AppLanguage.labelRes: Int
             AppLanguage.SYSTEM -> R.string.language_system
             AppLanguage.KOREAN -> R.string.language_korean
             AppLanguage.ENGLISH -> R.string.language_english
+            AppLanguage.CHINESE_SIMPLIFIED -> R.string.language_chinese_simplified
+            AppLanguage.CHINESE_TRADITIONAL -> R.string.language_chinese_traditional
+            AppLanguage.JAPANESE -> R.string.language_japanese
+            AppLanguage.SPANISH -> R.string.language_spanish
             AppLanguage.URDU -> R.string.language_urdu
             AppLanguage.HINDI -> R.string.language_hindi
             AppLanguage.FRENCH -> R.string.language_french

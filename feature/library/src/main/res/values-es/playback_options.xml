@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">¿Continuar mirando?</string>
+    <string name="player_resume_message">Viste hasta %1$s.</string>
+    <string name="player_resume_continue">Continuar</string>
+    <string name="player_resume_restart">Empezar de nuevo</string>
+    <string name="player_history_failure">No se pudo cargar ni guardar el historial de reproducción.</string>
+    <string name="player_settings_failure">No se pudieron guardar los ajustes de reproducción.</string>
+    <string name="player_speed">Velocidad de reproducción</string>
+    <string name="player_speed_value">Velocidad de reproducción · %1$s×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">Repetir este vídeo</string>
+    <string name="player_options_close">Cerrar</string>
+</resources>

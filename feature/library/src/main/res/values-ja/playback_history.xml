@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">最近再生した動画</string>
+    <string name="library_recently_played_empty_title">最近再生されたビデオはありません</string>
+    <string name="library_recently_played_empty_description">ここでビデオを再生してご覧ください。フィルターが有効になっている場合は、フィルターを変更してみてください。</string>
+</resources>

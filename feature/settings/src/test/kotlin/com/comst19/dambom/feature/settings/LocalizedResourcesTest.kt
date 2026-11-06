@@ -17,8 +17,8 @@ import java.util.Locale
 class LocalizedResourcesTest {
     @Test
     fun `unsupported language falls back to English`() {
-        assertEquals("Settings", title("ja-JP"))
-        assertEquals("Settings", title("es-ES"))
+        assertEquals("Settings", title("xx-JP"))
+        assertEquals("Settings", title("xx-ES"))
     }
 
     @Test
@@ -26,6 +26,17 @@ class LocalizedResourcesTest {
         assertEquals("설정", title("ko-KR"))
         assertEquals("Settings", title("en-NG"))
         assertEquals("Paramètres", title("fr-BJ"))
+    }
+
+    @Test
+    fun `new languages resolve script and regional resources`() {
+        assertEquals("设置", title("zh-Hans"))
+        assertEquals("设置", title("zh-CN"))
+        assertEquals("設定", title("zh-Hant"))
+        assertEquals("設定", title("zh-TW"))
+        assertEquals("設定", title("zh-HK"))
+        assertEquals("設定", title("ja-JP"))
+        assertEquals("Configuración", title("es-MX"))
     }
 
     @Test

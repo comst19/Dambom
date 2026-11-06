@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">儲存空間不足。釋放空間並重試：%1$s</string>
+    <string name="download_notification_channel">下載</string>
+    <string name="download_notification_title">Dambom正在下載視頻</string>
+    <string name="download_notification_description">重新連線後從已儲存的點下載復原。</string>
+    <string name="download_result_notification_channel">下載結果</string>
+    <string name="download_notification_progress_title">正在下載%1$s</string>
+    <string name="download_notification_progress">%1$d%%完成</string>
+    <string name="download_notification_completed">下載完成</string>
+    <string name="download_notification_completed_description">%1$s 已儲存到您的庫中。</string>
+    <string name="download_notification_failed">下載失敗</string>
+    <string name="download_notification_failed_description">嘗試再次下載%1$s。</string>
+    <string name="download_notification_failed_network">檢查%1$s的網路連線。</string>
+    <string name="download_notification_failed_storage">檢查%1$s的可用儲存空間。</string>
+</resources>

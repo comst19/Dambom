@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">ストレージが不十分である。スペースを解放して再試行してください: %1$s</string>
+    <string name="download_notification_channel">ダウンロード</string>
+    <string name="download_notification_title">Dambom はビデオをダウンロードしています</string>
+    <string name="download_notification_description">ダウンロードは、再接続後に保存されたポイントから再開される。</string>
+    <string name="download_result_notification_channel">ダウンロード結果</string>
+    <string name="download_notification_progress_title">%1$sをダウンロード中</string>
+    <string name="download_notification_progress">%1$d%%完了</string>
+    <string name="download_notification_completed">ダウンロードが完了しました</string>
+    <string name="download_notification_completed_description">%1$s がライブラリに保存されました。</string>
+    <string name="download_notification_failed">ダウンロードに失敗しました</string>
+    <string name="download_notification_failed_description">再度、%1$sをダウンロードしてみてください。</string>
+    <string name="download_notification_failed_network">ネットワーク接続を確認してください%1$s.</string>
+    <string name="download_notification_failed_storage">利用可能なストレージを確認する%1$s.</string>
+</resources>

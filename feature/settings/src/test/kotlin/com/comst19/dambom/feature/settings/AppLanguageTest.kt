@@ -28,8 +28,19 @@ class AppLanguageTest {
     }
 
     @Test
+    fun `Chinese region and explicit script map to distinct choices`() {
+        assertEquals(AppLanguage.CHINESE_SIMPLIFIED, AppLanguage.from("zh-CN"))
+        assertEquals(AppLanguage.CHINESE_TRADITIONAL, AppLanguage.from("zh-TW"))
+        assertEquals(AppLanguage.CHINESE_TRADITIONAL, AppLanguage.from("zh-HK"))
+        assertEquals(AppLanguage.CHINESE_SIMPLIFIED, AppLanguage.from("zh-Hans-HK"))
+        assertEquals(AppLanguage.CHINESE_TRADITIONAL, AppLanguage.from("zh-Hant-CN,en"))
+        assertEquals(AppLanguage.JAPANESE, AppLanguage.from("ja-JP"))
+        assertEquals(AppLanguage.SPANISH, AppLanguage.from("es-ES"))
+    }
+
+    @Test
     fun `empty or unsupported locale tags use system default`() {
         assertEquals(AppLanguage.SYSTEM, AppLanguage.from(""))
-        assertEquals(AppLanguage.SYSTEM, AppLanguage.from("ja-JP"))
+        assertEquals(AppLanguage.SYSTEM, AppLanguage.from("xx-JP"))
     }
 }

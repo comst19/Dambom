@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">Posición de reproducción</string>
+    <string name="playback_rewind">Retroceder 10 segundos</string>
+    <string name="playback_play">Reproducir</string>
+    <string name="playback_pause">Pausa</string>
+    <string name="playback_forward">Adelante 10 segundos</string>
+</resources>

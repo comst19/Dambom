@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,9 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -98,43 +97,51 @@ internal fun BoxScope.SubtitleCaption(
     bottomPadding: Dp = 20.dp,
     fontSize: TextUnit = 14.sp,
 ) {
-    Text(
-        text = text,
-        modifier =
-            modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(start = 12.dp, end = 12.dp, bottom = bottomPadding),
-        color = Color.White,
-        fontSize = fontSize,
-        lineHeight = fontSize * SUBTITLE_LINE_HEIGHT,
-        fontWeight = FontWeight.Medium,
-        textAlign = TextAlign.Center,
-        maxLines = 2,
-        style =
-            MaterialTheme.typography.bodyMedium.copy(
-                shadow =
-                    Shadow(
-                        color = Color.Black,
-                        offset = Offset.Zero,
-                        blurRadius = SUBTITLE_SHADOW_RADIUS,
-                    ),
-            ),
-    )
+    Box(
+        modifier
+            .align(Alignment.BottomCenter)
+            .padding(start = 12.dp, end = 12.dp, bottom = bottomPadding),
+    ) {
+        Text(
+            text = text,
+            modifier =
+                Modifier
+                    .background(Color.Black.copy(alpha = SUBTITLE_BACKGROUND_ALPHA), RoundedCornerShape(4.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+            color = Color.White,
+            fontSize = fontSize,
+            lineHeight = fontSize * SUBTITLE_LINE_HEIGHT,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+    }
 }
 
-@Preview(name = "Inline subtitle", widthDp = 360, heightDp = 203)
-@Preview(name = "Wide subtitle", widthDp = 800, heightDp = 450)
+@Preview(name = "Bright inline", widthDp = 360, heightDp = 203)
+@Preview(name = "Bright wide", widthDp = 800, heightDp = 450)
 @Composable
-private fun SubtitleCaptionPreview() {
-    Box(Modifier.fillMaxWidth().aspectRatio(SUBTITLE_PREVIEW_ASPECT).background(Color(SUBTITLE_PREVIEW_COLOR))) {
-        SubtitleCaption("안녕하세요, 이것은 자막 번역 테스트입니다.")
+private fun BrightSubtitleCaptionPreview() {
+    SubtitleCaptionPreview(Color.White)
+}
+
+@Preview(name = "Dark inline", widthDp = 360, heightDp = 203)
+@Preview(name = "Dark wide", widthDp = 800, heightDp = 450)
+@Composable
+private fun DarkSubtitleCaptionPreview() {
+    SubtitleCaptionPreview(Color.Black)
+}
+
+@Composable
+private fun SubtitleCaptionPreview(videoColor: Color) {
+    Box(Modifier.fillMaxWidth().aspectRatio(SUBTITLE_PREVIEW_ASPECT).background(videoColor)) {
+        SubtitleCaption("밝거나 어두운 영상에서도\n자막을 또렷하게 읽을 수 있습니다.")
     }
 }
 
 private const val SUBTITLE_TICK_MILLIS = 100L
 
 private const val SUBTITLE_LINE_HEIGHT = 1.3f
-private const val SUBTITLE_SHADOW_RADIUS = 4f
+private const val SUBTITLE_BACKGROUND_ALPHA = 0.8f
 private const val SUBTITLE_PREVIEW_ASPECT = 16f / 9f
-private const val SUBTITLE_PREVIEW_COLOR = 0xFF124F76

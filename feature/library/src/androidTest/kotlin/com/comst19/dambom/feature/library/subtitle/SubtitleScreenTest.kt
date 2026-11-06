@@ -437,22 +437,43 @@ class SubtitleScreenTest {
         }
     }
 
-    @Test fun captionStaysAtTheVideoBottomWithoutAnOpaqueTextBox() {
-        val videoColor = Color(0xFF124F76)
+    @Test fun captionHasWhiteTextOnEightyPercentBlackOverBrightVideo() {
+        assertCaptionContrast(Color.White, Color(0xFF333333), "bright")
+    }
+
+    @Test fun captionHasWhiteTextOnEightyPercentBlackOverDarkVideo() {
+        assertCaptionContrast(Color.Black, Color.Black, "dark")
+    }
+
+    private fun assertCaptionContrast(
+        videoColor: Color,
+        expectedBackground: Color,
+        name: String,
+    ) {
+        val text = "첫 번째 줄\n두 번째 줄"
         compose.setContent {
             Box(Modifier.size(320.dp, 180.dp).background(videoColor).testTag("subtitle-video")) {
-                SubtitleCaption("짧은 자막")
+                SubtitleCaption(text)
             }
         }
         val video = compose.onNodeWithTag("subtitle-video").fetchSemanticsNode().boundsInRoot
-        val caption = compose.onNodeWithText("짧은 자막").fetchSemanticsNode().boundsInRoot
+        val caption = compose.onNodeWithText(text).fetchSemanticsNode().boundsInRoot
         assertTrue(caption.top > video.center.y)
         assertTrue(caption.bottom < video.bottom)
-        val pixels = compose.onNodeWithTag("subtitle-video").captureToImage().toPixelMap()
-        val x = (caption.left - video.left + 2).toInt()
-        val y = (caption.top - video.top + 2).toInt()
-        assertEquals(videoColor.toArgb(), pixels[x, y].toArgb())
-        capture("subtitle-caption-bottom.png")
+        assertTrue(caption.width < video.width)
+        val pixels = compose.onNodeWithText(text).captureToImage().toPixelMap()
+        val background = pixels[2, pixels.height / 2]
+        assertEquals(expectedBackground.red, background.red, 0.01f)
+        assertEquals(expectedBackground.green, background.green, 0.01f)
+        assertEquals(expectedBackground.blue, background.blue, 0.01f)
+        assertTrue(
+            (0 until pixels.height).any { y ->
+                (0 until pixels.width).any { x -> pixels[x, y].toArgb() == Color.White.toArgb() }
+            },
+        )
+        val videoPixels = compose.onNodeWithTag("subtitle-video").captureToImage().toPixelMap()
+        assertEquals(videoColor.toArgb(), videoPixels[2, videoPixels.height / 2].toArgb())
+        capture("subtitle-caption-$name.png")
     }
 
     @Test fun timedCuesAdvanceOnSeekWithoutRewritingTheSavedSrt() {

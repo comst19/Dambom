@@ -38,15 +38,19 @@ class SubtitleCueTest {
         assertEquals(null, SubtitleLanguagePair.parse(null))
     }
 
-    @Test fun `targets include every app language and preserve script differences`() {
-        val appLanguages =
-            com.comst19.dambom.core.common.locale.AppLanguage.entries.filter {
-                it != com.comst19.dambom.core.common.locale.AppLanguage.SYSTEM
-            }
-        assertEquals(appLanguages.size + 1, SubtitleLanguagePair.targetLanguages.size)
+    @Test fun `subtitle languages stay independent of app translation resources`() {
+        assertEquals(15, SubtitleLanguagePair.sourceLanguages.size)
+        assertEquals(43, SubtitleLanguagePair.targetLanguages.size)
+        assertEquals(43, SubtitleLanguagePair.targetLanguages.distinct().size)
         assertEquals(true, "pa-Guru" in SubtitleLanguagePair.targetLanguages)
         assertEquals(true, "ja" in SubtitleLanguagePair.targetLanguages)
+        assertEquals(false, "es" in SubtitleLanguagePair.targetLanguages)
+        assertEquals(false, "zh-Hans" in SubtitleLanguagePair.targetLanguages)
+        assertEquals(false, "zh-Hant" in SubtitleLanguagePair.targetLanguages)
         assertEquals("ur", SubtitleLanguagePair.defaultTarget(java.util.Locale.forLanguageTag("ur-PK")))
+        assertEquals("en", SubtitleLanguagePair.defaultTarget(java.util.Locale.forLanguageTag("es-MX")))
+        assertEquals("en", SubtitleLanguagePair.defaultTarget(java.util.Locale.forLanguageTag("zh-TW")))
+        assertEquals("ja", SubtitleLanguagePair.defaultTarget(java.util.Locale.forLanguageTag("ja-JP")))
         assertEquals("en", SubtitleLanguagePair.defaultTarget(java.util.Locale.forLanguageTag("xx-ZZ")))
     }
 

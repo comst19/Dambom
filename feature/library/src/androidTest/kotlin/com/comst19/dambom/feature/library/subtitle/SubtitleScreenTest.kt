@@ -2,11 +2,16 @@ package com.comst19.dambom.feature.library.subtitle
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.FileObserver
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,6 +34,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -46,8 +55,10 @@ import com.comst19.dambom.feature.library.subtitle.model.SubtitleLanguagePair
 import com.comst19.dambom.feature.library.subtitle.model.subtitleTranscriptSections
 import com.comst19.dambom.feature.library.subtitle.model.toSrt
 import com.comst19.dambom.feature.library.subtitle.playback.SubtitleCaption
+import com.comst19.dambom.feature.library.subtitle.playback.SubtitleCueSource
 import com.comst19.dambom.feature.library.subtitle.playback.SubtitleToggleButton
 import com.comst19.dambom.feature.library.subtitle.playback.TranslatedSubtitleOverlay
+import com.comst19.dambom.feature.library.subtitle.playback.rememberSubtitleCues
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -55,6 +66,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
+import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(AndroidJUnit4::class)
 class SubtitleScreenTest {
@@ -215,7 +227,9 @@ class SubtitleScreenTest {
             val interaction = PlayerInteractionState()
             compose.setContent {
                 Box(Modifier.fillMaxSize()) {
-                    TranslatedSubtitleOverlay(player, interaction.subtitlesEnabled) { interaction.hasSubtitles = it }
+                    val cues by rememberSubtitleCues(Uri.fromFile(video))
+                    SideEffect { interaction.hasSubtitles = cues.isNotEmpty() }
+                    TranslatedSubtitleOverlay(player, SubtitleCueSource(Uri.fromFile(video), cues), interaction.subtitlesEnabled)
                     SubtitleToggleButton(interaction)
                 }
             }
@@ -232,7 +246,7 @@ class SubtitleScreenTest {
             compose.waitUntil(5_000) { compose.onAllNodesWithText("번역 확인").fetchSemanticsNodes().isNotEmpty() }
             capture("subtitle-overlay.png")
             compose.runOnUiThread { player.clearMediaItems() }
-            compose.waitUntil(5_000) { !interaction.hasSubtitles }
+            compose.waitForIdle()
             compose.onNodeWithText("번역 확인").assertDoesNotExist()
         } finally {
             compose.runOnUiThread { player.release() }
@@ -249,7 +263,12 @@ class SubtitleScreenTest {
             player.setMediaItem(MediaItem.fromUri(Uri.fromFile(video)))
         }
         try {
-            compose.setContent { Box(Modifier.fillMaxSize()) { TranslatedSubtitleOverlay(player) } }
+            compose.setContent {
+                Box(Modifier.fillMaxSize()) {
+                    val cues by rememberSubtitleCues(Uri.fromFile(video))
+                    TranslatedSubtitleOverlay(player, SubtitleCueSource(Uri.fromFile(video), cues))
+                }
+            }
             compose.waitForIdle()
             compose.onNodeWithText("늦게 완성된 자막").assertDoesNotExist()
             video.videoSubtitleFile().writeText(listOf(SubtitleCue(0, 800, "늦게 완성된 자막")).toSrt())
@@ -418,22 +437,43 @@ class SubtitleScreenTest {
         }
     }
 
-    @Test fun captionStaysAtTheVideoBottomWithoutAnOpaqueTextBox() {
-        val videoColor = Color(0xFF124F76)
+    @Test fun captionHasWhiteTextOnEightyPercentBlackOverBrightVideo() {
+        assertCaptionContrast(Color.White, Color(0xFF333333), "bright")
+    }
+
+    @Test fun captionHasWhiteTextOnEightyPercentBlackOverDarkVideo() {
+        assertCaptionContrast(Color.Black, Color.Black, "dark")
+    }
+
+    private fun assertCaptionContrast(
+        videoColor: Color,
+        expectedBackground: Color,
+        name: String,
+    ) {
+        val text = "첫 번째 줄\n두 번째 줄"
         compose.setContent {
             Box(Modifier.size(320.dp, 180.dp).background(videoColor).testTag("subtitle-video")) {
-                SubtitleCaption("짧은 자막")
+                SubtitleCaption(text)
             }
         }
         val video = compose.onNodeWithTag("subtitle-video").fetchSemanticsNode().boundsInRoot
-        val caption = compose.onNodeWithText("짧은 자막").fetchSemanticsNode().boundsInRoot
+        val caption = compose.onNodeWithText(text).fetchSemanticsNode().boundsInRoot
         assertTrue(caption.top > video.center.y)
         assertTrue(caption.bottom < video.bottom)
-        val pixels = compose.onNodeWithTag("subtitle-video").captureToImage().toPixelMap()
-        val x = (caption.left - video.left + 2).toInt()
-        val y = (caption.top - video.top + 2).toInt()
-        assertEquals(videoColor.toArgb(), pixels[x, y].toArgb())
-        capture("subtitle-caption-bottom.png")
+        assertTrue(caption.width < video.width)
+        val pixels = compose.onNodeWithText(text).captureToImage().toPixelMap()
+        val background = pixels[2, pixels.height / 2]
+        assertEquals(expectedBackground.red, background.red, 0.01f)
+        assertEquals(expectedBackground.green, background.green, 0.01f)
+        assertEquals(expectedBackground.blue, background.blue, 0.01f)
+        assertTrue(
+            (0 until pixels.height).any { y ->
+                (0 until pixels.width).any { x -> pixels[x, y].toArgb() == Color.White.toArgb() }
+            },
+        )
+        val videoPixels = compose.onNodeWithTag("subtitle-video").captureToImage().toPixelMap()
+        assertEquals(videoColor.toArgb(), videoPixels[2, videoPixels.height / 2].toArgb())
+        capture("subtitle-caption-$name.png")
     }
 
     @Test fun timedCuesAdvanceOnSeekWithoutRewritingTheSavedSrt() {
@@ -446,7 +486,12 @@ class SubtitleScreenTest {
             player.setMediaItem(MediaItem.fromUri(Uri.fromFile(video)))
         }
         try {
-            compose.setContent { Box(Modifier.fillMaxSize()) { TranslatedSubtitleOverlay(player) } }
+            compose.setContent {
+                Box(Modifier.fillMaxSize()) {
+                    val cues by rememberSubtitleCues(Uri.fromFile(video))
+                    TranslatedSubtitleOverlay(player, SubtitleCueSource(Uri.fromFile(video), cues))
+                }
+            }
             compose.waitUntil(5_000) { compose.onAllNodesWithText("첫 문장입니다.").fetchSemanticsNodes().isNotEmpty() }
             compose.runOnUiThread { player.seekTo(7_500) }
             compose.waitUntil(5_000) { compose.onAllNodesWithText("마지막 문장입니다.").fetchSemanticsNodes().isNotEmpty() }
@@ -456,6 +501,159 @@ class SubtitleScreenTest {
             compose.runOnUiThread { player.release() }
             video.videoSubtitleFile().delete()
             video.delete()
+        }
+    }
+
+    @Test fun parentSharesOneSrtReadAcrossInlineFullscreenAndPipContent() {
+        val video = File(context.cacheDir, "subtitle-shared.mp4").apply { writeText("test") }
+        val subtitle =
+            video.videoSubtitleFile().apply {
+                writeText(listOf(SubtitleCue(0, 8_000, "공유 자막")).toSrt())
+            }
+        val reads = AtomicInteger()
+        val observer =
+            object : FileObserver(subtitle, CLOSE_NOWRITE) {
+                override fun onEvent(
+                    event: Int,
+                    path: String?,
+                ) {
+                    if (event and CLOSE_NOWRITE != 0) reads.incrementAndGet()
+                }
+            }
+        lateinit var player: ExoPlayer
+        compose.runOnUiThread {
+            player = ExoPlayer.Builder(context).build()
+            player.setMediaItem(MediaItem.fromUri(Uri.fromFile(video)))
+        }
+        val fullscreen = mutableStateOf(false)
+        val pip = mutableStateOf(false)
+        observer.startWatching()
+        try {
+            compose.setContent {
+                MaterialTheme {
+                    VideoPlayerScreen(
+                        task = task.copy(localFilePath = video.path),
+                        player = player,
+                        fileActions = LibraryFileActions({ _, _ -> }, {}, {}, {}, {}, {}, onDelete = {}),
+                        onBack = {},
+                        showBack = true,
+                        isVideoFullscreen = fullscreen.value,
+                        onVideoFullscreenChange = { fullscreen.value = it },
+                        onVideoRotate = {},
+                        isPipContentOnly = pip.value,
+                    )
+                }
+            }
+            compose.waitUntil(5_000) { compose.onAllNodesWithText("공유 자막").fetchSemanticsNodes().isNotEmpty() }
+            assertEquals(1, reads.get())
+            compose.runOnIdle { fullscreen.value = true }
+            compose.onNodeWithText("공유 자막").assertIsDisplayed()
+            compose.runOnIdle { pip.value = true }
+            compose.onNodeWithText("공유 자막").assertDoesNotExist()
+            compose.runOnIdle {
+                pip.value = false
+                fullscreen.value = false
+            }
+            compose.waitUntil(5_000) { compose.onAllNodesWithText("공유 자막").fetchSemanticsNodes().isNotEmpty() }
+            assertEquals(1, reads.get())
+            subtitle.writeText(listOf(SubtitleCue(0, 8_000, "새로 생성한 공유 자막")).toSrt())
+            compose.waitUntil(5_000) { compose.onAllNodesWithText("새로 생성한 공유 자막").fetchSemanticsNodes().isNotEmpty() }
+            assertEquals(2, reads.get())
+            subtitle.delete()
+            compose.waitUntil(5_000) { compose.onAllNodesWithText("새로 생성한 공유 자막").fetchSemanticsNodes().isEmpty() }
+            compose.onNodeWithContentDescription(context.getString(R.string.subtitle_hide)).assertDoesNotExist()
+        } finally {
+            observer.stopWatching()
+            compose.runOnUiThread { player.release() }
+            subtitle.delete()
+            video.delete()
+        }
+    }
+
+    @Test fun sharedCuesAreHiddenUntilThePlayerMatchesTheirVideo() {
+        val first = Uri.parse("file:///first.mp4")
+        val second = Uri.parse("file:///second.mp4")
+        val source = mutableStateOf(SubtitleCueSource(first, listOf(SubtitleCue(0, 8_000, "이전 영상"))))
+        lateinit var player: ExoPlayer
+        compose.runOnUiThread {
+            player = ExoPlayer.Builder(context).build()
+            player.setMediaItem(MediaItem.fromUri(first))
+        }
+        try {
+            compose.setContent {
+                Box(Modifier.fillMaxSize()) { TranslatedSubtitleOverlay(player, source.value) }
+            }
+            compose.onNodeWithText("이전 영상").assertIsDisplayed()
+            compose.runOnIdle {
+                source.value = SubtitleCueSource(second, listOf(SubtitleCue(0, 8_000, "다음 영상")))
+            }
+            compose.onNodeWithText("이전 영상").assertDoesNotExist()
+            compose.onNodeWithText("다음 영상").assertDoesNotExist()
+            compose.runOnUiThread { player.setMediaItem(MediaItem.fromUri(second)) }
+            compose.waitUntil(5_000) { compose.onAllNodesWithText("다음 영상").fetchSemanticsNodes().isNotEmpty() }
+            compose.runOnUiThread { player.setMediaItem(MediaItem.fromUri(first)) }
+            compose.onNodeWithText("다음 영상").assertDoesNotExist()
+        } finally {
+            compose.runOnUiThread { player.release() }
+        }
+    }
+
+    @Test fun changingTheSubtitleUriPublishesEmptyBeforeTheNewFileIsRead() {
+        val first = File(context.cacheDir, "subtitle-source-first.mp4")
+        val second = File(context.cacheDir, "subtitle-source-second.mp4")
+        first.videoSubtitleFile().writeText(listOf(SubtitleCue(0, 800, "이전 자막")).toSrt())
+        val uri = mutableStateOf(Uri.fromFile(first))
+        val observed = mutableListOf<Pair<Uri, List<SubtitleCue>>>()
+        try {
+            compose.setContent {
+                val cues = rememberSubtitleCues(uri.value).value
+                SideEffect { observed.add(uri.value to cues) }
+            }
+            compose.waitUntil(5_000) { observed.any { it.second.isNotEmpty() } }
+            compose.runOnIdle { uri.value = Uri.fromFile(second) }
+            compose.runOnIdle {
+                val newSourceStates = observed.filter { it.first == Uri.fromFile(second) }
+                assertTrue(newSourceStates.isNotEmpty())
+                assertTrue(newSourceStates.all { it.second.isEmpty() })
+            }
+        } finally {
+            first.videoSubtitleFile().delete()
+            second.videoSubtitleFile().delete()
+        }
+    }
+
+    @Test fun resumeRefreshesSameStampSubtitlesAndRestartObservesTheFileAgain() {
+        val video = File(context.cacheDir, "subtitle-lifecycle.mp4")
+        val subtitle =
+            video.videoSubtitleFile().apply {
+                writeText(listOf(SubtitleCue(0, 800, "AAA")).toSrt())
+            }
+        val owner =
+            object : LifecycleOwner {
+                override val lifecycle = LifecycleRegistry(this)
+            }
+        compose.runOnUiThread { owner.lifecycle.currentState = Lifecycle.State.RESUMED }
+        try {
+            compose.setContent {
+                CompositionLocalProvider(LocalLifecycleOwner provides owner) {
+                    val cues by rememberSubtitleCues(Uri.fromFile(video))
+                    Text(cues.joinToString { it.text })
+                }
+            }
+            compose.waitUntil(5_000) { compose.onAllNodesWithText("AAA").fetchSemanticsNodes().isNotEmpty() }
+            compose.runOnUiThread { owner.lifecycle.currentState = Lifecycle.State.STARTED }
+            val stamp = subtitle.lastModified()
+            subtitle.writeText(listOf(SubtitleCue(0, 800, "BBB")).toSrt())
+            assertTrue(subtitle.setLastModified(stamp))
+            compose.runOnUiThread { owner.lifecycle.currentState = Lifecycle.State.RESUMED }
+            compose.waitUntil(5_000) { compose.onAllNodesWithText("BBB").fetchSemanticsNodes().isNotEmpty() }
+            compose.runOnUiThread { owner.lifecycle.currentState = Lifecycle.State.CREATED }
+            subtitle.writeText(listOf(SubtitleCue(0, 800, "CCC")).toSrt())
+            compose.runOnUiThread { owner.lifecycle.currentState = Lifecycle.State.RESUMED }
+            compose.waitUntil(5_000) { compose.onAllNodesWithText("CCC").fetchSemanticsNodes().isNotEmpty() }
+        } finally {
+            compose.runOnUiThread { owner.lifecycle.currentState = Lifecycle.State.DESTROYED }
+            subtitle.delete()
         }
     }
 

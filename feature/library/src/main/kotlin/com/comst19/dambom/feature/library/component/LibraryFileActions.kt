@@ -150,7 +150,7 @@ internal fun rememberLibraryFileActions(
                 onDelete = { task -> currentOnDelete.value?.invoke(task) ?: viewModel.delete(task) },
                 onTrim = viewModel::trimVideo,
                 onCompress = viewModel::compressVideo,
-                onTranslate = viewModel::translateVideo,
+                onTranslate = if (context.packageName.contains(".onestore")) null else viewModel::translateVideo,
             )
         }
     var choosingExport by rememberSaveable { mutableStateOf<String?>(null) }

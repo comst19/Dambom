@@ -44,13 +44,16 @@ internal fun localVideoCacheKey(path: String): LocalVideoCacheKey =
     }
 
 @Composable
-internal fun rememberLocalVideoMetadata(path: String?): State<LocalVideoMetadata?> =
+internal fun rememberLocalVideoMetadata(
+    path: String?,
+    includeThumbnail: Boolean = true,
+): State<LocalVideoMetadata?> =
     LocalContext.current.let { context ->
-        produceState<LocalVideoMetadata?>(initialValue = null, key1 = context, key2 = path) {
+        produceState<LocalVideoMetadata?>(initialValue = null, key1 = context, key2 = path, key3 = includeThumbnail) {
             value = null
             if (path != null) {
                 observeLocalVideoCacheKey(path).collect { key ->
-                    value = LocalVideoMetadataLoader.load(context.applicationContext, key)
+                    value = LocalVideoMetadataLoader.load(context.applicationContext, key, includeThumbnail)
                 }
             }
         }
@@ -101,6 +104,7 @@ internal object LocalVideoMetadataLoader {
     suspend fun load(
         context: Context,
         key: LocalVideoCacheKey,
+        includeThumbnail: Boolean = true,
     ): LocalVideoMetadata {
         val version =
             synchronized(this) {
@@ -114,6 +118,11 @@ internal object LocalVideoMetadataLoader {
                 }
                 cacheVersion
             }
+        if (!includeThumbnail) {
+            return cache[key]?.copy(thumbnail = null) ?: withContext(Dispatchers.IO) {
+                readMetadata(key.path, thumbnail = null)
+            }
+        }
         return cache[key] ?: readMutex.withLock {
             cache[key] ?: withContext(Dispatchers.IO) {
                 readMetadata(

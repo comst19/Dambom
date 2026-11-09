@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="library_recently_played">Reproducido recientemente</string>
+    <string name="library_recently_played_empty_title">No hay vídeos reproducidos recientemente</string>
+    <string name="library_recently_played_empty_description">Reproduzca un vídeo para verlo aquí. Si los filtros están activos, intente cambiarlos.</string>
+</resources>

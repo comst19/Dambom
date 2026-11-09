@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from pathlib import Path
 
-ALIASES = {"id": "in", "he": "iw"}
+ALIASES = {"id": "in", "he": "iw", "zh-Hans": "b+zh+Hans", "zh-Hant": "b+zh+Hant"}
 FORMAT = re.compile(r"%(?:(\d+)\$)?[-#+ 0,(]*\d*(?:\.\d+)?([a-zA-Z%])")
 
 

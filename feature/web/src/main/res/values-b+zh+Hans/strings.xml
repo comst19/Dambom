@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">关闭网络</string>
+    <string name="web_address_placeholder">输入网址</string>
+    <string name="web_start_title">在网络上查找视频</string>
+    <string name="web_start_description">保持多个选项卡打开并且仅检测当前选项卡上的视频。</string>
+    <string name="web_open">打开页面</string>
+    <string name="web_recent">最近的页面</string>
+    <string name="web_recent_empty">没有最近访问过的页面。</string>
+    <string name="web_go_back">上一页</string>
+    <string name="web_go_forward">下一页</string>
+    <string name="web_refresh">刷新</string>
+    <string name="web_detecting">检测</string>
+    <string name="web_open_detected_count">打开%1$d视频</string>
+    <string name="web_no_detected_video">未检测到视频</string>
+    <string name="web_rescan">再次扫描</string>
+    <string name="web_playback_hint">如果没有检测到视频，则在页面上播放视频并重试。</string>
+    <string name="web_connection_error_title">无法连接到该站点</string>
+    <string name="web_connection_error_description">该站点关闭了连接或者在当前网络上不可用。</string>
+    <string name="web_timeout_error_title">该站点响应时间过长</string>
+    <string name="web_timeout_error_description">稍等一下，然后重试。</string>
+    <string name="web_unsupported_url_error_title">不支持的网址</string>
+    <string name="web_unsupported_url_error_description">检查这是否是HTTP或HTTPS网址。</string>
+    <string name="web_access_error_title">页面访问失败</string>
+    <string name="web_access_error_description">该页面不存在或者您没有查看该页面的权限。</string>
+    <string name="web_server_error_title">该站点暂时不可用</string>
+    <string name="web_server_error_description">该站点存在服务器问题。稍等片刻，然后重试。</string>
+    <string name="web_security_error_title">无法安全地打开该站点</string>
+    <string name="web_security_error_description">其安全证书无效或者页面被检测为不安全。</string>
+    <string name="web_unknown_error_title">该页面无法打开</string>
+    <string name="web_unknown_error_description">检查地址并再次打开它。</string>
+    <string name="web_retry">再试一次</string>
+    <string name="web_external_download_notice">Dambom无法从外部浏览器检测或下载视频。</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d 打开选项卡</item>
+        <item quantity="other">%1$d 打开选项卡</item>
+    </plurals>
+    <string name="web_new_tab">新建标签页</string>
+    <string name="web_close_tab">关闭%1$s选项卡</string>
+    <string name="web_empty_tab">空白标签页</string>
+    <string name="web_tab_actions">当前选项卡操作</string>
+    <string name="web_open_external">在默认浏览器中打开</string>
+    <string name="web_copy_link">复制链接</string>
+    <string name="web_share_link">分享链接</string>
+    <string name="web_link_copied">链接已复制。</string>
+    <string name="web_action_failure">没有应用程序可以处理该请求。</string>
+    <string name="web_share_chooser">分享链接</string>
+    <string name="web_drm_protected">该媒体受保护且无法下载。</string>
+    <string name="web_unsupported_service">不支持YouTube视频下载。</string>
+    <string name="web_drm_excluded">受保护的视频从此列表中隐藏。</string>
+</resources>

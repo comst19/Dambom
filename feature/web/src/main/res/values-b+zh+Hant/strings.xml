@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">關閉網絡</string>
+    <string name="web_address_placeholder">輸入網址</string>
+    <string name="web_start_title">在網路上尋找視頻</string>
+    <string name="web_start_description">保持多個選項卡開啟並且僅偵測目前選項卡上的影片。</string>
+    <string name="web_open">開啟頁面</string>
+    <string name="web_recent">最近的頁面</string>
+    <string name="web_recent_empty">沒有最近造訪過的頁面。</string>
+    <string name="web_go_back">上一頁</string>
+    <string name="web_go_forward">下一頁</string>
+    <string name="web_refresh">刷新</string>
+    <string name="web_detecting">檢測</string>
+    <string name="web_open_detected_count">開啟%1$d視頻</string>
+    <string name="web_no_detected_video">未偵測到視頻</string>
+    <string name="web_rescan">再次掃描</string>
+    <string name="web_playback_hint">如果沒有偵測到視頻，則在頁面上播放影片並重試。</string>
+    <string name="web_connection_error_title">無法連接到該站點</string>
+    <string name="web_connection_error_description">該站點關閉了連線或在目前網路上不可用。</string>
+    <string name="web_timeout_error_title">該站點響應時間過長</string>
+    <string name="web_timeout_error_description">等一下，然後再試一次。</string>
+    <string name="web_unsupported_url_error_title">不支援的網址</string>
+    <string name="web_unsupported_url_error_description">檢查這是否是HTTP或HTTPS網址。</string>
+    <string name="web_access_error_title">頁面存取失敗</string>
+    <string name="web_access_error_description">該頁面不存在或您沒有查看該頁面的權限。</string>
+    <string name="web_server_error_title">該站點暫時無法使用</string>
+    <string name="web_server_error_description">該網站有伺服器問題。稍等片刻，然後再試一次。</string>
+    <string name="web_security_error_title">無法安全地開啟該站點</string>
+    <string name="web_security_error_description">其安全性憑證無效或頁面被偵測為不安全。</string>
+    <string name="web_unknown_error_title">該頁面無法開啟</string>
+    <string name="web_unknown_error_description">檢查地址並再次開啟它。</string>
+    <string name="web_retry">再試一次</string>
+    <string name="web_external_download_notice">Dambom無法從外部瀏覽器偵測或下載影片。</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d 開啟選項卡</item>
+        <item quantity="other">%1$d 開啟選項卡</item>
+    </plurals>
+    <string name="web_new_tab">新增分頁</string>
+    <string name="web_close_tab">關閉%1$s選項卡</string>
+    <string name="web_empty_tab">空白分頁</string>
+    <string name="web_tab_actions">目前選項卡操作</string>
+    <string name="web_open_external">在預設瀏覽器中開啟</string>
+    <string name="web_copy_link">複製鏈接</string>
+    <string name="web_share_link">分享鏈接</string>
+    <string name="web_link_copied">連結已複製。</string>
+    <string name="web_action_failure">沒有應用程式可以處理該請求。</string>
+    <string name="web_share_chooser">分享鏈接</string>
+    <string name="web_drm_protected">該媒體受保護且無法下載。</string>
+    <string name="web_unsupported_service">不支援YouTube影片下載。</string>
+    <string name="web_drm_excluded">受保護的影片從此清單中隱藏。</string>
+</resources>

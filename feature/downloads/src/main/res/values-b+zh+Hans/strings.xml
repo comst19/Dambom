@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">存储空间不足。释放空间并重试。</string>
+    <string name="downloads_summary_waiting">等待下载</string>
+    <string name="downloads_summary_paused">下载已暂停</string>
+    <string name="downloads_summary_attention">下载需要注意</string>
+    <string name="downloads_quality_original">原始</string>
+    <string name="downloads_title">下载</string>
+    <string name="downloads_back">返回</string>
+    <string name="downloads_view_as_list">作为列表查看</string>
+    <string name="downloads_view_as_grid">以网格形式查看</string>
+    <string name="downloads_empty_title">没有正在进行的下载</string>
+    <string name="downloads_empty_description">完成的下载已准备好在您的库中观看。</string>
+    <string name="downloads_open_library">打开视频库</string>
+    <string name="downloads_summary">%1$d下载</string>
+    <string name="downloads_summary_remaining">剩余%1$d</string>
+    <string name="downloads_pause_all">全部暂停</string>
+    <string name="downloads_resume_all">全部恢复</string>
+    <string name="downloads_group_active">正在下载</string>
+    <string name="downloads_group_queued">排队</string>
+    <string name="downloads_group_paused">暂停</string>
+    <string name="downloads_group_failed">失败</string>
+    <string name="downloads_group_completed">已完成</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s缩略图</string>
+    <string name="downloads_unknown_size">总大小未知</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">剩余下载的进度</string>
+    <string name="downloads_pause">暂停</string>
+    <string name="downloads_resume">继续下载</string>
+    <string name="downloads_cancel">取消</string>
+    <string name="downloads_retry">重试</string>
+    <string name="downloads_remove">从列表中删除</string>
+    <string name="downloads_error_access">该视频需要访问权限。</string>
+    <string name="downloads_error_format">不支持该视频格式。</string>
+    <string name="downloads_error_network">连接没有恢复。再试一次。</string>
+    <string name="downloads_error_storage">无法保存文件。检查存储空间。</string>
+    <string name="downloads_error_server">服务器无法处理下载。</string>
+    <string name="downloads_error_unknown">下载时出现问题。</string>
+    <string name="downloads_command_failed">无法更新下载。再试一次。</string>
+    <string name="downloads_delete_pending">需要删除清理</string>
+    <string name="downloads_delete_retry">重试删除</string>
+    <string name="downloads_delete_group_count">删除清理%1$d</string>
+    <string name="downloads_error_drm">无法下载受保护的视频。</string>
+</resources>

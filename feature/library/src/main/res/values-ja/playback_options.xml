@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">視聴を続けますか?</string>
+    <string name="player_resume_message">%1$sまで視聴しました。</string>
+    <string name="player_resume_continue">続行</string>
+    <string name="player_resume_restart">最初からやり直す</string>
+    <string name="player_history_failure">再生履歴の読み込みまたは保存ができませんでした。</string>
+    <string name="player_settings_failure">再生設定を保存できませんでした。</string>
+    <string name="player_speed">再生速度</string>
+    <string name="player_speed_value">再生速度・%1$s×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">このビデオを繰り返します</string>
+    <string name="player_options_close">閉じる</string>
+</resources>

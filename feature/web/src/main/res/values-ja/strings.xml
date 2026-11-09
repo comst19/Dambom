@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="web_back">ウェブを閉じる</string>
+    <string name="web_address_placeholder">Webアドレスを入力してください</string>
+    <string name="web_start_title">ウェブ上のビデオを検索する</string>
+    <string name="web_start_description">複数のタブを開いたままにして、現在のタブ上のビデオのみを検出する。</string>
+    <string name="web_open">ページを開く</string>
+    <string name="web_recent">最近のページ</string>
+    <string name="web_recent_empty">最近アクセスしたページはありません。</string>
+    <string name="web_go_back">前のページへ</string>
+    <string name="web_go_forward">次のページへ</string>
+    <string name="web_refresh">リフレッシュ</string>
+    <string name="web_detecting">検出</string>
+    <string name="web_open_detected_count">%1$d ビデオを開く</string>
+    <string name="web_no_detected_video">ビデオは検出されませんでした</string>
+    <string name="web_rescan">再度スキャンする</string>
+    <string name="web_playback_hint">ビデオが検出されない場合、ページ上でビデオを再生し、再試行する。</string>
+    <string name="web_connection_error_title">サイトに接続できませんでした</string>
+    <string name="web_connection_error_description">サイトは接続を閉じたか、現在のネットワークでは利用できません。</string>
+    <string name="web_timeout_error_title">サイトの応答に時間がかかりすぎました</string>
+    <string name="web_timeout_error_description">少し待ってから再試行してください。</string>
+    <string name="web_unsupported_url_error_title">サポートされていない Web アドレス</string>
+    <string name="web_unsupported_url_error_description">これがHTTPまたはHTTPSウェブアドレスであることを確認する。</string>
+    <string name="web_access_error_title">ページアクセスに失敗しました</string>
+    <string name="web_access_error_description">ページが存在しないか、閲覧する権限がありません。</string>
+    <string name="web_server_error_title">サイトは一時的に利用できません</string>
+    <string name="web_server_error_description">サイトにサーバーの問題が発生しています。しばらく待ってからもう一度試してください。</string>
+    <string name="web_security_error_title">サイトを安全に開けませんでした</string>
+    <string name="web_security_error_description">そのセキュリティ証明書が無効であるか、ページが安全でないことが検出された。</string>
+    <string name="web_unknown_error_title">ページを開けませんでした</string>
+    <string name="web_unknown_error_description">アドレスを確認して再度開いてください。</string>
+    <string name="web_retry">もう一度お試しください</string>
+    <string name="web_external_download_notice">Dambomは、外部ブラウザからビデオを検出またはダウンロードすることができません。</string>
+    <plurals name="web_tabs_title">
+        <item quantity="one">%1$d タブを開く</item>
+        <item quantity="other">%1$d タブを開く</item>
+    </plurals>
+    <string name="web_new_tab">新しいタブ</string>
+    <string name="web_close_tab">%1$sタブを閉じる</string>
+    <string name="web_empty_tab">空のタブ</string>
+    <string name="web_tab_actions">現在のタブのアクション</string>
+    <string name="web_open_external">デフォルトのブラウザで開く</string>
+    <string name="web_copy_link">リンクをコピー</string>
+    <string name="web_share_link">リンクを共有</string>
+    <string name="web_link_copied">リンクをコピーしました。</string>
+    <string name="web_action_failure">このリクエストを処理できるアプリはない。</string>
+    <string name="web_share_chooser">リンクを共有</string>
+    <string name="web_drm_protected">このメディアは保護されており、ダウンロードすることはできません。</string>
+    <string name="web_unsupported_service">YouTubeビデオのダウンロードはサポートされていません。</string>
+    <string name="web_drm_excluded">保護されたビデオはこのリストから隠される。</string>
+</resources>

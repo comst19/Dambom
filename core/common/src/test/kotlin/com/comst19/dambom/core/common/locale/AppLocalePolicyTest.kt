@@ -22,7 +22,7 @@ class AppLocalePolicyTest {
         assertEquals("fr", resolve("swb-YT"))
         assertEquals("ar", resolve("tzm-MA"))
         assertEquals("pt", resolve("vmw-MZ"))
-        assertEquals("ko", resolve("ja-KR"))
+        assertEquals("ko", resolve("xx-KR"))
     }
 
     @Test
@@ -37,13 +37,13 @@ class AppLocalePolicyTest {
     @Test
     fun `primary system locale country wins before secondary languages`() {
         assertEquals("hi", resolve("ks-IN", "fr-FR"))
-        assertEquals("en", resolve("ja-JP", "fr-FR"))
+        assertEquals("en", resolve("xx-ZZ", "fr-FR"))
     }
 
     @Test
     fun `unknown country or missing locale uses English`() {
-        assertEquals("en", resolve("ja-JP"))
-        assertEquals("en", resolve("ja"))
+        assertEquals("en", resolve("xx-ZZ"))
+        assertEquals("en", resolve("xx"))
         assertEquals("en", resolve())
     }
 
@@ -52,6 +52,25 @@ class AppLocalePolicyTest {
         AppLanguage.entries.filter { it != AppLanguage.SYSTEM }.forEach {
             assertEquals(it.languageTag, resolve(it.languageTag))
         }
+    }
+
+    @Test
+    fun `Chinese script and region select the matching translation`() {
+        assertEquals("zh-Hans", resolve("zh"))
+        assertEquals("zh-Hans", resolve("zh-CN"))
+        assertEquals("zh-Hans", resolve("zh-SG"))
+        assertEquals("zh-Hant", resolve("zh-TW"))
+        assertEquals("zh-Hant", resolve("zh-HK"))
+        assertEquals("zh-Hant", resolve("zh-MO"))
+        assertEquals("zh-Hans", resolve("zh-Hans-TW"))
+        assertEquals("zh-Hant", resolve("zh-Hant-CN"))
+        assertEquals("zh-Hans", resolve("xx-CN"))
+        assertEquals("zh-Hant", resolve("xx-TW"))
+        assertEquals("ja", resolve("xx-JP"))
+        assertEquals("es", resolve("xx-ES"))
+        assertEquals("es", resolve("xx-MX"))
+        assertEquals("ja", resolve("ja-JP"))
+        assertEquals("es", resolve("es-MX"))
     }
 
     private fun resolve(vararg tags: String): String = AppLocalePolicy.resolve(tags.map(Locale::forLanguageTag))

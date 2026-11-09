@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">もう一度見る価値がありますか?\nリンクを付けて保存してください。</string>
+    <string name="home_description">ページリンクから保存するビデオを見つけます。</string>
+    <string name="home_url_label">ウェブアドレス</string>
+    <string name="home_invalid_url">http://またはhttps://.で始まるリンクを入力してください</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">ペースト</string>
+    <string name="home_analyze">ビデオを検索する</string>
+    <string name="home_open_settings">設定</string>
+    <string name="home_hide_results">結果を非表示にする</string>
+    <string name="home_show_results">入力と一緒に結果を表示する</string>
+    <string name="home_web_prompt_title">まだリンクをお持ちではありませんか?</string>
+    <string name="home_web_prompt_description">リンクのないページを検索する。</string>
+    <string name="home_browse_web">ウェブを閲覧する</string>
+    <string name="home_current_activity">現在の活動</string>
+    <string name="home_clipboard_found">コピーされたリンクが利用可能です</string>
+    <string name="home_use_link">ペースト</string>
+    <string name="home_dismiss">閉じる</string>
+    <string name="home_clipboard_consent_title">コピーされたリンクを提案しますか？</string>
+    <string name="home_clipboard_consent_description">いつDambom開くと、クリップボードで Web アドレスを確認し、そのアドレスを入力するよう提案します。自動的に分析したりダウンロードしたりすることはありません。</string>
+    <string name="home_clipboard_consent_allow">提案を許可する</string>
+    <string name="home_clipboard_consent_deny">手動で貼り付ける</string>
+    <string name="home_clipboard_save_failed">設定を保存できませんでした。もう一度試してください。</string>
+    <string name="home_shared_url_title">共有リンクを受信しました</string>
+    <string name="home_shared_url_description">リンクを確認し、ビデオの検索を開始する。</string>
+    <string name="home_analyze_now">ビデオを検索する</string>
+    <string name="home_cancel">キャンセル</string>
+    <string name="home_download_active">%1$dダウンロード中</string>
+    <string name="home_download_paused">%1$d 一時停止しました</string>
+    <string name="home_download_failed">%1$d のダウンロードには注意が必要です</string>
+    <string name="home_download_open">ダウンロードステータスの表示</string>
+</resources>

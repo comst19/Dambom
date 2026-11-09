@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="download_notification_insufficient_storage">Almacenamiento insuficiente. Libera espacio y vuelve a intentarlo: %1$s</string>
+    <string name="download_notification_channel">Descargas</string>
+    <string name="download_notification_title">Dambom está descargando videos</string>
+    <string name="download_notification_description">Las descargas se reanudan desde el punto guardado después de volver a conectarse.</string>
+    <string name="download_result_notification_channel">Resultados de descarga</string>
+    <string name="download_notification_progress_title">Descargando %1$s</string>
+    <string name="download_notification_progress">%1$d%% completo</string>
+    <string name="download_notification_completed">Descarga completa</string>
+    <string name="download_notification_completed_description">%1$s se guardó en su biblioteca.</string>
+    <string name="download_notification_failed">Descarga fallida</string>
+    <string name="download_notification_failed_description">Intente descargar %1$s nuevamente.</string>
+    <string name="download_notification_failed_network">Verifique la conexión de red para %1$s.</string>
+    <string name="download_notification_failed_storage">Verifique el almacenamiento disponible para %1$s.</string>
+</resources>

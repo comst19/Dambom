@@ -115,6 +115,10 @@ internal fun SubtitleScreen(
     }
 }
 
+@Preview(name = "Chinese simplified", widthDp = 320, heightDp = 800, locale = "b+zh+Hans")
+@Preview(name = "Chinese traditional", widthDp = 320, heightDp = 800, locale = "b+zh+Hant")
+@Preview(name = "Japanese", widthDp = 320, heightDp = 800, locale = "ja")
+@Preview(name = "Spanish", widthDp = 320, heightDp = 800, locale = "es")
 @Preview(name = "Subtitle ready", widthDp = 360, heightDp = 800, locale = "ko")
 @Composable
 private fun SubtitleReadyPreview() {

@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">儲存空間不足。釋放空間並重試。</string>
+    <string name="downloads_summary_waiting">等待下載</string>
+    <string name="downloads_summary_paused">下載已暫停</string>
+    <string name="downloads_summary_attention">下載需要注意</string>
+    <string name="downloads_quality_original">原始</string>
+    <string name="downloads_title">下載</string>
+    <string name="downloads_back">返回</string>
+    <string name="downloads_view_as_list">作為列表查看</string>
+    <string name="downloads_view_as_grid">以網格形式查看</string>
+    <string name="downloads_empty_title">沒有正在進行的下載</string>
+    <string name="downloads_empty_description">完成的下載已準備好在您的庫中觀看。</string>
+    <string name="downloads_open_library">開啟影片庫</string>
+    <string name="downloads_summary">%1$d下載</string>
+    <string name="downloads_summary_remaining">剩餘%1$d</string>
+    <string name="downloads_pause_all">全部暫停</string>
+    <string name="downloads_resume_all">全部恢復</string>
+    <string name="downloads_group_active">正在下載</string>
+    <string name="downloads_group_queued">排隊</string>
+    <string name="downloads_group_paused">暫停</string>
+    <string name="downloads_group_failed">失敗</string>
+    <string name="downloads_group_completed">已完成</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$s縮圖</string>
+    <string name="downloads_unknown_size">總大小未知</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">剩餘下載的進度</string>
+    <string name="downloads_pause">暫停</string>
+    <string name="downloads_resume">繼續下載</string>
+    <string name="downloads_cancel">取消</string>
+    <string name="downloads_retry">重試</string>
+    <string name="downloads_remove">從清單中刪除</string>
+    <string name="downloads_error_access">該影片需要存取權限。</string>
+    <string name="downloads_error_format">不支援該影片格式。</string>
+    <string name="downloads_error_network">連線沒有恢復。再試一次。</string>
+    <string name="downloads_error_storage">無法儲存檔案。檢查儲存空間。</string>
+    <string name="downloads_error_server">伺服器無法處理下載。</string>
+    <string name="downloads_error_unknown">下載時出現問題。</string>
+    <string name="downloads_command_failed">無法更新下載。再試一次。</string>
+    <string name="downloads_delete_pending">需要刪除清理</string>
+    <string name="downloads_delete_retry">重試刪除</string>
+    <string name="downloads_delete_group_count">刪除清理%1$d</string>
+    <string name="downloads_error_drm">無法下載受保護的影片。</string>
+</resources>

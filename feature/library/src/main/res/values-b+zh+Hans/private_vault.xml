@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">私密视频库</string>
+    <string name="vault_locked_title">您的私人视频库</string>
+    <string name="vault_locked_description">解锁以查看您的私人视频</string>
+    <string name="vault_unlock">解锁</string>
+    <string name="vault_lock">锁</string>
+    <string name="vault_auth_subtitle">使用生物识别技术或您的设备屏幕锁定</string>
+    <string name="vault_use_device_lock">使用屏幕锁定</string>
+    <string name="vault_setup_lock">在您的电话设置中设置PIN、图案或密码以使用私密视频库。</string>
+    <string name="vault_open_settings">打开设置</string>
+    <string name="vault_auth_unavailable">无法在此设备上启动认证。请再试一次。</string>
+    <string name="vault_move">移至私密视频库</string>
+    <string name="vault_restore">移至常规视频库</string>
+    <string name="vault_move_success">移至私密视频库。以前导出的副本未更改。</string>
+    <string name="vault_restore_success">移至常规视频库</string>
+    <string name="vault_move_failure">无法移动视频。请再试一次。</string>
+    <string name="vault_empty_title">没有私人视频</string>
+    <string name="vault_empty_description">选择常规库中的视频并将它们移至此处</string>
+</resources>

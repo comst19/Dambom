@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="vault_title">プライベートライブラリ</string>
+    <string name="vault_locked_title">あなたのプライベートビデオライブラリ</string>
+    <string name="vault_locked_description">ロックを解除してプライベートビデオを表示します</string>
+    <string name="vault_unlock">ロックを解除する</string>
+    <string name="vault_lock">ロック</string>
+    <string name="vault_auth_subtitle">生体認証またはデバイスの画面ロックを使用する</string>
+    <string name="vault_use_device_lock">画面ロックを使用する</string>
+    <string name="vault_setup_lock">プライベートライブラリを使用するには、電話設定でＰＩＮ、パターン、またはパスワードを設定する。</string>
+    <string name="vault_open_settings">設定を開く</string>
+    <string name="vault_auth_unavailable">このデバイスでは認証を開始できませんでした。もう一度試してください。</string>
+    <string name="vault_move">プライベートライブラリへ移動</string>
+    <string name="vault_restore">通常のライブラリに移動</string>
+    <string name="vault_move_success">プライベートライブラリに移動。以前にエクスポートされたコピーは変更されません。</string>
+    <string name="vault_restore_success">通常のライブラリに移動</string>
+    <string name="vault_move_failure">ビデオを移動できなかった。もう一度試してください。</string>
+    <string name="vault_empty_title">プライベートビデオはありません</string>
+    <string name="vault_empty_description">通常のライブラリでビデオを選択し、ここに移動します</string>
+</resources>

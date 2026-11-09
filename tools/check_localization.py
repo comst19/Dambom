@@ -30,11 +30,24 @@ def arguments(text: str) -> Counter[tuple[int, str]]:
     return result
 
 
-def strings(path: Path) -> dict[str, str]:
+def text_resources(directory: Path) -> dict[tuple[str, str], ET.Element]:
+    resources = {}
+    for path in sorted(directory.glob("*.xml")):
+        for element in ET.parse(path).getroot():
+            if (
+                element.tag in {"string", "plurals"}
+                and element.get("translatable") != "false"
+            ):
+                resources[element.tag, element.attrib["name"]] = element
+    return resources
+
+
+def resource_arguments(element: ET.Element) -> dict[str, Counter[tuple[int, str]]]:
+    if element.tag == "string":
+        return {"": arguments("".join(element.itertext()))}
     return {
-        element.attrib["name"]: "".join(element.itertext())
-        for element in ET.parse(path).getroot().findall("string")
-        if element.attrib.get("translatable") != "false"
+        item.attrib["quantity"]: arguments("".join(item.itertext()))
+        for item in element.findall("item")
     }
 
 
@@ -88,29 +101,32 @@ def validate(root: Path) -> list[str]:
         errors.append(
             "LanguageLabels does not match the selectable AppLanguage entries"
         )
-    for base in sorted(root.glob("**/src/main/res/values/strings.xml")):
-        defaults = strings(base)
+    for base in sorted(root.glob("**/src/main/res/values")):
+        defaults = text_resources(base)
         if not defaults:
             continue
         for tag in languages:
             if tag == "en":
                 continue
-            localized = (
-                base.parent.parent / f"values-{ALIASES.get(tag, tag)}" / base.name
-            )
-            if not localized.is_file():
-                errors.append(
-                    f"Missing translation file: {localized.relative_to(root)}"
-                )
-                continue
-            translated = strings(localized)
-            for key, text in defaults.items():
-                if key not in translated:
-                    errors.append(f"{localized.relative_to(root)}: missing {key}")
-                elif arguments(text) != arguments(translated[key]):
-                    errors.append(
-                        f"{localized.relative_to(root)}: format arguments differ for {key}"
-                    )
+            localized = base.parent / f"values-{ALIASES.get(tag, tag)}"
+            translated = text_resources(localized)
+            location = localized.relative_to(root)
+            for (kind, name), default in defaults.items():
+                key = f"{kind}/{name}"
+                translation = translated.get((kind, name))
+                if translation is None:
+                    errors.append(f"{location}: missing {key}")
+                    continue
+                expected = resource_arguments(default)
+                actual = resource_arguments(translation)
+                if kind == "plurals" and "other" not in (expected.keys() & actual.keys()):
+                    missing_in = base.relative_to(root) if "other" not in expected else location
+                    errors.append(f"{missing_in}: missing {key}[other]")
+                    continue
+                for quantity, found in actual.items():
+                    if found != expected.get(quantity, expected.get("other")):
+                        item = f"{key}[{quantity}]" if quantity else key
+                        errors.append(f"{location}: format arguments differ for {item}")
     return errors
 
 

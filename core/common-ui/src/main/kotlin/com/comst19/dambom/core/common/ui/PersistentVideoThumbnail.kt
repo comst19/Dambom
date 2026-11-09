@@ -243,29 +243,32 @@ private suspend fun decodeVideoThumbnail(
             null
         }
     }
-    val imageLoader =
-        ImageLoader
+    val request =
+        ImageRequest
             .Builder(context)
-            .components { add(VideoFrameDecoder.Factory()) }
+            .data(videoFile)
+            .size(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT)
             .memoryCachePolicy(CachePolicy.DISABLED)
             .diskCachePolicy(CachePolicy.DISABLED)
             .build()
-    return try {
-        val request =
-            ImageRequest
-                .Builder(context)
-                .data(videoFile)
-                .size(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT)
-                .memoryCachePolicy(CachePolicy.DISABLED)
-                .diskCachePolicy(CachePolicy.DISABLED)
-                .build()
-        val image = (imageLoader.execute(request) as? SuccessResult)?.image ?: return null
-        Bitmap.createBitmap(image.width, image.height, Bitmap.Config.ARGB_8888).also { bitmap ->
-            image.draw(Canvas(bitmap))
-        }
-    } finally {
-        imageLoader.shutdown()
+    val image = (VideoThumbnailImageLoader.get(context).execute(request) as? SuccessResult)?.image ?: return null
+    return Bitmap.createBitmap(image.width, image.height, Bitmap.Config.ARGB_8888).also { bitmap ->
+        image.draw(Canvas(bitmap))
     }
+}
+
+private object VideoThumbnailImageLoader {
+    private var loader: ImageLoader? = null
+
+    @Synchronized
+    fun get(context: Context): ImageLoader =
+        loader ?: ImageLoader
+            .Builder(context.applicationContext)
+            .components { add(VideoFrameDecoder.Factory()) }
+            .memoryCache { null }
+            .diskCache { null }
+            .build()
+            .also { loader = it }
 }
 
 private fun writeVideoThumbnail(

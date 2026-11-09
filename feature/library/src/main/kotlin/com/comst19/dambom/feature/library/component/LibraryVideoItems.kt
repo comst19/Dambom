@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -39,6 +38,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.common.ui.format.formatFileSize
 import com.comst19.dambom.core.domain.model.DownloadTask
@@ -109,6 +109,7 @@ internal fun VideoCard(
 @Composable
 internal fun VideoListItem(
     task: DownloadTask,
+    thumbnailWidth: Dp,
     selected: Boolean,
     selectionSelected: Boolean,
     isSelecting: Boolean,
@@ -130,41 +131,38 @@ internal fun VideoListItem(
         color = style.containerColor,
         contentColor = style.contentColor,
     ) {
-        BoxWithConstraints {
-            val thumbnailWidth = if (maxWidth < 360.dp) 112.dp else 128.dp
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            VideoListThumbnail(task, metadata, thumbnailWidth, fileActions, !isSelecting)
+            Column(
+                Modifier.weight(1f).padding(start = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                VideoListThumbnail(task, metadata, thumbnailWidth, fileActions, !isSelecting)
-                Column(
-                    Modifier.weight(1f).padding(start = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(
-                        task.title,
-                        style = MaterialTheme.typography.titleSmall,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        if (task.deletePending) {
-                            stringResource(com.comst19.dambom.feature.library.R.string.library_delete_pending)
-                        } else {
-                            style.sourceHost ?: style.sourceLabel
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = style.metadataColor,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                Row(Modifier.align(Alignment.Top)) {
-                    if (isSelecting) {
-                        Checkbox(checked = selectionSelected, onCheckedChange = { onToggleSelection() })
+                Text(
+                    task.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    if (task.deletePending) {
+                        stringResource(com.comst19.dambom.feature.library.R.string.library_delete_pending)
                     } else {
-                        VideoActionsButton(task, fileActions)
-                    }
+                        style.sourceHost ?: style.sourceLabel
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = style.metadataColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Row(Modifier.align(Alignment.Top)) {
+                if (isSelecting) {
+                    Checkbox(checked = selectionSelected, onCheckedChange = { onToggleSelection() })
+                } else {
+                    VideoActionsButton(task, fileActions)
                 }
             }
         }

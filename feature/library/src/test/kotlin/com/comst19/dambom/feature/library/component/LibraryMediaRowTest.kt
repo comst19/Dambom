@@ -27,7 +27,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35], qualifiers = "en")
+@Config(sdk = [35], qualifiers = "en-w500dp")
 class LibraryMediaRowTest {
     @get:Rule val composeRule = createComposeRule()
     private val video = libraryTestVideo("/video.mp4")
@@ -51,6 +51,7 @@ class LibraryMediaRowTest {
                 Box(Modifier.width(411.dp)) {
                     VideoListItem(
                         video,
+                        128.dp,
                         false,
                         false,
                         false,
@@ -108,6 +109,35 @@ class LibraryMediaRowTest {
     fun `visible fold detail identifies its active row`() {
         showLibrary(true)
         composeRule.onNodeWithTag("library-video-${video.id}").assertIsSelected()
+    }
+
+    @Test
+    fun `list uses narrow thumbnail below the row width cutoff`() = verifyThumbnailWidth(391, 112)
+
+    @Test
+    fun `list uses wide thumbnail at the row width cutoff`() = verifyThumbnailWidth(392, 128)
+
+    private fun verifyThumbnailWidth(
+        listWidth: Int,
+        expectedThumbnailWidth: Int,
+    ) {
+        composeRule.setContent {
+            DambomTheme {
+                Box(Modifier.width(listWidth.dp)) {
+                    VideoList(
+                        uiState = LibraryUiState(videos = persistentListOf(video), hasVideos = true),
+                        fileActions = actions,
+                        onVideoClick = {},
+                        isSelecting = false,
+                        onToggleSelection = {},
+                        header = {},
+                        emptyContent = {},
+                    )
+                }
+            }
+        }
+        val bounds = composeRule.onNodeWithTag("library-thumbnail-${video.id}", true).getUnclippedBoundsInRoot()
+        assertEquals(expectedThumbnailWidth.dp, bounds.right - bounds.left)
     }
 
     private fun showLibrary(showDetail: Boolean) {

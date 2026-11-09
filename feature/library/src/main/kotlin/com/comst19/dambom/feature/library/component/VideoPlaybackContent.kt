@@ -78,7 +78,7 @@ internal fun VideoPlayerPanel(
     onPlayPauseRequest: (() -> Unit)? = null,
 ) {
     val playPauseState = rememberPlayPauseButtonState(player)
-    val metadata by rememberLocalVideoMetadata(task.localFilePath)
+    val metadata by rememberLocalVideoMetadata(task.localFilePath, includeThumbnail = false)
     var playbackError by remember(player) { mutableStateOf<PlaybackException?>(player.playerError) }
     val controls = rememberPlayerControlsState(task.id, isPlaying = !playPauseState.showPlay)
     val surfaceDescription = stringResource(R.string.player_surface_description, task.title)

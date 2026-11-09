@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.ComponentCallbacks2
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.comst19.dambom.core.common.io.videoThumbnailFile
+import com.comst19.dambom.core.common.io.videoThumbnailUnavailableFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -16,8 +18,10 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotSame
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,6 +54,22 @@ class LocalVideoMetadataTest {
         fixtures += file
         return file
     }
+
+    @Test
+    fun `details read does not create thumbnail files`() =
+        runTest {
+            val context = ApplicationProvider.getApplicationContext<Application>()
+            val file = context.filesDir.resolve("details-only.mp4")
+            fixtures += file
+            file.writeBytes(byteArrayOf(1))
+
+            val metadata =
+                LocalVideoMetadataLoader.load(context, localVideoCacheKey(file.path), includeThumbnail = false)
+
+            assertNull(metadata.thumbnail)
+            assertFalse(file.videoThumbnailFile().exists())
+            assertFalse(file.videoThumbnailUnavailableFile().exists())
+        }
 
     @Test
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)

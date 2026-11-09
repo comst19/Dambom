@@ -1,6 +1,7 @@
 package com.comst19.dambom.feature.library.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -82,40 +83,46 @@ internal fun VideoList(
     emptyContent: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize().testTag("library-collection"),
-        contentPadding =
-            PaddingValues(
-                start = LibraryHorizontalPadding,
-                end = LibraryHorizontalPadding,
-                bottom = 24.dp,
-            ),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        item(key = "library-header", contentType = "header") { header() }
-        if (uiState.videos.isEmpty()) {
-            item(key = "library-empty", contentType = "empty") { emptyContent() }
-        }
-        listItems(
-            items = uiState.videos,
-            key = DownloadTask::id,
-            contentType = DownloadTask::libraryContentType,
-        ) { task ->
-            VideoListItem(
-                task = task,
-                selected = task.id == uiState.selectedVideo?.id,
-                selectionSelected = task.id in uiState.selectedIds,
-                isSelecting = isSelecting,
-                fileActions = fileActions,
-                onClick = {
-                    if (isSelecting) {
-                        onToggleSelection(task.id)
-                    } else if (!task.deletePending) {
-                        onVideoClick(task)
-                    }
-                },
-                onToggleSelection = { onToggleSelection(task.id) },
-            )
+    BoxWithConstraints(modifier.fillMaxSize()) {
+        val horizontalPadding = with(LocalDensity.current) { (LibraryHorizontalPadding.roundToPx() * 2).toDp() }
+        val rowWidth = maxWidth - horizontalPadding
+        val thumbnailWidth = if (rowWidth < 360.dp) 112.dp else 128.dp
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().testTag("library-collection"),
+            contentPadding =
+                PaddingValues(
+                    start = LibraryHorizontalPadding,
+                    end = LibraryHorizontalPadding,
+                    bottom = 24.dp,
+                ),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item(key = "library-header", contentType = "header") { header() }
+            if (uiState.videos.isEmpty()) {
+                item(key = "library-empty", contentType = "empty") { emptyContent() }
+            }
+            listItems(
+                items = uiState.videos,
+                key = DownloadTask::id,
+                contentType = DownloadTask::libraryContentType,
+            ) { task ->
+                VideoListItem(
+                    task = task,
+                    thumbnailWidth = thumbnailWidth,
+                    selected = task.id == uiState.selectedVideo?.id,
+                    selectionSelected = task.id in uiState.selectedIds,
+                    isSelecting = isSelecting,
+                    fileActions = fileActions,
+                    onClick = {
+                        if (isSelecting) {
+                            onToggleSelection(task.id)
+                        } else if (!task.deletePending) {
+                            onVideoClick(task)
+                        }
+                    },
+                    onToggleSelection = { onToggleSelection(task.id) },
+                )
+            }
         }
     }
 }

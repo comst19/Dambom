@@ -63,7 +63,8 @@ class LocalVideoMetadataTest {
             fixtures += file
             file.writeBytes(byteArrayOf(1))
 
-            val metadata = LocalVideoMetadataLoader.load(context, localVideoCacheKey(file.path), includeThumbnail = false)
+            val metadata =
+                LocalVideoMetadataLoader.load(context, localVideoCacheKey(file.path), includeThumbnail = false)
 
             assertNull(metadata.thumbnail)
             assertFalse(file.videoThumbnailFile().exists())

@@ -76,8 +76,8 @@ class StartupBenchmark {
             },
         ) {
             val collection = checkNotNull(device.findObject(scrollable))
-            collection.setGestureMargin(device.displayWidth / 5)
-            repeat(3) { collection.swipe(Direction.UP, 0.65f) }
+            collection.setGestureMargin(device.displayWidth / SCROLL_GESTURE_MARGIN_DIVISOR)
+            repeat(SCROLL_SWIPE_COUNT) { collection.swipe(Direction.UP, SCROLL_SWIPE_FRACTION) }
             check(device.wait(Until.gone(firstItem), UI_TIMEOUT_MILLIS)) {
                 "The library did not scroll past the first fixture video"
             }
@@ -121,3 +121,7 @@ class StartupBenchmark {
         }
     }
 }
+
+private const val SCROLL_GESTURE_MARGIN_DIVISOR = 5
+private const val SCROLL_SWIPE_COUNT = 3
+private const val SCROLL_SWIPE_FRACTION = 0.65f

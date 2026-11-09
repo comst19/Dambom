@@ -107,6 +107,7 @@ internal fun VideoCard(
 }
 
 @Composable
+@Suppress("LongParameterList")
 internal fun VideoListItem(
     task: DownloadTask,
     thumbnailWidth: Dp,

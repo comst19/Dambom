@@ -75,6 +75,20 @@ class AppLanguagePreferencesTest {
     }
 
     @Test
+    @Config(qualifiers = "zh-rTW")
+    fun `traditional Chinese system selection preserves its script`() {
+        AppLanguagePreferences.syncSystemLanguage(context)
+
+        assertEquals("zh-Hant", AppCompatDelegate.getApplicationLocales().toLanguageTags())
+        assertEquals("", AppLanguagePreferences.selectedLanguageTags(context))
+        AppLanguagePreferences.apply(context, "zh-Hans")
+        AppLanguagePreferences.syncSystemLanguage(context)
+        assertEquals("zh-Hans", AppLanguagePreferences.selectedLanguageTags(context))
+        AppLanguagePreferences.apply(context, "")
+        assertEquals("zh-Hant", AppCompatDelegate.getApplicationLocales().toLanguageTags())
+    }
+
+    @Test
     fun `explicit choice survives automatic synchronization`() {
         AppLanguagePreferences.apply(context, "de")
         AppLanguagePreferences.syncSystemLanguage(context)

@@ -1,7 +1,6 @@
 package com.comst19.dambom.feature.library.subtitle.model
 
 import androidx.compose.runtime.Immutable
-import com.comst19.dambom.core.common.locale.AppLanguage
 import java.util.Locale
 
 @Immutable
@@ -35,9 +34,51 @@ internal data class SubtitleLanguagePair(
                 "vi-VN",
             )
         val targetLanguages =
-            AppLanguage.entries.filter { it != AppLanguage.SYSTEM }.map {
-                listOfNotNull(it.languageTag, it.supportedScript).joinToString("-")
-            } + "ja"
+            listOf(
+                "ko",
+                "en",
+                "ur",
+                "hi",
+                "fr",
+                "pt",
+                "bn",
+                "ar",
+                "ps",
+                "am",
+                "sw",
+                "de",
+                "id",
+                "he",
+                "fa",
+                "my",
+                "pa-Guru",
+                "sd-Arab",
+                "ta",
+                "te",
+                "mr",
+                "gu",
+                "kn",
+                "ml",
+                "or",
+                "as",
+                "ha-Latn",
+                "yo",
+                "ig",
+                "ti",
+                "so",
+                "ln",
+                "uz-Latn",
+                "tk",
+                "az-Latn",
+                "ku-Latn",
+                "ckb",
+                "af",
+                "zu",
+                "xh",
+                "st",
+                "ru",
+                "ja",
+            )
 
         fun parse(value: String?): SubtitleLanguagePair? =
             when (value) {

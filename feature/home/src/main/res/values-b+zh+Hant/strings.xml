@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">值得再看嗎？ \n用連結保存。</string>
+    <string name="home_description">從頁面連結尋找要儲存的影片。</string>
+    <string name="home_url_label">網址</string>
+    <string name="home_invalid_url">輸入以http://或https://.開頭的鏈接</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">貼上</string>
+    <string name="home_analyze">尋找視頻</string>
+    <string name="home_open_settings">設定</string>
+    <string name="home_hide_results">隱藏結果</string>
+    <string name="home_show_results">在輸入旁顯示結果</string>
+    <string name="home_web_prompt_title">還沒有連結？</string>
+    <string name="home_web_prompt_description">尋找沒有連結的頁面。</string>
+    <string name="home_browse_web">瀏覽網頁</string>
+    <string name="home_current_activity">目前活動</string>
+    <string name="home_clipboard_found">複製的連結可用</string>
+    <string name="home_use_link">貼上</string>
+    <string name="home_dismiss">關閉</string>
+    <string name="home_clipboard_consent_title">建議複製連結？</string>
+    <string name="home_clipboard_consent_description">當Dambom開啟時，它可以檢查剪貼簿中的網址並建議填寫它。它從不自動分析或下載。</string>
+    <string name="home_clipboard_consent_allow">允許建議</string>
+    <string name="home_clipboard_consent_deny">手動貼上</string>
+    <string name="home_clipboard_save_failed">無法儲存您的偏好。請再試一次。</string>
+    <string name="home_shared_url_title">接收到共享鏈接</string>
+    <string name="home_shared_url_description">查看鏈接，然後開始查找視頻。</string>
+    <string name="home_analyze_now">尋找視頻</string>
+    <string name="home_cancel">取消</string>
+    <string name="home_download_active">%1$d下載</string>
+    <string name="home_download_paused">%1$d 暫停</string>
+    <string name="home_download_failed">%1$d下載需要注意</string>
+    <string name="home_download_open">查看下載狀態</string>
+</resources>

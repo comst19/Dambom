@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="player_resume_title">继续观看？</string>
+    <string name="player_resume_message">您观看了%1$s。</string>
+    <string name="player_resume_continue">继续</string>
+    <string name="player_resume_restart">重新开始</string>
+    <string name="player_history_failure">无法加载或保存播放历史。</string>
+    <string name="player_settings_failure">无法保存播放设置。</string>
+    <string name="player_speed">播放速度</string>
+    <string name="player_speed_value">播放速度·%1$s×</string>
+    <string name="player_speed_multiplier">%1$s×</string>
+    <string name="player_repeat_one">重复该视频</string>
+    <string name="player_options_close">关闭</string>
+</resources>

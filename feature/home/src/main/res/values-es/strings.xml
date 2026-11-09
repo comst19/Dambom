@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="home_brand">Dambom</string>
+    <string name="home_title">¿Vale la pena verlo de nuevo? \n Guárdelo con un enlace.</string>
+    <string name="home_description">Buscar vídeos para guardar desde el enlace de una página.</string>
+    <string name="home_url_label">Dirección web</string>
+    <string name="home_invalid_url">Ingrese un enlace que comience con http:// o https://.</string>
+    <string name="home_url_placeholder">https://example.com/video</string>
+    <string name="home_paste">Pegar</string>
+    <string name="home_analyze">Buscar vídeos</string>
+    <string name="home_open_settings">Configuración</string>
+    <string name="home_hide_results">Ocultar resultados</string>
+    <string name="home_show_results">Mostrar resultados junto con la entrada</string>
+    <string name="home_web_prompt_title">¿Aún no tienes un enlace?</string>
+    <string name="home_web_prompt_description">Encuentre una página sin un enlace.</string>
+    <string name="home_browse_web">Navegar por la web</string>
+    <string name="home_current_activity">Actividad actual</string>
+    <string name="home_clipboard_found">Un enlace copiado está disponible</string>
+    <string name="home_use_link">Pegar</string>
+    <string name="home_dismiss">Descartar</string>
+    <string name="home_clipboard_consent_title">¿Sugerir enlaces copiados?</string>
+    <string name="home_clipboard_consent_description">Cuando se abre Dambom, puede buscar en el portapapeles una dirección web y sugerir completarla. Nunca analiza ni descarga automáticamente.</string>
+    <string name="home_clipboard_consent_allow">Permitir sugerencias</string>
+    <string name="home_clipboard_consent_deny">Pegar manualmente</string>
+    <string name="home_clipboard_save_failed">No se pudo guardar su preferencia. Por favor inténtalo de nuevo.</string>
+    <string name="home_shared_url_title">Enlace compartido recibido</string>
+    <string name="home_shared_url_description">Revise el enlace y luego comience a buscar vídeos.</string>
+    <string name="home_analyze_now">Buscar vídeos</string>
+    <string name="home_cancel">Cancelar</string>
+    <string name="home_download_active">Descarga de %1$d</string>
+    <string name="home_download_paused">%1$d en pausa</string>
+    <string name="home_download_failed">Las descargas de %1$d necesitan atención</string>
+    <string name="home_download_open">Ver el estado de descarga</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">播放位置</string>
+    <string name="playback_rewind">后退 10 秒</string>
+    <string name="playback_play">播放</string>
+    <string name="playback_pause">暂停</string>
+    <string name="playback_forward">前进 10 秒</string>
+</resources>

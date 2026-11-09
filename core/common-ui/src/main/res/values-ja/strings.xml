@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="playback_seek_description">再生位置</string>
+    <string name="playback_rewind">10秒前に戻る</string>
+    <string name="playback_play">再生</string>
+    <string name="playback_pause">一時停止</string>
+    <string name="playback_forward">10秒送り</string>
+</resources>

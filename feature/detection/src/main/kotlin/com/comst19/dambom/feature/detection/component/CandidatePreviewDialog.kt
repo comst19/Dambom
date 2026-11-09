@@ -191,7 +191,7 @@ private fun CandidatePreviewSurface(
                         state.controlsVisible = !state.controlsVisible
                         true
                     }
-                }.pointerInput(Unit) {
+                }.pointerInput(state) {
                     detectTapGestures { state.controlsVisible = !state.controlsVisible }
                 },
         contentAlignment = Alignment.Center,

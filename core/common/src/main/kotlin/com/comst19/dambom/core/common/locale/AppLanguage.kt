@@ -1,5 +1,7 @@
 package com.comst19.dambom.core.common.locale
 
+import java.util.Locale
+
 enum class AppLanguage(
     val languageTag: String,
     val supportedScript: String? = null,
@@ -7,6 +9,10 @@ enum class AppLanguage(
     SYSTEM(""),
     KOREAN("ko"),
     ENGLISH("en"),
+    CHINESE_SIMPLIFIED("zh-Hans"),
+    CHINESE_TRADITIONAL("zh-Hant"),
+    JAPANESE("ja"),
+    SPANISH("es"),
     URDU("ur"),
     HINDI("hi"),
     FRENCH("fr"),
@@ -51,7 +57,17 @@ enum class AppLanguage(
 
     companion object {
         fun from(languageTags: String): AppLanguage {
-            val language = languageTags.substringBefore(',').substringBefore('-').lowercase()
+            val locale = Locale.forLanguageTag(languageTags.substringBefore(','))
+            if (locale.language == "zh") {
+                return when {
+                    locale.script == "Hant" -> CHINESE_TRADITIONAL
+                    locale.script == "Hans" -> CHINESE_SIMPLIFIED
+                    locale.script.isNotEmpty() -> SYSTEM
+                    locale.country == "TW" || locale.country == "HK" || locale.country == "MO" -> CHINESE_TRADITIONAL
+                    else -> CHINESE_SIMPLIFIED
+                }
+            }
+            val language = locale.language
             val normalizedLanguage =
                 when (language) {
                     "in" -> "id"

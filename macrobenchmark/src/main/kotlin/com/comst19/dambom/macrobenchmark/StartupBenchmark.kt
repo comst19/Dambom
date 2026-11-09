@@ -8,11 +8,15 @@ import androidx.benchmark.macro.StartupTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.Until
+import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.regex.Pattern
 
 @LargeTest
 @RunWith(AndroidJUnit4::class)
@@ -46,6 +50,38 @@ class StartupBenchmark {
                 baselineProfileMode = BaselineProfileMode.Require,
             ),
         )
+    }
+
+    @Test
+    fun scrollPopulatedLibrary() {
+        val firstTitle = InstrumentationRegistry.getArguments().getString("libraryFixtureFirstTitle").orEmpty()
+        assumeTrue("Seed a populated library and pass libraryFixtureFirstTitle", firstTitle.isNotBlank())
+        val firstItem = By.descContains(firstTitle)
+        val showList = By.desc(Pattern.compile("목록으로 보기|View as list"))
+        val scrollable = By.scrollable(true)
+        benchmarkRule.measureRepeated(
+            packageName = TARGET_PACKAGE,
+            metrics = listOf(FrameTimingMetric()),
+            compilationMode = CompilationMode.Partial(baselineProfileMode = BaselineProfileMode.Require),
+            iterations = 10,
+            setupBlock = {
+                killProcess()
+                startActivityAndWait()
+                device.wait(Until.findObject(By.text(CLIPBOARD_CONSENT_DENY_PATTERN)), UI_TIMEOUT_MILLIS)?.click()
+                checkNotNull(device.wait(Until.findObject(By.text(LIBRARY_TAB_PATTERN)), UI_TIMEOUT_MILLIS)).click()
+                device.findObject(showList)?.click()
+                check(device.wait(Until.hasObject(firstItem), UI_TIMEOUT_MILLIS)) {
+                    "The first fixture video is not visible: $firstTitle"
+                }
+            },
+        ) {
+            val collection = checkNotNull(device.findObject(scrollable))
+            collection.setGestureMargin(device.displayWidth / SCROLL_GESTURE_MARGIN_DIVISOR)
+            repeat(SCROLL_SWIPE_COUNT) { collection.swipe(Direction.UP, SCROLL_SWIPE_FRACTION) }
+            check(device.wait(Until.gone(firstItem), UI_TIMEOUT_MILLIS)) {
+                "The library did not scroll past the first fixture video"
+            }
+        }
     }
 
     private fun measureColdStartup(compilationMode: CompilationMode) {
@@ -85,3 +121,7 @@ class StartupBenchmark {
         }
     }
 }
+
+private const val SCROLL_GESTURE_MARGIN_DIVISOR = 5
+private const val SCROLL_SWIPE_COUNT = 3
+private const val SCROLL_SWIPE_FRACTION = 0.65f

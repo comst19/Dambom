@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">Almacenamiento insuficiente. Libera espacio y vuelve a intentarlo.</string>
+    <string name="downloads_summary_waiting">Esperando descargar</string>
+    <string name="downloads_summary_paused">Descargas en pausa</string>
+    <string name="downloads_summary_attention">Las descargas necesitan atención</string>
+    <string name="downloads_quality_original">Original</string>
+    <string name="downloads_title">Descargas</string>
+    <string name="downloads_back">Volver</string>
+    <string name="downloads_view_as_list">Ver como lista</string>
+    <string name="downloads_view_as_grid">Ver como cuadrícula</string>
+    <string name="downloads_empty_title">No hay descargas en curso</string>
+    <string name="downloads_empty_description">Las descargas finalizadas están listas para ver en su biblioteca.</string>
+    <string name="downloads_open_library">Abrir biblioteca</string>
+    <string name="downloads_summary">Descarga de %1$d</string>
+    <string name="downloads_summary_remaining">%1$d restante</string>
+    <string name="downloads_pause_all">Pausar todo</string>
+    <string name="downloads_resume_all">Reanudar todo</string>
+    <string name="downloads_group_active">Descargando</string>
+    <string name="downloads_group_queued">En cola</string>
+    <string name="downloads_group_paused">En pausa</string>
+    <string name="downloads_group_failed">Falló</string>
+    <string name="downloads_group_completed">Completado</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">Miniatura de %1$s</string>
+    <string name="downloads_unknown_size">Tamaño total desconocido</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">Progreso de las descargas restantes</string>
+    <string name="downloads_pause">Pausa</string>
+    <string name="downloads_resume">Reanudar</string>
+    <string name="downloads_cancel">Cancelar</string>
+    <string name="downloads_retry">Reintentar</string>
+    <string name="downloads_remove">Eliminar de la lista</string>
+    <string name="downloads_error_access">Este vídeo requiere permiso de acceso.</string>
+    <string name="downloads_error_format">Este formato de vídeo no es compatible.</string>
+    <string name="downloads_error_network">La conexión no se recuperó. Intentar otra vez.</string>
+    <string name="downloads_error_storage">No se pudo guardar el archivo. Verifique el espacio de almacenamiento.</string>
+    <string name="downloads_error_server">El servidor no pudo procesar la descarga.</string>
+    <string name="downloads_error_unknown">Algo salió mal durante la descarga.</string>
+    <string name="downloads_command_failed">No se pudo actualizar la descarga. Intentar otra vez.</string>
+    <string name="downloads_delete_pending">Se necesita limpieza de eliminación</string>
+    <string name="downloads_delete_retry">Reintentar eliminación</string>
+    <string name="downloads_delete_group_count">Eliminación de limpieza %1$d</string>
+    <string name="downloads_error_drm">Los vídeos protegidos no se pueden descargar.</string>
+</resources>

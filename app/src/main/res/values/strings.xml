@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name" translatable="false">Dambom</string>
+    <string name="subtitle_runtime_title">Translation runtime</string>
 </resources>

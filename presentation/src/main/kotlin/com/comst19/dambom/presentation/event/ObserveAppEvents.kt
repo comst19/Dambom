@@ -3,6 +3,8 @@ package com.comst19.dambom.presentation.event
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
@@ -16,7 +18,7 @@ internal fun ObserveAppEvents(
     eventBus: AppEventBus,
     snackbarHostState: SnackbarHostState,
 ) {
-    val context = LocalContext.current
+    val context by rememberUpdatedState(LocalContext.current)
     LaunchedEffect(eventBus, snackbarHostState) {
         eventBus.events.collectLatest { event ->
             when (event) {

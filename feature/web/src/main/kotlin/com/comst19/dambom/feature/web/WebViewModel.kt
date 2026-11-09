@@ -147,29 +147,21 @@ internal class WebViewModel
                 invalidatePage(tabId)
             }
             updateState { state ->
-                val tabs =
-                    state.tabs
-                        .map { tab ->
-                            if (tab.id == tabId) {
-                                tab.copy(
-                                    url = safeUrl,
-                                    title = title?.takeIf(String::isNotBlank) ?: safeUrl.hostLabel(),
-                                    detectionState = if (pageChanged) WebDetectionState.Idle else tab.detectionState,
-                                )
-                            } else {
-                                tab
-                            }
-                        }.toPersistentList()
-                val currentTab = tabs.firstOrNull { it.id == tabId }
+                val index = state.tabs.indexOfFirst { it.id == tabId }
+                if (index < 0) return@updateState state
+                val previousTab = state.tabs[index]
+                val updatedTab =
+                    previousTab.copy(
+                        url = safeUrl,
+                        title = title?.takeIf(String::isNotBlank) ?: safeUrl.hostLabel(),
+                        detectionState = if (pageChanged) WebDetectionState.Idle else previousTab.detectionState,
+                    )
+                val tabs = if (updatedTab == previousTab) state.tabs else state.tabs.set(index, updatedTab)
                 val recentPages =
-                    if (currentTab == null) {
-                        state.recentPages
-                    } else {
-                        (
-                            listOf(RecentPage(currentTab.title, safeUrl)) +
-                                state.recentPages.filterNot { it.url == safeUrl }.take(MAX_RECENT_PAGES - 1)
-                        ).toPersistentList()
-                    }
+                    (
+                        listOf(RecentPage(updatedTab.title, safeUrl)) +
+                            state.recentPages.filterNot { it.url == safeUrl }.take(MAX_RECENT_PAGES - 1)
+                    ).toPersistentList()
                 state.copy(tabs = tabs, recentPages = recentPages)
             }
         }
@@ -365,7 +357,11 @@ internal class WebViewModel
             transform: (WebTab) -> WebTab,
         ) {
             updateState { state ->
-                state.copy(tabs = state.tabs.map { if (it.id == tabId) transform(it) else it }.toPersistentList())
+                val index = state.tabs.indexOfFirst { it.id == tabId }
+                if (index < 0) return@updateState state
+                val previousTab = state.tabs[index]
+                val updatedTab = transform(previousTab)
+                if (updatedTab == previousTab) state else state.copy(tabs = state.tabs.set(index, updatedTab))
             }
         }
 

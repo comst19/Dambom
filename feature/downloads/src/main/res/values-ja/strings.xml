@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="downloads_error_insufficient_storage">ストレージが不十分である。スペースを解放して再試行してください。</string>
+    <string name="downloads_summary_waiting">ダウンロードを待っています</string>
+    <string name="downloads_summary_paused">ダウンロードが一時停止されました</string>
+    <string name="downloads_summary_attention">ダウンロードには注意が必要です</string>
+    <string name="downloads_quality_original">オリジナル</string>
+    <string name="downloads_title">ダウンロード</string>
+    <string name="downloads_back">戻る</string>
+    <string name="downloads_view_as_list">リストとして表示</string>
+    <string name="downloads_view_as_grid">グリッドとして表示</string>
+    <string name="downloads_empty_title">進行中のダウンロードはありません</string>
+    <string name="downloads_empty_description">ダウンロードが完了すると、ライブラリで視聴できるようになります。</string>
+    <string name="downloads_open_library">ライブラリを開く</string>
+    <string name="downloads_summary">%1$dダウンロード中</string>
+    <string name="downloads_summary_remaining">残り%1$d</string>
+    <string name="downloads_pause_all">すべてを一時停止する</string>
+    <string name="downloads_resume_all">すべてを再開する</string>
+    <string name="downloads_group_active">ダウンロード</string>
+    <string name="downloads_group_queued">キューに入れられました</string>
+    <string name="downloads_group_paused">一時停止</string>
+    <string name="downloads_group_failed">失敗しました</string>
+    <string name="downloads_group_completed">完成</string>
+    <string name="downloads_group_count">%1$s · %2$d</string>
+    <string name="downloads_bytes">%1$s / %2$s · %3$s</string>
+    <string name="downloads_thumbnail">%1$sサムネイル</string>
+    <string name="downloads_unknown_size">合計サイズは不明</string>
+    <string name="downloads_progress_percent">%1$d%%</string>
+    <string name="downloads_remaining_progress">残りのダウンロードの進行状況</string>
+    <string name="downloads_pause">一時停止</string>
+    <string name="downloads_resume">再開</string>
+    <string name="downloads_cancel">キャンセル</string>
+    <string name="downloads_retry">リトライ</string>
+    <string name="downloads_remove">リストから削除</string>
+    <string name="downloads_error_access">このビデオにはアクセス許可が必要である。</string>
+    <string name="downloads_error_format">このビデオフォーマットはサポートされていない。</string>
+    <string name="downloads_error_network">接続は回復しませんでした。もう一度やり直してください。</string>
+    <string name="downloads_error_storage">ファイルを保存できませんでした。収納スペースを確認してください。</string>
+    <string name="downloads_error_server">サーバーはダウンロードを処理できませんでした。</string>
+    <string name="downloads_error_unknown">ダウンロード中に問題が発生しました。</string>
+    <string name="downloads_command_failed">ダウンロードを更新できませんでした。もう一度やり直してください。</string>
+    <string name="downloads_delete_pending">削除のクリーンアップが必要です</string>
+    <string name="downloads_delete_retry">削除を再試行する</string>
+    <string name="downloads_delete_group_count">削除クリーンアップ %1$d</string>
+    <string name="downloads_error_drm">保護されたビデオはダウンロードすることができない。</string>
+</resources>

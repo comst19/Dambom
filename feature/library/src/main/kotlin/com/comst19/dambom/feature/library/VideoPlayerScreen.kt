@@ -1,5 +1,6 @@
 package com.comst19.dambom.feature.library
 
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -17,6 +18,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -47,7 +49,10 @@ import com.comst19.dambom.feature.library.component.rememberLibraryFileActions
 import com.comst19.dambom.feature.library.file.rememberLocalVideoAvailable
 import com.comst19.dambom.feature.library.pip.PipPlatformEffect
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
+import com.comst19.dambom.feature.library.subtitle.playback.SubtitleCueSource
+import com.comst19.dambom.feature.library.subtitle.playback.rememberSubtitleCues
 import com.comst19.dambom.feature.library.vault.PrivateVideoWindowProtection
+import java.io.File
 
 @Composable
 @Suppress("LongParameterList", "LongMethod")
@@ -179,6 +184,10 @@ internal fun VideoPlayerScreen(
     onPlayPauseRequest: (() -> Unit)? = null,
 ) {
     val interaction = rememberSaveable(task?.id, saver = PlayerInteractionState.Saver) { PlayerInteractionState() }
+    val subtitleUri = remember(task?.localFilePath) { task?.localFilePath?.let { Uri.fromFile(File(it)) } }
+    val subtitleCues by rememberSubtitleCues(subtitleUri)
+    val subtitleSource = SubtitleCueSource(subtitleUri, subtitleCues)
+    SideEffect { interaction.hasSubtitles = subtitleCues.isNotEmpty() }
     LaunchedEffect(isVideoFullscreen) {
         if (!isVideoFullscreen) interaction.locked = false
     }
@@ -192,6 +201,7 @@ internal fun VideoPlayerScreen(
             task = task,
             player = player,
             interaction = interaction,
+            subtitleSource = subtitleSource,
             fileActions = fileActions,
             onDismiss = { onVideoFullscreenChange(false) },
             onRotate = onVideoRotate,
@@ -264,6 +274,7 @@ internal fun VideoPlayerScreen(
                     task = task,
                     player = player,
                     interaction = interaction,
+                    subtitleSource = subtitleSource,
                     onPlayPauseRequest = onPlayPauseRequest,
                     onOpenOriginal = { fileActions.onOpenOriginal(task) },
                     onCopyLink = { fileActions.onCopyLink(task) },

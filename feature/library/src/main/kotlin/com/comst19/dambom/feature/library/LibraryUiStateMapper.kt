@@ -54,16 +54,25 @@ internal fun toLibraryUiState(
                     videos
                 }
             ).toPersistentList(),
-        selectedVideo = savedVideos.firstOrNull { it.id == selectedId },
         query = query,
         hasVideos = savedVideos.isNotEmpty(),
-        viewMode = viewMode,
-        isSelecting = selection.isActive,
-        selectedIds = selection.selectedIds.filterTo(linkedSetOf()) { it in tasks.ids }.toPersistentSet(),
         totalBytes = tasks.totalBytes,
         totalVideoCount = tasks.totalVideoCount,
         sourceFilter = sourceFilter,
         favoritesOnly = favoritesOnly,
         recentlyPlayedOnly = recentlyPlayedOnly,
-    )
+    ).withSelection(tasks, selectedId, viewMode, selection)
 }
+
+internal fun LibraryUiState.withSelection(
+    tasks: LibrarySnapshot,
+    selectedId: String?,
+    viewMode: LibraryViewMode,
+    selection: LibrarySelectionState,
+): LibraryUiState =
+    copy(
+        selectedVideo = selectedId?.let { id -> tasks.videos.firstOrNull { it.id == id } },
+        viewMode = viewMode,
+        isSelecting = selection.isActive,
+        selectedIds = selection.selectedIds.filterTo(linkedSetOf()) { it in tasks.ids }.toPersistentSet(),
+    )

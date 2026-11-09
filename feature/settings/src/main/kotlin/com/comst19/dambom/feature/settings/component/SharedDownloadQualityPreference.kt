@@ -36,7 +36,7 @@ internal fun SharedDownloadQualityPreference(
     if (showQuality) {
         SettingsChoiceDialog(
             title = stringResource(R.string.settings_shared_quality),
-            entries = SharedLinkQuality.entries.toPersistentList(),
+            entries = SHARED_LINK_QUALITIES,
             selected = state.sharedLinkQuality,
             label = { stringResource(it.labelRes) },
             onDismiss = { showQuality = false },
@@ -71,3 +71,5 @@ private val SharedLinkQuality.labelRes: Int
 
 @Suppress("MagicNumber")
 private val SHARED_RESOLUTIONS = listOf(240, 360, 480, 720, 1080, 1440, 2160).toPersistentList()
+
+private val SHARED_LINK_QUALITIES = SharedLinkQuality.entries.toPersistentList()

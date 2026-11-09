@@ -39,6 +39,21 @@ sealed interface LibraryGraph : AppNavKey {
     data object PrivateLibraryKey : LibraryGraph
 
     @Serializable
+    data class VideoSubtitleTranscriptKey(
+        val id: String,
+    ) : LibraryGraph
+
+    @Serializable
+    data class VideoSubtitleKey(
+        val id: String,
+    ) : LibraryGraph
+
+    @Serializable
+    data class VideoSubtitleExportKey(
+        val id: String,
+    ) : LibraryGraph
+
+    @Serializable
     data object LibraryKey : LibraryGraph, TopLevelNavKey
 
     @Serializable

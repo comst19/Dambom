@@ -22,6 +22,8 @@ import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.PrivateLibraryKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoCompressionKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoSubtitleExportKey
+import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoSubtitleKey
 import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoTrimKey
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryUiState
@@ -68,13 +70,11 @@ internal class LibraryViewModel
         private var deletingSelection = false
         private val displayPreferences =
             combine(
-                viewMode,
                 sourceFilter,
                 favoritesOnly,
                 recentlyPlayedOnly,
-            ) { viewMode, sourceFilter, favoritesOnly, recentlyPlayedOnly ->
+            ) { sourceFilter, favoritesOnly, recentlyPlayedOnly ->
                 LibraryDisplayPreferences(
-                    viewMode = LibraryViewMode.entries.firstOrNull { it.name == viewMode } ?: LibraryViewMode.GRID,
                     sourceFilter = LibrarySourceFilter.entries.firstOrNull { it.name == sourceFilter } ?: LibrarySourceFilter.ALL,
                     favoritesOnly = favoritesOnly,
                     recentlyPlayedOnly = recentlyPlayedOnly,
@@ -125,25 +125,27 @@ internal class LibraryViewModel
                 },
             ) { tasks, history -> tasks to history }
 
+        private val filteredLibrary =
+            combine(libraryWithHistory, query, displayPreferences) { tasks, query, preferences ->
+                tasks.first to
+                    toLibraryUiState(
+                        tasks = tasks.first,
+                        playbackHistory = tasks.second,
+                        selectedId = null,
+                        query = query,
+                        sourceFilter = preferences.sourceFilter,
+                        favoritesOnly = preferences.favoritesOnly,
+                        recentlyPlayedOnly = preferences.recentlyPlayedOnly,
+                    ).copy(isPrivateVault = tasks.first.isPrivateVault)
+            }
         private val mappedUiState =
-            combine(
-                libraryWithHistory,
-                selectedId,
-                query,
-                displayPreferences,
-                selection,
-            ) { tasks, selectedId, query, preferences, selection ->
-                toLibraryUiState(
-                    tasks = tasks.first,
-                    playbackHistory = tasks.second,
+            combine(filteredLibrary, selectedId, viewMode, selection) { (tasks, state), selectedId, mode, selection ->
+                state.withSelection(
+                    tasks = tasks,
                     selectedId = selectedId,
-                    query = query,
-                    viewMode = preferences.viewMode,
-                    sourceFilter = preferences.sourceFilter,
+                    viewMode = LibraryViewMode.entries.firstOrNull { it.name == mode } ?: LibraryViewMode.GRID,
                     selection = selection,
-                    favoritesOnly = preferences.favoritesOnly,
-                    recentlyPlayedOnly = preferences.recentlyPlayedOnly,
-                ).copy(isPrivateVault = tasks.first.isPrivateVault)
+                )
             }.flowOn(defaultDispatcher)
         val uiState: StateFlow<LibraryUiState> =
             combine(mappedUiState, privateVault, privateVideoSession.isUnlocked) { state, privateScope, unlocked ->
@@ -217,6 +219,12 @@ internal class LibraryViewModel
             if (task.isPrivate) return
             if (task.deletePending || task.localFilePath == null || task.status != DownloadStatus.COMPLETED) return
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoCompressionKey(task.id))) }
+        }
+
+        fun translateVideo(task: DownloadTask) {
+            if (task.isPrivate) return
+            if (task.deletePending || task.localFilePath == null || task.status != DownloadStatus.COMPLETED) return
+            viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoSubtitleKey(task.id))) }
         }
 
         fun trimVideo(task: DownloadTask) {
@@ -365,6 +373,15 @@ internal class LibraryViewModel
             }
         }
 
+        suspend fun hasSubtitles(task: DownloadTask): Boolean = fileManager.hasSubtitles(task)
+
+        fun exportWithSubtitles(task: DownloadTask) {
+            if (task.isPrivate || task.deletePending || task.localFilePath == null) return
+            viewModelScope.launch {
+                navigation.dispatch(NavigationEvent.Navigate(VideoSubtitleExportKey(task.id)))
+            }
+        }
+
         fun exportToConfiguredLocation(task: DownloadTask) {
             if (task.isPrivate || task.deletePending || task.localFilePath == null) return
             viewModelScope.launch {
@@ -441,7 +458,6 @@ internal class LibraryViewModel
     }
 
 private data class LibraryDisplayPreferences(
-    val viewMode: LibraryViewMode,
     val sourceFilter: LibrarySourceFilter,
     val favoritesOnly: Boolean,
     val recentlyPlayedOnly: Boolean,

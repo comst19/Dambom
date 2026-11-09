@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,6 +48,9 @@ import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.media.rememberLocalVideoMetadata
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
 import com.comst19.dambom.feature.library.player.component.PlaybackOptionsButton
+import com.comst19.dambom.feature.library.subtitle.playback.SubtitleCueSource
+import com.comst19.dambom.feature.library.subtitle.playback.SubtitleToggleButton
+import com.comst19.dambom.feature.library.subtitle.playback.TranslatedSubtitleOverlay
 
 @Composable
 internal fun MissingVideo(modifier: Modifier = Modifier) {
@@ -66,6 +70,7 @@ internal fun VideoPlayerPanel(
     task: DownloadTask,
     player: Player,
     interaction: PlayerInteractionState,
+    subtitleSource: SubtitleCueSource,
     onOpenOriginal: () -> Unit,
     onCopyLink: () -> Unit,
     onShareLink: () -> Unit,
@@ -73,7 +78,7 @@ internal fun VideoPlayerPanel(
     onPlayPauseRequest: (() -> Unit)? = null,
 ) {
     val playPauseState = rememberPlayPauseButtonState(player)
-    val metadata by rememberLocalVideoMetadata(task.localFilePath)
+    val metadata by rememberLocalVideoMetadata(task.localFilePath, includeThumbnail = false)
     var playbackError by remember(player) { mutableStateOf<PlaybackException?>(player.playerError) }
     val controls = rememberPlayerControlsState(task.id, isPlaying = !playPauseState.showPlay)
     val surfaceDescription = stringResource(R.string.player_surface_description, task.title)
@@ -102,6 +107,7 @@ internal fun VideoPlayerPanel(
         InlineVideoSurface(
             player = player,
             interaction = interaction,
+            subtitleSource = subtitleSource,
             surfaceDescription = surfaceDescription,
             controlsVisible = controls.isVisible,
             showPlay = playPauseState.showPlay,
@@ -111,7 +117,10 @@ internal fun VideoPlayerPanel(
             onControlsInteraction = controls::onInteraction,
             onControlsInteractionChanged = controls::onInteractionChanged,
         )
-        PlaybackOptionsButton(player)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            PlaybackOptionsButton(player)
+            SubtitleToggleButton(interaction)
+        }
         Text(
             text = task.title,
             style = MaterialTheme.typography.headlineSmall,
@@ -140,6 +149,7 @@ internal fun VideoPlayerPanel(
 private fun InlineVideoSurface(
     player: Player,
     interaction: PlayerInteractionState,
+    subtitleSource: SubtitleCueSource,
     surfaceDescription: String,
     controlsVisible: Boolean,
     showPlay: Boolean,
@@ -182,6 +192,12 @@ private fun InlineVideoSurface(
                         true
                     }
                 }.fullscreenPlayerGestures(toggleControlsLabel, onToggleControls, {}, interaction),
+        )
+        TranslatedSubtitleOverlay(
+            player,
+            subtitleSource,
+            interaction.subtitlesEnabled,
+            bottomPadding = if (controlsVisible) 64.dp else 20.dp,
         )
         AnimatedVisibility(
             visible = controlsVisible,

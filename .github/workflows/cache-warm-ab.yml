@@ -1,0 +1,99 @@
+name: Gradle cache warm A/B
+
+on:
+  push:
+    branches: [ci/cache-warm-ab-20261111]
+
+permissions:
+  contents: read
+
+env:
+  SUBJECT: 40e8da683eb995a4cc10dc4a0a9a1b67a32b988a
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    env:
+      EXPERIMENT_CACHE: ${{ runner.temp }}/dambom-build-cache
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.SUBJECT }}
+      - uses: ./.github/actions/setup-android
+      - name: Configure isolated Gradle output cache
+        run: |
+          cat > "$RUNNER_TEMP/cache.init.gradle" <<'GRADLE'
+          gradle.settingsEvaluated { settings ->
+              settings.buildCache.local {
+                  directory = new File(System.getenv('EXPERIMENT_CACHE'))
+                  push = System.getenv('EXPERIMENT_WRITE') == 'true'
+              }
+          }
+          GRADLE
+      - name: Warm Google Play Debug APK
+        env:
+          EXPERIMENT_WRITE: "true"
+        run: ./gradlew :app:assembleGooglePlayDebug --parallel --stacktrace --console=plain -I "$RUNNER_TEMP/cache.init.gradle"
+      - name: Save APK cache
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ${{ env.EXPERIMENT_CACHE }}
+          key: dambom-ab-${{ github.run_id }}-${{ github.run_attempt }}-apk
+      - name: Warm unit tests and lint
+        env:
+          EXPERIMENT_WRITE: "true"
+        run: ./gradlew testDebugUnitTest lintDebug --parallel --stacktrace --console=plain -I "$RUNNER_TEMP/cache.init.gradle"
+      - name: Save expanded cache
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ${{ env.EXPERIMENT_CACHE }}
+          key: dambom-ab-${{ github.run_id }}-${{ github.run_attempt }}-expanded
+
+  measure:
+    name: ${{ matrix.cache }} / ${{ matrix.check.name }}
+    needs: seed
+    runs-on: ubuntu-latest
+    env:
+      EXPERIMENT_CACHE: ${{ runner.temp }}/dambom-build-cache
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        cache: [apk, expanded]
+        check:
+          - name: Static analysis
+            tasks: ktlintCheck detekt
+          - name: Unit tests
+            tasks: testDebugUnitTest
+          - name: Debug lint
+            tasks: lintDebug
+          - name: Debug build
+            tasks: :app:assembleDebug
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ env.SUBJECT }}
+      - uses: ./.github/actions/setup-android
+      - name: Restore measured Gradle output cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ${{ env.EXPERIMENT_CACHE }}
+          key: dambom-ab-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.cache }}
+          fail-on-cache-miss: true
+      - name: Check localization consistency
+        if: matrix.check.name == 'Static analysis'
+        run: python3 tools/check_localization.py
+      - name: Run measured Gradle check
+        env:
+          GRADLE_TASKS: ${{ matrix.check.tasks }}
+        run: |
+          cat > "$RUNNER_TEMP/cache.init.gradle" <<'GRADLE'
+          gradle.settingsEvaluated { settings ->
+              settings.buildCache.local {
+                  directory = new File(System.getenv('EXPERIMENT_CACHE'))
+                  push = false
+              }
+          }
+          GRADLE
+          ./gradlew $GRADLE_TASKS --parallel --stacktrace --console=plain -I "$RUNNER_TEMP/cache.init.gradle"

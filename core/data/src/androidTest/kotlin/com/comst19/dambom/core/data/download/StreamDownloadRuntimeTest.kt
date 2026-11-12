@@ -2,6 +2,9 @@
 
 package com.comst19.dambom.core.data.download
 
+import android.graphics.Color
+import android.media.MediaExtractor
+import android.media.MediaFormat
 import android.media.MediaMetadataRetriever
 import android.os.SystemClock
 import android.util.Log
@@ -25,6 +28,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.File
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -90,6 +94,50 @@ class StreamDownloadRuntimeTest {
 
     @Test
     fun hlsWithSeparateAudioBecomesPlayableMp4() = verifyStream("master.m3u8", "application/vnd.apple.mpegurl")
+
+    @Test
+    fun hlsDownloadPreservesOpeningBeforePreferredPlaybackStart() {
+        val baseUrl = InstrumentationRegistry.getArguments().getString("hlsStartFixtureBaseUrl")
+        assumeTrue("Pass hlsStartFixtureBaseUrl for the red/blue HLS fixture", baseUrl != null)
+        verifyStream("preferred-start.m3u8", "application/vnd.apple.mpegurl", fixtureBaseUrl = baseUrl) { metadata ->
+            val frame = checkNotNull(metadata.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST_SYNC))
+            try {
+                val pixel = frame.getPixel(frame.width / 2, frame.height / 2)
+                assertTrue("Expected a red opening frame, got ${Integer.toHexString(pixel)}", Color.red(pixel) > 200)
+                assertTrue("Expected the first segment, got ${Integer.toHexString(pixel)}", Color.blue(pixel) < 40)
+            } finally {
+                frame.recycle()
+            }
+        }
+    }
+
+    @Test
+    fun hlsTransportStreamPreservesAvcDecoderConfiguration() {
+        val baseUrl = InstrumentationRegistry.getArguments().getString("hlsAvcFixtureBaseUrl")
+        assumeTrue("Pass hlsAvcFixtureBaseUrl for the MPEG-TS HLS fixture", baseUrl != null)
+        verifyStream("annexb.m3u8", "application/vnd.apple.mpegurl", fixtureBaseUrl = baseUrl, verifyOutput = { output ->
+            val extractor = MediaExtractor()
+            try {
+                extractor.setDataSource(output.absolutePath)
+                val videoFormat =
+                    (0 until extractor.trackCount)
+                        .map(extractor::getTrackFormat)
+                        .first { it.getString(MediaFormat.KEY_MIME) == MediaFormat.MIMETYPE_VIDEO_AVC }
+                assertTrue("MP4 must carry the SPS", (videoFormat.getByteBuffer("csd-0")?.remaining() ?: 0) > 4)
+                assertTrue("MP4 must carry the PPS", (videoFormat.getByteBuffer("csd-1")?.remaining() ?: 0) > 4)
+            } finally {
+                extractor.release()
+            }
+        }) { metadata ->
+            val frame = checkNotNull(metadata.getFrameAtTime(0, MediaMetadataRetriever.OPTION_CLOSEST_SYNC))
+            try {
+                val pixel = frame.getPixel(frame.width * 7 / 8, frame.height / 7)
+                assertTrue("Expected the cyan region in the opening frame", Color.green(pixel) > 180 && Color.blue(pixel) > 180)
+            } finally {
+                frame.recycle()
+            }
+        }
+    }
 
     @Test
     fun dashWithSeparateAudioBecomesPlayableMp4() = verifyStream("manifest.mpd", "application/dash+xml")
@@ -200,8 +248,11 @@ class StreamDownloadRuntimeTest {
         path: String,
         mimeType: String,
         height: Int? = null,
+        fixtureBaseUrl: String? = InstrumentationRegistry.getArguments().getString("streamFixtureBaseUrl"),
+        verifyOutput: (File) -> Unit = {},
+        verifyFrames: (MediaMetadataRetriever) -> Unit = {},
     ) = runBlocking {
-        val baseUrl = InstrumentationRegistry.getArguments().getString("streamFixtureBaseUrl")
+        val baseUrl = fixtureBaseUrl
         assumeTrue("Pass streamFixtureBaseUrl for a synthetic authenticated VOD fixture server", baseUrl != null)
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val store = DownloadFileStore(context)
@@ -249,6 +300,7 @@ class StreamDownloadRuntimeTest {
             assertEquals(0, activeRequests.get())
             assertTrue(receivedBytes > 0L)
             assertTrue(output.isFile && output.length() > 0L)
+            verifyOutput(output)
             val metadata = MediaMetadataRetriever()
             try {
                 metadata.setDataSource(output.absolutePath)
@@ -260,6 +312,7 @@ class StreamDownloadRuntimeTest {
                     assertEquals(height.toString(), metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT))
                 }
                 assertTrue(checkNotNull(metadata.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)).toLong() >= 3_000)
+                verifyFrames(metadata)
             } finally {
                 metadata.release()
             }

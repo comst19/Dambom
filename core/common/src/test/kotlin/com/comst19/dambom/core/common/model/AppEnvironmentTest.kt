@@ -24,6 +24,7 @@ class AppEnvironmentTest {
         assertEquals(true, AppEnvironment.DEBUG.isDebug)
         assertEquals(false, AppEnvironment.QA.isDebug)
         assertEquals(true, AppEnvironment.RELEASE.isRelease)
+        assertEquals(false, AppEnvironment.RELEASE.isDebug)
         assertEquals(false, AppEnvironment.QA.isRelease)
     }
 }

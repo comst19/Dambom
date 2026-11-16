@@ -12,7 +12,7 @@ internal data class PcmChunk(
 )
 
 internal class PcmChunker(
-    private val chunkSamples: Int = PCM_SAMPLE_RATE * 8,
+    private val chunkSamples: Int = PCM_SAMPLE_RATE * 9,
 ) {
     private val pending = ByteArrayOutputStream(chunkSamples * 2)
     private var originUs = -1L

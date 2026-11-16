@@ -116,7 +116,12 @@ jobs:
       - name: Set up Android environment
         uses: ./.github/actions/setup-android
         with:
-          cache-read-only: "true"
+          cache-read-only: >-
+            ${{
+              !(github.event_name == 'pull_request' &&
+                github.event.pull_request.head.repo.full_name == github.repository &&
+                contains(fromJSON('["unit-tests", "debug-lint", "debug-build"]'), matrix.id))
+            }}
 
       - name: Check localization consistency
         if: ${{ matrix.id == 'static-analysis' }}

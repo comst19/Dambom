@@ -1,0 +1,85 @@
+name: Same PR Gradle cache A/B
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'ci/pr-cache-repeat-ab-20261116'
+    name: ${{ matrix.condition }} / ${{ matrix.check.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        condition: [baseline, pr-cache]
+        check:
+          - id: static
+            name: Static analysis
+            tasks: ktlintCheck detekt
+          - id: unit
+            name: Unit tests
+            tasks: testDebugUnitTest
+          - id: lint
+            name: Debug lint
+            tasks: lintDebug
+          - id: apk
+            name: Debug build
+            tasks: :app:assembleDebug
+
+    env:
+      PR_CACHE_KEY: pr-output-ab-v2-${{ github.event.pull_request.number }}-${{ matrix.check.id }}-
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: ./.github/actions/setup-android
+        with:
+          cache-read-only: "true"
+      - name: Restore previous PR output
+        id: previous
+        if: matrix.condition == 'pr-cache' && (matrix.check.id == 'unit' || matrix.check.id == 'lint') && github.event.action == 'synchronize'
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ${{ runner.temp }}/dambom-output-cache
+          key: ${{ env.PR_CACHE_KEY }}${{ github.event.pull_request.head.sha }}
+          restore-keys: ${{ env.PR_CACHE_KEY }}
+          fail-on-cache-miss: true
+      - name: Prepare Gradle output cache
+        env:
+          PREVIOUS_CACHE_KEY: ${{ steps.previous.outputs.cache-matched-key }}
+        run: |
+          base_cache="${GRADLE_USER_HOME:-$HOME/.gradle}/caches/build-cache-1"
+          target_cache="$RUNNER_TEMP/dambom-output-cache"
+          mkdir -p "$target_cache"
+          if [[ -d "$base_cache" ]]; then
+            cp -an "$base_cache/." "$target_cache/"
+          fi
+          rm -f "$target_cache"/*.lock "$target_cache/gc.properties"
+          if [[ -n "$PREVIOUS_CACHE_KEY" ]]; then
+            echo "Restored PR cache: $PREVIOUS_CACHE_KEY"
+          fi
+          cat > "$RUNNER_TEMP/pr-cache.init.gradle" <<'GRADLE'
+          gradle.settingsEvaluated { settings ->
+              settings.buildCache.local {
+                  directory = new File(System.getenv('RUNNER_TEMP'), 'dambom-output-cache')
+                  push = true
+              }
+          }
+          GRADLE
+      - name: Check localization consistency
+        if: matrix.check.id == 'static'
+        run: python3 tools/check_localization.py
+      - name: Run PR check
+        env:
+          GRADLE_TASKS: ${{ matrix.check.tasks }}
+        run: ./gradlew $GRADLE_TASKS --parallel --stacktrace --console=plain -I "$RUNNER_TEMP/pr-cache.init.gradle"
+      - name: Save PR output
+        if: matrix.condition == 'pr-cache' && (matrix.check.id == 'unit' || matrix.check.id == 'lint')
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ${{ runner.temp }}/dambom-output-cache
+          key: ${{ env.PR_CACHE_KEY }}${{ github.event.pull_request.head.sha }}

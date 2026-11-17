@@ -22,13 +22,13 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.offline.DownloadHelper
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.DefaultDecoderFactory
 import androidx.media3.transformer.EditedMediaItem
 import androidx.media3.transformer.ExoPlayerAssetLoader
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
-import androidx.media3.transformer.FrameworkMuxer
 import androidx.media3.transformer.Transformer
 import com.comst19.dambom.core.common.util.VideoExportGate
 import com.comst19.dambom.core.domain.model.DownloadFailureReason
@@ -232,18 +232,28 @@ internal class StreamDownloadEngine(
         source: DataSource.Factory,
         output: File,
     ) = withContext(Dispatchers.Main.immediate) {
+        val mediaSourceFactory = DefaultMediaSourceFactory(context).setDataSourceFactory(source)
+        val exportSourceFactory =
+            if (item.localConfiguration?.mimeType == MimeTypes.APPLICATION_M3U8) {
+                object : MediaSource.Factory by mediaSourceFactory {
+                    override fun createMediaSource(mediaItem: MediaItem): MediaSource =
+                        HlsExportMediaSource(mediaSourceFactory.createMediaSource(mediaItem))
+                }
+            } else {
+                mediaSourceFactory
+            }
         val assetLoader =
             ExoPlayerAssetLoader.Factory(
                 context,
                 DefaultDecoderFactory.Builder(context).build(),
                 Clock.DEFAULT,
-                DefaultMediaSourceFactory(context).setDataSourceFactory(source),
+                exportSourceFactory,
             )
         val transformer =
             Transformer
                 .Builder(context)
                 .setAssetLoaderFactory(assetLoader)
-                .setMuxerFactory(FrameworkMuxer.Factory())
+                .setMuxerFactory(StreamMp4MuxerFactory())
                 .build()
         try {
             suspendCancellableCoroutine { continuation ->

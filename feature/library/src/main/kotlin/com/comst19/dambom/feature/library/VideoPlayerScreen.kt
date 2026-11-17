@@ -299,7 +299,7 @@ internal fun shouldShowFullscreenRotationControl(smallestScreenWidthDp: Int): Bo
     smallestScreenWidthDp < ROTATION_MIN_SMALLEST_WIDTH_DP
 
 internal fun Long.toTimeText(): String {
-    val totalSeconds = coerceAtLeast(0L) / 1_000L
+    val totalSeconds = (this / 1_000L).coerceAtLeast(0L)
     val hours = totalSeconds / 3_600L
     val minutes = (totalSeconds % 3_600L) / 60L
     val seconds = totalSeconds % 60L

@@ -17,6 +17,14 @@ class NetworkAccessStateTest {
     }
 
     @Test
+    fun `offline takes precedence over wifi only downloads`() {
+        val state = NetworkAccessState(NetworkConnection.OFFLINE, wifiOnlyDownloads = true)
+
+        assertFalse(state.canDownload)
+        assertEquals(NetworkRestriction.OFFLINE, state.restriction)
+    }
+
+    @Test
     fun `metered network blocks only wifi restricted downloads`() {
         val unrestricted = NetworkAccessState(NetworkConnection.METERED, wifiOnlyDownloads = false)
         val wifiOnly = NetworkAccessState(NetworkConnection.METERED, wifiOnlyDownloads = true)

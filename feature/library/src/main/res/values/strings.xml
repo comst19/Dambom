@@ -1,7 +1,7 @@
 <resources>
     <string name="library_favorites">Favorites</string>
     <string name="library_favorite_action_description">%1$s: %2$s</string>
-    <string name="library_favorites_filter_on">Show favorites only</string>
+    <string name="library_favorites_filter_on">Only show favorites</string>
     <string name="library_favorites_filter_off">Clear favorites filter</string>
     <string name="library_favorite_add">Add to favorites</string>
     <string name="library_favorite_remove">Remove from favorites</string>

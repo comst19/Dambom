@@ -90,6 +90,8 @@ Google Play 버전에서 사용할 수 있으며, Android 12 이상과 지원되
 | 데이터 저장 | Room, DataStore |
 | 다운로드 작업 | WorkManager |
 | 영상 재생과 스트림 저장·구간 편집 | Media3 |
+| 음성 인식과 번역 자막 | ML Kit 음성 인식, LiteRT-LM과 Gemma |
+| 번역 실행 모듈 배포 | Play Feature Delivery |
 
 ## 아키텍처와 모듈 구성
 
@@ -100,6 +102,7 @@ Google Play 버전에서 사용할 수 있으며, Android 12 이상과 지원되
 | `app` | 앱 진입점과 의존성 조립 |
 | `presentation` | 앱 공통 화면 구성과 기능별 내비게이션 연결 |
 | `feature:*` | 홈, 영상 감지, 웹 탐색, 다운로드, 보관함, 설정 |
+| `translationruntime` | Google Play에서 필요할 때 설치하는 LiteRT-LM 실행 모듈 |
 | `core:domain` | 도메인 모델과 Repository 인터페이스 |
 | `core:data` | Repository 구현과 다운로드 작업 관리 |
 | `core:network`, `core:database`, `core:datastore` | 네트워크 통신, 로컬 DB, 사용자 설정 저장 |
@@ -109,14 +112,18 @@ Google Play 버전에서 사용할 수 있으며, Android 12 이상과 지원되
 
 ### 주요 모듈 의존성
 
-공통 유틸리티와 테스트 의존성을 제외한 주요 연결입니다. 왼쪽 모듈이 오른쪽 모듈을 참조합니다.
+아래 표는 앱 실행과 화면 구성에 쓰이는 주요 직접 의존성을 보여줍니다. 공통 유틸리티와 테스트 모듈은 생략했습니다.
 
 | 참조하는 모듈 | 주요 의존 모듈 |
 | --- | --- |
 | `app` | `presentation`, `core:data`, `core:network`, `core:analytics`, `core:navigation` |
-| `presentation` | `feature:*`, `core:domain`, 공통 UI·내비게이션 모듈 |
-| `feature:*` | `core:domain`, 공통 UI·내비게이션 모듈 |
+| `presentation` | 홈·영상 감지·웹 탐색·다운로드·보관함·설정 모듈, `core:domain`, 공통 UI·내비게이션 모듈 |
+| `feature:*` 공통 | `core:domain`, `core:common-ui`, `core:designsystem`, `core:navigation`, `core:navigation-contract` |
+| `feature:detection` 추가 | `core:network` |
 | `core:data` | `core:domain`, `core:network`, `core:database`, `core:datastore` |
 | `core:navigation` | `core:navigation-contract` |
+| `translationruntime` | `app`, `feature:library` |
 
-기능 모듈끼리는 직접 참조하지 않으며, `presentation`에서 연결합니다. `core:domain`은 Android 플러그인을 사용하지 않는 Kotlin/JVM 모듈로, UI와 데이터 구현에 의존하지 않습니다.
+`presentation`에서 기능별 화면과 내비게이션을 연결합니다. 각 기능 모듈의 공통 의존성은 `dambom.android.feature` Gradle 플러그인이 추가합니다. `core:domain`은 Kotlin/JVM 모듈이며 도메인 모델과 저장소 인터페이스를 제공합니다.
+
+`app`은 `translationruntime`을 주문형 다이나믹 피처로 등록합니다. 번역 런타임은 `feature:library`의 인터페이스를 구현하며, 모델 파일은 번역 기능을 준비할 때 별도로 내려받습니다.

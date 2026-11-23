@@ -1,7 +1,9 @@
 package com.comst19.dambom.translationruntime
 
+import android.content.Context
 import com.comst19.dambom.feature.library.subtitle.runtime.LocalSubtitleLlm
 import com.comst19.dambom.feature.library.subtitle.runtime.LocalSubtitleLlmSession
+import com.comst19.dambom.feature.library.subtitle.runtime.LocalSubtitleSpeechClassifier
 import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.Content
 import com.google.ai.edge.litertlm.ConversationConfig
@@ -15,6 +17,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 class GemmaRuntime : LocalSubtitleLlm {
+    override fun openSpeechClassifier(context: Context): LocalSubtitleSpeechClassifier = YamnetSpeechClassifier(context)
+
     override suspend fun open(modelPath: String): LocalSubtitleLlmSession {
         val engine = Engine(EngineConfig(modelPath, Backend.CPU(), maxNumTokens = MODEL_CONTEXT))
         var transferred = false

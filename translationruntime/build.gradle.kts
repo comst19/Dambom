@@ -20,6 +20,7 @@ android {
         maybeCreate("qa").initWith(getByName("release"))
         getByName("release") { proguardFiles("proguard-rules.pro") }
     }
+    androidResources { noCompress += "tflite" }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -32,5 +33,6 @@ dependencies {
     implementation(project(":app"))
     implementation(project(":feature:library"))
     implementation(libs.litertlm)
+    implementation(libs.mediapipe.tasks.audio)
     implementation(libs.kotlinx.coroutines.android)
 }

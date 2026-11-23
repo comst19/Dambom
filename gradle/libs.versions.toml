@@ -49,6 +49,7 @@ crashlyticsPlugin = "3.0.8"
 androidx-biometric = { module = "androidx.biometric:biometric", version = "1.1.0" }
 mlkit-speech-recognition = { module = "com.google.mlkit:genai-speech-recognition", version = "1.0.0-alpha2" }
 litertlm = { module = "com.google.ai.edge.litertlm:litertlm-android", version = "0.18.1" }
+mediapipe-tasks-audio = { module = "com.google.mediapipe:tasks-audio", version = "1.2.3" }
 play-feature-delivery = { module = "com.google.android.play:feature-delivery", version = "2.1.0" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }

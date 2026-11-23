@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
+import android.util.Log
+import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.feature.library.subtitle.data.GemmaModelStore
 import com.comst19.dambom.feature.library.subtitle.model.ModelDownloadProgress
@@ -146,29 +148,41 @@ internal class GemmaSubtitleEngine
             models.access.withLock {
                 check(status(pair, forceRefresh = true) == SubtitleModelStatus.AVAILABLE)
                 withContext(io) {
-                    delivery.runtime().open(models.model.path).use { session ->
-                        currentCoroutineContext().ensureActive()
-                        val cues = mutableListOf<SubtitleCue>()
-                        decoder.decode(path) { chunk ->
-                            if (chunk.bytes.any { it != 0.toByte() }) {
-                                val recognized =
-                                    recognizeSubtitleWithFallback(pair.source) { language ->
-                                        recognizer(language).use { speech ->
-                                            val ready =
-                                                language == pair.source ||
-                                                    speech.checkStatus() == FeatureStatus.AVAILABLE
-                                            if (ready) transcribe(chunk, speech::startRecognition) else emptyList()
-                                        }
+                    val runtime = delivery.runtime()
+                    val classifier = optionalSpeechClassification { runtime.openSpeechClassifier(context) }
+                    var speechEvidence = classifier?.let { SubtitleSpeechEvidence(it::speechScore) }
+                    try {
+                        runtime.open(models.model.path).use { session ->
+                            currentCoroutineContext().ensureActive()
+                            val cues = mutableListOf<SubtitleCue>()
+                            decoder.decode(path) { chunk ->
+                                speechEvidence?.let { evidence ->
+                                    if (optionalSpeechClassification { evidence.append(chunk) } == null) {
+                                        speechEvidence = null
                                     }
-                                for (segment in recognized.cues) {
-                                    val prompt = translationPrompt(pair, segment.text, recognized.sourceLanguage)
-                                    val translated = session.translate(prompt)
-                                    cues.add(segment.copy(text = translated))
                                 }
+                                if (chunk.bytes.any { it != 0.toByte() }) {
+                                    val recognized =
+                                        recognizeSubtitleWithFallback(pair.source) { language ->
+                                            recognizer(language).use { speech ->
+                                                val ready =
+                                                    language == pair.source ||
+                                                        speech.checkStatus() == FeatureStatus.AVAILABLE
+                                                if (ready) transcribe(chunk, speech::startRecognition) else emptyList()
+                                            }
+                                        }
+                                    for (segment in recognized.cues) {
+                                        val prompt = translationPrompt(pair, segment.text, recognized.sourceLanguage)
+                                        val translated = session.translate(prompt)
+                                        cues.add(segment.copy(text = translated))
+                                    }
+                                }
+                                onProgress(chunk.endMillis)
                             }
-                            onProgress(chunk.endMillis)
+                            speechEvidence?.retainCues(cues) ?: cues
                         }
-                        cues
+                    } finally {
+                        optionalSpeechClassification { classifier?.close() }
                     }
                 }
             }
@@ -258,6 +272,11 @@ internal class GemmaSubtitleEngine
                     }.build(),
             )
     }
+
+private suspend fun <T> optionalSpeechClassification(block: () -> T): T? =
+    suspendRunCatching { block() }
+        .onFailure { Log.w("GemmaSubtitleEngine", "Background lyrics classification failed", it) }
+        .getOrNull()
 
 internal fun translationPrompt(
     pair: SubtitleLanguagePair,

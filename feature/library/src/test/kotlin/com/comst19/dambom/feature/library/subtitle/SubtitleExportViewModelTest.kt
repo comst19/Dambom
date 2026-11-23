@@ -8,6 +8,7 @@ import com.comst19.dambom.core.common.io.videoSubtitleFile
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.library.LibraryTestDownloads
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.feature.library.libraryTestVideo
 import com.comst19.dambom.feature.library.subtitle.data.SubtitleFiles
 import com.comst19.dambom.feature.library.subtitle.export.SubtitleExportViewModel
@@ -93,7 +94,7 @@ class SubtitleExportViewModelTest {
     private fun model() =
         SubtitleExportViewModel(
             LibraryTestDownloads(listOf(task)),
-            SubtitleFiles(context, main.dispatcher),
+            SubtitleFiles(ExportDocumentStore(context, main.dispatcher), main.dispatcher),
             fake,
             SpyNavigationDispatcher(),
         ).also { store.put("export", it) }

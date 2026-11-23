@@ -9,6 +9,7 @@ import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.feature.library.file.LibraryFileManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -40,7 +41,11 @@ class LibraryListReuseTest {
                     LibraryTestSettings,
                     SpyNavigationDispatcher(),
                     SavedStateHandle(),
-                    LibraryFileManager(context, dispatcherRule.dispatcher),
+                    LibraryFileManager(
+                        context,
+                        dispatcherRule.dispatcher,
+                        ExportDocumentStore(context, dispatcherRule.dispatcher),
+                    ),
                     AppEventBus(),
                     LibraryTestPlaybackHistory(),
                     PrivateVideoSession(),

@@ -65,6 +65,7 @@
     <string name="library_delete_retry">Retry deletion</string>
     <string name="library_export_success">Video saved to your device.</string>
     <string name="library_export_failure">Couldn’t save the video to your device.</string>
+    <string name="library_export_cleanup_incomplete">An incomplete export couldn’t be removed. Check the save location and delete the file there.</string>
     <string name="library_export_location_permission_expired">The selected folder permission expired. Choose a save location again.</string>
     <string name="library_share_failure">No app is available to share this video.</string>
     <string name="library_share_link_failure">No app is available to share this link.</string>

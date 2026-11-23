@@ -9,6 +9,7 @@ import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.feature.library.file.LibraryFileManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -155,7 +156,11 @@ class LibraryFavoritesTest {
         LibraryTestSettings,
         SpyNavigationDispatcher(),
         state,
-        LibraryFileManager(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
+        LibraryFileManager(
+            ApplicationProvider.getApplicationContext(),
+            dispatcherRule.dispatcher,
+            ExportDocumentStore(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
+        ),
         events,
         LibraryTestPlaybackHistory(),
         privateVideoSession = PrivateVideoSession(),

@@ -16,6 +16,7 @@ import com.comst19.dambom.core.common.io.videoSubtitleFile
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.feature.library.R
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.currentCoroutineContext
@@ -32,6 +33,7 @@ internal class LibraryFileManager
     constructor(
         @ApplicationContext private val context: Context,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+        private val documents: ExportDocumentStore,
     ) {
         suspend fun hasSubtitles(task: DownloadTask): Boolean =
             withContext(ioDispatcher) {
@@ -41,21 +43,11 @@ internal class LibraryFileManager
         suspend fun export(
             task: DownloadTask,
             destination: Uri,
-        ) = withContext(ioDispatcher) {
-            var copied = false
-            try {
-                task.requireLocalFile().copyToDocument(context, destination)
-                copied = true
-            } finally {
-                if (!copied) runCatching { DocumentsContract.deleteDocument(context.contentResolver, destination) }
-            }
+        ) {
+            documents.save(destination) { task.requireLocalFile() }
         }
 
-        suspend fun discardExport(destination: Uri) =
-            withContext(ioDispatcher) {
-                runCatching { DocumentsContract.deleteDocument(context.contentResolver, destination) }
-                Unit
-            }
+        suspend fun discardExport(destination: Uri) = documents.discard(destination)
 
         suspend fun exportToConfiguredLocation(
             task: DownloadTask,
@@ -131,12 +123,7 @@ internal class LibraryFileManager
                         task.suggestedFileName(),
                     ),
                 )
-            try {
-                copyToDocument(context, destination)
-            } catch (throwable: Throwable) {
-                DocumentsContract.deleteDocument(context.contentResolver, destination)
-                throw throwable
-            }
+            documents.save(destination) { this }
         }
 
         private suspend fun File.copyToDefaultDownloads(task: DownloadTask) {

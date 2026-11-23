@@ -11,6 +11,7 @@ import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.feature.library.subtitle.data.SubtitleFiles
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleEngine
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleModelStatus
@@ -59,7 +60,12 @@ class SubtitleViewModelTest {
     private val engine = FakeSubtitleEngine()
     private val background = CoroutineScope(SupervisorJob() + main.dispatcher)
     private val jobs by lazy {
-        FakeSubtitleJobs(engine, SubtitleFiles(context, main.dispatcher), { source.path }, background)
+        FakeSubtitleJobs(
+            engine,
+            SubtitleFiles(ExportDocumentStore(context, main.dispatcher), main.dispatcher),
+            { source.path },
+            background,
+        )
     }
 
     @Before fun setup() {
@@ -370,7 +376,7 @@ class SubtitleViewModelTest {
         return SubtitleViewModel(
             repository,
             engine,
-            SubtitleFiles(context, main.dispatcher),
+            SubtitleFiles(ExportDocumentStore(context, main.dispatcher), main.dispatcher),
             SpyNavigationDispatcher(),
             saved,
             jobs,

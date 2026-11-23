@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Isku day in aad tirtirto</string>
     <string name="library_export_success">Fiidiyow lagu kaydiyay qalabkaaga.</string>
     <string name="library_export_failure">Ma lagu kaydin kari waayay muuqaalka qalabkaaga.</string>
+    <string name="library_export_cleanup_incomplete">Faylka aan dhammaystirnayn lama tirtiri karin. Ka tirtir meesha lagu kaydiyey.</string>
     <string name="library_export_location_permission_expired">Oggolaanshaha faylka la doortay wuu dhacay Dooro meel kaydin mar labaad</string>
     <string name="library_share_failure">Ma jiro app diyaar ah oo la wadaago muuqaalkan.</string>
     <string name="library_share_link_failure">Ma jiro app la heli karo si loo wadaago xidhiidhkan.</string>

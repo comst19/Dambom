@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Versuchen Sie den Löschvorgang erneut</string>
     <string name="library_export_success">Video auf Ihrem Gerät gespeichert.</string>
     <string name="library_export_failure">Das Video konnte nicht auf Ihrem Gerät gespeichert werden.</string>
+    <string name="library_export_cleanup_incomplete">Die unvollständige Datei konnte nicht gelöscht werden. Lösche sie am Speicherort.</string>
     <string name="library_export_location_permission_expired">Die Berechtigung für den ausgewählten Ordner ist abgelaufen. Wählen Sie erneut einen Speicherort.</string>
     <string name="library_share_failure">Zum Teilen dieses Videos ist keine App verfügbar.</string>
     <string name="library_share_link_failure">Es ist keine App zum Teilen dieses Links verfügbar.</string>

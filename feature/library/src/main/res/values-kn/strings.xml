@@ -66,6 +66,7 @@
     <string name="library_delete_retry">ಅಳಿಸುವಿಕೆಯನ್ನು ಮರುಪ್ರಯತ್ನಿಸಿ</string>
     <string name="library_export_success">ವೀಡಿಯೊವನ್ನು ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಉಳಿಸಲಾಗಿದೆ.</string>
     <string name="library_export_failure">ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ವೀಡಿಯೊವನ್ನು ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.</string>
+    <string name="library_export_cleanup_incomplete">ಅಪೂರ್ಣ ಫೈಲ್ ಅನ್ನು ಅಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಅದನ್ನು ಉಳಿಸಿದ ಸ್ಥಳದಿಂದ ಅಳಿಸಿ.</string>
     <string name="library_export_location_permission_expired">ಆಯ್ಕೆಮಾಡಿದ ಫೋಲ್ಡರ್ ಅನುಮತಿ ಅವಧಿ ಮೀರಿದೆ. ಉಳಿಸುವ ಸ್ಥಳವನ್ನು ಮತ್ತೊಮ್ಮೆ ಆಯ್ಕೆಮಾಡಿ.</string>
     <string name="library_share_failure">ಈ ವೀಡಿಯೊವನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್ ಲಭ್ಯವಿಲ್ಲ.</string>
     <string name="library_share_link_failure">ಈ ಲಿಂಕ್ ಅನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್ ಲಭ್ಯವಿಲ್ಲ.</string>

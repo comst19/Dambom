@@ -66,6 +66,7 @@
     <string name="library_delete_retry">حذف کرنے کی دوبارہ کوشش کریں۔</string>
     <string name="library_export_success">ویڈیو آپ کے آلے میں محفوظ ہو گئی۔</string>
     <string name="library_export_failure">ویڈیو کو آپ کے آلے میں محفوظ نہیں کیا جا سکا۔</string>
+    <string name="library_export_cleanup_incomplete">نامکمل فائل حذف نہیں ہو سکی۔ جہاں اسے محفوظ کیا گیا تھا وہاں سے اسے حذف کریں۔</string>
     <string name="library_export_location_permission_expired">منتخب فولڈر کی اجازت ختم ہو گئی۔ دوبارہ محفوظ مقام کا انتخاب کریں۔</string>
     <string name="library_share_failure">اس ویڈیو کو شیئر کرنے کے لیے کوئی ایپ دستیاب نہیں ہے۔</string>
     <string name="library_share_link_failure">اس لنک کو شیئر کرنے کے لیے کوئی ایپ دستیاب نہیں ہے۔</string>

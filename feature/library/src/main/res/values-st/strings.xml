@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Leka hape ho hlakola</string>
     <string name="library_export_success">Video e bolokiloe sesebelisoa sa hau.</string>
     <string name="library_export_failure">E ne e sa khone ho boloka video sesebelisoa sa hau.</string>
+    <string name="library_export_cleanup_incomplete">Faele e sa phethahalang ha ea ka ea hlakoleha. E hlakole sebakeng seo e bolokiloeng ho sona.</string>
     <string name="library_export_location_permission_expired">Tumello ea folda e khethiloeng e felile. Khetha sebaka sa ho boloka hape.</string>
     <string name="library_share_failure">Ha ho sesebelisoa se fumanehang sa ho arolelana video ena.</string>
     <string name="library_share_link_failure">Ha ho sesebelisoa se fumanehang sa ho arolelana sehokela sena.</string>

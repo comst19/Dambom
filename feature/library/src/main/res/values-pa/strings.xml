@@ -66,6 +66,7 @@
     <string name="library_delete_retry">ਮਿਟਾਉਣ ਦੀ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰੋ</string>
     <string name="library_export_success">ਵੀਡੀਓ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਵਿੱਚ ਸੁਰੱਖਿਅਤ ਕੀਤੀ ਗਈ।</string>
     <string name="library_export_failure">ਵੀਡੀਓ ਨੂੰ ਤੁਹਾਡੀ ਡਿਵਾਈਸ ਵਿੱਚ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ।</string>
+    <string name="library_export_cleanup_incomplete">ਅਧੂਰੀ ਫ਼ਾਈਲ ਮਿਟਾਈ ਨਹੀਂ ਜਾ ਸਕੀ। ਜਿੱਥੇ ਇਹ ਸੇਵ ਕੀਤੀ ਸੀ, ਉੱਥੋਂ ਇਸ ਨੂੰ ਮਿਟਾਓ।</string>
     <string name="library_export_location_permission_expired">ਚੁਣੇ ਗਏ ਫੋਲਡਰ ਦੀ ਇਜਾਜ਼ਤ ਦੀ ਮਿਆਦ ਪੁੱਗ ਗਈ ਹੈ। ਇੱਕ ਸੁਰੱਖਿਅਤ ਸਥਾਨ ਦੁਬਾਰਾ ਚੁਣੋ।</string>
     <string name="library_share_failure">ਇਸ ਵੀਡੀਓ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਲਈ ਕੋਈ ਐਪ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।</string>
     <string name="library_share_link_failure">ਇਸ ਲਿੰਕ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਲਈ ਕੋਈ ਐਪ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।</string>

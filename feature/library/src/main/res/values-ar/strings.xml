@@ -66,6 +66,7 @@
     <string name="library_delete_retry">إعادة محاولة الحذف</string>
     <string name="library_export_success">تم حفظ الفيديو على جهازك.</string>
     <string name="library_export_failure">لا يمكن حفظ الفيديو على جهازك.</string>
+    <string name="library_export_cleanup_incomplete">تعذّر حذف الملف غير المكتمل. احذفه يدويًا من مكان حفظه.</string>
     <string name="library_export_location_permission_expired">انتهت صلاحية إذن المجلد المحدد. اختر موقع الحفظ مرة أخرى.</string>
     <string name="library_share_failure">لا يوجد تطبيق متاح لمشاركة هذا الفيديو.</string>
     <string name="library_share_link_failure">لا يوجد تطبيق متاح لمشاركة هذا الرابط.</string>

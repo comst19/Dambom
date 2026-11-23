@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Ji nû ve jêbirinê biceribîne</string>
     <string name="library_export_success">Vîdyo li ser cîhaza we hate tomarkirin.</string>
     <string name="library_export_failure">Nekarî vîdyoyê li cîhaza we hilîne.</string>
+    <string name="library_export_cleanup_incomplete">Pelê netemam nehat jêbirin. Ji cihê ku lê hatiye hilanîn jê bibe.</string>
     <string name="library_export_location_permission_expired">Destûra peldanka hilbijartî qediya. Dîsa cîhek hilbijartî hilbijêrin.</string>
     <string name="library_share_failure">Ji bo parvekirina vê vîdyoyê serîlêdanek tune.</string>
     <string name="library_share_link_failure">Ji bo parvekirina vê lînkê serîlêdanek tune.</string>

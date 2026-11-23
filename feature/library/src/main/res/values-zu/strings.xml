@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Zama ukususa futhi</string>
     <string name="library_export_success">Ividiyo igciniwe kudivayisi yakho.</string>
     <string name="library_export_failure">Akuwenzeki ukugcina ividiyo kudivayisi yakho.</string>
+    <string name="library_export_cleanup_incomplete">Ifayela elingaphelele alikwazanga ukususwa. Lisuse endaweni eligcinwe kuyo.</string>
     <string name="library_export_location_permission_expired">Imvume yefolda ekhethiwe isiphelile. Khetha indawo yokugcina futhi.</string>
     <string name="library_share_failure">Alukho uhlelo olutholakalayo lokwabelana ngale vidiyo.</string>
     <string name="library_share_link_failure">Alukho uhlelo olutholakalayo lokwabelana ngaleli khonk LINK.</string>

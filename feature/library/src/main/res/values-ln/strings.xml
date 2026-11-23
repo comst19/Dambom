@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Meka lisusu kosilisa</string>
     <string name="library_export_success">Video ebombami na appareil na yo.</string>
     <string name="library_export_failure">Ekoki te kobomba video na appareil na yo.</string>
+    <string name="library_export_cleanup_incomplete">Fisyé oyo esilaki te ekokaki kolongolama te. Longolá yango na esika ebombami.</string>
     <string name="library_export_location_permission_expired">Ndingisa ya dossier oyo eponami esilaki. Pona lisusu esika ya kobomba.</string>
     <string name="library_share_failure">Application moko te ezali mpo na kokabola video oyo.</string>
     <string name="library_share_link_failure">Application moko te ezali mpo na kokabola lien oyo.</string>

@@ -66,6 +66,7 @@
     <string name="library_delete_retry">நீக்க மீண்டும் முயற்சிக்கவும்</string>
     <string name="library_export_success">வீடியோ உங்கள் சாதனத்தில் சேமிக்கப்பட்டது.</string>
     <string name="library_export_failure">உங்கள் சாதனத்தில் வீடியோவைச் சேமிக்க முடியவில்லை.</string>
+    <string name="library_export_cleanup_incomplete">முழுமையடையாத கோப்பை நீக்க முடியவில்லை. கோப்பு சேமிக்கப்பட்ட இடத்தில் அதை நீக்கவும்.</string>
     <string name="library_export_location_permission_expired">தேர்ந்தெடுக்கப்பட்ட கோப்புறை அனுமதி காலாவதியானது. சேமிக்கும் இடத்தை மீண்டும் தேர்வு செய்யவும்.</string>
     <string name="library_share_failure">இந்த வீடியோவைப் பகிர எந்தப் பயன்பாடும் இல்லை.</string>
     <string name="library_share_link_failure">இந்த இணைப்பைப் பகிர எந்தப் பயன்பாடும் இல்லை.</string>

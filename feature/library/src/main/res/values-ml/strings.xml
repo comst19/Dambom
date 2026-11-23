@@ -66,6 +66,7 @@
     <string name="library_delete_retry">ഇല്ലാതാക്കാൻ വീണ്ടും ശ്രമിക്കുക</string>
     <string name="library_export_success">വീഡിയോ നിങ്ങളുടെ ഉപകരണത്തിൽ സംരക്ഷിച്ചു.</string>
     <string name="library_export_failure">നിങ്ങളുടെ ഉപകരണത്തിൽ വീഡിയോ സംരക്ഷിക്കാനായില്ല.</string>
+    <string name="library_export_cleanup_incomplete">പൂർത്തിയാകാത്ത ഫയൽ ഇല്ലാതാക്കാനായില്ല. ഫയൽ സേവ് ചെയ്ത സ്ഥലത്തുനിന്ന് അത് ഇല്ലാതാക്കുക.</string>
     <string name="library_export_location_permission_expired">തിരഞ്ഞെടുത്ത ഫോൾഡർ അനുമതി കാലഹരണപ്പെട്ടു. ഒരു സേവ് ലൊക്കേഷൻ വീണ്ടും തിരഞ്ഞെടുക്കുക.</string>
     <string name="library_share_failure">ഈ വീഡിയോ പങ്കിടാൻ ഒരു ആപ്പും ലഭ്യമല്ല.</string>
     <string name="library_share_link_failure">ഈ ലിങ്ക് പങ്കിടാൻ ഒരു ആപ്പും ലഭ്യമല്ല.</string>

@@ -66,6 +66,7 @@
     <string name="library_delete_retry">ٻيهر ڪوشش ڪريو حذف ڪرڻ</string>
     <string name="library_export_success">وڊيو توهان جي ڊوائيس تي محفوظ ڪئي وئي.</string>
     <string name="library_export_failure">توهان جي ڊوائيس تي وڊيو محفوظ نه ٿي سگهي.</string>
+    <string name="library_export_cleanup_incomplete">اڻپوري فائل ختم نه ٿي سگهي. فائل کي محفوظ ڪيل هنڌ تان ختم ڪريو.</string>
     <string name="library_export_location_permission_expired">چونڊيل فولڊر جي اجازت ختم ٿي وئي. ٻيهر محفوظ جڳھ چونڊيو.</string>
     <string name="library_share_failure">هي وڊيو شيئر ڪرڻ لاءِ ڪا به ايپ موجود ناهي.</string>
     <string name="library_share_link_failure">هن لنڪ کي شيئر ڪرڻ لاءِ ڪابه ايپ موجود ناهي.</string>

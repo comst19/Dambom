@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Sake gwada gogewa</string>
     <string name="library_export_success">An adana bidiyon a na\'urar ku.</string>
     <string name="library_export_failure">Ba za a iya ajiye bidiyon a na\'urar ku ba.</string>
+    <string name="library_export_cleanup_incomplete">An kasa share fayil ɗin da bai cika ba. Share shi daga inda aka ajiye shi.</string>
     <string name="library_export_location_permission_expired">Izinin babban fayil ɗin da aka zaɓa ya ƙare. Zabi wurin ajiyewa kuma.</string>
     <string name="library_share_failure">Babu app da yake akwai don raba wannan bidiyon.</string>
     <string name="library_share_link_failure">Babu app da yake akwai don raba wannan hanyar haɗin yanar gizon.</string>

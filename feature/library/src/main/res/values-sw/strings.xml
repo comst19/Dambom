@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Jaribu tena kufuta</string>
     <string name="library_export_success">Video imehifadhiwa kwenye kifaa chako.</string>
     <string name="library_export_failure">Haikuweza kuhifadhi video kwenye kifaa chako.</string>
+    <string name="library_export_cleanup_incomplete">Faili isiyokamilika haikuweza kufutwa. Ifute mwenyewe kutoka mahali ilipohifadhiwa.</string>
     <string name="library_export_location_permission_expired">Ruhusa ya folda iliyochaguliwa imekwisha. Chagua eneo la kuhifadhi tena.</string>
     <string name="library_share_failure">Hakuna programu inayopatikana kushiriki video hii.</string>
     <string name="library_share_link_failure">Hakuna programu inayopatikana ili kushiriki kiungo hiki.</string>

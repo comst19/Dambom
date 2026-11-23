@@ -66,6 +66,7 @@
     <string name="library_delete_retry">重试删除</string>
     <string name="library_export_success">视频保存到您的设备。</string>
     <string name="library_export_failure">无法将视频保存到您的设备。</string>
+    <string name="library_export_cleanup_incomplete">无法删除未完成的导出文件。请前往保存位置手动删除。</string>
     <string name="library_export_location_permission_expired">所选文件夹权限已过期。再次选择保存位置。</string>
     <string name="library_share_failure">没有应用程序可用于共享该视频。</string>
     <string name="library_share_link_failure">没有应用程序可用于共享此链接。</string>

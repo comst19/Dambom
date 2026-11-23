@@ -66,6 +66,7 @@
     <string name="library_delete_retry">ပြန်ဖျက်ရန် ကြိုးစားပါ။</string>
     <string name="library_export_success">ဗီဒီယိုကို သင့်စက်တွင် သိမ်းဆည်းထားသည်။</string>
     <string name="library_export_failure">ဗီဒီယိုကို သင့်စက်တွင် မသိမ်းဆည်းနိုင်ပါ။</string>
+    <string name="library_export_cleanup_incomplete">မပြီးသေးသောဖိုင်ကို ဖျက်၍မရပါ။ သိမ်းထားသည့်နေရာမှ ဖိုင်ကို ဖျက်ပါ။</string>
     <string name="library_export_location_permission_expired">ရွေးချယ်ထားသောဖိုင်တွဲခွင့်ပြုချက် သက်တမ်းကုန်သွားပါပြီ။ သိမ်းဆည်းမည့်နေရာကို ထပ်မံရွေးချယ်ပါ။</string>
     <string name="library_share_failure">ဤဗီဒီယိုကို မျှဝေရန် မည်သည့်အက်ပ်မှ မရနိုင်ပါ။</string>
     <string name="library_share_link_failure">ဤလင့်ခ်ကို မျှဝေရန် မည်သည့်အက်ပ်မှ မရနိုင်ပါ။</string>

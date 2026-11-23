@@ -66,6 +66,7 @@
     <string name="library_delete_retry">हटाने का पुनः प्रयास करें</string>
     <string name="library_export_success">वीडियो आपके डिवाइस में सहेजा गया।</string>
     <string name="library_export_failure">वीडियो को आपके डिवाइस पर सहेजा नहीं जा सका।</string>
+    <string name="library_export_cleanup_incomplete">अधूरी फ़ाइल हटाई नहीं जा सकी। फ़ाइल जहाँ सेव की गई है, वहाँ जाकर उसे हटाएँ।</string>
     <string name="library_export_location_permission_expired">चयनित फ़ोल्डर की अनुमति समाप्त हो गई। फिर से सेव लोकेशन चुनें.</string>
     <string name="library_share_failure">इस वीडियो को साझा करने के लिए कोई ऐप उपलब्ध नहीं है।</string>
     <string name="library_share_link_failure">इस लिंक को साझा करने के लिए कोई ऐप उपलब्ध नहीं है।</string>

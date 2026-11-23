@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Повторить удаление</string>
     <string name="library_export_success">Видео сохранено на ваше устройство.</string>
     <string name="library_export_failure">Не удалось сохранить видео на ваше устройство.</string>
+    <string name="library_export_cleanup_incomplete">Не удалось удалить неполный файл. Удалите его вручную из папки, в которую он сохранён.</string>
     <string name="library_export_location_permission_expired">Срок действия разрешения выбранной папки истек. Выберите место сохранения снова.</string>
     <string name="library_share_failure">Нет доступного приложения для совместного использования этого видео.</string>
     <string name="library_share_link_failure">Нет доступного приложения для отправки этой ссылки.</string>

@@ -26,6 +26,7 @@ import com.comst19.dambom.feature.library.LibraryTestPlaybackHistory
 import com.comst19.dambom.feature.library.LibraryTestSettings
 import com.comst19.dambom.feature.library.LibraryViewModel
 import com.comst19.dambom.feature.library.R
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.feature.library.file.LibraryFileManager
 import com.comst19.dambom.feature.library.libraryTestVideo
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +71,11 @@ class LibraryExportRestorationTest {
                                 LibraryTestSettings,
                                 SpyNavigationDispatcher(),
                                 SavedStateHandle(),
-                                LibraryFileManager(context, Dispatchers.Unconfined),
+                                LibraryFileManager(
+                                    context,
+                                    Dispatchers.Unconfined,
+                                    ExportDocumentStore(context, Dispatchers.Unconfined),
+                                ),
                                 AppEventBus(),
                                 LibraryTestPlaybackHistory(),
                                 privateVideoSession = PrivateVideoSession(),
@@ -117,7 +122,11 @@ class LibraryExportRestorationTest {
                                 LibraryTestSettings,
                                 navigation,
                                 SavedStateHandle(),
-                                LibraryFileManager(context, Dispatchers.Unconfined),
+                                LibraryFileManager(
+                                    context,
+                                    Dispatchers.Unconfined,
+                                    ExportDocumentStore(context, Dispatchers.Unconfined),
+                                ),
                                 AppEventBus(),
                                 LibraryTestPlaybackHistory(),
                                 privateVideoSession = PrivateVideoSession(),

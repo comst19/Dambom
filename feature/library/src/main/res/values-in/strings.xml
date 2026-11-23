@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Coba lagi penghapusan</string>
     <string name="library_export_success">Video disimpan ke perangkat Anda.</string>
     <string name="library_export_failure">Tidak dapat menyimpan video ke perangkat Anda.</string>
+    <string name="library_export_cleanup_incomplete">File yang belum lengkap tidak dapat dihapus. Hapus secara manual dari lokasi penyimpanan.</string>
     <string name="library_export_location_permission_expired">Izin folder yang dipilih telah habis masa berlakunya. Pilih lokasi penyimpanan lagi.</string>
     <string name="library_share_failure">Tidak ada aplikasi yang tersedia untuk membagikan video ini.</string>
     <string name="library_share_link_failure">Tidak ada aplikasi yang tersedia untuk membagikan tautan ini.</string>

@@ -8,6 +8,7 @@ import android.provider.DocumentsContract
 import androidx.media3.common.util.UnstableApi
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.feature.library.export.VideoExportFiles
 import com.comst19.dambom.feature.library.trim.contract.TrimSelection
 import com.comst19.dambom.feature.library.trim.export.VideoClipExporter
@@ -33,7 +34,7 @@ import java.security.MessageDigest
 class VideoCompressionRuntimeTest {
     private val context = InstrumentationRegistry.getInstrumentation().context
     private val input get() = File(checkNotNull(InstrumentationRegistry.getArguments().getString("compressionFixturePath")))
-    private val store = VideoExportFiles(context, Dispatchers.IO)
+    private val store = VideoExportFiles(ExportDocumentStore(context, Dispatchers.IO))
     private val compressor = Media3VideoCompressor(context, Dispatchers.IO, store)
 
     @Test
@@ -73,7 +74,7 @@ class VideoCompressionRuntimeTest {
             context.contentResolver.openOutputStream(uri)?.use { it.write(byteArrayOf(1)) }
             val job =
                 async {
-                    store.save(uri.toString(), "cancel-compress") { file ->
+                    store.save(uri.toString()) { file ->
                         file.writeBytes(byteArrayOf(1, 2, 3))
                         awaitCancellation()
                     }
@@ -83,7 +84,7 @@ class VideoCompressionRuntimeTest {
                     while (context.cacheDir
                             .listFiles()
                             .orEmpty()
-                            .none { it.name.startsWith("cancel-compress-") }
+                            .none { it.name.startsWith("export-") }
                     ) {
                         kotlinx.coroutines.delay(10)
                     }
@@ -96,7 +97,7 @@ class VideoCompressionRuntimeTest {
                 context.cacheDir
                     .listFiles()
                     .orEmpty()
-                    .none { it.name.startsWith("cancel-compress-") },
+                    .none { it.name.startsWith("export-") },
             )
         }
 
@@ -125,7 +126,7 @@ class VideoCompressionRuntimeTest {
                 context.cacheDir
                     .listFiles()
                     .orEmpty()
-                    .none { it.name.startsWith("compress-") },
+                    .none { it.name.startsWith("export-") },
             )
             assertEquals(before, sha(source))
         }

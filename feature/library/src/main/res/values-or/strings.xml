@@ -66,6 +66,7 @@
     <string name="library_delete_retry">ବିଲୋପନ ପୁନ ry ଚେଷ୍ଟା କରନ୍ତୁ |</string>
     <string name="library_export_success">ଭିଡିଓ ଆପଣଙ୍କ ଡିଭାଇସରେ ସେଭ୍ ହୋଇଛି |</string>
     <string name="library_export_failure">ଭିଡିଓକୁ ଆପଣଙ୍କର ଡିଭାଇସରେ ସେଭ୍ କରିପାରିବ ନାହିଁ |</string>
+    <string name="library_export_cleanup_incomplete">ଅସମ୍ପୂର୍ଣ୍ଣ ଫାଇଲ୍‌ଟି ଡିଲିଟ୍ କରିହେଲା ନାହିଁ। ଏହାକୁ ସେଭ୍ କରିଥିବା ସ୍ଥାନରୁ ଡିଲିଟ୍ କରନ୍ତୁ।</string>
     <string name="library_export_location_permission_expired">ମନୋନୀତ ଫୋଲ୍ଡର ଅନୁମତି ମିଆଦ ପୂର୍ଣ୍ଣ ହୋଇଛି | ପୁନର୍ବାର ଏକ ସଂରକ୍ଷଣ ସ୍ଥାନ ବାଛନ୍ତୁ |</string>
     <string name="library_share_failure">ଏହି ଭିଡିଓ ଅଂଶୀଦାର କରିବାକୁ କ app ଣସି ଆପ୍ ଉପଲବ୍ଧ ନାହିଁ |</string>
     <string name="library_share_link_failure">ଏହି ଲିଙ୍କ୍ ଅଂଶୀଦାର କରିବାକୁ କ app ଣସି ଆପ୍ ଉପଲବ୍ଧ ନାହିଁ |</string>

@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Probeer verwydering weer</string>
     <string name="library_export_success">Video gestoor op jou toestel.</string>
     <string name="library_export_failure">Kon nie die video op jou toestel stoor nie.</string>
+    <string name="library_export_cleanup_incomplete">Die onvolledige lêer kon nie uitgevee word nie. Vee dit by die stoorligging uit.</string>
     <string name="library_export_location_permission_expired">Die geselekteerde vouer-toestemming het verval. Kies weer \'n stoorplek.</string>
     <string name="library_share_failure">Geen app beskikbaar om hierdie video te deel nie.</string>
     <string name="library_share_link_failure">Geen app beskikbaar om hierdie skakel te deel nie.</string>

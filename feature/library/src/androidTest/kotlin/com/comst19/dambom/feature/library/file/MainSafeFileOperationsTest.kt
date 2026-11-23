@@ -6,6 +6,7 @@ import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -42,7 +43,7 @@ class MainSafeFileOperationsTest {
                     createdAtMillis = 0L,
                     updatedAtMillis = 0L,
                 )
-            val manager = LibraryFileManager(context, Dispatchers.IO)
+            val manager = LibraryFileManager(context, Dispatchers.IO, ExportDocumentStore(context, Dispatchers.IO))
             val violations = CopyOnWriteArrayList<Throwable>()
             try {
                 isLocalVideoAvailable(task)

@@ -18,6 +18,7 @@ import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.feature.library.file.LibraryFileManager
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,7 +57,11 @@ class LibraryDeletionTest {
                     DeletionSettings,
                     SpyNavigationDispatcher(),
                     SavedStateHandle(),
-                    LibraryFileManager(context, dispatcherRule.dispatcher),
+                    LibraryFileManager(
+                        context,
+                        dispatcherRule.dispatcher,
+                        ExportDocumentStore(context, dispatcherRule.dispatcher),
+                    ),
                     events,
                     LibraryTestPlaybackHistory(),
                     privateVideoSession = PrivateVideoSession(),
@@ -114,7 +119,11 @@ class LibraryDeletionTest {
                     DeletionSettings,
                     navigation,
                     SavedStateHandle(),
-                    LibraryFileManager(context, dispatcherRule.dispatcher),
+                    LibraryFileManager(
+                        context,
+                        dispatcherRule.dispatcher,
+                        ExportDocumentStore(context, dispatcherRule.dispatcher),
+                    ),
                     AppEventBus(),
                     LibraryTestPlaybackHistory(),
                     privateVideoSession = PrivateVideoSession(),
@@ -168,7 +177,11 @@ class LibraryDeletionTest {
                     DeletionSettings,
                     SpyNavigationDispatcher(),
                     SavedStateHandle(),
-                    LibraryFileManager(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
+                    LibraryFileManager(
+                        ApplicationProvider.getApplicationContext(),
+                        dispatcherRule.dispatcher,
+                        ExportDocumentStore(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
+                    ),
                     AppEventBus(),
                     LibraryTestPlaybackHistory(),
                     privateVideoSession = PrivateVideoSession(),

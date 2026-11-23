@@ -66,6 +66,7 @@
     <string name="library_delete_retry">حذف مجدد را امتحان کنید</string>
     <string name="library_export_success">ویدیو در دستگاه شما ذخیره شد.</string>
     <string name="library_export_failure">ویدیو در دستگاه شما ذخیره نشد.</string>
+    <string name="library_export_cleanup_incomplete">فایل ناقص حذف نشد. آن را از محل ذخیره به‌صورت دستی حذف کنید.</string>
     <string name="library_export_location_permission_expired">مجوز پوشه انتخابی منقضی شده است. دوباره یک مکان ذخیره را انتخاب کنید.</string>
     <string name="library_share_failure">هیچ برنامه ای برای اشتراک گذاری این ویدیو در دسترس نیست.</string>
     <string name="library_share_link_failure">هیچ برنامه ای برای اشتراک گذاری این پیوند در دسترس نیست.</string>

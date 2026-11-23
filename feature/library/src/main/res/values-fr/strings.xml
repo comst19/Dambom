@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Réessayer la suppression</string>
     <string name="library_export_success">Vidéo enregistrée sur votre appareil.</string>
     <string name="library_export_failure">Impossible d\'enregistrer la vidéo sur votre appareil.</string>
+    <string name="library_export_cleanup_incomplete">Impossible de supprimer le fichier incomplet. Supprimez-le manuellement depuis son emplacement.</string>
     <string name="library_export_location_permission_expired">L\'autorisation du dossier sélectionné a expiré. Choisissez à nouveau un emplacement de sauvegarde.</string>
     <string name="library_share_failure">Aucune application n\'est disponible pour partager cette vidéo.</string>
     <string name="library_share_link_failure">Aucune application n\'est disponible pour partager ce lien.</string>

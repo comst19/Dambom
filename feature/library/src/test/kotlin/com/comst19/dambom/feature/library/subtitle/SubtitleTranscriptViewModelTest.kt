@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.library.LibraryTestDownloads
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.feature.library.libraryTestVideo
 import com.comst19.dambom.feature.library.subtitle.data.SubtitleFiles
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleCue
@@ -35,7 +36,7 @@ class SubtitleTranscriptViewModelTest {
         runTest(main.dispatcher) {
             val context = ApplicationProvider.getApplicationContext<Context>()
             val source = temporary.newFile("video.mp4")
-            val files = SubtitleFiles(context, main.dispatcher)
+            val files = SubtitleFiles(ExportDocumentStore(context, main.dispatcher), main.dispatcher)
             val cues = (0 until 1_000).map { SubtitleCue(it * 1_000L, it * 1_000L + 900, "Cue $it") }
             files.save(source.path, cues)
             val computation = TestCoroutineScheduler()

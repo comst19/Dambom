@@ -66,6 +66,7 @@
     <string name="library_delete_retry">মচি পেলাবলৈ পুনৰ চেষ্টা কৰক</string>
     <string name="library_export_success">আপোনাৰ ডিভাইচত ভিডিঅ\' সংৰক্ষণ কৰা হৈছে।</string>
     <string name="library_export_failure">ভিডিঅ’টো আপোনাৰ ডিভাইচত সংৰক্ষণ কৰিব পৰা নগ’ল৷</string>
+    <string name="library_export_cleanup_incomplete">অসম্পূৰ্ণ ফাইলটো মচিব পৰা নগ’ল। সাঁচি থোৱা স্থানৰ পৰা ফাইলটো মচি দিয়ক।</string>
     <string name="library_export_location_permission_expired">নিৰ্বাচিত ফোল্ডাৰৰ অনুমতিৰ ম্যাদ উকলি গ\'ল। আকৌ এটা সংৰক্ষণ স্থান বাছক।</string>
     <string name="library_share_failure">এই ভিডিঅ\'টো শ্বেয়াৰ কৰিবলৈ কোনো এপ উপলব্ধ নহয়।</string>
     <string name="library_share_link_failure">এই লিংকটো শ্বেয়াৰ কৰিবলৈ কোনো এপ উপলব্ধ নহয়।</string>

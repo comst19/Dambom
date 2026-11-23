@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Tun gbiyanju piparẹ</string>
     <string name="library_export_success">Fidio ti a fipamọ sori ẹrọ rẹ.</string>
     <string name="library_export_failure">Ko le fi fidio naa pamọ sori ẹrọ rẹ.</string>
+    <string name="library_export_cleanup_incomplete">A kò lè pa fáìlì tí kò pé rẹ́. Pa á rẹ́ níbi tí a ti fipamọ́ ọ́.</string>
     <string name="library_export_location_permission_expired">Igbanilaaye folda ti o yan ti pari. Yan ibi ipamọ lẹẹkansi.</string>
     <string name="library_share_failure">Ko si app to wa lati pin fidio yii.</string>
     <string name="library_share_link_failure">Ko si app to wa lati pin ọna asopọ yii.</string>

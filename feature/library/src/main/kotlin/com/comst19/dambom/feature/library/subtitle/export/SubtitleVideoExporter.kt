@@ -48,7 +48,7 @@ internal class Media3SubtitleVideoExporter
             destination: String,
             onProgress: (Int?) -> Unit,
         ) {
-            files.save(destination, "subtitled") { output ->
+            files.save(destination) { output ->
                 require(cues.isNotEmpty())
                 VideoExportGate.shared.run {
                     withContext(Dispatchers.Main.immediate) {

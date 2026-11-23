@@ -66,6 +66,7 @@
     <string name="library_delete_retry">נסה שוב למחוק</string>
     <string name="library_export_success">הסרטון נשמר במכשיר שלך.</string>
     <string name="library_export_failure">לא ניתן לשמור את הסרטון במכשיר שלך.</string>
+    <string name="library_export_cleanup_incomplete">לא ניתן למחוק את הקובץ החלקי. יש למחוק אותו ידנית מהמיקום שבו נשמר.</string>
     <string name="library_export_location_permission_expired">פג תוקף הרשאת התיקייה שנבחרה. בחר שוב מיקום שמירה.</string>
     <string name="library_share_failure">אין אפליקציה זמינה לשיתוף הסרטון הזה.</string>
     <string name="library_share_link_failure">אין אפליקציה זמינה לשיתוף קישור זה.</string>

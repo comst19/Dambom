@@ -16,6 +16,7 @@ import com.comst19.dambom.core.common.io.videoSubtitleFile
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
 import com.comst19.dambom.core.domain.repository.DownloadRepository
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.feature.library.subtitle.data.SubtitleFiles
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleEngine
 import com.comst19.dambom.feature.library.subtitle.inference.SubtitleModelStatus
@@ -199,7 +200,7 @@ class SubtitleWorkerTest {
                             workerParameters,
                             repository,
                             engine,
-                            SubtitleFiles(context, Dispatchers.IO),
+                            SubtitleFiles(ExportDocumentStore(context, Dispatchers.IO), Dispatchers.IO),
                             SubtitleNotifier(context),
                         )
                 },

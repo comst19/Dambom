@@ -53,7 +53,7 @@ internal class VideoClipExporter
             destination: String,
             onProgress: (Int?) -> Unit,
         ) {
-            files.save(destination, "trim") { output ->
+            files.save(destination) { output ->
                 require(selection.isValidFor(durationMillis(path)))
                 VideoExportGate.shared.run { transform(path, selection, output, onProgress) }
                 onProgress(null)

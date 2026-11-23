@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Yenidən silməyə cəhd edin</string>
     <string name="library_export_success">Video cihazınızda saxlandı.</string>
     <string name="library_export_failure">Videonu cihazınıza saxlamaq mümkün olmadı.</string>
+    <string name="library_export_cleanup_incomplete">Natamam faylı silmək olmadı. Faylı saxlandığı yerdən silin.</string>
     <string name="library_export_location_permission_expired">Seçilmiş qovluq icazəsinin müddəti bitdi. Yenidən saxlama yerini seçin.</string>
     <string name="library_share_failure">Bu videonu paylaşmaq üçün heç bir proqram yoxdur.</string>
     <string name="library_share_link_failure">Bu keçidi paylaşmaq üçün heç bir proqram yoxdur.</string>

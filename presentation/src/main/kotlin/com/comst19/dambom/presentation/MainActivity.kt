@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.locale.AppLanguagePreferences
 import com.comst19.dambom.core.navigation.NavigationDispatcher
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.presentation.contract.AppStartupState
 import com.comst19.dambom.presentation.entry.SharedTextEntryHandler
 import com.comst19.dambom.presentation.system.VideoOrientationCoordinator
@@ -27,6 +28,8 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var appEventBus: AppEventBus
 
     @Inject internal lateinit var sharedTextEntryHandler: SharedTextEntryHandler
+
+    @Inject lateinit var exportDocumentStore: ExportDocumentStore
 
     private val mainViewModel: MainViewModel by viewModels()
     private val videoOrientationCoordinator by lazy { VideoOrientationCoordinator(this) }
@@ -44,6 +47,7 @@ class MainActivity : AppCompatActivity() {
             window.isNavigationBarContrastEnforced = false
         }
         if (savedInstanceState == null) handleSharedTextIntent(intent)
+        lifecycleScope.launch { exportDocumentStore.recoverInterruptedExports() }
         setContent {
             MainActivityContent(
                 viewModel = mainViewModel,

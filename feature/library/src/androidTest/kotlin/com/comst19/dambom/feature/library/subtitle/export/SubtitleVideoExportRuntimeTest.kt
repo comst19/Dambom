@@ -8,6 +8,7 @@ import androidx.media3.common.util.Size
 import androidx.media3.common.util.UnstableApi
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.feature.library.export.VideoExportFiles
 import com.comst19.dambom.feature.library.subtitle.model.SubtitleCue
 import kotlinx.coroutines.CompletableDeferred
@@ -49,7 +50,7 @@ class SubtitleVideoExportRuntimeTest {
             val before = MessageDigest.getInstance("SHA-256").digest(input.readBytes())
             val name = "subtitle-burned.mp4"
             val destination = DocumentsContract.buildDocumentUri("com.comst19.dambom.compression.test.documents", name)
-            val exporter = Media3SubtitleVideoExporter(context, VideoExportFiles(context, Dispatchers.IO))
+            val exporter = Media3SubtitleVideoExporter(context, VideoExportFiles(ExportDocumentStore(context, Dispatchers.IO)))
             try {
                 withTimeout(180_000) {
                     exporter.export(input.path, listOf(SubtitleCue(1_000, 2_000, "안녕하세요 Hello")), destination.toString()) {}
@@ -84,7 +85,7 @@ class SubtitleVideoExportRuntimeTest {
             val input = File(checkNotNull(InstrumentationRegistry.getArguments().getString("subtitleExportLongFixturePath")))
             val name = "subtitle-cancelled.mp4"
             val destination = DocumentsContract.buildDocumentUri("com.comst19.dambom.compression.test.documents", name)
-            val exporter = Media3SubtitleVideoExporter(context, VideoExportFiles(context, Dispatchers.IO))
+            val exporter = Media3SubtitleVideoExporter(context, VideoExportFiles(ExportDocumentStore(context, Dispatchers.IO)))
             val started = CompletableDeferred<Unit>()
             val work =
                 async {
@@ -101,7 +102,7 @@ class SubtitleVideoExportRuntimeTest {
                     context.cacheDir
                         .listFiles()
                         .orEmpty()
-                        .any { it.name.startsWith("subtitled-") },
+                        .any { it.name.startsWith("export-") },
                 )
             } finally {
                 work.cancelAndJoin()

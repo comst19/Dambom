@@ -21,6 +21,7 @@ import com.comst19.dambom.core.domain.model.ThemeMode
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.feature.library.file.LibraryFileManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -62,7 +63,7 @@ class VideoPlayerLifecycleTest {
                 LifecycleSettings,
                 SpyNavigationDispatcher(),
                 SavedStateHandle(),
-                LibraryFileManager(context, Dispatchers.IO),
+                LibraryFileManager(context, Dispatchers.IO, ExportDocumentStore(context, Dispatchers.IO)),
                 AppEventBus(),
                 LibraryTestPlaybackHistory(),
                 privateVideoSession = PrivateVideoSession(),

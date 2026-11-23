@@ -66,6 +66,7 @@
     <string name="library_delete_retry">د حذف کولو بیا هڅه وکړئ</string>
     <string name="library_export_success">ویډیو ستاسو وسیله کې خوندي شوې.</string>
     <string name="library_export_failure">ستاسو وسیله ته ویډیو نشي خوندي کولی.</string>
+    <string name="library_export_cleanup_incomplete">نیمګړی فایل ړنګ نه شو. له هغه ځایه یې ړنګ کړئ چې خوندي شوی دی.</string>
     <string name="library_export_location_permission_expired">د ټاکل شوي فولډر اجازه پای ته ورسیده. بیا د خوندي کولو ځای غوره کړئ.</string>
     <string name="library_share_failure">د دې ویډیو شریکولو لپاره هیڅ اپلیکیشن شتون نلري.</string>
     <string name="library_share_link_failure">د دې لینک شریکولو لپاره هیڅ اپلیکیشن شتون نلري.</string>

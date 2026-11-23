@@ -66,6 +66,7 @@
     <string name="library_delete_retry">削除を再試行する</string>
     <string name="library_export_success">ビデオがデバイスに保存される。</string>
     <string name="library_export_failure">ビデオをデバイスに保存できませんでした。</string>
+    <string name="library_export_cleanup_incomplete">未完了の書き出しファイルを削除できませんでした。保存先で手動で削除してください。</string>
     <string name="library_export_location_permission_expired">選択されたフォルダの権限は期限切れです。保存場所を再度選択します。</string>
     <string name="library_share_failure">このビデオを共有するために利用できるアプリはありません。</string>
     <string name="library_share_link_failure">このリンクを共有するために使用できるアプリはありません。</string>

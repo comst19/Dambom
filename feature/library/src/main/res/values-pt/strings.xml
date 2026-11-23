@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Tentar novamente a exclusão</string>
     <string name="library_export_success">Vídeo salvo em seu dispositivo.</string>
     <string name="library_export_failure">Não foi possível salvar o vídeo no seu dispositivo.</string>
+    <string name="library_export_cleanup_incomplete">Não foi possível excluir o arquivo incompleto. Exclua-o manualmente do local onde foi salvo.</string>
     <string name="library_export_location_permission_expired">A permissão da pasta selecionada expirou. Escolha um local para salvar novamente.</string>
     <string name="library_share_failure">Nenhum aplicativo está disponível para compartilhar este vídeo.</string>
     <string name="library_share_link_failure">Nenhum aplicativo está disponível para compartilhar este link.</string>

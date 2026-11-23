@@ -92,7 +92,7 @@ internal class Media3VideoCompressor
             destination: String,
             onProgress: (Int?) -> Unit,
         ): Long =
-            files.save(destination, "compress") { output ->
+            files.save(destination) { output ->
                 val source = inspect(path)
                 val settings = source.settings(profile)
                 VideoExportGate.shared.run { transform(path, settings, output, onProgress) }

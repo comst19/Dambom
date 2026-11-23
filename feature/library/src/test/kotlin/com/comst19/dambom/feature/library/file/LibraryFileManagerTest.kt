@@ -5,6 +5,7 @@ import android.provider.MediaStore
 import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadTask
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
@@ -192,7 +193,7 @@ class LibraryFileManagerTest {
     fun `missing local file returns no share intent instead of throwing`() =
         kotlinx.coroutines.runBlocking {
             val context = ApplicationProvider.getApplicationContext<Context>()
-            val manager = LibraryFileManager(context, Dispatchers.IO)
+            val manager = LibraryFileManager(context, Dispatchers.IO, ExportDocumentStore(context, Dispatchers.IO))
 
             assertNull(manager.createShareIntent(missingFileTask()))
         }
@@ -201,7 +202,7 @@ class LibraryFileManagerTest {
     fun `file outside configured provider path returns no share intent`() =
         kotlinx.coroutines.runBlocking {
             val context = ApplicationProvider.getApplicationContext<Context>()
-            val manager = LibraryFileManager(context, Dispatchers.IO)
+            val manager = LibraryFileManager(context, Dispatchers.IO, ExportDocumentStore(context, Dispatchers.IO))
             val unsupportedFile = context.cacheDir.resolve("outside-provider.mp4").apply { writeBytes(byteArrayOf(1)) }
 
             try {

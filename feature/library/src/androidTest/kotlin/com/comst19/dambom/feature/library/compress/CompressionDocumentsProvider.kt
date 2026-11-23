@@ -7,6 +7,9 @@ import android.os.ParcelFileDescriptor
 import android.provider.DocumentsContract.Document
 import android.provider.DocumentsProvider
 import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 class CompressionDocumentsProvider : DocumentsProvider() {
     override fun onCreate() = true
@@ -46,14 +49,44 @@ class CompressionDocumentsProvider : DocumentsProvider() {
         documentId: String,
         mode: String,
         signal: CancellationSignal?,
-    ): ParcelFileDescriptor = ParcelFileDescriptor.open(document(documentId), ParcelFileDescriptor.parseMode(mode))
+    ): ParcelFileDescriptor {
+        if (documentId.startsWith("journal-deny-all-") && mode == "rwt") {
+            throw SecurityException("Truncation rejected by test provider")
+        }
+        if (!documentId.startsWith("journal-") || mode != "wt") {
+            return ParcelFileDescriptor.open(document(documentId), ParcelFileDescriptor.parseMode(mode))
+        }
+        val (reader, writer) = ParcelFileDescriptor.createPipe()
+        thread(name = "export-test-provider", isDaemon = true) {
+            ParcelFileDescriptor.AutoCloseInputStream(reader).use { input ->
+                document(documentId).outputStream().use { output ->
+                    val buffer = ByteArray(4096)
+                    val size = input.read(buffer)
+                    if (size <= 0) return@thread
+                    output.write(buffer, 0, size)
+                    if (documentId.contains("-wait-")) {
+                        firstBytes.countDown()
+                        releaseWriter.await(45, TimeUnit.SECONDS)
+                    }
+                    if (!documentId.contains("-fail-")) input.copyTo(output)
+                }
+            }
+        }
+        return writer
+    }
 
     override fun deleteDocument(documentId: String) {
+        if (documentId.startsWith("journal-deny-")) throw UnsupportedOperationException("Cannot delete test document")
         document(documentId).delete()
     }
 
     private fun document(id: String): File {
         require(id.matches(Regex("[a-z0-9.-]+")))
         return File(checkNotNull(context).cacheDir, id)
+    }
+
+    companion object {
+        var firstBytes = CountDownLatch(1)
+        var releaseWriter = CountDownLatch(1)
     }
 }

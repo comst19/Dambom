@@ -7,6 +7,7 @@ import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import com.comst19.dambom.core.testing.SpyNavigationDispatcher
 import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.feature.library.file.LibraryFileManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -194,7 +195,11 @@ class PrivateVideoVaultTest {
         LibraryTestSettings,
         SpyNavigationDispatcher(),
         SavedStateHandle(),
-        LibraryFileManager(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
+        LibraryFileManager(
+            ApplicationProvider.getApplicationContext(),
+            dispatcherRule.dispatcher,
+            ExportDocumentStore(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
+        ),
         AppEventBus(),
         LibraryTestPlaybackHistory(),
         session,

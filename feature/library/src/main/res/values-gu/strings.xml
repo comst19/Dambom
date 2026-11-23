@@ -66,6 +66,7 @@
     <string name="library_delete_retry">કાઢી નાખવાનો ફરી પ્રયાસ કરો</string>
     <string name="library_export_success">વિડિઓ તમારા ઉપકરણ પર સાચવવામાં આવી છે.</string>
     <string name="library_export_failure">તમારા ઉપકરણ પર વિડિઓ સાચવી શક્યાં નથી.</string>
+    <string name="library_export_cleanup_incomplete">અધૂરી ફાઇલ કાઢી શકાઈ નથી. ફાઇલ જ્યાં સાચવી છે ત્યાંથી તેને કાઢી નાખો.</string>
     <string name="library_export_location_permission_expired">પસંદ કરેલ ફોલ્ડરની પરવાનગી સમાપ્ત થઈ ગઈ છે. ફરીથી સાચવવાનું સ્થાન પસંદ કરો.</string>
     <string name="library_share_failure">આ વિડિયો શેર કરવા માટે કોઈ એપ ઉપલબ્ધ નથી.</string>
     <string name="library_share_link_failure">આ લિંક શેર કરવા માટે કોઈ એપ ઉપલબ્ધ નથી.</string>

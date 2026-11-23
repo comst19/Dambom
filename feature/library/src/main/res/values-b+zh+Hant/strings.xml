@@ -66,6 +66,7 @@
     <string name="library_delete_retry">重試刪除</string>
     <string name="library_export_success">影片儲存到您的裝置。</string>
     <string name="library_export_failure">無法將影片儲存到您的裝置。</string>
+    <string name="library_export_cleanup_incomplete">無法刪除未完成的匯出檔案。請前往儲存位置手動刪除。</string>
     <string name="library_export_location_permission_expired">所選資料夾權限已過期。再次選擇儲存位置。</string>
     <string name="library_share_failure">沒有應用程式可用於分享該影片。</string>
     <string name="library_share_link_failure">沒有應用程式可用於共享此連結。</string>

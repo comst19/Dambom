@@ -66,6 +66,7 @@
     <string name="library_delete_retry">Öçürmek üçin gaýtadan synanyşyň</string>
     <string name="library_export_success">Wideo enjamyňyza ýazdyryldy.</string>
     <string name="library_export_failure">Wideony enjamyňyza ýazdyryp bolmaýar.</string>
+    <string name="library_export_cleanup_incomplete">Doly däl faýly pozup bolmady. Ony ýazdyrylan ýerinden pozuň.</string>
     <string name="library_export_location_permission_expired">Saýlanan bukjanyň rugsady gutardy. Saklamak üçin ýeri saýlaň.</string>
     <string name="library_share_failure">Bu wideony paýlaşmak üçin hiç hili programma ýok.</string>
     <string name="library_share_link_failure">Bu baglanyşygy paýlaşmak üçin hiç hili programma ýok.</string>

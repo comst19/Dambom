@@ -416,6 +416,141 @@ class PrivateDownloadRepositoryTest {
             }
         }
 
+    @Test
+    @Suppress("LongMethod")
+    fun `recovery removes stale move temp files in both directions and preserves intact originals`() =
+        runTest {
+            val session = PrivateVideoSession().apply { unlock() }
+            val dao = database.downloadTaskDao()
+            val privateRow = completedEntity("private-tmp", isPrivate = true)
+            val publicRow = completedEntity("public-tmp", isPrivate = false)
+            dao.insert(privateRow)
+            dao.insert(publicRow)
+
+            val privateOriginal = createPrivateVideoFile(privateRow, content = "secret-11b!")
+            val publicOriginal = createVideoFile(publicRow, content = "intact-11b!")
+            val videosDir = checkNotNull(publicOriginal.parentFile)
+            val privateDir = checkNotNull(privateOriginal.parentFile)
+
+            val privateVideoTempInPublic =
+                videosDir.resolve(".${privateOriginal.name}.1001.move.tmp").apply { writeText("sec") }
+            val privateSubtitleTempInPublic =
+                videosDir.resolve(".${privateOriginal.videoSubtitleFile().name}.1002.move.tmp").apply {
+                    writeText("sub")
+                }
+            val publicVideoTempInPrivate =
+                privateDir.resolve(".${publicOriginal.name}.2001.move.tmp").apply { writeText("int") }
+            val publicThumbTempInPrivate =
+                privateDir.resolve(".${publicOriginal.videoThumbnailFile().name}.2002.move.tmp").apply {
+                    writeText("th")
+                }
+            val repository = createRepository(dao, session, testScheduler)
+
+            repository.recoverPendingDownloads()
+
+            assertFalse(privateVideoTempInPublic.exists())
+            assertFalse(privateSubtitleTempInPublic.exists())
+            assertFalse(publicVideoTempInPrivate.exists())
+            assertFalse(publicThumbTempInPrivate.exists())
+
+            repository.recoverPendingDownloads()
+
+            assertTrue(requireNotNull(dao.getById(privateRow.id)).isPrivate)
+            assertEquals("secret-11b!", privateOriginal.readText())
+            val privateTask = repository.privateCompletedDownloads.first().single()
+            assertEquals(privateOriginal.canonicalPath, privateTask.localFilePath)
+            assertEquals(
+                privateOriginal.canonicalPath,
+                repository.observeDownload(privateRow.id).first()?.localFilePath,
+            )
+
+            assertFalse(requireNotNull(dao.getById(publicRow.id)).isPrivate)
+            assertEquals("intact-11b!", publicOriginal.readText())
+            val publicTask = repository.completedDownloads.first().single()
+            assertEquals(publicOriginal.canonicalPath, publicTask.localFilePath)
+            assertEquals(
+                publicOriginal.canonicalPath,
+                repository.observeDownload(publicRow.id).first()?.localFilePath,
+            )
+        }
+
+    @Test
+    @Suppress("LongMethod")
+    fun `delete removes target move temp files across both directories without touching similar videos`() =
+        runTest {
+            val session = PrivateVideoSession().apply { unlock() }
+            val dao = database.downloadTaskDao()
+            val target = completedEntity("target", isPrivate = true)
+            val similar = completedEntity("target-other", isPrivate = true)
+            dao.insert(target)
+            dao.insert(similar)
+
+            val targetPrivate = createPrivateVideoFile(target, content = "target-video")
+            val targetSubtitle = targetPrivate.videoSubtitleFile().apply { writeText("target-sub") }
+            val targetThumb = targetPrivate.videoThumbnailFile().apply { writeText("target-thumb") }
+            val similarPrivate = createPrivateVideoFile(similar, content = "similar-video")
+            val videosDir = context.filesDir.resolve("videos").apply(File::mkdirs)
+            val privateDir = checkNotNull(targetPrivate.parentFile)
+
+            val targetTempInPublic =
+                videosDir.resolve(".${targetPrivate.name}.1001.move.tmp").apply { writeText("part") }
+            val targetSubTempInPublic =
+                videosDir.resolve(".${targetSubtitle.name}.1002.move.tmp").apply { writeText("part-sub") }
+            val targetTempInPrivate =
+                privateDir.resolve(".${targetPrivate.name}.1003.move.tmp").apply { writeText("part-priv") }
+            val targetThumbTempInPrivate =
+                privateDir.resolve(".${targetThumb.name}.1004.move.tmp").apply { writeText("part-thumb") }
+
+            val similarTempInPublic =
+                videosDir.resolve(".${similarPrivate.name}.2001.move.tmp").apply { writeText("keep-1") }
+            val similarTempInPrivate =
+                privateDir.resolve(".${similarPrivate.name}.2002.move.tmp").apply { writeText("keep-2") }
+            val dotPrefixedOtherTemp =
+                videosDir.resolve(".${targetPrivate.name}.copy.mp4.2003.move.tmp").apply { writeText("keep-3") }
+            val repository = createRepository(dao, session, testScheduler)
+
+            repository.delete(target.id)
+
+            assertNull(dao.getById(target.id))
+            assertFalse(targetPrivate.exists())
+            assertFalse(targetSubtitle.exists())
+            assertFalse(targetThumb.exists())
+            assertFalse(targetTempInPublic.exists())
+            assertFalse(targetSubTempInPublic.exists())
+            assertFalse(targetTempInPrivate.exists())
+            assertFalse(targetThumbTempInPrivate.exists())
+
+            assertTrue(similarPrivate.isFile)
+            assertEquals("similar-video", similarPrivate.readText())
+            assertTrue(similarTempInPublic.isFile)
+            assertTrue(similarTempInPrivate.isFile)
+            assertTrue(dotPrefixedOtherTemp.isFile)
+        }
+
+    @Test
+    fun `delete fails and retains database row when target move temp file cannot be deleted`() =
+        runTest {
+            val session = PrivateVideoSession().apply { unlock() }
+            val dao = database.downloadTaskDao()
+            val target = completedEntity("target-locked-tmp", isPrivate = true)
+            dao.insert(target)
+            val targetPrivate = createPrivateVideoFile(target, content = "target-video")
+            val videosDir = context.filesDir.resolve("videos").apply(File::mkdirs)
+            val undeletableTempDir =
+                videosDir.resolve(".${targetPrivate.name}.9999.move.tmp").apply {
+                    mkdirs()
+                    resolve("blocker").writeText("lock")
+                }
+            val repository = createRepository(dao, session, testScheduler)
+
+            val thrown = runCatching { repository.delete(target.id) }.exceptionOrNull()
+
+            assertTrue(thrown is IOException)
+            assertEquals(true, dao.getById(target.id)?.deletePending)
+            assertTrue(undeletableTempDir.exists())
+            undeletableTempDir.deleteRecursively()
+        }
+
     private fun createRepository(
         dao: DownloadTaskDao,
         session: PrivateVideoSession,

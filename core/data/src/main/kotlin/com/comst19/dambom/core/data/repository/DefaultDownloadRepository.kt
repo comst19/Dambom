@@ -245,13 +245,14 @@ class DefaultDownloadRepository
                     } catch (_: IOException) {
                     }
                 }
+                val cleanedMoveTemps = deletionMutex.withLock { fileStore.deleteMoveTempFiles() }
                 val failedPrivacyIds = mutableListOf<String>()
                 dao.getCompleted().forEach { task ->
                     val reconciled = deletionMutex.withLock { reconcileCompletedPrivacyStorage(task.id) }
                     if (!reconciled) failedPrivacyIds += task.id
                 }
                 if (dao.countSchedulable() > 0) scheduler.ensureScheduled()
-                if (failedPrivacyIds.isNotEmpty()) {
+                if (!cleanedMoveTemps || failedPrivacyIds.isNotEmpty()) {
                     throw IOException(
                         "Unable to reconcile private video storage for: ${failedPrivacyIds.joinToString()}",
                     )

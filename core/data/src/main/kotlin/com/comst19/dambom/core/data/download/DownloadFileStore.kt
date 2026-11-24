@@ -132,6 +132,12 @@ internal open class DownloadFileStore
             rollbackMovedPrivacyFiles(movedFiles)
         }
 
+        open fun deleteMoveTempFiles(): Boolean =
+            listOf(videoDirectory, privateVideoDirectory)
+                .filter(File::isDirectory)
+                .flatMap { directory -> directory.listFiles().orEmpty().filter { isAppMoveTempFile(it.name) } }
+                .fold(true) { allDeleted, file -> deleteIfPresent(file) && allDeleted }
+
         open fun delete(
             id: String,
             localFileName: String?,
@@ -141,8 +147,13 @@ internal open class DownloadFileStore
                     add(partialFile(id))
                     add(partialValidatorFile(id))
                     localFileName?.let { fileName ->
-                        safeResolve(videoDirectory, fileName)?.let { addAll(videoAndSidecarFiles(it)) }
-                        safeResolve(privateVideoDirectory, fileName)?.let { addAll(videoAndSidecarFiles(it)) }
+                        listOf(videoDirectory, privateVideoDirectory).forEach { directory ->
+                            safeResolve(directory, fileName)?.let { videoFile ->
+                                val owners = videoAndSidecarFiles(videoFile)
+                                addAll(owners)
+                                addAll(moveTempFilesFor(directory, owners))
+                            }
+                        }
                     }
                 }
             var allDeleted = true
@@ -278,7 +289,7 @@ internal fun moveFile(
         }
 
         else -> {
-            val tempFile = File(parent, ".${target.name}.${System.nanoTime()}.move.tmp")
+            val tempFile = File(parent, ".${target.name}.${System.nanoTime()}$MOVE_TEMP_SUFFIX")
             runCatching {
                 source.copyTo(tempFile, overwrite = true)
                 if (!tempFile.renameTo(target)) {
@@ -297,6 +308,41 @@ internal fun moveFile(
         }
     }
 }
+
+private fun moveTempFilesFor(
+    directory: File,
+    owners: List<File>,
+): List<File> {
+    if (!directory.isDirectory) return emptyList()
+    val prefixes = owners.map { ".${it.name}." }
+    return directory
+        .listFiles()
+        .orEmpty()
+        .filter { candidate ->
+            val name = candidate.name
+            name.endsWith(MOVE_TEMP_SUFFIX) &&
+                prefixes.any { prefix ->
+                    name.startsWith(prefix) &&
+                        name.length > prefix.length + MOVE_TEMP_SUFFIX.length &&
+                        name
+                            .substring(prefix.length, name.length - MOVE_TEMP_SUFFIX.length)
+                            .none { it == '.' || it == '/' }
+                }
+        }
+}
+
+private fun isAppMoveTempFile(candidateName: String): Boolean {
+    val validAffix =
+        candidateName.startsWith(".") &&
+            candidateName.endsWith(MOVE_TEMP_SUFFIX) &&
+            candidateName.length > 1 + MOVE_TEMP_SUFFIX.length
+    if (!validAffix) return false
+    val body = candidateName.substring(1, candidateName.length - MOVE_TEMP_SUFFIX.length)
+    val separator = body.lastIndexOf('.')
+    return separator > 0 && separator < body.lastIndex
+}
+
+private const val MOVE_TEMP_SUFFIX = ".move.tmp"
 
 private fun fileExtension(
     url: String,

@@ -31,6 +31,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.File
+import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -38,6 +39,7 @@ class PrivateDownloadRepositoryTest {
     private lateinit var context: Context
     private lateinit var database: DambomDatabase
     private lateinit var files: TrackingFileStore
+    private lateinit var scheduler: CountingScheduler
 
     @Before
     fun setUp() {
@@ -48,6 +50,7 @@ class PrivateDownloadRepositoryTest {
                 .allowMainThreadQueries()
                 .build()
         files = TrackingFileStore(context)
+        scheduler = CountingScheduler()
     }
 
     @After
@@ -255,6 +258,164 @@ class PrivateDownloadRepositoryTest {
             assertFalse(publicFile.videoSubtitleFile().exists())
         }
 
+    @Test
+    fun `recovery preserves intact original over partial copy in both public and private directions`() =
+        runTest {
+            val session = PrivateVideoSession().apply { unlock() }
+            val dao = database.downloadTaskDao()
+            val publicRow = completedEntity("public-partial", isPrivate = false)
+            val privateRow = completedEntity("private-partial", isPrivate = true)
+            dao.insert(publicRow)
+            dao.insert(privateRow)
+
+            val publicOriginal = createVideoFile(publicRow, content = "intact-11b!")
+            val publicPartialCopy = createPrivateVideoFile(publicRow, content = "int")
+            val privateOriginal = createPrivateVideoFile(privateRow, content = "secret-11b!")
+            val privatePartialCopy = createVideoFile(privateRow, content = "sec")
+            val repository = createRepository(dao, session, testScheduler)
+
+            repository.recoverPendingDownloads()
+            repository.recoverPendingDownloads()
+
+            assertFalse(requireNotNull(dao.getById(publicRow.id)).isPrivate)
+            assertTrue(publicOriginal.isFile)
+            assertEquals("intact-11b!", publicOriginal.readText())
+            assertFalse(publicPartialCopy.exists())
+            val publicTask = repository.completedDownloads.first().single()
+            assertEquals(publicOriginal.canonicalPath, publicTask.localFilePath)
+            assertEquals(publicOriginal.canonicalPath, repository.observeDownload(publicRow.id).first()?.localFilePath)
+
+            assertTrue(requireNotNull(dao.getById(privateRow.id)).isPrivate)
+            assertTrue(privateOriginal.isFile)
+            assertEquals("secret-11b!", privateOriginal.readText())
+            assertFalse(privatePartialCopy.exists())
+            val privateTask = repository.privateCompletedDownloads.first().single()
+            assertEquals(privateOriginal.canonicalPath, privateTask.localFilePath)
+            assertEquals(
+                privateOriginal.canonicalPath,
+                repository.observeDownload(privateRow.id).first()?.localFilePath,
+            )
+        }
+
+    @Test
+    fun `setPrivate fails and preserves database when video file is missing from both folders`() =
+        runTest {
+            val session = PrivateVideoSession().apply { unlock() }
+            val dao = database.downloadTaskDao()
+            val source = completedEntity("missing-both", isPrivate = false)
+            dao.insert(source)
+            val repository = createRepository(dao, session, testScheduler)
+
+            val thrown = runCatching { repository.setPrivate(setOf(source.id), true) }.exceptionOrNull()
+
+            assertTrue(thrown is IOException)
+            assertFalse(requireNotNull(dao.getById(source.id)).isPrivate)
+        }
+
+    @Test
+    fun `setPrivate fails and preserves database when only subtitle exists without video file`() =
+        runTest {
+            val session = PrivateVideoSession().apply { unlock() }
+            val dao = database.downloadTaskDao()
+            val source = completedEntity("subtitle-only", isPrivate = false)
+            dao.insert(source)
+            val orphanSubtitle = files.completedFile(source.id, source.url, source.mimeType).videoSubtitleFile()
+            orphanSubtitle.writeText("orphan-subtitle")
+            val repository = createRepository(dao, session, testScheduler)
+
+            val thrown = runCatching { repository.setPrivate(setOf(source.id), true) }.exceptionOrNull()
+
+            assertTrue(thrown is IOException)
+            assertFalse(requireNotNull(dao.getById(source.id)).isPrivate)
+            assertTrue(orphanSubtitle.isFile)
+            assertFalse(privateFileFor(source).videoSubtitleFile().exists())
+        }
+
+    @Test
+    fun `setPrivate preserves target video and moves leftover subtitle when only subtitle remains in source`() =
+        runTest {
+            val session = PrivateVideoSession().apply { unlock() }
+            val dao = database.downloadTaskDao()
+            val source = completedEntity("target-has-video", isPrivate = false)
+            dao.insert(source)
+            val privateVideo = createPrivateVideoFile(source, content = "already-at-target")
+            val leftoverSubtitle = files.completedFile(source.id, source.url, source.mimeType).videoSubtitleFile()
+            leftoverSubtitle.writeText("source-subtitle")
+            val repository = createRepository(dao, session, testScheduler)
+
+            repository.setPrivate(setOf(source.id), true)
+
+            assertTrue(requireNotNull(dao.getById(source.id)).isPrivate)
+            assertTrue(privateVideo.isFile)
+            assertEquals("already-at-target", privateVideo.readText())
+            assertFalse(leftoverSubtitle.exists())
+            assertTrue(privateVideo.videoSubtitleFile().isFile)
+            assertEquals("source-subtitle", privateVideo.videoSubtitleFile().readText())
+        }
+
+    @Test
+    @Suppress("LongMethod")
+    fun `recovery reports failure while migrating healthy legacy item and succeeds on retry`() =
+        runTest {
+            val session = PrivateVideoSession().apply { unlock() }
+            val dao = database.downloadTaskDao()
+            val blocked = completedEntity("legacy-blocked", isPrivate = true)
+            val healthy = completedEntity("legacy-healthy", isPrivate = true)
+            val queued =
+                completedEntity("queued-work", isPrivate = false).copy(
+                    status = "QUEUED",
+                    localFileName = null,
+                )
+            dao.insert(blocked)
+            dao.insert(healthy)
+            dao.insert(queued)
+            val blockedPublicFile = createVideoFile(blocked, content = "blocked-video")
+            blockedPublicFile.videoSubtitleFile().writeText("blocked-sub")
+            val healthyPublicFile = createVideoFile(healthy, content = "healthy-video")
+            val blockingDir =
+                privateFileFor(blocked).apply {
+                    mkdirs()
+                    resolve("blocker").writeText("lock")
+                }
+            val repository = createRepository(dao, session, testScheduler)
+
+            repository.privateCompletedDownloads.test {
+                val listTurbine = this
+                repository.observeDownload(blocked.id).test {
+                    assertEquals(blockedPublicFile.canonicalPath, awaitItem()?.localFilePath)
+                    val initialList = listTurbine.awaitItem().associateBy { it.id }
+                    assertEquals(blockedPublicFile.canonicalPath, initialList[blocked.id]?.localFilePath)
+                    assertEquals(healthyPublicFile.canonicalPath, initialList[healthy.id]?.localFilePath)
+
+                    val firstError = runCatching { repository.recoverPendingDownloads() }.exceptionOrNull()
+
+                    assertTrue(firstError is IOException)
+                    assertEquals(1, scheduler.ensureCount)
+                    assertTrue(privateFileFor(healthy).isFile)
+                    assertFalse(healthyPublicFile.exists())
+                    assertTrue(blockedPublicFile.isFile)
+                    assertTrue(blockedPublicFile.videoSubtitleFile().isFile)
+                    val afterFirstRun = listTurbine.awaitItem().associateBy { it.id }
+                    assertEquals(privateFileFor(healthy).canonicalPath, afterFirstRun[healthy.id]?.localFilePath)
+                    assertEquals(blockedPublicFile.canonicalPath, afterFirstRun[blocked.id]?.localFilePath)
+
+                    blockingDir.deleteRecursively()
+                    repository.recoverPendingDownloads()
+
+                    val expectedBlockedPrivate = privateFileFor(blocked).canonicalPath
+                    assertEquals(expectedBlockedPrivate, awaitItem()?.localFilePath)
+                    val afterRetry = listTurbine.awaitItem().associateBy { it.id }
+                    assertEquals(expectedBlockedPrivate, afterRetry[blocked.id]?.localFilePath)
+                    assertTrue(privateFileFor(blocked).isFile)
+                    assertTrue(privateFileFor(blocked).videoSubtitleFile().isFile)
+                    assertFalse(blockedPublicFile.exists())
+                    assertFalse(blockedPublicFile.videoSubtitleFile().exists())
+                    cancelAndIgnoreRemainingEvents()
+                }
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
     private fun createRepository(
         dao: DownloadTaskDao,
         session: PrivateVideoSession,
@@ -262,15 +423,27 @@ class PrivateDownloadRepositoryTest {
     ): DefaultDownloadRepository =
         DefaultDownloadRepository(
             dao = dao,
-            scheduler = NoOpScheduler,
+            scheduler = this.scheduler,
             fileStore = files,
             ioDispatcher = StandardTestDispatcher(scheduler),
             privateVideoSession = session,
         )
 
-    private fun createVideoFile(entity: DownloadTaskEntity): File =
+    private fun createVideoFile(
+        entity: DownloadTaskEntity,
+        content: String = "video-bytes",
+    ): File =
         files.completedFile(entity.id, entity.url, entity.mimeType).apply {
-            writeText("video-bytes")
+            writeText(content)
+        }
+
+    private fun createPrivateVideoFile(
+        entity: DownloadTaskEntity,
+        content: String = "video-bytes",
+    ): File =
+        privateFileFor(entity).apply {
+            parentFile?.mkdirs()
+            writeText(content)
         }
 
     private fun privateFileFor(entity: DownloadTaskEntity): File =
@@ -287,10 +460,14 @@ private class TrackingFileStore(
     }
 }
 
-private object NoOpScheduler : DownloadWorkScheduler {
+private class CountingScheduler : DownloadWorkScheduler {
+    var ensureCount = 0
+
     override suspend fun schedule() = Unit
 
-    override suspend fun ensureScheduled() = Unit
+    override suspend fun ensureScheduled() {
+        ensureCount++
+    }
 
     override suspend fun reschedule() = Unit
 }

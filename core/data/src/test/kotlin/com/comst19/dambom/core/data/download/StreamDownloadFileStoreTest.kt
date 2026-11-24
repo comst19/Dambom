@@ -166,8 +166,31 @@ class StreamDownloadFileStoreTest {
             assertTrue(file.isFile)
             assertTrue(file.videoSubtitleFile().isFile)
             assertFalse(privateDir.resolve(file.name).exists())
+            assertTrue(privateDir.listFiles().orEmpty().none { it.name.endsWith(".move.tmp") })
         } finally {
             blockingSubtitleDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `copy fallback writes via temporary file and removes temp artifacts after moving`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val sourceDir = context.filesDir.resolve("move-fallback-src").apply(File::mkdirs)
+        val targetDir = context.filesDir.resolve("move-fallback-dst").apply(File::mkdirs)
+        val rawSource = sourceDir.resolve("video.mp4").apply { writeText("intact-11b!") }
+        val nonRenamingSource =
+            object : File(rawSource.path) {
+                override fun renameTo(dest: File): Boolean = false
+            }
+        val target = targetDir.resolve("video.mp4").apply { writeText("old") }
+        try {
+            assertTrue(moveFile(nonRenamingSource, target))
+            assertFalse(rawSource.exists())
+            assertEquals("intact-11b!", target.readText())
+            assertTrue(targetDir.listFiles().orEmpty().none { it.name.endsWith(".move.tmp") })
+        } finally {
+            sourceDir.deleteRecursively()
+            targetDir.deleteRecursively()
         }
     }
 

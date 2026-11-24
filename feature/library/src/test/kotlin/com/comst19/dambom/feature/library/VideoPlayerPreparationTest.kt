@@ -1,8 +1,15 @@
 package com.comst19.dambom.feature.library
 
 import android.content.Context
+import android.net.Uri
+import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
+import com.comst19.dambom.core.domain.model.PlaybackHistory
 import com.comst19.dambom.core.domain.model.PrivateVideoSession
+import com.comst19.dambom.core.domain.repository.PlaybackHistoryRepository
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -10,7 +17,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows
 import org.robolectric.annotation.Config
+import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -31,9 +40,7 @@ class VideoPlayerPreparationTest {
             viewModel.prepare(task)
             assertEquals("private", viewModel.player.currentMediaItem?.mediaId)
             session.lock()
-            org.robolectric.Shadows
-                .shadowOf(android.os.Looper.getMainLooper())
-                .idle()
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
             assertNull(viewModel.player.currentMediaItem)
             viewModel.onUiStarted()
             viewModel.requestPlayPause()
@@ -89,6 +96,60 @@ class VideoPlayerPreparationTest {
             assertEquals("second", viewModel.player.currentMediaItem?.mediaId)
             assertFalse(viewModel.player.playWhenReady)
         } finally {
+            viewModel.closeForTest()
+        }
+    }
+
+    @Test
+    fun `prepare cancels pending load when uri changes for same id while deduplicating same uri`() {
+        val historyGate = CompletableDeferred<Unit>()
+        var historyCalls = 0
+        val suspendingHistory =
+            object : PlaybackHistoryRepository {
+                override fun observeHistory(): Flow<Map<String, PlaybackHistory>> = MutableStateFlow(emptyMap())
+
+                override suspend fun getHistory(downloadId: String): PlaybackHistory? {
+                    historyCalls++
+                    historyGate.await()
+                    return null
+                }
+
+                override suspend fun saveProgress(
+                    downloadId: String,
+                    positionMillis: Long,
+                    durationMillis: Long,
+                    lastPlayedAtMillis: Long,
+                ) = Unit
+            }
+        val session = PrivateVideoSession().apply { unlock() }
+        val viewModel =
+            testVideoPlayerViewModel(
+                ApplicationProvider.getApplicationContext<Context>(),
+                history = suspendingHistory,
+                session = session,
+            )
+        val oldPath = "/files/videos/one.mp4"
+        val newPath = "/files/private_videos/one.mp4"
+        val task = savedVideo("one").copy(localFilePath = oldPath, isPrivate = true)
+        try {
+            viewModel.prepare(task)
+            viewModel.prepare(task.copy(isFavorite = true))
+            assertEquals(1, historyCalls)
+
+            viewModel.prepare(task.copy(localFilePath = newPath))
+            assertEquals(2, historyCalls)
+
+            historyGate.complete(Unit)
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+
+            assertEquals("one", viewModel.player.currentMediaItem?.mediaId)
+            val currentUri =
+                viewModel.player.currentMediaItem
+                    ?.localConfiguration
+                    ?.uri
+            assertEquals(Uri.fromFile(File(newPath)), currentUri)
+        } finally {
+            historyGate.complete(Unit)
             viewModel.closeForTest()
         }
     }

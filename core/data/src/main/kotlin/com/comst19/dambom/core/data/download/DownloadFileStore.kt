@@ -106,14 +106,25 @@ internal open class DownloadFileStore
         open fun movePrivacyFiles(
             localFileName: String,
             toPrivate: Boolean,
+            preserveExistingTarget: Boolean = false,
         ): PrivacyFileMoveResult {
             val sourceDir = if (toPrivate) videoDirectory else privateVideoDirectory
             val targetDir = if (toPrivate) privateVideoDirectory else videoDirectory
             val sourceVideo = safeResolve(sourceDir, localFileName)
             val targetVideo = safeResolve(targetDir, localFileName)
             return when {
-                sourceVideo == null || targetVideo == null -> PrivacyFileMoveResult.Failed
-                else -> moveVideoAndSidecars(sourceVideo, targetVideo, targetDir)
+                sourceVideo == null || targetVideo == null -> {
+                    PrivacyFileMoveResult.Failed
+                }
+
+                else -> {
+                    moveVideoAndSidecars(
+                        sourceVideo = sourceVideo,
+                        targetVideo = targetVideo,
+                        targetDir = targetDir,
+                        preserveExistingTarget = preserveExistingTarget,
+                    )
+                }
             }
         }
 
@@ -151,7 +162,13 @@ internal data class MovedPrivacyFile(
 internal sealed interface PrivacyFileMoveResult {
     data class Moved(
         val files: List<MovedPrivacyFile>,
-    ) : PrivacyFileMoveResult
+        val removedDuplicates: Boolean = false,
+    ) : PrivacyFileMoveResult {
+        val changed: Boolean
+            get() = files.isNotEmpty() || removedDuplicates
+    }
+
+    data object MissingVideo : PrivacyFileMoveResult
 
     data object Failed : PrivacyFileMoveResult
 }
@@ -180,35 +197,63 @@ private fun moveVideoAndSidecars(
     sourceVideo: File,
     targetVideo: File,
     targetDir: File,
+    preserveExistingTarget: Boolean,
 ): PrivacyFileMoveResult {
     val existingPairs =
         videoAndSidecarFiles(sourceVideo)
             .zip(videoAndSidecarFiles(targetVideo))
             .filter { (source, _) -> source.exists() }
+    val needsTargetDir = existingPairs.any { (_, target) -> !preserveExistingTarget || !target.isFile }
     return when {
+        !sourceVideo.isFile && !targetVideo.isFile -> {
+            PrivacyFileMoveResult.MissingVideo
+        }
+
         existingPairs.isEmpty() -> {
             PrivacyFileMoveResult.Moved(emptyList())
         }
 
-        !targetDir.exists() && !targetDir.mkdirs() -> {
+        needsTargetDir && !targetDir.exists() && !targetDir.mkdirs() -> {
             PrivacyFileMoveResult.Failed
         }
 
         else -> {
-            val movedFiles = mutableListOf<MovedPrivacyFile>()
-            val allMoved =
-                existingPairs.all { (source, target) ->
-                    moveFile(source, target).also { moved ->
-                        if (moved) movedFiles += MovedPrivacyFile(source = source, target = target)
-                    }
+            moveExistingPairs(existingPairs, preserveExistingTarget)
+        }
+    }
+}
+
+private fun moveExistingPairs(
+    existingPairs: List<Pair<File, File>>,
+    preserveExistingTarget: Boolean,
+): PrivacyFileMoveResult {
+    val movedFiles = mutableListOf<MovedPrivacyFile>()
+    var removedDuplicates = false
+    val succeeded =
+        existingPairs.all { (source, target) ->
+            when {
+                preserveExistingTarget && target.isFile -> {
+                    source.delete().also { deleted -> if (deleted) removedDuplicates = true }
                 }
-            if (!allMoved) {
-                rollbackMovedPrivacyFiles(movedFiles)
-                PrivacyFileMoveResult.Failed
-            } else {
-                PrivacyFileMoveResult.Moved(movedFiles)
+
+                moveFile(source, target) -> {
+                    movedFiles += MovedPrivacyFile(source = source, target = target)
+                    true
+                }
+
+                else -> {
+                    false
+                }
             }
         }
+    return if (succeeded) {
+        PrivacyFileMoveResult.Moved(
+            files = movedFiles,
+            removedDuplicates = removedDuplicates,
+        )
+    } else {
+        rollbackMovedPrivacyFiles(movedFiles)
+        PrivacyFileMoveResult.Failed
     }
 }
 
@@ -218,20 +263,39 @@ private fun rollbackMovedPrivacyFiles(movedFiles: List<MovedPrivacyFile>) {
     }
 }
 
-private fun moveFile(
+internal fun moveFile(
     source: File,
     target: File,
 ): Boolean {
-    if (source.renameTo(target)) return true
-    return runCatching {
-        source.copyTo(target, overwrite = true)
-        if (source.delete()) {
+    val parent = target.parentFile
+    return when {
+        source.renameTo(target) -> {
             true
-        } else {
-            target.delete()
+        }
+
+        parent == null -> {
             false
         }
-    }.getOrDefault(false)
+
+        else -> {
+            val tempFile = File(parent, ".${target.name}.${System.nanoTime()}.move.tmp")
+            runCatching {
+                source.copyTo(tempFile, overwrite = true)
+                if (!tempFile.renameTo(target)) {
+                    tempFile.delete()
+                    false
+                } else if (source.delete()) {
+                    true
+                } else {
+                    target.delete()
+                    false
+                }
+            }.getOrElse {
+                tempFile.delete()
+                false
+            }
+        }
+    }
 }
 
 private fun fileExtension(

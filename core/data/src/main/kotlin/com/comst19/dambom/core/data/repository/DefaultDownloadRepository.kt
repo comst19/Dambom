@@ -134,6 +134,7 @@ class DefaultDownloadRepository
             check(privateVideoSession.isUnlocked.value) { "Private library is locked" }
             deletionMutex.withLock {
                 val movedFiles = mutableListOf<MovedPrivacyFile>()
+                var storageChanged = false
                 var committed = false
                 try {
                     ids.forEach { id ->
@@ -141,14 +142,29 @@ class DefaultDownloadRepository
                         if (entity.status != DownloadStatus.COMPLETED.name || entity.deletePending) return@forEach
                         val localFileName = entity.localFileName ?: return@forEach
                         if (isPrivate) fileStore.revokeSharing(localFileName)
-                        when (val result = fileStore.movePrivacyFiles(localFileName, toPrivate = isPrivate)) {
-                            is PrivacyFileMoveResult.Moved -> movedFiles += result.files
-                            PrivacyFileMoveResult.Failed -> throw IOException("Unable to update private video storage")
+                        when (
+                            val result =
+                                fileStore.movePrivacyFiles(
+                                    localFileName = localFileName,
+                                    toPrivate = isPrivate,
+                                    preserveExistingTarget = entity.isPrivate == isPrivate,
+                                )
+                        ) {
+                            is PrivacyFileMoveResult.Moved -> {
+                                movedFiles += result.files
+                                if (result.changed) storageChanged = true
+                            }
+
+                            PrivacyFileMoveResult.MissingVideo,
+                            PrivacyFileMoveResult.Failed,
+                            -> {
+                                throw IOException("Unable to update private video storage")
+                            }
                         }
                     }
                     dao.setPrivate(ids, isPrivate)
                     committed = true
-                    if (movedFiles.isNotEmpty()) {
+                    if (storageChanged) {
                         storageVersion.update { it + 1L }
                     }
                 } finally {
@@ -229,23 +245,53 @@ class DefaultDownloadRepository
                     } catch (_: IOException) {
                     }
                 }
+                val failedPrivacyIds = mutableListOf<String>()
                 dao.getCompleted().forEach { task ->
-                    deletionMutex.withLock { reconcileCompletedPrivacyStorage(task.id) }
+                    val reconciled = deletionMutex.withLock { reconcileCompletedPrivacyStorage(task.id) }
+                    if (!reconciled) failedPrivacyIds += task.id
                 }
                 if (dao.countSchedulable() > 0) scheduler.ensureScheduled()
+                if (failedPrivacyIds.isNotEmpty()) {
+                    throw IOException(
+                        "Unable to reconcile private video storage for: ${failedPrivacyIds.joinToString()}",
+                    )
+                }
             }
 
-        private suspend fun reconcileCompletedPrivacyStorage(id: String) {
+        private suspend fun reconcileCompletedPrivacyStorage(id: String): Boolean {
             val current =
                 dao
                     .getById(id)
-                    ?.takeIf { it.status == DownloadStatus.COMPLETED.name && !it.deletePending }
-                    ?: return
-            val localFileName = current.localFileName ?: return
-            val result = fileStore.movePrivacyFiles(localFileName, toPrivate = current.isPrivate)
-            if (result is PrivacyFileMoveResult.Moved && result.files.isNotEmpty()) {
-                if (current.isPrivate) fileStore.revokeSharing(localFileName)
-                storageVersion.update { it + 1L }
+                    ?.takeIf {
+                        it.status == DownloadStatus.COMPLETED.name &&
+                            !it.deletePending &&
+                            it.localFileName != null
+                    }
+                    ?: return true
+            val localFileName = requireNotNull(current.localFileName)
+            return when (
+                val result =
+                    fileStore.movePrivacyFiles(
+                        localFileName = localFileName,
+                        toPrivate = current.isPrivate,
+                        preserveExistingTarget = true,
+                    )
+            ) {
+                is PrivacyFileMoveResult.Moved -> {
+                    if (result.changed) {
+                        if (current.isPrivate) fileStore.revokeSharing(localFileName)
+                        storageVersion.update { it + 1L }
+                    }
+                    true
+                }
+
+                PrivacyFileMoveResult.MissingVideo -> {
+                    true
+                }
+
+                PrivacyFileMoveResult.Failed -> {
+                    false
+                }
             }
         }
 

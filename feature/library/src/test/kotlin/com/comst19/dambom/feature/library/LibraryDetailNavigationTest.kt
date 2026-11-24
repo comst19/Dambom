@@ -68,4 +68,45 @@ class LibraryDetailNavigationTest {
                 navigation.dispatched,
             )
         }
+
+    @Test
+    fun `private vault video passes private hint to detail key and protects loading frame`() =
+        runTest(dispatcherRule.dispatcher) {
+            val privateVideo = libraryTestVideo("/private.mp4").copy(id = "secret", isPrivate = true)
+            val navigation = SpyNavigationDispatcher()
+            val session = PrivateVideoSession().apply { unlock() }
+            val viewModel =
+                LibraryViewModel(
+                    LibraryTestDownloads(listOf(privateVideo)),
+                    LibraryTestSettings,
+                    navigation,
+                    SavedStateHandle(),
+                    LibraryFileManager(
+                        ApplicationProvider.getApplicationContext(),
+                        dispatcherRule.dispatcher,
+                        ExportDocumentStore(ApplicationProvider.getApplicationContext(), dispatcherRule.dispatcher),
+                    ),
+                    AppEventBus(),
+                    LibraryTestPlaybackHistory(),
+                    privateVideoSession = session,
+                    defaultDispatcher = dispatcherRule.dispatcher,
+                )
+            viewModel.setPrivateVault(true)
+            backgroundScope.launch { viewModel.uiState.collect() }
+            runCurrent()
+            viewModel.openVideo(privateVideo.id)
+            runCurrent()
+
+            assertEquals(
+                listOf(NavigationEvent.Navigate(VideoDetailKey(privateVideo.id, isPrivate = true))),
+                navigation.dispatched,
+            )
+            assertEquals(true, shouldProtectVideoWindow(isPrivateHint = true, task = null))
+            assertEquals(false, shouldProtectVideoWindow(isPrivateHint = false, task = null))
+            assertEquals(true, shouldProtectVideoWindow(isPrivateHint = false, task = privateVideo))
+            assertEquals(
+                false,
+                shouldProtectVideoWindow(isPrivateHint = true, task = privateVideo.copy(isPrivate = false)),
+            )
+        }
 }

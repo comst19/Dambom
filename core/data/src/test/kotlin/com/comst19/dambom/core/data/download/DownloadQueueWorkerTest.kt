@@ -1,8 +1,11 @@
 package com.comst19.dambom.core.data.download
 
+import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import androidx.work.ForegroundInfo
+import androidx.work.ForegroundUpdater
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
@@ -11,6 +14,8 @@ import com.comst19.dambom.core.database.DambomDatabase
 import com.comst19.dambom.core.database.download.DownloadTaskDao
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadStatus
+import com.google.common.util.concurrent.Futures
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -811,13 +816,155 @@ class DownloadQueueWorkerTest {
         assertFalse(fileStore.completedFile(task.id, task.url, task.mimeType).exists())
     }
 
+    @Test
+    fun `initial foreground denial retries without touching queue or issuing http requests`() =
+        runTest {
+            successfulServer.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "video/mp4")
+                    .setBody("video-content"),
+            )
+            val queued = entity("fgs-denied-queued", successfulServer.url("/queued.mp4").toString())
+            val active =
+                entity("fgs-denied-active", successfulServer.url("/active.mp4").toString())
+                    .copy(status = DownloadStatus.DOWNLOADING.name)
+            val dao = database.downloadTaskDao()
+            dao.insert(queued)
+            dao.insert(active)
+            val foregroundCalls = AtomicInteger(0)
+            val failingForegroundUpdater =
+                ForegroundUpdater { _, _, _: ForegroundInfo ->
+                    foregroundCalls.incrementAndGet()
+                    Futures.immediateFailedFuture<Void>(
+                        ForegroundServiceStartNotAllowedException("Background foreground start denied"),
+                    )
+                }
+
+            val result = createWorker(foregroundUpdater = failingForegroundUpdater).doWork()
+
+            assertEquals(ListenableWorker.Result.retry(), result)
+            assertEquals(0, successfulServer.requestCount)
+            assertEquals(1, foregroundCalls.get())
+            assertEquals(DownloadStatus.QUEUED.name, dao.getById(queued.id)?.status)
+            assertEquals(DownloadStatus.DOWNLOADING.name, dao.getById(active.id)?.status)
+        }
+
+    @Test
+    fun `initial non-denial IllegalStateException is rethrown without modifying queue`() =
+        runTest {
+            val queued = entity("fgs-ise-queued", successfulServer.url("/queued.mp4").toString())
+            val active =
+                entity("fgs-ise-active", successfulServer.url("/active.mp4").toString())
+                    .copy(status = DownloadStatus.DOWNLOADING.name)
+            val dao = database.downloadTaskDao()
+            dao.insert(queued)
+            dao.insert(active)
+            val failingForegroundUpdater =
+                ForegroundUpdater { _, _, _: ForegroundInfo ->
+                    Futures.immediateFailedFuture<Void>(IllegalStateException("WorkSpec is finished"))
+                }
+
+            val thrown =
+                runCatching { createWorker(foregroundUpdater = failingForegroundUpdater).doWork() }
+                    .exceptionOrNull()
+
+            assertEquals(IllegalStateException::class.java, thrown?.javaClass)
+            assertEquals(0, successfulServer.requestCount)
+            assertEquals(DownloadStatus.QUEUED.name, dao.getById(queued.id)?.status)
+            assertEquals(DownloadStatus.DOWNLOADING.name, dao.getById(active.id)?.status)
+        }
+
+    @Test
+    fun `progress foreground denial after promotion finishes download without repeated calls`() =
+        runTest {
+            successfulServer.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "video/mp4")
+                    .setBody("video-content"),
+            )
+            val task = entity("fgs-update-denied", successfulServer.url("/video.mp4").toString())
+            val dao = database.downloadTaskDao()
+            dao.insert(task)
+            val foregroundCalls = AtomicInteger(0)
+            val updater =
+                ForegroundUpdater { _, _, _: ForegroundInfo ->
+                    if (foregroundCalls.incrementAndGet() == 1) {
+                        Futures.immediateFuture(null)
+                    } else {
+                        Futures.immediateFailedFuture<Void>(
+                            ForegroundServiceStartNotAllowedException("Progress update denied"),
+                        )
+                    }
+                }
+
+            val result = createWorker(foregroundUpdater = updater).doWork()
+
+            assertEquals(ListenableWorker.Result.success(), result)
+            assertEquals(DownloadStatus.COMPLETED.name, dao.getById(task.id)?.status)
+            assertEquals(2, foregroundCalls.get())
+        }
+
+    @Test
+    fun `non-denial IllegalStateException during progress foreground update is rethrown`() =
+        runTest {
+            successfulServer.enqueue(
+                MockResponse()
+                    .setHeader("Content-Type", "video/mp4")
+                    .setBody("video-content"),
+            )
+            val task = entity("fgs-update-ise", successfulServer.url("/video.mp4").toString())
+            val dao = database.downloadTaskDao()
+            dao.insert(task)
+            val foregroundCalls = AtomicInteger(0)
+            val updater =
+                ForegroundUpdater { _, _, _: ForegroundInfo ->
+                    if (foregroundCalls.incrementAndGet() == 1) {
+                        Futures.immediateFuture(null)
+                    } else {
+                        Futures.immediateFailedFuture<Void>(IllegalStateException("WorkSpec replaced"))
+                    }
+                }
+
+            val thrown =
+                runCatching { createWorker(foregroundUpdater = updater).doWork() }
+                    .exceptionOrNull()
+
+            assertEquals(IllegalStateException::class.java, thrown?.javaClass)
+            assertEquals("WorkSpec replaced", thrown?.message)
+            assertEquals(DownloadStatus.QUEUED.name, dao.getById(task.id)?.status)
+        }
+
+    @Test
+    fun `cancellation during foreground promotion is rethrown`() =
+        runTest {
+            val task = entity("fgs-cancelled", successfulServer.url("/video.mp4").toString())
+            database.downloadTaskDao().insert(task)
+            val cancellingForegroundUpdater =
+                ForegroundUpdater { _, _, _: ForegroundInfo ->
+                    Futures.immediateCancelledFuture()
+                }
+
+            val cancelled =
+                try {
+                    createWorker(foregroundUpdater = cancellingForegroundUpdater).doWork()
+                    false
+                } catch (_: CancellationException) {
+                    true
+                }
+
+            assertEquals(true, cancelled)
+        }
+
     private fun createWorker(
         runAttemptCount: Int = 0,
         dao: DownloadTaskDao = database.downloadTaskDao(),
         fileStore: DownloadFileStore = this.fileStore,
+        foregroundUpdater: ForegroundUpdater? = null,
     ): DownloadQueueWorker =
         TestListenableWorkerBuilder<DownloadQueueWorker>(context, runAttemptCount = runAttemptCount)
-            .setWorkerFactory(
+            .apply {
+                if (foregroundUpdater != null) setForegroundUpdater(foregroundUpdater)
+            }.setWorkerFactory(
                 object : WorkerFactory() {
                     override fun createWorker(
                         appContext: Context,

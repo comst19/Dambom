@@ -3,6 +3,8 @@ package com.comst19.dambom.core.data.repository
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.data.download.DownloadFileStore
 import com.comst19.dambom.core.data.download.DownloadWorkScheduler
+import com.comst19.dambom.core.data.download.MovedPrivacyFile
+import com.comst19.dambom.core.data.download.PrivacyFileMoveResult
 import com.comst19.dambom.core.database.download.DownloadTaskDao
 import com.comst19.dambom.core.database.download.DownloadTaskEntity
 import com.comst19.dambom.core.domain.model.DownloadFailureReason
@@ -16,11 +18,14 @@ import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.network.header.encodeMediaHeaders
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -41,6 +46,7 @@ class DefaultDownloadRepository
         private val privateVideoSession: PrivateVideoSession,
     ) : DownloadRepository {
         private val deletionMutex = Mutex()
+        private val storageVersion = MutableStateFlow(0L)
 
         override val overview: Flow<DownloadOverview> =
             dao
@@ -72,45 +78,45 @@ class DefaultDownloadRepository
                 }.flowOn(ioDispatcher)
 
         override val downloads: Flow<List<DownloadTask>> =
-            dao
-                .observeAll()
-                .map { entities ->
-                    entities.filter { !it.deletePending && !it.isPrivate }.map(::toDownloadTask)
-                }.distinctUntilChanged()
-                .flowOn(ioDispatcher)
+            combine(
+                dao.observeAll(),
+                storageVersion,
+            ) { entities, _ ->
+                entities.filter { !it.deletePending && !it.isPrivate }.map(::toDownloadTask)
+            }.distinctUntilChanged().flowOn(ioDispatcher)
 
         override fun observeDownload(id: String): Flow<DownloadTask?> =
-            dao
-                .observeById(id)
-                .distinctUntilChanged()
-                .combine(privateVideoSession.isUnlocked) { entity, unlocked ->
-                    entity?.takeIf { !it.isPrivate || unlocked }?.let(::toDownloadTask)
-                }.flowOn(ioDispatcher)
+            combine(
+                dao.observeById(id).distinctUntilChanged(),
+                privateVideoSession.isUnlocked,
+                storageVersion,
+            ) { entity, unlocked, _ ->
+                entity?.takeIf { !it.isPrivate || unlocked }?.let(::toDownloadTask)
+            }.distinctUntilChanged().flowOn(ioDispatcher)
 
         override val completedDownloads: Flow<List<DownloadTask>> =
-            dao
-                .observeCompleted()
-                .distinctUntilChanged()
-                .map { entities ->
-                    entities.filterNot(DownloadTaskEntity::isPrivate).map(::toDownloadTask)
-                }.distinctUntilChanged()
-                .flowOn(ioDispatcher)
+            combine(
+                dao.observeCompleted().distinctUntilChanged(),
+                storageVersion,
+            ) { entities, _ ->
+                entities.filterNot(DownloadTaskEntity::isPrivate).map(::toDownloadTask)
+            }.distinctUntilChanged().flowOn(ioDispatcher)
 
         override val deletionPendingDownloads: Flow<List<DownloadTask>> =
-            dao
-                .observePendingDeletions()
-                .distinctUntilChanged()
-                .map { entities ->
-                    entities.filterNot(DownloadTaskEntity::isPrivate).map(::toDownloadTask)
-                }.distinctUntilChanged()
-                .flowOn(ioDispatcher)
+            combine(
+                dao.observePendingDeletions().distinctUntilChanged(),
+                storageVersion,
+            ) { entities, _ ->
+                entities.filterNot(DownloadTaskEntity::isPrivate).map(::toDownloadTask)
+            }.distinctUntilChanged().flowOn(ioDispatcher)
 
         override val privateCompletedDownloads: Flow<List<DownloadTask>> =
             combine(
                 dao.observeCompleted(),
                 dao.observePendingDeletions(),
                 privateVideoSession.isUnlocked,
-            ) { completed, pending, unlocked ->
+                storageVersion,
+            ) { completed, pending, unlocked, _ ->
                 if (unlocked) {
                     (completed + pending)
                         .filter { it.isPrivate && it.status == DownloadStatus.COMPLETED.name }
@@ -126,10 +132,50 @@ class DefaultDownloadRepository
             isPrivate: Boolean,
         ) = withContext(ioDispatcher) {
             check(privateVideoSession.isUnlocked.value) { "Private library is locked" }
-            ids.forEach { id ->
-                dao.getById(id)?.localFileName?.let(fileStore::revokeSharing)
+            deletionMutex.withLock {
+                val movedFiles = mutableListOf<MovedPrivacyFile>()
+                var storageChanged = false
+                var committed = false
+                try {
+                    ids.forEach { id ->
+                        val entity = dao.getById(id) ?: return@forEach
+                        if (entity.status != DownloadStatus.COMPLETED.name || entity.deletePending) return@forEach
+                        val localFileName = entity.localFileName ?: return@forEach
+                        if (isPrivate) fileStore.revokeSharing(localFileName)
+                        when (
+                            val result =
+                                fileStore.movePrivacyFiles(
+                                    localFileName = localFileName,
+                                    toPrivate = isPrivate,
+                                    preserveExistingTarget = entity.isPrivate == isPrivate,
+                                )
+                        ) {
+                            is PrivacyFileMoveResult.Moved -> {
+                                movedFiles += result.files
+                                if (result.changed) storageChanged = true
+                            }
+
+                            PrivacyFileMoveResult.MissingVideo,
+                            PrivacyFileMoveResult.Failed,
+                            -> {
+                                throw IOException("Unable to update private video storage")
+                            }
+                        }
+                    }
+                    dao.setPrivate(ids, isPrivate)
+                    committed = true
+                    if (storageChanged) {
+                        storageVersion.update { it + 1L }
+                    }
+                } finally {
+                    if (!committed && movedFiles.isNotEmpty()) {
+                        withContext(NonCancellable) {
+                            fileStore.rollbackPrivacyFiles(movedFiles)
+                            storageVersion.update { it + 1L }
+                        }
+                    }
+                }
             }
-            dao.setPrivate(ids, isPrivate)
         }
 
         override suspend fun enqueue(requests: List<DownloadRequest>): EnqueueDownloadsResult =
@@ -199,8 +245,56 @@ class DefaultDownloadRepository
                     } catch (_: IOException) {
                     }
                 }
+                val cleanedMoveTemps = deletionMutex.withLock { fileStore.deleteMoveTempFiles() }
+                val failedPrivacyIds = mutableListOf<String>()
+                dao.getCompleted().forEach { task ->
+                    val reconciled = deletionMutex.withLock { reconcileCompletedPrivacyStorage(task.id) }
+                    if (!reconciled) failedPrivacyIds += task.id
+                }
                 if (dao.countSchedulable() > 0) scheduler.ensureScheduled()
+                if (!cleanedMoveTemps || failedPrivacyIds.isNotEmpty()) {
+                    throw IOException(
+                        "Unable to reconcile private video storage for: ${failedPrivacyIds.joinToString()}",
+                    )
+                }
             }
+
+        private suspend fun reconcileCompletedPrivacyStorage(id: String): Boolean {
+            val current =
+                dao
+                    .getById(id)
+                    ?.takeIf {
+                        it.status == DownloadStatus.COMPLETED.name &&
+                            !it.deletePending &&
+                            it.localFileName != null
+                    }
+                    ?: return true
+            val localFileName = requireNotNull(current.localFileName)
+            return when (
+                val result =
+                    fileStore.movePrivacyFiles(
+                        localFileName = localFileName,
+                        toPrivate = current.isPrivate,
+                        preserveExistingTarget = true,
+                    )
+            ) {
+                is PrivacyFileMoveResult.Moved -> {
+                    if (result.changed) {
+                        if (current.isPrivate) fileStore.revokeSharing(localFileName)
+                        storageVersion.update { it + 1L }
+                    }
+                    true
+                }
+
+                PrivacyFileMoveResult.MissingVideo -> {
+                    true
+                }
+
+                PrivacyFileMoveResult.Failed -> {
+                    false
+                }
+            }
+        }
 
         override suspend fun refreshNetworkPolicy() {
             if (dao.countSchedulable() > 0) scheduler.reschedule()
@@ -213,7 +307,7 @@ class DefaultDownloadRepository
         }
 
         private fun toDownloadTask(entity: DownloadTaskEntity): DownloadTask =
-            entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
+            entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName, entity.isPrivate))
 
         private suspend fun cleanupDeletion(
             id: String,

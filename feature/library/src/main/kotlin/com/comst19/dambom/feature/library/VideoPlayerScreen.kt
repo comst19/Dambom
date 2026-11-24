@@ -58,6 +58,7 @@ import java.io.File
 @Suppress("LongParameterList", "LongMethod")
 internal fun VideoPlayerRoute(
     id: String,
+    isPrivate: Boolean = false,
     isVideoFullscreen: Boolean,
     onVideoFullscreenChange: (Boolean) -> Unit,
     onVideoRotate: () -> Unit,
@@ -69,7 +70,9 @@ internal fun VideoPlayerRoute(
             libraryViewModel.observeVideo(id)
         }.collectAsStateWithLifecycle(initialValue = VideoDetailState.Loading).value
     val task = (detailState as? VideoDetailState.Ready)?.task
-    if (task?.isPrivate == true) PrivateVideoWindowProtection()
+    if (shouldProtectVideoWindow(isPrivateHint = isPrivate, task = task)) {
+        PrivateVideoWindowProtection()
+    }
     var fileCheckRevision by remember { mutableIntStateOf(0) }
     val fileAvailability by rememberLocalVideoAvailable(task, fileCheckRevision)
     val isLocalVideoAvailable = fileAvailability == true
@@ -289,6 +292,11 @@ internal fun VideoPlayerScreen(
         }
     }
 }
+
+internal fun shouldProtectVideoWindow(
+    isPrivateHint: Boolean,
+    task: DownloadTask?,
+): Boolean = task?.isPrivate == true || (task == null && isPrivateHint)
 
 internal fun shouldClearVideoFullscreen(
     isVideoFullscreen: Boolean,

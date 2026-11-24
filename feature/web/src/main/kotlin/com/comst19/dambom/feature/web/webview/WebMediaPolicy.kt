@@ -4,6 +4,21 @@ import android.webkit.WebResourceResponse
 import com.comst19.dambom.core.common.net.hasVideoFileExtension
 import java.io.ByteArrayInputStream
 
+internal fun shouldAllowWebNavigationUrl(
+    url: String?,
+    isForMainFrame: Boolean = true,
+): Boolean {
+    val normalized = url?.trim().orEmpty()
+    val isHttpUrl =
+        normalized.startsWith("https://", ignoreCase = true) ||
+            normalized.startsWith("http://", ignoreCase = true)
+    return when {
+        normalized.isEmpty() -> false
+        !isForMainFrame && normalized.equals("about:blank", ignoreCase = true) -> true
+        else -> isHttpUrl
+    }
+}
+
 internal fun shouldBlockWebVideo(
     url: String,
     mediaGuardInstalled: Boolean,

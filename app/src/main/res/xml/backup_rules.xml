@@ -4,4 +4,5 @@
     <exclude domain="file" path="download-parts/" />
     <exclude domain="file" path="download-streams/" />
     <exclude domain="file" path="videos/" />
+    <exclude domain="file" path="private_videos/" />
 </full-backup-content>

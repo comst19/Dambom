@@ -210,7 +210,7 @@ internal class LibraryViewModel
             if (task?.deletePending != false || task.localFilePath == null) return
             savedStateHandle[SELECTED_ID_KEY] = id
             viewModelScope.launch {
-                val key = VideoDetailKey(id)
+                val key = VideoDetailKey(id, isPrivate = task.isPrivate || privateVault.value)
                 navigation.dispatch(if (replaceDetail) NavigationEvent.Replace(key) else NavigationEvent.Navigate(key))
             }
         }

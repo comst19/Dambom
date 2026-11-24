@@ -40,6 +40,12 @@ interface DownloadTaskDao {
     )
     fun observeCompleted(): Flow<List<DownloadTaskEntity>>
 
+    @Query(
+        "SELECT * FROM download_tasks " +
+            "WHERE status = 'COMPLETED' AND deletePending = 0 AND localFileName IS NOT NULL",
+    )
+    suspend fun getCompleted(): List<DownloadTaskEntity>
+
     @Query("SELECT * FROM download_tasks WHERE deletePending = 1 ORDER BY updatedAtMillis DESC")
     fun observePendingDeletions(): Flow<List<DownloadTaskEntity>>
 

@@ -27,6 +27,7 @@ internal open class DownloadFileStore
     ) {
         private val partialDirectory by lazy { context.filesDir.resolve("download-parts").apply(File::mkdirs) }
         private val videoDirectory by lazy { context.filesDir.resolve("videos").apply(File::mkdirs) }
+        private val privateVideoDirectory by lazy { context.filesDir.resolve("private_videos") }
         private val streamRoot by lazy { context.filesDir.resolve("download-streams") }
         val streamDatabaseProvider by lazy { StandaloneDatabaseProvider(context) }
 
@@ -73,20 +74,69 @@ internal open class DownloadFileStore
         ): File = videoDirectory.resolve(id + fileExtension(url, mimeType))
 
         open fun revokeSharing(localFileName: String) {
+            val file = safeResolve(videoDirectory, localFileName) ?: return
             val uri =
                 FileProvider.getUriForFile(
                     context,
                     "${context.packageName}.fileprovider",
-                    videoDirectory.resolve(localFileName),
+                    file,
                 )
             context.revokeUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
-        fun completedFilePath(localFileName: String?): String? =
-            localFileName
-                ?.let(videoDirectory::resolve)
-                ?.takeIf(File::isFile)
-                ?.absolutePath
+        fun completedFilePath(
+            localFileName: String?,
+            isPrivate: Boolean = false,
+        ): String? =
+            localFileName?.let { fileName ->
+                val privatePath =
+                    if (isPrivate) {
+                        safeResolve(privateVideoDirectory, fileName)
+                            ?.takeIf(File::isFile)
+                            ?.absolutePath
+                    } else {
+                        null
+                    }
+                privatePath
+                    ?: safeResolve(videoDirectory, fileName)
+                        ?.takeIf(File::isFile)
+                        ?.absolutePath
+            }
+
+        open fun movePrivacyFiles(
+            localFileName: String,
+            toPrivate: Boolean,
+            preserveExistingTarget: Boolean = false,
+        ): PrivacyFileMoveResult {
+            val sourceDir = if (toPrivate) videoDirectory else privateVideoDirectory
+            val targetDir = if (toPrivate) privateVideoDirectory else videoDirectory
+            val sourceVideo = safeResolve(sourceDir, localFileName)
+            val targetVideo = safeResolve(targetDir, localFileName)
+            return when {
+                sourceVideo == null || targetVideo == null -> {
+                    PrivacyFileMoveResult.Failed
+                }
+
+                else -> {
+                    moveVideoAndSidecars(
+                        sourceVideo = sourceVideo,
+                        targetVideo = targetVideo,
+                        targetDir = targetDir,
+                        preserveExistingTarget = preserveExistingTarget,
+                    )
+                }
+            }
+        }
+
+        open fun rollbackPrivacyFiles(movedFiles: List<MovedPrivacyFile>) {
+            rollbackMovedPrivacyFiles(movedFiles)
+        }
+
+        open fun deleteMoveTempFiles(): Boolean =
+            listOf(videoDirectory, privateVideoDirectory)
+                .filter(File::isDirectory)
+                .flatMap { directory -> directory.listFiles().orEmpty().filter { isAppMoveTempFile(it.name) } }
+                .fold(true) { allDeleted, file -> deleteIfPresent(file) && allDeleted }
 
         open fun delete(
             id: String,
@@ -97,13 +147,13 @@ internal open class DownloadFileStore
                     add(partialFile(id))
                     add(partialValidatorFile(id))
                     localFileName?.let { fileName ->
-                        val videoFile = videoDirectory.resolve(fileName)
-                        add(videoFile)
-                        add(videoFile.videoSubtitleFile())
-                        add(videoFile.videoSubtitleTemporaryFile())
-                        add(videoFile.videoThumbnailFile())
-                        add(videoFile.videoThumbnailTemporaryFile())
-                        add(videoFile.videoThumbnailUnavailableFile())
+                        listOf(videoDirectory, privateVideoDirectory).forEach { directory ->
+                            safeResolve(directory, fileName)?.let { videoFile ->
+                                val owners = videoAndSidecarFiles(videoFile)
+                                addAll(owners)
+                                addAll(moveTempFilesFor(directory, owners))
+                            }
+                        }
                     }
                 }
             var allDeleted = true
@@ -114,6 +164,185 @@ internal open class DownloadFileStore
             return allDeleted
         }
     }
+
+internal data class MovedPrivacyFile(
+    val source: File,
+    val target: File,
+)
+
+internal sealed interface PrivacyFileMoveResult {
+    data class Moved(
+        val files: List<MovedPrivacyFile>,
+        val removedDuplicates: Boolean = false,
+    ) : PrivacyFileMoveResult {
+        val changed: Boolean
+            get() = files.isNotEmpty() || removedDuplicates
+    }
+
+    data object MissingVideo : PrivacyFileMoveResult
+
+    data object Failed : PrivacyFileMoveResult
+}
+
+private fun safeResolve(
+    directory: File,
+    fileName: String,
+): File? {
+    if (fileName.isBlank()) return null
+    val root = directory.canonicalFile
+    val candidate = File(root, fileName).canonicalFile
+    return candidate.takeIf { it.parentFile == root }
+}
+
+private fun videoAndSidecarFiles(videoFile: File): List<File> =
+    listOf(
+        videoFile,
+        videoFile.videoSubtitleFile(),
+        videoFile.videoSubtitleTemporaryFile(),
+        videoFile.videoThumbnailFile(),
+        videoFile.videoThumbnailTemporaryFile(),
+        videoFile.videoThumbnailUnavailableFile(),
+    )
+
+private fun moveVideoAndSidecars(
+    sourceVideo: File,
+    targetVideo: File,
+    targetDir: File,
+    preserveExistingTarget: Boolean,
+): PrivacyFileMoveResult {
+    val existingPairs =
+        videoAndSidecarFiles(sourceVideo)
+            .zip(videoAndSidecarFiles(targetVideo))
+            .filter { (source, _) -> source.exists() }
+    val needsTargetDir = existingPairs.any { (_, target) -> !preserveExistingTarget || !target.isFile }
+    return when {
+        !sourceVideo.isFile && !targetVideo.isFile -> {
+            PrivacyFileMoveResult.MissingVideo
+        }
+
+        existingPairs.isEmpty() -> {
+            PrivacyFileMoveResult.Moved(emptyList())
+        }
+
+        needsTargetDir && !targetDir.exists() && !targetDir.mkdirs() -> {
+            PrivacyFileMoveResult.Failed
+        }
+
+        else -> {
+            moveExistingPairs(existingPairs, preserveExistingTarget)
+        }
+    }
+}
+
+private fun moveExistingPairs(
+    existingPairs: List<Pair<File, File>>,
+    preserveExistingTarget: Boolean,
+): PrivacyFileMoveResult {
+    val movedFiles = mutableListOf<MovedPrivacyFile>()
+    var removedDuplicates = false
+    val succeeded =
+        existingPairs.all { (source, target) ->
+            when {
+                preserveExistingTarget && target.isFile -> {
+                    source.delete().also { deleted -> if (deleted) removedDuplicates = true }
+                }
+
+                moveFile(source, target) -> {
+                    movedFiles += MovedPrivacyFile(source = source, target = target)
+                    true
+                }
+
+                else -> {
+                    false
+                }
+            }
+        }
+    return if (succeeded) {
+        PrivacyFileMoveResult.Moved(
+            files = movedFiles,
+            removedDuplicates = removedDuplicates,
+        )
+    } else {
+        rollbackMovedPrivacyFiles(movedFiles)
+        PrivacyFileMoveResult.Failed
+    }
+}
+
+private fun rollbackMovedPrivacyFiles(movedFiles: List<MovedPrivacyFile>) {
+    movedFiles.asReversed().forEach { moved ->
+        moveFile(moved.target, moved.source)
+    }
+}
+
+internal fun moveFile(
+    source: File,
+    target: File,
+): Boolean {
+    val parent = target.parentFile
+    return when {
+        source.renameTo(target) -> {
+            true
+        }
+
+        parent == null -> {
+            false
+        }
+
+        else -> {
+            val tempFile = File(parent, ".${target.name}.${System.nanoTime()}$MOVE_TEMP_SUFFIX")
+            runCatching {
+                source.copyTo(tempFile, overwrite = true)
+                if (!tempFile.renameTo(target)) {
+                    tempFile.delete()
+                    false
+                } else if (source.delete()) {
+                    true
+                } else {
+                    target.delete()
+                    false
+                }
+            }.getOrElse {
+                tempFile.delete()
+                false
+            }
+        }
+    }
+}
+
+private fun moveTempFilesFor(
+    directory: File,
+    owners: List<File>,
+): List<File> {
+    if (!directory.isDirectory) return emptyList()
+    val prefixes = owners.map { ".${it.name}." }
+    return directory
+        .listFiles()
+        .orEmpty()
+        .filter { candidate ->
+            val name = candidate.name
+            name.endsWith(MOVE_TEMP_SUFFIX) &&
+                prefixes.any { prefix ->
+                    name.startsWith(prefix) &&
+                        name.length > prefix.length + MOVE_TEMP_SUFFIX.length &&
+                        name
+                            .substring(prefix.length, name.length - MOVE_TEMP_SUFFIX.length)
+                            .none { it == '.' || it == '/' }
+                }
+        }
+}
+
+private fun isAppMoveTempFile(candidateName: String): Boolean {
+    val validAffix =
+        candidateName.startsWith(".") &&
+            candidateName.endsWith(MOVE_TEMP_SUFFIX) &&
+            candidateName.length > 1 + MOVE_TEMP_SUFFIX.length
+    if (!validAffix) return false
+    val body = candidateName.substring(1, candidateName.length - MOVE_TEMP_SUFFIX.length)
+    val separator = body.lastIndexOf('.')
+    return separator > 0 && separator < body.lastIndex
+}
+
+private const val MOVE_TEMP_SUFFIX = ".move.tmp"
 
 private fun fileExtension(
     url: String,

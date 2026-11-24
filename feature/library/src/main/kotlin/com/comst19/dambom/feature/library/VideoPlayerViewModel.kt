@@ -52,6 +52,7 @@ internal class VideoPlayerViewModel
         private val visibilityState = PlaybackVisibilityState()
         private var preparation: Job? = null
         private var requestedId: String? = null
+        private var requestedUri: String? = null
         private var privatePlayback = false
         private var playRequestedWhilePreparing = false
         private var progressJob: Job? = null
@@ -163,20 +164,13 @@ internal class VideoPlayerViewModel
             privatePlayback = task.isPrivate
             val path = task.localFilePath ?: return
             val uri = Uri.fromFile(File(path))
-            if (!shouldReplaceMediaItem(
-                    player.currentMediaItem?.mediaId,
-                    player.currentMediaItem
-                        ?.localConfiguration
-                        ?.uri
-                        ?.toString(),
-                    task.id,
-                    uri.toString(),
-                ) || (requestedId == task.id && preparation?.isActive == true)
-            ) {
+            val uriString = uri.toString()
+            if (isAlreadyPreparedOrPending(task.id, uriString)) {
                 return
             }
             preparation?.cancel()
             requestedId = task.id
+            requestedUri = uriString
             playRequestedWhilePreparing = false
             resumeCandidate = null
             _resumePromptPosition.value = null
@@ -272,6 +266,7 @@ internal class VideoPlayerViewModel
         fun stopUnavailableVideo() {
             preparation?.cancel()
             requestedId = null
+            requestedUri = null
             playRequestedWhilePreparing = false
             _resumePromptPosition.value = null
             resumeCandidate = null
@@ -285,6 +280,7 @@ internal class VideoPlayerViewModel
         override fun onCleared() {
             preparation?.cancel()
             requestedId = null
+            requestedUri = null
             playRequestedWhilePreparing = false
             _resumePromptPosition.value = null
             resumeCandidate = null
@@ -292,6 +288,27 @@ internal class VideoPlayerViewModel
             history.reset()
             applyPlaybackCommand(visibilityState.onDisposed())
             player.release()
+        }
+
+        private fun isAlreadyPreparedOrPending(
+            taskId: String,
+            uriString: String,
+        ): Boolean {
+            val currentUri =
+                player.currentMediaItem
+                    ?.localConfiguration
+                    ?.uri
+                    ?.toString()
+            val samePendingRequest =
+                requestedId == taskId &&
+                    requestedUri == uriString &&
+                    preparation?.isActive == true
+            return !shouldReplaceMediaItem(
+                player.currentMediaItem?.mediaId,
+                currentUri,
+                taskId,
+                uriString,
+            ) || samePendingRequest
         }
 
         private fun applyPlaybackCommand(command: PlaybackCommand) {

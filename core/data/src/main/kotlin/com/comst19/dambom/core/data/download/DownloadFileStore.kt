@@ -106,15 +106,19 @@ internal open class DownloadFileStore
         open fun movePrivacyFiles(
             localFileName: String,
             toPrivate: Boolean,
-        ): Boolean {
+        ): PrivacyFileMoveResult {
             val sourceDir = if (toPrivate) videoDirectory else privateVideoDirectory
             val targetDir = if (toPrivate) privateVideoDirectory else videoDirectory
             val sourceVideo = safeResolve(sourceDir, localFileName)
             val targetVideo = safeResolve(targetDir, localFileName)
             return when {
-                sourceVideo == null || targetVideo == null -> false
+                sourceVideo == null || targetVideo == null -> PrivacyFileMoveResult.Failed
                 else -> moveVideoAndSidecars(sourceVideo, targetVideo, targetDir)
             }
+        }
+
+        open fun rollbackPrivacyFiles(movedFiles: List<MovedPrivacyFile>) {
+            rollbackMovedPrivacyFiles(movedFiles)
         }
 
         open fun delete(
@@ -138,6 +142,19 @@ internal open class DownloadFileStore
             return allDeleted
         }
     }
+
+internal data class MovedPrivacyFile(
+    val source: File,
+    val target: File,
+)
+
+internal sealed interface PrivacyFileMoveResult {
+    data class Moved(
+        val files: List<MovedPrivacyFile>,
+    ) : PrivacyFileMoveResult
+
+    data object Failed : PrivacyFileMoveResult
+}
 
 private fun safeResolve(
     directory: File,
@@ -163,33 +180,41 @@ private fun moveVideoAndSidecars(
     sourceVideo: File,
     targetVideo: File,
     targetDir: File,
-): Boolean {
+): PrivacyFileMoveResult {
     val existingPairs =
         videoAndSidecarFiles(sourceVideo)
             .zip(videoAndSidecarFiles(targetVideo))
             .filter { (source, _) -> source.exists() }
     return when {
         existingPairs.isEmpty() -> {
-            true
+            PrivacyFileMoveResult.Moved(emptyList())
         }
 
         !targetDir.exists() && !targetDir.mkdirs() -> {
-            false
+            PrivacyFileMoveResult.Failed
         }
 
         else -> {
-            val movedPairs = mutableListOf<Pair<File, File>>()
+            val movedFiles = mutableListOf<MovedPrivacyFile>()
             val allMoved =
-                existingPairs.all { pair ->
-                    moveFile(pair.first, pair.second).also { moved ->
-                        if (moved) movedPairs += pair
+                existingPairs.all { (source, target) ->
+                    moveFile(source, target).also { moved ->
+                        if (moved) movedFiles += MovedPrivacyFile(source = source, target = target)
                     }
                 }
             if (!allMoved) {
-                movedPairs.asReversed().forEach { (source, target) -> moveFile(target, source) }
+                rollbackMovedPrivacyFiles(movedFiles)
+                PrivacyFileMoveResult.Failed
+            } else {
+                PrivacyFileMoveResult.Moved(movedFiles)
             }
-            allMoved
         }
+    }
+}
+
+private fun rollbackMovedPrivacyFiles(movedFiles: List<MovedPrivacyFile>) {
+    movedFiles.asReversed().forEach { moved ->
+        moveFile(moved.target, moved.source)
     }
 }
 
@@ -200,7 +225,12 @@ private fun moveFile(
     if (source.renameTo(target)) return true
     return runCatching {
         source.copyTo(target, overwrite = true)
-        source.delete()
+        if (source.delete()) {
+            true
+        } else {
+            target.delete()
+            false
+        }
     }.getOrDefault(false)
 }
 

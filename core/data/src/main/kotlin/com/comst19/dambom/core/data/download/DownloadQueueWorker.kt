@@ -1,10 +1,11 @@
 package com.comst19.dambom.core.data.download
 
+import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
+import android.os.Build
 import android.os.SystemClock
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.comst19.dambom.core.common.net.hasVideoFileExtension
 import com.comst19.dambom.core.coroutine.IoDispatcher
@@ -60,9 +61,9 @@ internal class DownloadQueueWorker
 
         override suspend fun doWork(): Result =
             withContext(ioDispatcher) {
+                if (!promoteInitialForeground()) return@withContext Result.retry()
                 dao.resetInterrupted(System.currentTimeMillis())
                 try {
-                    isForegroundActive = trySetForeground(notifier.foreground())
                     drainQueue()
                     Result.success()
                 } catch (_: RetryQueueException) {
@@ -147,6 +148,8 @@ internal class DownloadQueueWorker
                 }
             } catch (cancellation: CancellationException) {
                 throw cancellation
+            } catch (failure: ForegroundUpdateException) {
+                throw failure.cause
             } catch (failure: StreamDownloadException) {
                 markFailed(task, failure.reason)
                 DownloadOutcome.PERMANENT_FAILURE
@@ -385,6 +388,21 @@ internal class DownloadQueueWorker
             updateForeground(task.title, downloadedBytes, totalBytes)
         }
 
+        private suspend fun promoteInitialForeground(): Boolean =
+            try {
+                setForeground(notifier.foreground())
+                isForegroundActive = true
+                true
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (error: IllegalStateException) {
+                if (isForegroundServiceStartNotAllowed(error)) {
+                    false
+                } else {
+                    throw error
+                }
+            }
+
         private suspend fun updateForeground(
             title: String,
             downloadedBytes: Long,
@@ -394,24 +412,20 @@ internal class DownloadQueueWorker
                 if (!isForegroundActive) return
                 val nextState = foregroundNotificationState(title, downloadedBytes, totalBytes)
                 if (nextState == foregroundState) return
-                if (trySetForeground(notifier.foreground(title, downloadedBytes, totalBytes))) {
+                try {
+                    setForeground(notifier.foreground(title, downloadedBytes, totalBytes))
                     foregroundState = nextState
-                } else {
-                    isForegroundActive = false
+                } catch (cancellation: CancellationException) {
+                    throw cancellation
+                } catch (error: IllegalStateException) {
+                    if (isForegroundServiceStartNotAllowed(error)) {
+                        isForegroundActive = false
+                    } else {
+                        throw ForegroundUpdateException(error)
+                    }
                 }
             }
         }
-
-        private suspend fun trySetForeground(info: ForegroundInfo): Boolean =
-            try {
-                setForeground(info)
-                true
-            } catch (cancellation: CancellationException) {
-                throw cancellation
-            } catch (_: IllegalStateException) {
-                // Android 12+ ForegroundServiceStartNotAllowedException extends IllegalStateException.
-                false
-            }
 
         private suspend fun complete(
             task: DownloadTaskEntity,
@@ -605,3 +619,11 @@ private const val HTTP_RANGE_NOT_SATISFIABLE = 416
 
 private fun Response.requiresRestart(rangeStart: Long): Boolean =
     code == HTTP_RANGE_NOT_SATISFIABLE || (code == HTTP_PARTIAL_CONTENT && contentRangeStart() != rangeStart)
+
+private fun isForegroundServiceStartNotAllowed(error: Throwable): Boolean =
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+        error is ForegroundServiceStartNotAllowedException
+
+private class ForegroundUpdateException(
+    override val cause: IllegalStateException,
+) : RuntimeException(cause)

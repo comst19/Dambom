@@ -105,7 +105,9 @@ class StreamDownloadFileStoreTest {
         file.videoSubtitleFile().writeText("subtitles")
         file.videoThumbnailFile().writeText("thumb")
 
-        assertTrue(store.movePrivacyFiles(file.name, toPrivate = true))
+        val toPrivateResult = store.movePrivacyFiles(file.name, toPrivate = true)
+        assertTrue(toPrivateResult is PrivacyFileMoveResult.Moved)
+        assertEquals(3, (toPrivateResult as PrivacyFileMoveResult.Moved).files.size)
         assertFalse(file.exists())
         assertFalse(file.videoSubtitleFile().exists())
         assertFalse(file.videoThumbnailFile().exists())
@@ -117,11 +119,37 @@ class StreamDownloadFileStoreTest {
         assertTrue(privateFile.videoSubtitleFile().isFile)
         assertTrue(privateFile.videoThumbnailFile().isFile)
 
-        assertTrue(store.movePrivacyFiles(file.name, toPrivate = false))
+        val toPublicResult = store.movePrivacyFiles(file.name, toPrivate = false)
+        assertTrue(toPublicResult is PrivacyFileMoveResult.Moved)
+        assertEquals(3, (toPublicResult as PrivacyFileMoveResult.Moved).files.size)
         assertTrue(file.isFile)
         assertTrue(file.videoSubtitleFile().isFile)
         assertTrue(file.videoThumbnailFile().isFile)
         assertFalse(privateFile.exists())
+    }
+
+    @Test
+    fun `leftover sidecar moves and rolls back without disturbing video already in target directory`() {
+        val file = store.completedFile("stream-file-test", "https://example.test/video.mp4", "video/mp4")
+        file.writeText("video")
+        val initialMove = store.movePrivacyFiles(file.name, toPrivate = true)
+        assertTrue(initialMove is PrivacyFileMoveResult.Moved)
+        val privateFile = File(checkNotNull(store.completedFilePath(file.name, isPrivate = true)))
+        assertTrue(privateFile.isFile)
+
+        // Leave only a subtitle sidecar in the public folder while the video is already private.
+        file.videoSubtitleFile().writeText("late-subtitle")
+
+        val sidecarMove = store.movePrivacyFiles(file.name, toPrivate = true) as PrivacyFileMoveResult.Moved
+        assertEquals(1, sidecarMove.files.size)
+        assertFalse(file.videoSubtitleFile().exists())
+        assertTrue(privateFile.videoSubtitleFile().isFile)
+
+        store.rollbackPrivacyFiles(sidecarMove.files)
+        assertTrue(privateFile.isFile)
+        assertFalse(file.exists())
+        assertTrue(file.videoSubtitleFile().isFile)
+        assertFalse(privateFile.videoSubtitleFile().exists())
     }
 
     @Test
@@ -134,7 +162,7 @@ class StreamDownloadFileStoreTest {
         val blockingSubtitleDir = privateDir.resolve(file.videoSubtitleFile().name).apply(File::mkdirs)
         blockingSubtitleDir.resolve("blocker").writeText("block")
         try {
-            assertFalse(store.movePrivacyFiles(file.name, toPrivate = true))
+            assertEquals(PrivacyFileMoveResult.Failed, store.movePrivacyFiles(file.name, toPrivate = true))
             assertTrue(file.isFile)
             assertTrue(file.videoSubtitleFile().isFile)
             assertFalse(privateDir.resolve(file.name).exists())
@@ -150,7 +178,10 @@ class StreamDownloadFileStoreTest {
         try {
             assertNull(store.completedFilePath("../outside-secret.mp4", isPrivate = false))
             assertNull(store.completedFilePath("../outside-secret.mp4", isPrivate = true))
-            assertFalse(store.movePrivacyFiles("../outside-secret.mp4", toPrivate = true))
+            assertEquals(
+                PrivacyFileMoveResult.Failed,
+                store.movePrivacyFiles("../outside-secret.mp4", toPrivate = true),
+            )
             assertTrue(store.delete("traversal-test", "../outside-secret.mp4"))
             assertTrue(outsideFile.exists())
         } finally {

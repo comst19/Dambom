@@ -4,7 +4,7 @@ import android.content.Intent
 import com.comst19.dambom.core.common.url.SharedUrlBus
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
-import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
+import com.comst19.dambom.feature.home.api.HomeKey
 import javax.inject.Inject
 
 internal class SharedTextEntryHandler

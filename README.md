@@ -101,13 +101,14 @@ Google Play 버전에서 사용할 수 있으며, Android 12 이상과 지원되
 | --- | --- |
 | `app` | 앱 진입점과 의존성 조립 |
 | `presentation` | 앱 공통 화면 구성과 기능별 내비게이션 연결 |
-| `feature:*` | 홈, 영상 감지, 웹 탐색, 다운로드, 보관함, 설정 |
+| `feature:*:api` | 홈, 영상 감지, 웹 탐색, 다운로드, 보관함, 설정의 공개 내비게이션 키와 피처 간 계약 |
+| `feature:*:impl` | 홈, 영상 감지, 웹 탐색, 다운로드, 보관함, 설정의 화면, ViewModel, 내부 경로 구현 |
 | `translationruntime` | Google Play에서 필요할 때 설치하는 LiteRT-LM 실행 모듈 |
 | `core:domain` | 도메인 모델과 Repository 인터페이스 |
 | `core:data` | Repository 구현과 다운로드 작업 관리 |
 | `core:network`, `core:database`, `core:datastore` | 네트워크 통신, 로컬 DB, 사용자 설정 저장 |
 | `core:designsystem`, `core:common-ui` | 공통 테마와 UI 컴포넌트 |
-| `core:navigation`, `core:navigation-contract` | 화면 이동 처리와 경로 정의 |
+| `core:navigation` | 화면 이동 처리, 공통 키 계약(`AppNavKey`, `TopLevelNavKey`), 상태 복원 |
 | `build-logic` | 모듈에서 함께 사용하는 Gradle Convention Plugin |
 
 ### 주요 모듈 의존성
@@ -117,13 +118,13 @@ Google Play 버전에서 사용할 수 있으며, Android 12 이상과 지원되
 | 참조하는 모듈 | 주요 의존 모듈 |
 | --- | --- |
 | `app` | `presentation`, `core:data`, `core:network`, `core:analytics`, `core:navigation` |
-| `presentation` | 홈·영상 감지·웹 탐색·다운로드·보관함·설정 모듈, `core:domain`, 공통 UI·내비게이션 모듈 |
-| `feature:*` 공통 | `core:domain`, `core:common-ui`, `core:designsystem`, `core:navigation`, `core:navigation-contract` |
-| `feature:detection` 추가 | `core:network` |
+| `presentation` | 6개 피처의 `feature:*:api`·`feature:*:impl`, `core:domain`, 공통 UI·내비게이션 모듈 |
+| `feature:*:api` 공통 | `core:navigation` |
+| `feature:*:impl` 공통 | 자기 피처 `api`, 필요한 타 피처 `api`, `core:domain`, `core:common-ui`, `core:designsystem`, `core:navigation` |
+| `feature:detection:impl` 추가 | `core:network` |
 | `core:data` | `core:domain`, `core:network`, `core:database`, `core:datastore` |
-| `core:navigation` | `core:navigation-contract` |
-| `translationruntime` | `app`, `feature:library` |
+| `translationruntime` | `app`, `feature:library:api` |
 
-`presentation`에서 기능별 화면과 내비게이션을 연결합니다. 각 기능 모듈의 공통 의존성은 `dambom.android.feature` Gradle 플러그인이 추가합니다. `core:domain`은 Kotlin/JVM 모듈이며 도메인 모델과 저장소 인터페이스를 제공합니다.
+`presentation`에서 기능별 화면과 내비게이션을 직접 등록해 연결합니다. 공개 계약 모듈의 공통 설정은 `dambom.android.feature.api`가, 구현 모듈의 공통 의존성은 `dambom.android.feature` Gradle 플러그인이 추가합니다. `core:domain`은 Kotlin/JVM 모듈이며 도메인 모델과 저장소 인터페이스를 제공합니다.
 
-`app`은 `translationruntime`을 주문형 다이나믹 피처로 등록합니다. 번역 런타임은 `feature:library`의 인터페이스를 구현하며, 모델 파일은 번역 기능을 준비할 때 별도로 내려받습니다.
+`app`은 `translationruntime`을 주문형 다이나믹 피처로 등록합니다. 번역 런타임은 `feature:library:api`의 인터페이스를 구현하며, 모델 파일은 번역 기능을 준비할 때 별도로 내려받습니다.

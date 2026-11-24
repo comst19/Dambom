@@ -2,8 +2,6 @@ package com.comst19.dambom.core.navigation
 
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import com.comst19.dambom.core.navigation.contract.AppNavKey
-import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -126,8 +124,28 @@ class NavigatorTest {
     }
 
     @Test
-    fun `synthetic back stack rejects a mismatched root`() {
-        val navigator = Navigator(testState())
+    fun `replace at tab root preserves tab root and replaces only last child on non root`() {
+        val state = testState()
+        val navigator = Navigator(state)
+
+        navigator.replace(FirstTestKey)
+        assertEquals(listOf(HomeKey, FirstTestKey), state.currentStack.toList())
+
+        navigator.replace(SecondTestKey)
+        assertEquals(listOf(HomeKey, SecondTestKey), state.currentStack.toList())
+
+        navigator.goBack()
+        assertEquals(listOf(HomeKey), state.currentStack.toList())
+    }
+
+    @Test
+    fun `synthetic back stack rejects a mismatched root and preserves both tabs`() {
+        val state = testState()
+        val navigator = Navigator(state)
+        navigator.navigate(FirstTestKey)
+        navigator.navigateTopLevel(SettingsKey)
+        navigator.navigate(SettingsChildTestKey)
+        navigator.navigateTopLevel(HomeKey)
 
         assertThrows(IllegalArgumentException::class.java) {
             navigator.navigateDeepLink(
@@ -137,6 +155,55 @@ class NavigatorTest {
                 ),
             )
         }
+
+        assertEquals(HomeKey, state.currentTopLevel)
+        assertEquals(listOf(HomeKey), state.topLevelsInUse)
+        assertEquals(listOf(HomeKey, FirstTestKey), state.backStacks.getValue(HomeKey).toList())
+        assertEquals(listOf(SettingsKey, SettingsChildTestKey), state.backStacks.getValue(SettingsKey).toList())
+    }
+
+    @Test
+    fun `synthetic back stack rejects nested top level key and preserves departure and target tabs`() {
+        val state = testState()
+        val navigator = Navigator(state)
+        navigator.navigate(FirstTestKey)
+        navigator.navigateTopLevel(SettingsKey)
+        navigator.navigate(SettingsChildTestKey)
+        navigator.navigateTopLevel(HomeKey)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            navigator.navigateDeepLink(
+                NavigationEvent.NavigateDeepLink(
+                    topLevelKey = SettingsKey,
+                    backStack = listOf(SettingsKey, HomeKey, DetailTestKey(7)),
+                ),
+            )
+        }
+
+        assertEquals(HomeKey, state.currentTopLevel)
+        assertEquals(listOf(HomeKey), state.topLevelsInUse)
+        assertEquals(listOf(HomeKey, FirstTestKey), state.backStacks.getValue(HomeKey).toList())
+        assertEquals(listOf(SettingsKey, SettingsChildTestKey), state.backStacks.getValue(SettingsKey).toList())
+    }
+
+    @Test
+    fun `synthetic back stack rejects unregistered top level target without clearing current stack`() {
+        val state = testState()
+        val navigator = Navigator(state)
+        navigator.navigate(FirstTestKey)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            navigator.navigateDeepLink(
+                NavigationEvent.NavigateDeepLink(
+                    topLevelKey = UnregisteredTopLevelKey,
+                    backStack = listOf(UnregisteredTopLevelKey, FirstTestKey),
+                ),
+            )
+        }
+
+        assertEquals(HomeKey, state.currentTopLevel)
+        assertEquals(listOf(HomeKey), state.topLevelsInUse)
+        assertEquals(listOf(HomeKey, FirstTestKey), state.backStacks.getValue(HomeKey).toList())
     }
 
     @Test
@@ -184,6 +251,8 @@ private fun testState(topLevelBackBehavior: TopLevelBackBehavior = TopLevelBackB
     )
 
 private data object SomethingTestKey : TopLevelNavKey
+
+private data object UnregisteredTopLevelKey : TopLevelNavKey
 
 private data object FirstTestKey : AppNavKey
 

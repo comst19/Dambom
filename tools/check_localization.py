@@ -94,7 +94,7 @@ def validate(root: Path) -> list[str]:
         )
     labels = (
         root
-        / "feature/settings/src/main/kotlin/com/comst19/dambom/feature/settings/language/LanguageLabels.kt"
+        / "feature/settings/impl/src/main/kotlin/com/comst19/dambom/feature/settings/language/LanguageLabels.kt"
     ).read_text()
     enum_names = set(re.findall(r'^\s+([A-Z_]+)\("', language_source.read_text(), re.MULTILINE))
     if set(re.findall(r"AppLanguage\.([A-Z_]+)\s*->", labels)) != enum_names:

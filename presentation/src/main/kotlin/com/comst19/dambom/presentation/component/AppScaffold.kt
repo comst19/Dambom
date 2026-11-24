@@ -53,7 +53,7 @@ import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.core.navigation.NavigationState
 import com.comst19.dambom.core.navigation.Navigator
-import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
+import com.comst19.dambom.feature.library.api.VideoDetailKey
 import com.comst19.dambom.presentation.R
 import com.comst19.dambom.presentation.navigation.AppChrome
 import com.comst19.dambom.presentation.navigation.AppNavigationConfig

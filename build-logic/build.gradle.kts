@@ -31,6 +31,10 @@ gradlePlugin {
             id = "dambom.android.feature"
             implementationClass = "com.comst19.dambom.buildlogic.AndroidFeatureConventionPlugin"
         }
+        register("androidFeatureApi") {
+            id = "dambom.android.feature.api"
+            implementationClass = "com.comst19.dambom.buildlogic.AndroidFeatureApiConventionPlugin"
+        }
         register("androidHilt") {
             id = "dambom.android.hilt"
             implementationClass = "com.comst19.dambom.buildlogic.AndroidHiltConventionPlugin"

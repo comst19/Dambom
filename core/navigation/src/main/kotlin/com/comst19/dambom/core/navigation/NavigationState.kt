@@ -4,7 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -12,9 +15,13 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
+import androidx.savedstate.SavedState
+import androidx.savedstate.serialization.SavedStateConfiguration
+import androidx.savedstate.serialization.decodeFromSavedState
+import androidx.savedstate.serialization.encodeToSavedState
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.modules.SerializersModule
 
 /** 현재 top-level root에서 Back 했을 때 앱이 종료 경계에 도달하는 방식을 선택합니다. */
 enum class TopLevelBackBehavior {
@@ -29,21 +36,182 @@ enum class TopLevelBackBehavior {
  * configuration change와 process recreation에 저장되는 앱 navigation 상태를 생성합니다.
  * 앱 셸에서 한 번 호출하며 [NavigationConfig.startKey]는 반드시
  * [NavigationConfig.topLevelKeys]에 포함해야 합니다.
+ * 저장 상태 복원에 실패하면 top-level history와 모든 탭 back stack을 함께 [config] 초기 상태로 복구합니다.
  */
 @Composable
-fun rememberNavigationState(config: NavigationConfig): NavigationState {
-    val topLevelHistory = rememberNavBackStack(*config.initialTopLevelKeys.toTypedArray())
-    val backStacks = config.topLevelKeys.associateWith { key -> rememberNavBackStack(key) }
-    return remember(config) {
-        NavigationState(
-            bottomHomeKey = config.bottomHomeKey,
-            bottomBarKeys = config.bottomBarKeys,
-            topLevelHistory = topLevelHistory,
-            backStacks = backStacks,
-            topLevelBackBehavior = config.topLevelBackBehavior,
+fun rememberNavigationState(
+    config: NavigationConfig,
+    serializersModule: SerializersModule,
+): NavigationState =
+    // 구버전 스택은 복원하지 않고, 업데이트 후 저장한 내비게이션부터 이 슬롯에서 복원한다.
+    key(NAVIGATION_STATE_SAVE_KEY) {
+        val saver =
+            remember(config, serializersModule) {
+                navigationStateSaver(config = config, serializersModule = serializersModule)
+            }
+        rememberSaveable(config, saver = saver) {
+            createInitialNavigationState(config)
+        }
+    }
+
+private const val NAVIGATION_STATE_SAVE_KEY = "dambom.navigation_state"
+
+/**
+ * [NavigationState]의 top-level history와 탭별 back stack을 단일 [SavedState]로 저장·복원합니다.
+ * 역직렬화나 상태 불변식 검증에 실패하면 `null`을 반환해 초기 상태로 일괄 복구되도록 합니다.
+ */
+fun navigationStateSaver(
+    config: NavigationConfig,
+    serializersModule: SerializersModule,
+): Saver<NavigationState, Any> {
+    val savedStateConfiguration =
+        SavedStateConfiguration {
+            this.serializersModule = serializersModule
+        }
+    return Saver(
+        save = { state ->
+            val snapshot =
+                NavigationSavedSnapshot(
+                    topLevelHistory = state.topLevelsInUse,
+                    backStacks =
+                        state.backStacks.map { (rootKey, stack) ->
+                            SavedTabBackStack(
+                                rootKey = rootKey,
+                                stack = stack.toList(),
+                            )
+                        },
+                )
+            encodeToSavedState(
+                serializer = NavigationSavedSnapshot.serializer(),
+                value = snapshot,
+                configuration = savedStateConfiguration,
+            )
+        },
+        restore = { savedValue ->
+            restoreNavigationState(
+                savedValue = savedValue,
+                config = config,
+                savedStateConfiguration = savedStateConfiguration,
+            )
+        },
+    )
+}
+
+internal fun createInitialNavigationState(config: NavigationConfig): NavigationState =
+    createNavigationState(
+        config = config,
+        topLevelHistory = config.initialTopLevelKeys,
+        stacksByRoot = config.topLevelKeys.associateWith { key -> listOf(key) },
+    )
+
+private fun createNavigationState(
+    config: NavigationConfig,
+    topLevelHistory: List<TopLevelNavKey>,
+    stacksByRoot: Map<TopLevelNavKey, List<AppNavKey>>,
+): NavigationState =
+    NavigationState(
+        bottomHomeKey = config.bottomHomeKey,
+        bottomBarKeys = config.bottomBarKeys,
+        topLevelHistory = NavBackStack<NavKey>().apply { addAll(topLevelHistory) },
+        backStacks =
+            config.topLevelKeys.associateWith { rootKey ->
+                NavBackStack<NavKey>().apply { addAll(stacksByRoot.getValue(rootKey)) }
+            },
+        topLevelBackBehavior = config.topLevelBackBehavior,
+    )
+
+private fun restoreNavigationState(
+    savedValue: Any,
+    config: NavigationConfig,
+    savedStateConfiguration: SavedStateConfiguration,
+): NavigationState? =
+    // 탭 이력과 스택이 어긋나지 않도록 스냅샷 전체를 초기화한다.
+    (savedValue as? SavedState)
+        ?.let { savedState ->
+            runCatching {
+                decodeFromSavedState(
+                    deserializer = NavigationSavedSnapshot.serializer(),
+                    savedState = savedState,
+                    configuration = savedStateConfiguration,
+                )
+            }.getOrNull()
+        }?.toNavigationStateOrNull(config)
+
+private fun NavigationSavedSnapshot.toNavigationStateOrNull(config: NavigationConfig): NavigationState? {
+    val restoredHistory = validatedTopLevelHistory(config)
+    val stacksByRoot = validatedStacks(config)
+    return if (restoredHistory == null || stacksByRoot == null) {
+        null
+    } else {
+        createNavigationState(
+            config = config,
+            topLevelHistory = restoredHistory,
+            stacksByRoot = stacksByRoot,
         )
     }
 }
+
+private fun NavigationSavedSnapshot.validatedTopLevelHistory(config: NavigationConfig): List<TopLevelNavKey>? {
+    val typedHistory = topLevelHistory.filterIsInstance<TopLevelNavKey>()
+    if (typedHistory.size != topLevelHistory.size) return null
+    val isValid =
+        when (typedHistory.size) {
+            1 -> {
+                typedHistory.first() in config.topLevelKeys
+            }
+
+            2 -> {
+                val current = typedHistory.last()
+                current in config.topLevelKeys &&
+                    typedHistory ==
+                    topLevelHistoryFor(
+                        key = current,
+                        bottomHomeKey = config.bottomHomeKey,
+                        bottomBarKeys = config.bottomBarKeys,
+                        topLevelBackBehavior = config.topLevelBackBehavior,
+                    )
+            }
+
+            else -> {
+                false
+            }
+        }
+    return typedHistory.takeIf { isValid }
+}
+
+private fun NavigationSavedSnapshot.validatedStacks(config: NavigationConfig): Map<TopLevelNavKey, List<AppNavKey>>? {
+    if (backStacks.size != config.topLevelKeys.size) return null
+    val stacksByRoot = linkedMapOf<TopLevelNavKey, List<AppNavKey>>()
+    val allValid =
+        backStacks.all { tab ->
+            val rootKey = tab.rootKey as? TopLevelNavKey
+            val typedStack = tab.stack.filterIsInstance<AppNavKey>()
+            val tabValid =
+                rootKey != null &&
+                    rootKey in config.topLevelKeys &&
+                    rootKey !in stacksByRoot &&
+                    typedStack.size == tab.stack.size &&
+                    typedStack.firstOrNull() == rootKey &&
+                    typedStack.drop(1).none { it is TopLevelNavKey }
+            if (rootKey != null && tabValid) {
+                stacksByRoot[rootKey] = typedStack
+            }
+            tabValid
+        }
+    return stacksByRoot.takeIf { allValid && it.keys == config.topLevelKeys }
+}
+
+@Serializable
+internal data class NavigationSavedSnapshot(
+    val topLevelHistory: List<NavKey>,
+    val backStacks: List<SavedTabBackStack>,
+)
+
+@Serializable
+internal data class SavedTabBackStack(
+    val rootKey: NavKey,
+    val stack: List<NavKey>,
+)
 
 /** top-level별 독립 stack과 현재 사용 중인 top-level history를 보관하는 상태 객체입니다. */
 @Stable
@@ -81,14 +249,14 @@ class NavigationState(
     fun selectTopLevel(key: TopLevelNavKey) {
         require(key in backStacks)
         topLevelHistory.clear()
-        if (
-            topLevelBackBehavior == TopLevelBackBehavior.ExitThroughHome &&
-            key in bottomBarKeys &&
-            key != bottomHomeKey
-        ) {
-            topLevelHistory.add(bottomHomeKey)
-        }
-        topLevelHistory.add(key)
+        topLevelHistory.addAll(
+            topLevelHistoryFor(
+                key = key,
+                bottomHomeKey = bottomHomeKey,
+                bottomBarKeys = bottomBarKeys,
+                topLevelBackBehavior = topLevelBackBehavior,
+            ),
+        )
     }
 
     /** 현재 top-level root에서 이전 top-level로 돌아갑니다. 이전 항목이 없으면 상태를 유지합니다. */

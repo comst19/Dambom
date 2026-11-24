@@ -31,7 +31,7 @@ kotlin { compilerOptions { jvmTarget.set(JvmTarget.JVM_17) } }
 
 dependencies {
     implementation(project(":app"))
-    implementation(project(":feature:library"))
+    implementation(project(":feature:library:api"))
     implementation(libs.litertlm)
     implementation(libs.mediapipe.tasks.audio)
     implementation(libs.kotlinx.coroutines.android)

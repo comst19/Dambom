@@ -15,10 +15,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import com.comst19.dambom.core.navigation.Navigator
-import com.comst19.dambom.core.navigation.contract.HOME_DETECTION_DESTINATION
-import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
-import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
 import com.comst19.dambom.core.navigation.rememberNavigationState
+import com.comst19.dambom.feature.detection.api.DetectionResultKey
+import com.comst19.dambom.feature.home.api.HOME_DETECTION_DESTINATION
+import com.comst19.dambom.feature.home.api.HomeKey
 import com.comst19.dambom.presentation.navigation.AppNavigationConfig
 import org.junit.Rule
 import org.junit.Test
@@ -55,7 +55,13 @@ class HomeResultPaneLayoutTest {
             MaterialTheme {
                 AppNavDisplay(
                     entries = entries,
-                    navigator = Navigator(rememberNavigationState(AppNavigationConfig.navigation(HomeKey))),
+                    navigator =
+                        Navigator(
+                            rememberNavigationState(
+                                config = AppNavigationConfig.navigation(HomeKey),
+                                serializersModule = AppNavigationConfig.serializersModule,
+                            ),
+                        ),
                     isLibraryDetailPaneVisible = false,
                     isHomeResultPaneVisible = visible.value,
                     isVideoFullscreen = false,

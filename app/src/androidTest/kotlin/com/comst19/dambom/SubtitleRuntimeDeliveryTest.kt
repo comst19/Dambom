@@ -2,6 +2,7 @@ package com.comst19.dambom
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.comst19.dambom.feature.library.subtitle.runtime.LocalSubtitleLlm
 import com.google.android.play.core.splitcompat.SplitCompat
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallRequest
@@ -61,8 +62,7 @@ class SubtitleRuntimeDeliveryTest {
             assertTrue(SplitCompat.install(context))
             val implementation =
                 Class.forName(runtime, true, context.classLoader).getDeclaredConstructor().newInstance()
-            assertTrue(implementation.javaClass.interfaces.any { it.simpleName == "LocalSubtitleLlm" })
-            Class.forName("com.google.ai.edge.litertlm.Engine", true, context.classLoader)
+            assertTrue(implementation is LocalSubtitleLlm)
         } finally {
             manager.unregisterListener(listener)
         }

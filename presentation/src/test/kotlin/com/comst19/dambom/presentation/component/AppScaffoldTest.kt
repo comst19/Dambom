@@ -1,9 +1,9 @@
 package com.comst19.dambom.presentation.component
 
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
-import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
-import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
-import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
+import com.comst19.dambom.feature.home.api.HomeKey
+import com.comst19.dambom.feature.library.api.VideoDetailKey
+import com.comst19.dambom.feature.settings.api.SettingsKey
 import com.comst19.dambom.presentation.navigation.AppChrome
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

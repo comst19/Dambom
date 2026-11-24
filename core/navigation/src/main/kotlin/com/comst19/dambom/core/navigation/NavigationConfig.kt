@@ -1,7 +1,5 @@
 package com.comst19.dambom.core.navigation
 
-import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
-
 /** 앱 셸이 주입하는 top-level navigation 구성입니다. */
 data class NavigationConfig(
     val startKey: TopLevelNavKey,
@@ -20,11 +18,26 @@ data class NavigationConfig(
     /** 앱 시작 시 구성할 top-level Back 경로입니다. */
     val initialTopLevelKeys: List<TopLevelNavKey>
         get() =
-            when {
-                topLevelBackBehavior == TopLevelBackBehavior.ExitThroughHome &&
-                    startKey in bottomBarKeys &&
-                    startKey != bottomHomeKey -> listOf(bottomHomeKey, startKey)
-
-                else -> listOf(startKey)
-            }
+            topLevelHistoryFor(
+                key = startKey,
+                bottomHomeKey = bottomHomeKey,
+                bottomBarKeys = bottomBarKeys,
+                topLevelBackBehavior = topLevelBackBehavior,
+            )
 }
+
+internal fun topLevelHistoryFor(
+    key: TopLevelNavKey,
+    bottomHomeKey: TopLevelNavKey,
+    bottomBarKeys: Set<TopLevelNavKey>,
+    topLevelBackBehavior: TopLevelBackBehavior,
+): List<TopLevelNavKey> =
+    if (
+        topLevelBackBehavior == TopLevelBackBehavior.ExitThroughHome &&
+        key in bottomBarKeys &&
+        key != bottomHomeKey
+    ) {
+        listOf(bottomHomeKey, key)
+    } else {
+        listOf(key)
+    }

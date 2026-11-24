@@ -9,9 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.SceneStrategy
-import com.comst19.dambom.core.navigation.contract.HOME_DETECTION_DESTINATION
-import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
-import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
+import com.comst19.dambom.feature.detection.api.DetectionResultKey
+import com.comst19.dambom.feature.home.api.HOME_DETECTION_DESTINATION
+import com.comst19.dambom.feature.home.api.HomeKey
 
 @Composable
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)

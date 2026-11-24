@@ -1,11 +1,11 @@
 package com.comst19.dambom.presentation.component
 
-import com.comst19.dambom.core.navigation.contract.HomeGraph.DetectionResultKey
-import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
-import com.comst19.dambom.core.navigation.contract.HomeGraph.WebKey
-import com.comst19.dambom.core.navigation.contract.LibraryGraph.LibraryKey
-import com.comst19.dambom.core.navigation.contract.LibraryGraph.VideoDetailKey
-import com.comst19.dambom.core.navigation.contract.SettingsGraph.SettingsKey
+import com.comst19.dambom.feature.detection.api.DetectionResultKey
+import com.comst19.dambom.feature.home.api.HomeKey
+import com.comst19.dambom.feature.library.api.LibraryKey
+import com.comst19.dambom.feature.library.api.VideoDetailKey
+import com.comst19.dambom.feature.settings.api.SettingsKey
+import com.comst19.dambom.feature.web.api.WebKey
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test

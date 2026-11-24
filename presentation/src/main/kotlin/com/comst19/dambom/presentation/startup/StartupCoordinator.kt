@@ -6,8 +6,8 @@ import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.coroutine.ApplicationScope
 import com.comst19.dambom.core.domain.repository.DownloadRepository
-import com.comst19.dambom.core.navigation.contract.HomeGraph.HomeKey
-import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
+import com.comst19.dambom.core.navigation.TopLevelNavKey
+import com.comst19.dambom.feature.home.api.HomeKey
 import com.comst19.dambom.presentation.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch

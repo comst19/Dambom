@@ -1,8 +1,5 @@
 package com.comst19.dambom.core.navigation
 
-import com.comst19.dambom.core.navigation.contract.AppNavKey
-import com.comst19.dambom.core.navigation.contract.TopLevelNavKey
-
 /** [NavigationEvent]를 해석해 [NavigationState]만 변경하는 navigation 명령 처리기입니다. */
 class Navigator(
     private val state: NavigationState,
@@ -35,7 +32,7 @@ class Navigator(
 
     /**
      * 현재 stack의 마지막 destination을 [key]로 교체합니다.
-     * 완료 화면처럼 교체 전 화면이 Back 경로에 남으면 안 될 때 사용합니다.
+     * 현재 위치가 탭 root이면 root를 유지한 채 [key]를 추가해 탭 불변식을 보존합니다.
      */
     fun replace(key: AppNavKey) {
         if (key is TopLevelNavKey) {
@@ -44,7 +41,9 @@ class Navigator(
             state.currentStack.add(key)
             return
         }
-        state.currentStack.removeLastOrNull()
+        if (state.currentStack.size > 1) {
+            state.currentStack.removeLastOrNull()
+        }
         state.currentStack.add(key)
     }
 
@@ -83,11 +82,17 @@ class Navigator(
 
     /**
      * 목적 top-level stack을 [NavigationEvent.NavigateDeepLink.backStack]으로 교체합니다.
-     * 첫 key가 목적 top-level인지 검증하고 이전 top-level을 앱 Back history에서 제거합니다.
+     * 대상 탭 등록 여부와 synthetic back stack 구조를 먼저 검증해 실패 시 기존 stack을 보존합니다.
      */
     fun navigateDeepLink(event: NavigationEvent.NavigateDeepLink) {
+        require(event.topLevelKey in state.backStacks) {
+            "A deep link target must be a registered top-level key"
+        }
         require(event.backStack.firstOrNull() == event.topLevelKey) {
             "A synthetic back stack must start with its top-level key"
+        }
+        require(event.backStack.drop(1).none { it is TopLevelNavKey }) {
+            "A synthetic back stack cannot contain another top-level key after its root"
         }
         state.currentStack.subList(1, state.currentStack.size).clear()
         state.selectTopLevel(event.topLevelKey)

@@ -16,6 +16,7 @@ import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.network.header.encodeMediaHeaders
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -126,10 +127,30 @@ class DefaultDownloadRepository
             isPrivate: Boolean,
         ) = withContext(ioDispatcher) {
             check(privateVideoSession.isUnlocked.value) { "Private library is locked" }
-            ids.forEach { id ->
-                dao.getById(id)?.localFileName?.let(fileStore::revokeSharing)
+            deletionMutex.withLock {
+                val moved = mutableListOf<String>()
+                var committed = false
+                try {
+                    ids.forEach { id ->
+                        val localFileName = dao.getById(id)?.localFileName ?: return@forEach
+                        if (isPrivate) fileStore.revokeSharing(localFileName)
+                        if (!fileStore.movePrivacyFiles(localFileName, toPrivate = isPrivate)) {
+                            throw IOException("Unable to update private video storage")
+                        }
+                        moved += localFileName
+                    }
+                    dao.setPrivate(ids, isPrivate)
+                    committed = true
+                } finally {
+                    if (!committed && moved.isNotEmpty()) {
+                        withContext(NonCancellable) {
+                            moved.asReversed().forEach { localFileName ->
+                                fileStore.movePrivacyFiles(localFileName, toPrivate = !isPrivate)
+                            }
+                        }
+                    }
+                }
             }
-            dao.setPrivate(ids, isPrivate)
         }
 
         override suspend fun enqueue(requests: List<DownloadRequest>): EnqueueDownloadsResult =
@@ -213,7 +234,7 @@ class DefaultDownloadRepository
         }
 
         private fun toDownloadTask(entity: DownloadTaskEntity): DownloadTask =
-            entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName))
+            entity.toDomain(localFilePath = fileStore.completedFilePath(entity.localFileName, entity.isPrivate))
 
         private suspend fun cleanupDeletion(
             id: String,

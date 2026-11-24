@@ -27,6 +27,7 @@ internal open class DownloadFileStore
     ) {
         private val partialDirectory by lazy { context.filesDir.resolve("download-parts").apply(File::mkdirs) }
         private val videoDirectory by lazy { context.filesDir.resolve("videos").apply(File::mkdirs) }
+        private val privateVideoDirectory by lazy { context.filesDir.resolve("private_videos") }
         private val streamRoot by lazy { context.filesDir.resolve("download-streams") }
         val streamDatabaseProvider by lazy { StandaloneDatabaseProvider(context) }
 
@@ -73,20 +74,48 @@ internal open class DownloadFileStore
         ): File = videoDirectory.resolve(id + fileExtension(url, mimeType))
 
         open fun revokeSharing(localFileName: String) {
+            val file = safeResolve(videoDirectory, localFileName) ?: return
             val uri =
                 FileProvider.getUriForFile(
                     context,
                     "${context.packageName}.fileprovider",
-                    videoDirectory.resolve(localFileName),
+                    file,
                 )
             context.revokeUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
-        fun completedFilePath(localFileName: String?): String? =
-            localFileName
-                ?.let(videoDirectory::resolve)
-                ?.takeIf(File::isFile)
-                ?.absolutePath
+        fun completedFilePath(
+            localFileName: String?,
+            isPrivate: Boolean = false,
+        ): String? =
+            localFileName?.let { fileName ->
+                val privatePath =
+                    if (isPrivate) {
+                        safeResolve(privateVideoDirectory, fileName)
+                            ?.takeIf(File::isFile)
+                            ?.absolutePath
+                    } else {
+                        null
+                    }
+                privatePath
+                    ?: safeResolve(videoDirectory, fileName)
+                        ?.takeIf(File::isFile)
+                        ?.absolutePath
+            }
+
+        open fun movePrivacyFiles(
+            localFileName: String,
+            toPrivate: Boolean,
+        ): Boolean {
+            val sourceDir = if (toPrivate) videoDirectory else privateVideoDirectory
+            val targetDir = if (toPrivate) privateVideoDirectory else videoDirectory
+            val sourceVideo = safeResolve(sourceDir, localFileName)
+            val targetVideo = safeResolve(targetDir, localFileName)
+            return when {
+                sourceVideo == null || targetVideo == null -> false
+                else -> moveVideoAndSidecars(sourceVideo, targetVideo, targetDir)
+            }
+        }
 
         open fun delete(
             id: String,
@@ -97,13 +126,8 @@ internal open class DownloadFileStore
                     add(partialFile(id))
                     add(partialValidatorFile(id))
                     localFileName?.let { fileName ->
-                        val videoFile = videoDirectory.resolve(fileName)
-                        add(videoFile)
-                        add(videoFile.videoSubtitleFile())
-                        add(videoFile.videoSubtitleTemporaryFile())
-                        add(videoFile.videoThumbnailFile())
-                        add(videoFile.videoThumbnailTemporaryFile())
-                        add(videoFile.videoThumbnailUnavailableFile())
+                        safeResolve(videoDirectory, fileName)?.let { addAll(videoAndSidecarFiles(it)) }
+                        safeResolve(privateVideoDirectory, fileName)?.let { addAll(videoAndSidecarFiles(it)) }
                     }
                 }
             var allDeleted = true
@@ -114,6 +138,71 @@ internal open class DownloadFileStore
             return allDeleted
         }
     }
+
+private fun safeResolve(
+    directory: File,
+    fileName: String,
+): File? {
+    if (fileName.isBlank()) return null
+    val root = directory.canonicalFile
+    val candidate = File(root, fileName).canonicalFile
+    return candidate.takeIf { it.parentFile == root }
+}
+
+private fun videoAndSidecarFiles(videoFile: File): List<File> =
+    listOf(
+        videoFile,
+        videoFile.videoSubtitleFile(),
+        videoFile.videoSubtitleTemporaryFile(),
+        videoFile.videoThumbnailFile(),
+        videoFile.videoThumbnailTemporaryFile(),
+        videoFile.videoThumbnailUnavailableFile(),
+    )
+
+private fun moveVideoAndSidecars(
+    sourceVideo: File,
+    targetVideo: File,
+    targetDir: File,
+): Boolean {
+    val existingPairs =
+        videoAndSidecarFiles(sourceVideo)
+            .zip(videoAndSidecarFiles(targetVideo))
+            .filter { (source, _) -> source.exists() }
+    return when {
+        existingPairs.isEmpty() -> {
+            true
+        }
+
+        !targetDir.exists() && !targetDir.mkdirs() -> {
+            false
+        }
+
+        else -> {
+            val movedPairs = mutableListOf<Pair<File, File>>()
+            val allMoved =
+                existingPairs.all { pair ->
+                    moveFile(pair.first, pair.second).also { moved ->
+                        if (moved) movedPairs += pair
+                    }
+                }
+            if (!allMoved) {
+                movedPairs.asReversed().forEach { (source, target) -> moveFile(target, source) }
+            }
+            allMoved
+        }
+    }
+}
+
+private fun moveFile(
+    source: File,
+    target: File,
+): Boolean {
+    if (source.renameTo(target)) return true
+    return runCatching {
+        source.copyTo(target, overwrite = true)
+        source.delete()
+    }.getOrDefault(false)
+}
 
 private fun fileExtension(
     url: String,

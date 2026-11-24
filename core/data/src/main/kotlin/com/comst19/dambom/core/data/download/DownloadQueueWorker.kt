@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.SystemClock
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.comst19.dambom.core.common.net.hasVideoFileExtension
 import com.comst19.dambom.core.coroutine.IoDispatcher
@@ -53,14 +54,15 @@ internal class DownloadQueueWorker
         private val notifier: DownloadNotifier,
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : CoroutineWorker(appContext, params) {
+        private var isForegroundActive = false
         private var foregroundState: ForegroundNotificationState? = null
         private val foregroundMutex = Mutex()
 
         override suspend fun doWork(): Result =
             withContext(ioDispatcher) {
-                setForeground(notifier.foreground())
                 dao.resetInterrupted(System.currentTimeMillis())
                 try {
+                    isForegroundActive = trySetForeground(notifier.foreground())
                     drainQueue()
                     Result.success()
                 } catch (_: RetryQueueException) {
@@ -389,12 +391,27 @@ internal class DownloadQueueWorker
             totalBytes: Long?,
         ) {
             foregroundMutex.withLock {
+                if (!isForegroundActive) return
                 val nextState = foregroundNotificationState(title, downloadedBytes, totalBytes)
                 if (nextState == foregroundState) return
-                setForeground(notifier.foreground(title, downloadedBytes, totalBytes))
-                foregroundState = nextState
+                if (trySetForeground(notifier.foreground(title, downloadedBytes, totalBytes))) {
+                    foregroundState = nextState
+                } else {
+                    isForegroundActive = false
+                }
             }
         }
+
+        private suspend fun trySetForeground(info: ForegroundInfo): Boolean =
+            try {
+                setForeground(info)
+                true
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (_: IllegalStateException) {
+                // Android 12+ ForegroundServiceStartNotAllowedException extends IllegalStateException.
+                false
+            }
 
         private suspend fun complete(
             task: DownloadTaskEntity,
@@ -414,6 +431,9 @@ internal class DownloadQueueWorker
                     updatedAtMillis = System.currentTimeMillis(),
                 )
             if (completed == 0) {
+                if (dao.getById(task.id) == null && partialFile != completedFile) {
+                    completedFile.delete()
+                }
                 requireActiveTask(task.id)
                 throw DownloadStoppedException(DownloadStopReason.OWNERSHIP_LOST)
             }

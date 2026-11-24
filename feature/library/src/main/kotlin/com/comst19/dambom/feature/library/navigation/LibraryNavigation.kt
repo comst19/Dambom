@@ -62,6 +62,7 @@ fun EntryProviderScope<NavKey>.libraryEntries(
     entry<VideoDetailKey>(metadata = ListDetailSceneStrategy.detailPane()) { key ->
         VideoPlayerRoute(
             id = key.id,
+            isPrivate = key.isPrivate,
             isVideoFullscreen = isVideoFullscreen(),
             onVideoFullscreenChange = onVideoFullscreenChange,
             onVideoRotate = onVideoRotate,

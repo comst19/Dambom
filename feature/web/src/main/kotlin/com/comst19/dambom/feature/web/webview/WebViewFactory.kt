@@ -64,6 +64,14 @@ internal fun createWebView(
         }
         webViewClient =
             object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                ): Boolean {
+                    val isForMainFrame = request?.isForMainFrame != false
+                    return !shouldAllowWebNavigationUrl(request?.url?.toString(), isForMainFrame)
+                }
+
                 override fun onPageStarted(
                     view: WebView?,
                     url: String?,

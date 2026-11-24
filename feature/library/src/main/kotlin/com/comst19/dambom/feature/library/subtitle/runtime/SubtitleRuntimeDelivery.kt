@@ -87,9 +87,9 @@ internal class SubtitleRuntimeDelivery
                         .startInstall(request)
                         .addOnSuccessListener { id ->
                             session = id
-                            if (!continuation.isActive) {
+                            if (continuation.isCancelled) {
                                 manager.cancelInstall(id)
-                            } else if (installed()) {
+                            } else if (continuation.isActive && installed()) {
                                 cleanup()
                                 SplitCompat.install(context)
                                 continuation.resume(Unit)

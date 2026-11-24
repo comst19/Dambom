@@ -8,6 +8,7 @@ import com.comst19.dambom.feature.web.webview.WEB_MEDIA_GUARD_SCRIPT
 import com.comst19.dambom.feature.web.webview.WebNavigationFailure
 import com.comst19.dambom.feature.web.webview.classifyHttpNavigationFailure
 import com.comst19.dambom.feature.web.webview.classifyWebNavigationFailure
+import com.comst19.dambom.feature.web.webview.shouldAllowWebNavigationUrl
 import com.comst19.dambom.feature.web.webview.shouldBlockWebVideo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -114,5 +115,22 @@ class WebMediaPolicyTest {
         assertFalse(WebDetectionState.Scanning.shouldShowPlaybackHint())
         assertFalse(WebDetectionState.Found(1).shouldShowPlaybackHint())
         assertFalse(WebDetectionState.NotFound(UnsupportedReason.NETWORK_ERROR).shouldShowPlaybackHint())
+    }
+
+    @Test
+    fun `web navigation URL policy allows only http and https schemes`() {
+        assertTrue(shouldAllowWebNavigationUrl("https://example.com/watch?v=1"))
+        assertTrue(shouldAllowWebNavigationUrl("http://example.com"))
+        assertTrue(shouldAllowWebNavigationUrl("  HTTPS://EXAMPLE.COM/video  "))
+        assertFalse(shouldAllowWebNavigationUrl("file:///etc/passwd"))
+        assertFalse(shouldAllowWebNavigationUrl("content://com.comst19.dambom.fileprovider/saved_videos/1.mp4"))
+        assertFalse(shouldAllowWebNavigationUrl("javascript:alert(1)"))
+        assertFalse(shouldAllowWebNavigationUrl("intent://scan/#Intent;scheme=zxing;end"))
+        assertFalse(shouldAllowWebNavigationUrl("market://details?id=com.example"))
+        assertFalse(shouldAllowWebNavigationUrl("data:text/html,<script>alert(1)</script>"))
+        assertFalse(shouldAllowWebNavigationUrl("about:blank", isForMainFrame = true))
+        assertTrue(shouldAllowWebNavigationUrl("about:blank", isForMainFrame = false))
+        assertFalse(shouldAllowWebNavigationUrl(""))
+        assertFalse(shouldAllowWebNavigationUrl(null))
     }
 }

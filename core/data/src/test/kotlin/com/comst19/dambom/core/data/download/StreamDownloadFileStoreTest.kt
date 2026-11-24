@@ -9,9 +9,11 @@ import androidx.media3.datasource.cache.SimpleCache
 import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.common.io.videoSubtitleFile
 import com.comst19.dambom.core.common.io.videoSubtitleTemporaryFile
+import com.comst19.dambom.core.common.io.videoThumbnailFile
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -94,5 +96,65 @@ class StreamDownloadFileStoreTest {
         }
         assertTrue(store.delete("stream-file-test", null))
         assertFalse(directory.exists())
+    }
+
+    @Test
+    fun `private file move isolates video and sidecars outside shared videos directory`() {
+        val file = store.completedFile("stream-file-test", "https://example.test/video.mp4", "video/mp4")
+        file.writeText("video")
+        file.videoSubtitleFile().writeText("subtitles")
+        file.videoThumbnailFile().writeText("thumb")
+
+        assertTrue(store.movePrivacyFiles(file.name, toPrivate = true))
+        assertFalse(file.exists())
+        assertFalse(file.videoSubtitleFile().exists())
+        assertFalse(file.videoThumbnailFile().exists())
+        assertNull(store.completedFilePath(file.name, isPrivate = false))
+        val privatePath = store.completedFilePath(file.name, isPrivate = true)
+        assertTrue(privatePath?.contains("/private_videos/") == true)
+        val privateFile = File(checkNotNull(privatePath))
+        assertTrue(privateFile.isFile)
+        assertTrue(privateFile.videoSubtitleFile().isFile)
+        assertTrue(privateFile.videoThumbnailFile().isFile)
+
+        assertTrue(store.movePrivacyFiles(file.name, toPrivate = false))
+        assertTrue(file.isFile)
+        assertTrue(file.videoSubtitleFile().isFile)
+        assertTrue(file.videoThumbnailFile().isFile)
+        assertFalse(privateFile.exists())
+    }
+
+    @Test
+    fun `sidecar move failure rolls back already moved video file`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val file = store.completedFile("stream-file-test", "https://example.test/video.mp4", "video/mp4")
+        file.writeText("video")
+        file.videoSubtitleFile().writeText("subtitles")
+        val privateDir = context.filesDir.resolve("private_videos").apply(File::mkdirs)
+        val blockingSubtitleDir = privateDir.resolve(file.videoSubtitleFile().name).apply(File::mkdirs)
+        blockingSubtitleDir.resolve("blocker").writeText("block")
+        try {
+            assertFalse(store.movePrivacyFiles(file.name, toPrivate = true))
+            assertTrue(file.isFile)
+            assertTrue(file.videoSubtitleFile().isFile)
+            assertFalse(privateDir.resolve(file.name).exists())
+        } finally {
+            blockingSubtitleDir.deleteRecursively()
+        }
+    }
+
+    @Test
+    fun `path traversal file names are rejected by file store`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val outsideFile = context.filesDir.resolve("outside-secret.mp4").apply { writeText("secret") }
+        try {
+            assertNull(store.completedFilePath("../outside-secret.mp4", isPrivate = false))
+            assertNull(store.completedFilePath("../outside-secret.mp4", isPrivate = true))
+            assertFalse(store.movePrivacyFiles("../outside-secret.mp4", toPrivate = true))
+            assertTrue(store.delete("traversal-test", "../outside-secret.mp4"))
+            assertTrue(outsideFile.exists())
+        } finally {
+            outsideFile.delete()
+        }
     }
 }

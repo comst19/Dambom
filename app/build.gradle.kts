@@ -26,6 +26,7 @@ if (crashlyticsEnabled) {
 android {
     dynamicFeatures += setOf(":translationruntime")
     namespace = "com.comst19.dambom"
+    testBuildType = providers.gradleProperty("dambom.testBuildType").getOrElse("debug")
     defaultConfig {
         applicationId = "com.comst19.dambom"
         resourceConfigurations +=
@@ -123,6 +124,9 @@ android {
         }
         getByName("qa") {
             buildConfigField("String", "APP_ENVIRONMENT", "\"QA\"")
+            if (testBuildType == "qa") {
+                proguardFile("proguard-qa-android-test.pro")
+            }
         }
         getByName("release") {
             buildConfigField("String", "APP_ENVIRONMENT", "\"RELEASE\"")
@@ -153,6 +157,15 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.profileinstaller)
     testImplementation(libs.junit)
+    androidTestImplementation(projects.feature.detection.api)
+    androidTestImplementation(projects.feature.home.api)
+    androidTestImplementation(projects.feature.library.api)
+    androidTestImplementation(projects.feature.web.api)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui)
+    androidTestImplementation(libs.androidx.appcompat)
+    androidTestImplementation(libs.androidx.core.ktx)
+    androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.test.ext)
     androidTestImplementation(libs.androidx.test.runner)
 }

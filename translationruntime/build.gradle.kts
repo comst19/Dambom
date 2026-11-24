@@ -17,8 +17,8 @@ android {
         create("onestore") { dimension = "store" }
     }
     buildTypes {
-        maybeCreate("qa").initWith(getByName("release"))
         getByName("release") { proguardFiles("proguard-rules.pro") }
+        maybeCreate("qa").initWith(getByName("release"))
     }
     androidResources { noCompress += "tflite" }
     compileOptions {

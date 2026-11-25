@@ -1,6 +1,7 @@
 package com.comst19.dambom.presentation
 
 import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.common.ui.locale.AppLanguagePreferences
 import com.comst19.dambom.core.domain.error.ErrorHandler
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadRequest
@@ -19,10 +20,12 @@ import com.comst19.dambom.feature.home.api.HomeKey
 import com.comst19.dambom.presentation.contract.AppStartupState
 import com.comst19.dambom.presentation.contract.StartupFailure
 import com.comst19.dambom.presentation.startup.StartupCoordinator
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -33,18 +36,31 @@ class MainViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
     @Test
-    fun `startup is ready with the coordinator destination`() =
+    fun `startup stays initializing until coordinator completes then becomes ready`() =
         runTest(mainDispatcherRule.dispatcher) {
+            val startupGate = CompletableDeferred<Unit>()
+            val coordinator =
+                object : StartupCoordinator {
+                    override suspend fun initialize(): TopLevelNavKey {
+                        startupGate.await()
+                        return HomeKey
+                    }
+                }
             val viewModel =
                 MainViewModel(
                     FakeSettingsRepository(),
                     FakeNetworkMonitor,
                     FakeDownloadRepository,
-                    SuccessfulStartupCoordinator,
+                    coordinator,
+                    TrackingAppLanguagePreferences(),
                     ErrorHandler(),
                     AppEventBus(),
                 )
 
+            runCurrent()
+            assertEquals(AppStartupState.Initializing, viewModel.startupState.value)
+
+            startupGate.complete(Unit)
             advanceUntilIdle()
 
             assertEquals(AppStartupState.Ready(HomeKey), viewModel.startupState.value)
@@ -59,6 +75,7 @@ class MainViewModelTest {
                     FakeNetworkMonitor,
                     FakeDownloadRepository,
                     FailingStartupCoordinator,
+                    TrackingAppLanguagePreferences(),
                     ErrorHandler(),
                     AppEventBus(),
                 )
@@ -123,15 +140,17 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `onAppResumed ensures pending downloads are scheduled`() =
+    fun `onAppResumed syncs system language and ensures pending downloads are scheduled`() =
         runTest(mainDispatcherRule.dispatcher) {
             val repository = TrackingDownloadRepository()
+            val languagePreferences = TrackingAppLanguagePreferences()
             val viewModel =
                 MainViewModel(
                     FakeSettingsRepository(),
                     FakeNetworkMonitor,
                     repository,
                     SuccessfulStartupCoordinator,
+                    languagePreferences,
                     ErrorHandler(),
                     AppEventBus(),
                 )
@@ -139,16 +158,29 @@ class MainViewModelTest {
             viewModel.onAppResumed()
             advanceUntilIdle()
 
+            assertEquals(1, languagePreferences.syncCalls)
             assertEquals(1, repository.ensureScheduledCalls)
         }
 }
 
 private object SuccessfulStartupCoordinator : StartupCoordinator {
-    override fun initialize(): TopLevelNavKey = HomeKey
+    override suspend fun initialize(): TopLevelNavKey = HomeKey
 }
 
 private object FailingStartupCoordinator : StartupCoordinator {
-    override fun initialize(): TopLevelNavKey = error("Initialization failed")
+    override suspend fun initialize(): TopLevelNavKey = error("Initialization failed")
+}
+
+private class TrackingAppLanguagePreferences : AppLanguagePreferences {
+    var syncCalls = 0
+
+    override suspend fun selectedLanguageTags(): String = ""
+
+    override suspend fun apply(languageTag: String) = Unit
+
+    override suspend fun syncSystemLanguage() {
+        syncCalls++
+    }
 }
 
 private class FakeSettingsRepository : SettingsRepository {

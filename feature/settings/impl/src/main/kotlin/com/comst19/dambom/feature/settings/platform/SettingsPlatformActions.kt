@@ -13,10 +13,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 internal interface SettingsPlatformActions {
-    val currentLanguageTags: String
     val versionName: String
 
-    fun applyLanguage(languageTag: String)
+    suspend fun currentLanguageTags(): String
+
+    suspend fun applyLanguage(languageTag: String)
 
     fun takePersistedDownloadDirectory(treeUri: String): Boolean
 
@@ -28,10 +29,8 @@ internal class AndroidSettingsPlatformActions
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
+        private val appLanguagePreferences: AppLanguagePreferences,
     ) : SettingsPlatformActions {
-        override val currentLanguageTags: String
-            get() = AppLanguagePreferences.selectedLanguageTags(context)
-
         override val versionName: String =
             context.packageManager
                 .getPackageInfo(context.packageName, 0)
@@ -39,8 +38,10 @@ internal class AndroidSettingsPlatformActions
                 .orEmpty()
                 .ifBlank { "-" }
 
-        override fun applyLanguage(languageTag: String) {
-            AppLanguagePreferences.apply(context, languageTag)
+        override suspend fun currentLanguageTags(): String = appLanguagePreferences.selectedLanguageTags()
+
+        override suspend fun applyLanguage(languageTag: String) {
+            appLanguagePreferences.apply(languageTag)
         }
 
         override fun takePersistedDownloadDirectory(treeUri: String): Boolean =

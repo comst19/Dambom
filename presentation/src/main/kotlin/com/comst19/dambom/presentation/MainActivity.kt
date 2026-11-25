@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.comst19.dambom.core.common.ui.AppEventBus
-import com.comst19.dambom.core.common.ui.locale.AppLanguagePreferences
 import com.comst19.dambom.core.navigation.NavigationDispatcher
 import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import com.comst19.dambom.presentation.contract.AppStartupState
@@ -37,10 +36,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
-        AppLanguagePreferences.syncSystemLanguage(this)
+        val viewModel = mainViewModel
         videoOrientationCoordinator.applyInitialPolicy()
         splashScreen.setKeepOnScreenCondition {
-            mainViewModel.startupState.value is AppStartupState.Initializing
+            viewModel.startupState.value is AppStartupState.Initializing
         }
         enableEdgeToEdge()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -50,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch { exportDocumentStore.recoverInterruptedExports() }
         setContent {
             MainActivityContent(
-                viewModel = mainViewModel,
+                viewModel = viewModel,
                 dispatcher = navigationDispatcher,
                 appEventBus = appEventBus,
                 onVideoFullscreenChange = videoOrientationCoordinator::onFullscreenChanged,
@@ -61,7 +60,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        AppLanguagePreferences.syncSystemLanguage(this)
         mainViewModel.onAppResumed()
     }
 

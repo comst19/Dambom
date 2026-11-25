@@ -27,91 +27,54 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.comst19.dambom.core.designsystem.DambomLinearProgressIndicator
-import com.comst19.dambom.core.domain.model.MediaResourceRequest
 import com.comst19.dambom.feature.web.component.WebNavigationErrorContent
 import com.comst19.dambom.feature.web.component.WebRescanButton
 import com.comst19.dambom.feature.web.component.WebToolbar
 import com.comst19.dambom.feature.web.contract.WebDetectionState
+import com.comst19.dambom.feature.web.contract.WebHistoryState
 import com.comst19.dambom.feature.web.contract.WebTab
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 
 @Composable
 internal fun ColumnScope.WebContent(
     tab: WebTab,
     navigationFailureState: MutableState<WebNavigationFailure?>,
     savedState: Bundle?,
-    onWebViewReady: (WebView?) -> Unit,
-    onPageStarted: (Long, String?, String?, Long) -> Unit,
-    onPageFinished: (Long, String?, String?, Long) -> Unit,
-    onPageChanged: (Long, String?, String?) -> Unit,
-    onMediaRequest: (Long, Long, MediaResourceRequest) -> Unit,
-    onSaveWebState: (Long, Bundle) -> Unit,
-    onScan: () -> Unit,
-    onOpenDetectedMedia: () -> Unit,
-    onOpenExternal: (String) -> Unit,
+    callbacks: WebContentCallbacks,
+    historyState: WebHistoryState = WebHistoryState(),
 ) {
     val backgroundColor = MaterialTheme.colorScheme.background.toArgb()
     var webView by remember(tab.id) { mutableStateOf<WebView?>(null) }
+    val activeWebView = remember(tab.id) { AtomicReference<WebView?>(null) }
+    val lastConsumedNavigationRequestId =
+        remember(tab.id) { AtomicLong(callbacks.consumedNavigationRequestId(tab.id)) }
     val loadingProgress = remember(tab.id) { mutableIntStateOf(0) }
-    var webViewGeneration by remember(tab.id) { androidx.compose.runtime.mutableIntStateOf(0) }
+    var webViewGeneration by remember(tab.id) { mutableIntStateOf(0) }
 
     LifecycleEventEffect(Lifecycle.Event.ON_START) { webView?.onResume() }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { webView?.onPause() }
 
     WebLoadingProgress(loadingProgress, navigationFailureState)
     key(webViewGeneration) {
-        val rendererGone = remember { AtomicBoolean(false) }
         Box(
             modifier = Modifier.fillMaxWidth().weight(1f).clipToBounds(),
         ) {
-            AndroidView(
-                factory = { context ->
-                    createWebView(
-                        context = context,
-                        tab = tab,
-                        savedState = savedState,
-                        onPageStarted = { id, url, title, generation ->
-                            loadingProgress.intValue = 0
-                            onPageStarted(id, url, title, generation)
-                        },
-                        onPageFinished = onPageFinished,
-                        onPageChanged = onPageChanged,
-                        onMediaRequest = onMediaRequest,
-                        onProgress = { loadingProgress.intValue = it },
-                        onNavigationFailure = { navigationFailureState.value = it },
-                        onRendererGone = { failedWebView ->
-                            rendererGone.set(true)
-                            if (webView === failedWebView) {
-                                webView = null
-                                onWebViewReady(null)
-                                webViewGeneration += 1
-                            }
-                        },
-                    ).also {
-                        it.setBackgroundColor(backgroundColor)
-                        webView = it
-                        onWebViewReady(it)
-                    }
-                },
-                modifier = Modifier.fillMaxSize(),
-                onRelease = { releasedWebView ->
-                    if (!rendererGone.get()) {
-                        val state = Bundle()
-                        releasedWebView.saveState(state)
-                        onSaveWebState(tab.id, state)
-                    }
-                    if (webView === releasedWebView) {
-                        webView = null
-                        onWebViewReady(null)
-                    }
-                    releasedWebView.stopLoading()
-                    releasedWebView.destroy()
-                },
-                update = { view ->
-                    view.setBackgroundColor(backgroundColor)
-                    val targetUrl = tab.url
-                    if (targetUrl != null && view.url != targetUrl) view.loadUrl(targetUrl)
-                },
+            WebViewSurface(
+                tab = tab,
+                savedState = savedState,
+                backgroundColor = backgroundColor,
+                runtimeState =
+                    WebViewRuntimeState(
+                        activeWebView = activeWebView,
+                        lastConsumedNavigationRequestId = lastConsumedNavigationRequestId,
+                        loadingProgress = loadingProgress,
+                        navigationFailureState = navigationFailureState,
+                        onWebViewChanged = { webView = it },
+                        onReplaceWebView = { webViewGeneration += 1 },
+                    ),
+                callbacks = callbacks,
             )
             navigationFailureState.value?.let {
                 WebNavigationErrorContent(
@@ -120,12 +83,12 @@ internal fun ColumnScope.WebContent(
                         navigationFailureState.value = null
                         webView?.reload()
                     },
-                    onOpenExternal = { tab.url?.let(onOpenExternal) },
+                    onOpenExternal = { tab.url?.let(callbacks.onOpenExternal) },
                 )
             }
             if (navigationFailureState.value == null && tab.detectionState !is WebDetectionState.Scanning) {
                 Box(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
-                    WebRescanButton(detectionState = tab.detectionState, onScan = onScan)
+                    WebRescanButton(detectionState = tab.detectionState, onScan = callbacks.onScan)
                 }
             }
         }
@@ -134,8 +97,138 @@ internal fun ColumnScope.WebContent(
         webView = webView,
         canRefresh = navigationFailureState.value?.retryable != false,
         detectionState = tab.detectionState,
-        onOpenDetectedMedia = onOpenDetectedMedia,
+        onOpenDetectedMedia = callbacks.onOpenDetectedMedia,
+        historyState = historyState,
     )
+}
+
+private data class WebViewRuntimeState(
+    val activeWebView: AtomicReference<WebView?>,
+    val lastConsumedNavigationRequestId: AtomicLong,
+    val loadingProgress: MutableIntState,
+    val navigationFailureState: MutableState<WebNavigationFailure?>,
+    val onWebViewChanged: (WebView?) -> Unit,
+    val onReplaceWebView: () -> Unit,
+)
+
+private data class WebViewSurfaceFlags(
+    val released: AtomicBoolean = AtomicBoolean(false),
+    val rendererGone: AtomicBoolean = AtomicBoolean(false),
+)
+
+@Composable
+private fun WebViewSurface(
+    tab: WebTab,
+    savedState: Bundle?,
+    backgroundColor: Int,
+    runtimeState: WebViewRuntimeState,
+    callbacks: WebContentCallbacks,
+) {
+    val flags = remember { WebViewSurfaceFlags() }
+    AndroidView(
+        factory = { context ->
+            val createdRef = AtomicReference<WebView?>(null)
+            val pendingRequest =
+                tab.navigationRequest?.takeIf {
+                    it.id != runtimeState.lastConsumedNavigationRequestId.get()
+                }
+            createWebView(
+                context = context,
+                tab = tab,
+                savedState = savedState,
+                callbacks =
+                    buildWebViewCallbacks(
+                        createdRef = createdRef,
+                        flags = flags,
+                        runtimeState = runtimeState,
+                        callbacks = callbacks,
+                        pendingNavigationUrl = pendingRequest?.url,
+                    ),
+            ).also {
+                if (pendingRequest != null) {
+                    runtimeState.lastConsumedNavigationRequestId.set(pendingRequest.id)
+                    callbacks.onNavigationRequestConsumed(tab.id, pendingRequest.id)
+                }
+                createdRef.set(it)
+                runtimeState.activeWebView.set(it)
+                it.setBackgroundColor(backgroundColor)
+                runtimeState.onWebViewChanged(it)
+                callbacks.onWebViewReady(it)
+            }
+        },
+        modifier = Modifier.fillMaxSize(),
+        onRelease = { releasedWebView ->
+            releaseWebView(tab.id, releasedWebView, flags, runtimeState, callbacks)
+        },
+        update = { view ->
+            view.setBackgroundColor(backgroundColor)
+            val request = tab.navigationRequest
+            if (
+                request != null &&
+                runtimeState.lastConsumedNavigationRequestId.getAndSet(request.id) != request.id
+            ) {
+                callbacks.onNavigationRequestConsumed(tab.id, request.id)
+                view.loadUrl(request.url)
+            }
+        },
+    )
+}
+
+private fun buildWebViewCallbacks(
+    createdRef: AtomicReference<WebView?>,
+    flags: WebViewSurfaceFlags,
+    runtimeState: WebViewRuntimeState,
+    callbacks: WebContentCallbacks,
+    pendingNavigationUrl: String?,
+): WebViewCallbacks =
+    WebViewCallbacks(
+        onPageStarted = { id, url, title, generation ->
+            runtimeState.loadingProgress.intValue = 0
+            callbacks.onPageStarted(id, url, title, generation)
+        },
+        onPageFinished = callbacks.onPageFinished,
+        onPageChanged = callbacks.onPageChanged,
+        onMediaRequest = callbacks.onMediaRequest,
+        onProgress = { runtimeState.loadingProgress.intValue = it },
+        onNavigationFailure = { runtimeState.navigationFailureState.value = it },
+        onRendererGone = { failedWebView ->
+            flags.rendererGone.set(true)
+            flags.released.set(true)
+            if (runtimeState.activeWebView.compareAndSet(failedWebView, null)) {
+                runtimeState.onWebViewChanged(null)
+                callbacks.onWebViewReleased(failedWebView)
+                runtimeState.onReplaceWebView()
+            }
+        },
+        onHistoryChanged = callbacks.onHistoryChanged,
+        isActive = {
+            val created = createdRef.get()
+            !flags.released.get() &&
+                !flags.rendererGone.get() &&
+                (created == null || runtimeState.activeWebView.get() === created)
+        },
+        pendingNavigationUrl = pendingNavigationUrl,
+    )
+
+private fun releaseWebView(
+    tabId: Long,
+    releasedWebView: WebView,
+    flags: WebViewSurfaceFlags,
+    runtimeState: WebViewRuntimeState,
+    callbacks: WebContentCallbacks,
+) {
+    flags.released.set(true)
+    if (!flags.rendererGone.get()) {
+        val state = Bundle()
+        releasedWebView.saveState(state)
+        callbacks.onSaveWebState(tabId, state)
+    }
+    if (runtimeState.activeWebView.compareAndSet(releasedWebView, null)) {
+        runtimeState.onWebViewChanged(null)
+        callbacks.onWebViewReleased(releasedWebView)
+    }
+    releasedWebView.stopLoading()
+    releasedWebView.destroy()
 }
 
 @Composable

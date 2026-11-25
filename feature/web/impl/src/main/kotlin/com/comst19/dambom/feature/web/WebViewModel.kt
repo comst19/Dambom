@@ -16,6 +16,7 @@ import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.feature.detection.api.DetectionResultKey
 import com.comst19.dambom.feature.web.contract.RecentPage
 import com.comst19.dambom.feature.web.contract.WebDetectionState
+import com.comst19.dambom.feature.web.contract.WebNavigationRequest
 import com.comst19.dambom.feature.web.contract.WebTab
 import com.comst19.dambom.feature.web.contract.WebUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,6 +46,7 @@ internal class WebViewModel
         private val mutableUiState = MutableStateFlow(savedStateHandle.restoreWebUiState())
         val uiState: StateFlow<WebUiState> = mutableUiState.asStateFlow()
         private val savedWebStates = LinkedHashMap<Long, Bundle>()
+        private val consumedNavigationRequestIds = mutableMapOf<Long, Long>()
         private val mediaByTab = mutableMapOf<Long, WebMediaCandidates>()
         private val blockedTabs = mutableMapOf<Long, UnsupportedReason>()
         private val pageGenerations = mutableMapOf<Long, Long>()
@@ -95,6 +97,7 @@ internal class WebViewModel
         fun closeTab(id: Long) {
             clearSharedOrigin(id)
             savedWebStates.remove(id)
+            consumedNavigationRequestIds.remove(id)
             invalidatePage(id)
             updateState { state ->
                 if (state.tabs.size == 1) {
@@ -123,10 +126,12 @@ internal class WebViewModel
             if (uiState.value.currentTab?.url != url) clearSharedOrigin(uiState.value.currentTabId)
             invalidatePage(uiState.value.currentTabId)
             updateCurrentTab { tab ->
+                val nextRequestId = (tab.navigationRequest?.id ?: 0L) + 1L
                 tab.copy(
                     url = url,
                     title = url.hostLabel(),
                     detectionState = WebDetectionState.Idle,
+                    navigationRequest = WebNavigationRequest(id = nextRequestId, url = url),
                 )
             }
         }
@@ -342,6 +347,15 @@ internal class WebViewModel
         }
 
         fun savedWebState(tabId: Long): Bundle? = savedWebStates[tabId]
+
+        fun consumedNavigationRequestId(tabId: Long): Long = consumedNavigationRequestIds[tabId] ?: 0L
+
+        fun markNavigationRequestConsumed(
+            tabId: Long,
+            requestId: Long,
+        ) {
+            consumedNavigationRequestIds[tabId] = requestId
+        }
 
         fun goBack() {
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Back) }

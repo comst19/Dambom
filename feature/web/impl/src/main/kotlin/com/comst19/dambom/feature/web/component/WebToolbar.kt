@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.comst19.dambom.core.domain.model.UnsupportedReason
 import com.comst19.dambom.feature.web.R
 import com.comst19.dambom.feature.web.contract.WebDetectionState
+import com.comst19.dambom.feature.web.contract.WebHistoryState
 import com.comst19.dambom.feature.web.webview.WebNavigationFailure
 
 @Composable
@@ -48,16 +49,18 @@ internal fun WebToolbar(
     canRefresh: Boolean,
     detectionState: WebDetectionState,
     onOpenDetectedMedia: () -> Unit,
+    historyState: WebHistoryState = WebHistoryState(),
 ) {
     Column {
         WebDownloadNotice(detectionState)
-        WebToolbarActions(webView, canRefresh, detectionState, onOpenDetectedMedia)
+        WebToolbarActions(webView, historyState, canRefresh, detectionState, onOpenDetectedMedia)
     }
 }
 
 @Composable
 private fun WebToolbarActions(
     webView: WebView?,
+    historyState: WebHistoryState,
     canRefresh: Boolean,
     detectionState: WebDetectionState,
     onOpenDetectedMedia: () -> Unit,
@@ -66,10 +69,16 @@ private fun WebToolbarActions(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(onClick = { webView?.goBack() }, enabled = webView?.canGoBack() == true) {
+        IconButton(
+            onClick = { webView?.goBack() },
+            enabled = webView != null && historyState.canGoBack,
+        ) {
             Icon(Icons.AutoMirrored.Outlined.ArrowBack, stringResource(R.string.web_go_back))
         }
-        IconButton(onClick = { webView?.goForward() }, enabled = webView?.canGoForward() == true) {
+        IconButton(
+            onClick = { webView?.goForward() },
+            enabled = webView != null && historyState.canGoForward,
+        ) {
             Icon(Icons.AutoMirrored.Outlined.ArrowForward, stringResource(R.string.web_go_forward))
         }
         IconButton(onClick = { webView?.reload() }, enabled = canRefresh) {

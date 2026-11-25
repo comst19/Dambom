@@ -39,7 +39,7 @@ class MainViewModel
     constructor(
         repository: SettingsRepository,
         networkMonitor: NetworkMonitor,
-        downloadRepository: DownloadRepository,
+        private val downloadRepository: DownloadRepository,
         private val startupCoordinator: StartupCoordinator,
         private val errorHandler: ErrorHandler,
         private val appEventBus: AppEventBus,
@@ -67,6 +67,12 @@ class MainViewModel
             initializeStartup()
             observeUnhandledErrors()
             observeDownloadFeedback(downloadRepository)
+        }
+
+        fun onAppResumed() {
+            viewModelScope.launch {
+                suspendRunCatching { downloadRepository.ensurePendingDownloadsScheduled() }
+            }
         }
 
         private fun initializeStartup() {

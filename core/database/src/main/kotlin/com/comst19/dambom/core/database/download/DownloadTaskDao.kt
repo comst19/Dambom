@@ -76,6 +76,21 @@ interface DownloadTaskDao {
     @Query("SELECT COUNT(*) FROM download_tasks WHERE status IN ('QUEUED', 'DOWNLOADING') AND deletePending = 0")
     suspend fun countSchedulable(): Int
 
+    @Query(
+        """
+        SELECT COALESCE(SUM(
+            CASE
+                WHEN expectedBytes IS NOT NULL AND expectedBytes > downloadedBytes
+                THEN expectedBytes - downloadedBytes
+                ELSE 0
+            END
+        ), 0)
+        FROM download_tasks
+        WHERE status IN ('QUEUED', 'DOWNLOADING') AND deletePending = 0
+        """,
+    )
+    suspend fun estimateRemainingDownloadBytes(): Long
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(entity: DownloadTaskEntity): Long
 

@@ -62,6 +62,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         AppLanguagePreferences.syncSystemLanguage(this)
+        mainViewModel.onAppResumed()
     }
 
     override fun onNewIntent(intent: Intent) {

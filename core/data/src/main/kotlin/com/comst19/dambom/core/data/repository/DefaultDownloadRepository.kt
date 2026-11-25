@@ -296,6 +296,11 @@ class DefaultDownloadRepository
             }
         }
 
+        override suspend fun ensurePendingDownloadsScheduled() =
+            withContext(ioDispatcher) {
+                if (dao.countSchedulable() > 0) scheduler.ensureScheduled()
+            }
+
         override suspend fun refreshNetworkPolicy() {
             if (dao.countSchedulable() > 0) scheduler.reschedule()
         }

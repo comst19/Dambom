@@ -75,5 +75,7 @@ interface DownloadRepository {
 
     suspend fun recoverPendingDownloads()
 
+    suspend fun ensurePendingDownloadsScheduled() = Unit
+
     suspend fun refreshNetworkPolicy()
 }

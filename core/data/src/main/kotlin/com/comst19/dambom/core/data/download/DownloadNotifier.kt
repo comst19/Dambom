@@ -1,6 +1,7 @@
 package com.comst19.dambom.core.data.download
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -28,27 +29,34 @@ internal class DownloadNotifier
             get() = ContextCompat.getContextForLanguage(context)
         private var channelLanguageTags: String? = null
 
+        fun progressNotification(
+            title: String? = null,
+            downloadedBytes: Long = 0L,
+            totalBytes: Long? = null,
+        ): Notification {
+            val resourceContext = localizedContext
+            ensureChannels(resourceContext)
+            return NotificationCompat
+                .Builder(context, DOWNLOAD_PROGRESS_CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.stat_sys_download)
+                .setContentTitle(
+                    title?.let { resourceContext.getString(R.string.download_notification_progress_title, it) }
+                        ?: resourceContext.getString(R.string.download_notification_title),
+                ).setContentText(progressText(resourceContext, downloadedBytes, totalBytes))
+                .setContentIntent(contentIntent())
+                .setOngoing(true)
+                .setOnlyAlertOnce(true)
+                .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+                .setProgress(PROGRESS_MAX, downloadProgress(downloadedBytes, totalBytes), totalBytes == null)
+                .build()
+        }
+
         fun foreground(
             title: String? = null,
             downloadedBytes: Long = 0L,
             totalBytes: Long? = null,
         ): ForegroundInfo {
-            val resourceContext = localizedContext
-            ensureChannels(resourceContext)
-            val notification =
-                NotificationCompat
-                    .Builder(context, DOWNLOAD_PROGRESS_CHANNEL_ID)
-                    .setSmallIcon(android.R.drawable.stat_sys_download)
-                    .setContentTitle(
-                        title?.let { resourceContext.getString(R.string.download_notification_progress_title, it) }
-                            ?: resourceContext.getString(R.string.download_notification_title),
-                    ).setContentText(progressText(resourceContext, downloadedBytes, totalBytes))
-                    .setContentIntent(contentIntent())
-                    .setOngoing(true)
-                    .setOnlyAlertOnce(true)
-                    .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-                    .setProgress(PROGRESS_MAX, downloadProgress(downloadedBytes, totalBytes), totalBytes == null)
-                    .build()
+            val notification = progressNotification(title, downloadedBytes, totalBytes)
             val serviceType =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
@@ -181,7 +189,7 @@ private val DownloadFailureReason.notificationDescription: Int
 
 private const val DOWNLOAD_PROGRESS_CHANNEL_ID = "downloads"
 private const val DOWNLOAD_RESULT_CHANNEL_ID = "download-results"
-private const val DOWNLOAD_PROGRESS_NOTIFICATION_ID = 1001
+internal const val DOWNLOAD_PROGRESS_NOTIFICATION_ID = 1001
 private const val RESULT_NOTIFICATION_ID_BASE = 10_000
 private const val RESULT_NOTIFICATION_ID_MASK = 0x0FFF
 private const val PROGRESS_MAX = 100

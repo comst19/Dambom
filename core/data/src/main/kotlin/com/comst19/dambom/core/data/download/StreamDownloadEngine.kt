@@ -53,6 +53,7 @@ internal class StreamDownloadEngine(
     private val fileStore: DownloadFileStore,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val exportGate: VideoExportGate = VideoExportGate.shared,
+    private val networkSession: DownloadNetworkSession? = null,
 ) {
     // Keep the transfer boundary explicit for worker and instrumentation callers.
     @Suppress("LongParameterList")
@@ -69,7 +70,10 @@ internal class StreamDownloadEngine(
         var completed = false
         try {
             requireSpaceFor(STREAM_SPACE_CHECK_BYTES)
-            val upstream = OkHttpDataSource.Factory(mediaRequestClient(client, url, headers))
+            val upstream =
+                OkHttpDataSource.Factory(
+                    mediaRequestClient(client, url, headers).bindToNetworkCallFactory(networkSession),
+                )
             val downloadSource = CacheDataSource.Factory().setCache(cache).setUpstreamDataSourceFactory(upstream)
             val item =
                 MediaItem

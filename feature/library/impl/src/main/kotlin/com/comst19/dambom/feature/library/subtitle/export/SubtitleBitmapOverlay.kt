@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import androidx.core.graphics.createBitmap
 import androidx.media3.common.OverlaySettings
 import androidx.media3.common.util.Size
 import androidx.media3.common.util.UnstableApi
@@ -21,7 +22,7 @@ internal class SubtitleBitmapOverlay(
     cues: List<SubtitleCue>,
 ) : BitmapOverlay() {
     private val timeline = SubtitleTimeline(cues)
-    private val empty = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+    private val empty = createBitmap(1, 1)
     private var width = 1
     private var textSize = 1f
     private var previous: SubtitleCue? = null
@@ -64,7 +65,7 @@ internal class SubtitleBitmapOverlay(
                 .setAlignment(Layout.Alignment.ALIGN_CENTER)
                 .setIncludePad(false)
                 .build()
-        return Bitmap.createBitmap(width, layout.height + padding * 2, Bitmap.Config.ARGB_8888).also { image ->
+        return createBitmap(width, layout.height + padding * 2).also { image ->
             val canvas = Canvas(image)
             canvas.drawColor(Color.argb(190, 0, 0, 0))
             canvas.translate(padding.toFloat(), padding.toFloat())

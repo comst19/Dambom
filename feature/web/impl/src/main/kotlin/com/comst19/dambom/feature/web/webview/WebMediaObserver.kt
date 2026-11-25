@@ -13,22 +13,23 @@ internal fun installWebMediaObserver(
     generation: AtomicLong,
     onMediaRequest: (Long, Long, MediaResourceRequest) -> Unit,
 ) {
-    if (!WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER) ||
-        !WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
-    ) {
-        return
+    if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+            WebViewCompat.addWebMessageListener(
+                view,
+                "dambomMedia",
+                setOf("*"),
+            ) { webView, message, sourceOrigin, isMainFrame, _ ->
+                if (sourceOrigin.scheme !in setOf("http", "https")) return@addWebMessageListener
+                if (message.type != WebMessageCompat.TYPE_STRING) return@addWebMessageListener
+                val request =
+                    parseWebMediaMessage(message.data, webView.url, isMainFrame)
+                        ?: return@addWebMessageListener
+                onMediaRequest(tabId, generation.get(), request)
+            }
+            WebViewCompat.addDocumentStartJavaScript(view, WEB_MEDIA_OBSERVER_SCRIPT, setOf("*"))
+        }
     }
-    WebViewCompat.addWebMessageListener(
-        view,
-        "dambomMedia",
-        setOf("*"),
-    ) { webView, message, sourceOrigin, isMainFrame, _ ->
-        if (sourceOrigin.scheme !in setOf("http", "https")) return@addWebMessageListener
-        if (message.type != WebMessageCompat.TYPE_STRING) return@addWebMessageListener
-        val request = parseWebMediaMessage(message.data, webView.url, isMainFrame) ?: return@addWebMessageListener
-        onMediaRequest(tabId, generation.get(), request)
-    }
-    WebViewCompat.addDocumentStartJavaScript(view, WEB_MEDIA_OBSERVER_SCRIPT, setOf("*"))
 }
 
 internal const val WEB_MEDIA_OBSERVER_SCRIPT = """

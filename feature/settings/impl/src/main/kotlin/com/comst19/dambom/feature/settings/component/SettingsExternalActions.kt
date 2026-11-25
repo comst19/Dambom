@@ -3,8 +3,8 @@ package com.comst19.dambom.feature.settings.component
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.widget.Toast
+import androidx.core.net.toUri
 import com.comst19.dambom.core.designsystem.DambomDarkColorScheme
 import com.comst19.dambom.core.designsystem.DambomLightColorScheme
 import com.comst19.dambom.core.designsystem.DambomTypography
@@ -18,7 +18,7 @@ internal fun Context.sendSupportEmail(
     failureMessage: String,
 ) {
     val intent =
-        Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$SUPPORT_EMAIL"))
+        Intent(Intent.ACTION_SENDTO, "mailto:$SUPPORT_EMAIL".toUri())
             .putExtra(Intent.EXTRA_SUBJECT, subject)
             .putExtra(Intent.EXTRA_TEXT, body)
     startExternalActivity(intent, failureMessage)
@@ -28,7 +28,7 @@ internal fun Context.openExternalPage(
     url: String,
     failureMessage: String,
 ) {
-    startExternalActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)), failureMessage)
+    startExternalActivity(Intent(Intent.ACTION_VIEW, url.toUri()), failureMessage)
 }
 
 private fun Context.startExternalActivity(

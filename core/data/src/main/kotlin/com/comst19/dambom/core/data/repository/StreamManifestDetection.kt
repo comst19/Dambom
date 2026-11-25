@@ -2,6 +2,7 @@ package com.comst19.dambom.core.data.repository
 
 import android.net.Uri
 import android.util.Xml
+import androidx.core.net.toUri
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.dash.manifest.DashManifestParser
 import androidx.media3.exoplayer.hls.playlist.HlsMediaPlaylist
@@ -99,7 +100,7 @@ private fun inspectHls(
     url: String,
     text: String,
 ): ManifestTracks =
-    when (val playlist = HlsPlaylistParser().parse(Uri.parse(url), ByteArrayInputStream(text.toByteArray()))) {
+    when (val playlist = HlsPlaylistParser().parse(url.toUri(), ByteArrayInputStream(text.toByteArray()))) {
         is HlsMediaPlaylist -> {
             ManifestTracks(
                 reason =
@@ -137,7 +138,7 @@ private fun inspectDash(
     url: String,
     text: String,
 ): ManifestTracks {
-    val manifest = DashManifestParser().parse(Uri.parse(url), ByteArrayInputStream(text.toByteArray()))
+    val manifest = DashManifestParser().parse(url.toUri(), ByteArrayInputStream(text.toByteArray()))
     val representations =
         (0 until manifest.periodCount).flatMap { period ->
             manifest.getPeriod(period).adaptationSets.flatMap { it.representations }

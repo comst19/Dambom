@@ -1,6 +1,6 @@
 package com.comst19.dambom.feature.library.export
 
-import android.net.Uri
+import androidx.core.net.toUri
 import java.io.File
 import javax.inject.Inject
 
@@ -12,7 +12,7 @@ internal class VideoExportFiles
         suspend fun save(
             destination: String,
             transform: suspend (File) -> Unit,
-        ): Long = documents.save(Uri.parse(destination), transform) { it }
+        ): Long = documents.save(destination.toUri(), transform) { it }
 
-        suspend fun discard(destination: String) = documents.discard(Uri.parse(destination))
+        suspend fun discard(destination: String) = documents.discard(destination.toUri())
     }

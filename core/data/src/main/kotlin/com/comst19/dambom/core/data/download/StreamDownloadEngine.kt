@@ -3,9 +3,9 @@
 package com.comst19.dambom.core.data.download
 
 import android.content.Context
-import android.net.Uri
 import android.system.ErrnoException
 import android.system.OsConstants
+import androidx.core.net.toUri
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
@@ -79,7 +79,7 @@ internal class StreamDownloadEngine(
                 MediaItem
                     .Builder()
                     .setMediaId(id)
-                    .setUri(Uri.parse(url))
+                    .setUri(url.toUri())
                     .setMimeType(streamMimeType(url, mimeType) ?: mimeType)
                     .build()
             val request = prepareRequest(id, item, downloadSource, videoHeight)

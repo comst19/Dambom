@@ -46,15 +46,18 @@ class WebViewHostLifecycleTest {
                             tab = WebTab(id = 1L),
                             navigationFailureState = failure,
                             savedState = null,
-                            onWebViewReady = { webView = it },
-                            onPageStarted = { _, _, _, _ -> },
-                            onPageFinished = { _, _, _, _ -> },
-                            onPageChanged = { _, _, _ -> },
-                            onMediaRequest = { _, _, _ -> },
-                            onSaveWebState = { _, _ -> },
-                            onScan = {},
-                            onOpenDetectedMedia = {},
-                            onOpenExternal = {},
+                            callbacks =
+                                WebContentCallbacks(
+                                    onWebViewReady = { webView = it },
+                                    onPageStarted = { _, _, _, _ -> },
+                                    onPageFinished = { _, _, _, _ -> },
+                                    onPageChanged = { _, _, _ -> },
+                                    onMediaRequest = { _, _, _ -> },
+                                    onSaveWebState = { _, _ -> },
+                                    onScan = {},
+                                    onOpenDetectedMedia = {},
+                                    onOpenExternal = {},
+                                ),
                         )
                     }
                 }
@@ -80,15 +83,18 @@ class WebViewHostLifecycleTest {
                         tab = WebTab(id = 1L),
                         navigationFailureState = navigationFailureState,
                         savedState = null,
-                        onWebViewReady = readyEvents::add,
-                        onPageStarted = { _, _, _, _ -> },
-                        onPageFinished = { _, _, _, _ -> },
-                        onPageChanged = { _, _, _ -> },
-                        onMediaRequest = { _, _, _ -> },
-                        onSaveWebState = { _, _ -> },
-                        onScan = {},
-                        onOpenDetectedMedia = {},
-                        onOpenExternal = {},
+                        callbacks =
+                            WebContentCallbacks(
+                                onWebViewReady = readyEvents::add,
+                                onPageStarted = { _, _, _, _ -> },
+                                onPageFinished = { _, _, _, _ -> },
+                                onPageChanged = { _, _, _ -> },
+                                onMediaRequest = { _, _, _ -> },
+                                onSaveWebState = { _, _ -> },
+                                onScan = {},
+                                onOpenDetectedMedia = {},
+                                onOpenExternal = {},
+                            ),
                     )
                 }
             }

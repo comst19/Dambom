@@ -19,11 +19,24 @@ internal data class WebUiState(
 }
 
 @Immutable
+internal data class WebNavigationRequest(
+    val id: Long,
+    val url: String,
+)
+
+@Immutable
 internal data class WebTab(
     val id: Long,
     val title: String = "",
     val url: String? = null,
     val detectionState: WebDetectionState = WebDetectionState.Idle,
+    val navigationRequest: WebNavigationRequest? = null,
+)
+
+@Immutable
+internal data class WebHistoryState(
+    val canGoBack: Boolean = false,
+    val canGoForward: Boolean = false,
 )
 
 @Immutable

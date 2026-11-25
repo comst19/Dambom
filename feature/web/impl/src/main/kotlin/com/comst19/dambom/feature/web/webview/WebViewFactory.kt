@@ -20,9 +20,16 @@ import android.webkit.WebViewClient
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import com.comst19.dambom.core.domain.model.MediaResourceRequest
+import com.comst19.dambom.feature.web.contract.WebHistoryState
 import com.comst19.dambom.feature.web.contract.WebTab
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
+
+internal fun WebView.historyState(): WebHistoryState =
+    WebHistoryState(
+        canGoBack = canGoBack(),
+        canGoForward = canGoForward(),
+    )
 
 @SuppressLint("SetJavaScriptEnabled")
 internal fun createWebView(
@@ -37,10 +44,34 @@ internal fun createWebView(
     onNavigationFailure: (WebNavigationFailure?) -> Unit,
     onRendererGone: (WebView) -> Unit,
 ): WebView =
+    createWebView(
+        context = context,
+        tab = tab,
+        savedState = savedState,
+        callbacks =
+            WebViewCallbacks(
+                onPageStarted = onPageStarted,
+                onPageFinished = onPageFinished,
+                onPageChanged = onPageChanged,
+                onMediaRequest = onMediaRequest,
+                onProgress = onProgress,
+                onNavigationFailure = onNavigationFailure,
+                onRendererGone = onRendererGone,
+            ),
+    )
+
+@SuppressLint("SetJavaScriptEnabled")
+internal fun createWebView(
+    context: Context,
+    tab: WebTab,
+    savedState: Bundle?,
+    callbacks: WebViewCallbacks,
+): WebView =
     WebView(context).apply {
         val pageGeneration = AtomicLong()
         val defaultUserAgent = settings.userAgentString
         val mediaUserAgent = AtomicReference(defaultUserAgent)
+        var currentPageUrl = tab.url
         var pageStarted = false
         var failureBeforePageStart = false
         settings.javaScriptEnabled = true
@@ -55,12 +86,13 @@ internal fun createWebView(
             WebViewCompat.addDocumentStartJavaScript(this, WEB_MEDIA_GUARD_SCRIPT, setOf("*"))
         }
         installWebMediaObserver(this, tab.id, pageGeneration) { tabId, generation, request ->
+            if (!callbacks.isActive()) return@installWebMediaObserver
             val enriched =
                 request.withBrowserContext(
                     mediaUserAgent.get(),
                     CookieManager.getInstance().getCookie(request.url),
                 )
-            onMediaRequest(tabId, generation, enriched)
+            callbacks.onMediaRequest(tabId, generation, enriched)
         }
         webViewClient =
             object : WebViewClient() {
@@ -77,6 +109,7 @@ internal fun createWebView(
                     url: String?,
                     favicon: Bitmap?,
                 ) {
+                    if (!callbacks.isActive()) return
                     val desiredUserAgent = siteMediaUserAgent(url.orEmpty(), defaultUserAgent)
                     mediaUserAgent.set(desiredUserAgent)
                     if (view != null && url != null && view.settings.userAgentString != desiredUserAgent) {
@@ -85,32 +118,56 @@ internal fun createWebView(
                     if (failureBeforePageStart) {
                         failureBeforePageStart = false
                     } else {
-                        onNavigationFailure(null)
+                        callbacks.onNavigationFailure(null)
                     }
                     pageStarted = true
+                    if (url != null) currentPageUrl = url
                     val generation = nextWebPageGeneration.incrementAndGet()
                     pageGeneration.set(generation)
-                    onPageStarted(tab.id, url, view?.title, generation)
+                    callbacks.onPageStarted(tab.id, url, view?.title, generation)
+                    view?.let { callbacks.onHistoryChanged(it, it.historyState()) }
                 }
 
                 override fun onPageFinished(
                     view: WebView?,
                     url: String?,
                 ) {
+                    if (!callbacks.isActive()) return
                     pageStarted = false
-                    onPageFinished(tab.id, url, view?.title, pageGeneration.get())
+                    if (url != null) currentPageUrl = url
+                    callbacks.onPageFinished(tab.id, url, view?.title, pageGeneration.get())
+                    view?.let { callbacks.onHistoryChanged(it, it.historyState()) }
+                }
+
+                override fun doUpdateVisitedHistory(
+                    view: WebView?,
+                    url: String?,
+                    isReload: Boolean,
+                ) {
+                    if (!callbacks.isActive()) return
+                    view?.let { callbacks.onHistoryChanged(it, it.historyState()) }
+                    val visitedUrl =
+                        (url ?: view?.url)?.takeIf {
+                            it.startsWith("http://") || it.startsWith("https://")
+                        }
+                    if (!pageStarted && visitedUrl != null && visitedUrl != currentPageUrl) {
+                        currentPageUrl = visitedUrl
+                        val generation = nextWebPageGeneration.incrementAndGet()
+                        pageGeneration.set(generation)
+                        callbacks.onPageStarted(tab.id, visitedUrl, view?.title, generation)
+                    }
                 }
 
                 override fun shouldInterceptRequest(
                     view: WebView?,
                     request: WebResourceRequest?,
                 ): WebResourceResponse? {
-                    val url = request?.url?.toString() ?: return null
+                    val url = request?.url?.toString()?.takeIf { callbacks.isActive() } ?: return null
                     if (request.method.equals("GET", true)) {
                         val mediaRequest =
                             MediaResourceRequest(url, request.requestHeaders, request.method)
                                 .withBrowserContext(mediaUserAgent.get(), CookieManager.getInstance().getCookie(url))
-                        onMediaRequest(tab.id, pageGeneration.get(), mediaRequest)
+                        callbacks.onMediaRequest(tab.id, pageGeneration.get(), mediaRequest)
                     }
                     return if (shouldBlockWebVideo(url, mediaGuardInstalled)) blockedVideoResponse() else null
                 }
@@ -120,12 +177,13 @@ internal fun createWebView(
                     request: WebResourceRequest?,
                     error: WebResourceError?,
                 ) {
+                    if (!callbacks.isActive()) return
                     classifyWebNavigationFailure(
                         isForMainFrame = request?.isForMainFrame == true,
                         errorCode = error?.errorCode,
                     )?.let { failure ->
                         if (!pageStarted) failureBeforePageStart = true
-                        onNavigationFailure(failure)
+                        callbacks.onNavigationFailure(failure)
                     }
                 }
 
@@ -134,12 +192,13 @@ internal fun createWebView(
                     request: WebResourceRequest?,
                     errorResponse: WebResourceResponse?,
                 ) {
+                    if (!callbacks.isActive()) return
                     classifyHttpNavigationFailure(
                         isForMainFrame = request?.isForMainFrame == true,
                         statusCode = errorResponse?.statusCode,
                     )?.let { failure ->
                         if (!pageStarted) failureBeforePageStart = true
-                        onNavigationFailure(failure)
+                        callbacks.onNavigationFailure(failure)
                     }
                 }
 
@@ -149,8 +208,9 @@ internal fun createWebView(
                     error: SslError?,
                 ) {
                     handler?.cancel()
+                    if (!callbacks.isActive()) return
                     if (!pageStarted) failureBeforePageStart = true
-                    onNavigationFailure(WebNavigationFailure.SECURITY)
+                    callbacks.onNavigationFailure(WebNavigationFailure.SECURITY)
                 }
 
                 override fun onSafeBrowsingHit(
@@ -162,9 +222,10 @@ internal fun createWebView(
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                         callback?.backToSafety(true)
                     }
+                    if (!callbacks.isActive()) return
                     if (request?.isForMainFrame == true) {
                         if (!pageStarted) failureBeforePageStart = true
-                        onNavigationFailure(WebNavigationFailure.SECURITY)
+                        callbacks.onNavigationFailure(WebNavigationFailure.SECURITY)
                     }
                 }
 
@@ -172,8 +233,11 @@ internal fun createWebView(
                     view: WebView?,
                     detail: RenderProcessGoneDetail?,
                 ): Boolean {
+                    if (!callbacks.isActive()) return true
                     view?.let { failedWebView ->
-                        failedWebView.post { onRendererGone(failedWebView) }
+                        failedWebView.post {
+                            if (callbacks.isActive()) callbacks.onRendererGone(failedWebView)
+                        }
                     }
                     return true
                 }
@@ -184,23 +248,31 @@ internal fun createWebView(
                     view: WebView?,
                     newProgress: Int,
                 ) {
-                    onProgress(newProgress)
+                    if (!callbacks.isActive()) return
+                    callbacks.onProgress(newProgress)
                 }
 
                 override fun onReceivedTitle(
                     view: WebView?,
                     title: String?,
                 ) {
-                    onPageChanged(tab.id, view?.url, title)
+                    if (!callbacks.isActive()) return
+                    callbacks.onPageChanged(tab.id, view?.url, title)
                 }
             }
-        if (savedState == null || restoreState(savedState) == null) {
-            tab.url?.let { url ->
-                val userAgent = siteMediaUserAgent(url, defaultUserAgent)
-                mediaUserAgent.set(userAgent)
-                settings.userAgentString = userAgent
-                loadUrl(url)
+        val restored = savedState != null && restoreState(savedState) != null
+        val initialUrl =
+            if (restored) {
+                url?.let { currentPageUrl = it }
+                callbacks.pendingNavigationUrl
+            } else {
+                callbacks.pendingNavigationUrl ?: tab.url
             }
+        initialUrl?.let { urlToLoad ->
+            val userAgent = siteMediaUserAgent(urlToLoad, defaultUserAgent)
+            mediaUserAgent.set(userAgent)
+            settings.userAgentString = userAgent
+            loadUrl(urlToLoad)
         }
     }
 

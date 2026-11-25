@@ -207,6 +207,7 @@ class UserInitiatedDownloadTest {
 
             val finishedResults = mutableListOf<Boolean>()
             val jobToken = Any()
+            coordinator.onJobStarting(jobToken, wifiOnlyDownloads = true)
             val execution =
                 async(Dispatchers.IO) {
                     coordinator.executeJob(
@@ -270,8 +271,10 @@ class UserInitiatedDownloadTest {
 
             val injectedB = AtomicBoolean(false)
             val finishedResults = mutableListOf<Boolean>()
+            val token = Any()
+            coordinator.onJobStarting(token, wifiOnlyDownloads = true)
             coordinator.executeJob(
-                token = Any(),
+                token = token,
                 wifiOnlyDownloads = true,
                 runQueue = { runner.run() },
                 hasPendingWork = { dao.countSchedulable() > 0 },
@@ -749,8 +752,10 @@ class UserInitiatedDownloadTest {
             assertEquals(1, backend.scheduleCalls.size)
 
             val finishedResults = mutableListOf<Boolean>()
+            val token = Any()
+            coordinator.onJobStarting(token, wifiOnlyDownloads = true)
             coordinator.executeJob(
-                token = Any(),
+                token = token,
                 wifiOnlyDownloads = true,
                 runQueue = { runner.run() },
                 hasPendingWork = { dao.countSchedulable() > 0 },
@@ -787,8 +792,10 @@ class UserInitiatedDownloadTest {
             assertEquals(1, backend.scheduleCalls.size)
 
             // Leave backend.pendingPolicy == true even after jobFinished(false) to simulate async JobScheduler removal.
+            val token = Any()
+            coordinator.onJobStarting(token, wifiOnlyDownloads = true)
             coordinator.executeJob(
-                token = Any(),
+                token = token,
                 wifiOnlyDownloads = true,
                 runQueue = { runner.run() },
                 hasPendingWork = { dao.countSchedulable() > 0 },

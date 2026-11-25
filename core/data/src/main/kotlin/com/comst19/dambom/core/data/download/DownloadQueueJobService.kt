@@ -7,6 +7,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.work.await
+import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.database.download.DownloadTaskDao
 import dagger.hilt.android.AndroidEntryPoint
@@ -15,6 +16,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -81,13 +84,15 @@ class DownloadQueueJobService : JobService() {
             UIDT_LOG_TAG,
             "onStartJob jobId=${params.jobId} wifiOnly=$wifiOnlyDownloads hasNetwork=${params.network != null}",
         )
+        val progressReporter = UidtProgressReporter(params, execution)
         execution.job =
             serviceScope.launch {
-                runCatching { workManager.cancelUniqueWork(DOWNLOAD_WORK_NAME).await() }
-                val progressReporter = UidtProgressReporter(params, execution)
-                coordinator.executeJob(
+                runUidtJobExecution(
                     token = token,
                     wifiOnlyDownloads = wifiOnlyDownloads,
+                    cancelLegacyWork = { workManager.cancelUniqueWork(DOWNLOAD_WORK_NAME).await() },
+                    isStopped = { execution.stopped.get() },
+                    coordinator = coordinator,
                     runQueue = {
                         runner.run(
                             networkSession = execution.networkSession,
@@ -102,18 +107,29 @@ class DownloadQueueJobService : JobService() {
                     },
                     hasPendingWork = { dao.countSchedulable() > 0 },
                     onJobFinished = { needsReschedule ->
-                        if (execution.stopped.compareAndSet(false, true)) {
-                            activeExecution.compareAndSet(execution, null)
-                            Log.i(
-                                UIDT_LOG_TAG,
-                                "jobFinished jobId=${params.jobId} needsReschedule=$needsReschedule",
-                            )
-                            jobFinished(params, needsReschedule)
-                        }
+                        finishJobExecution(params, execution, needsReschedule)
+                    },
+                    onFailure = { error ->
+                        Log.e(UIDT_LOG_TAG, "UIDT job failed jobId=${params.jobId}", error)
                     },
                 )
             }
         return true
+    }
+
+    private fun finishJobExecution(
+        params: JobParameters,
+        execution: JobExecution,
+        needsReschedule: Boolean,
+    ) {
+        if (execution.stopped.compareAndSet(false, true)) {
+            activeExecution.compareAndSet(execution, null)
+            Log.i(
+                UIDT_LOG_TAG,
+                "jobFinished jobId=${params.jobId} needsReschedule=$needsReschedule",
+            )
+            jobFinished(params, needsReschedule)
+        }
     }
 
     override fun onNetworkChanged(params: JobParameters) {
@@ -144,7 +160,7 @@ class DownloadQueueJobService : JobService() {
             }
         val reschedule =
             Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
-                stopReason != JobParameters.STOP_REASON_CANCELLED_BY_APP
+                shouldRescheduleUidtOnStop(stopReason)
         Log.i(
             UIDT_LOG_TAG,
             "onStopJob jobId=${params.jobId} stopReason=$stopReason reschedule=$reschedule",
@@ -213,3 +229,37 @@ class DownloadQueueJobService : JobService() {
         @Volatile var job: Job? = null,
     )
 }
+
+@Suppress("LongParameterList")
+internal suspend fun runUidtJobExecution(
+    token: Any,
+    wifiOnlyDownloads: Boolean,
+    cancelLegacyWork: suspend () -> Unit,
+    isStopped: () -> Boolean,
+    coordinator: UserInitiatedDownloadCoordinator,
+    runQueue: suspend () -> DownloadQueueRunResult,
+    hasPendingWork: suspend () -> Boolean,
+    onJobFinished: (needsReschedule: Boolean) -> Unit,
+    onFailure: (Throwable) -> Unit = {},
+) {
+    suspendRunCatching {
+        suspendRunCatching { cancelLegacyWork() }
+        currentCoroutineContext().ensureActive()
+        if (isStopped()) return@suspendRunCatching
+        coordinator.executeJob(
+            token = token,
+            wifiOnlyDownloads = wifiOnlyDownloads,
+            runQueue = runQueue,
+            hasPendingWork = hasPendingWork,
+            onJobFinished = onJobFinished,
+        )
+    }.onFailure { error ->
+        onFailure(error)
+        coordinator.onJobFailed(token, onJobFinished)
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.S)
+internal fun shouldRescheduleUidtOnStop(stopReason: Int): Boolean =
+    stopReason != JobParameters.STOP_REASON_CANCELLED_BY_APP &&
+        stopReason != JobParameters.STOP_REASON_USER

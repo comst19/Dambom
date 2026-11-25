@@ -8,10 +8,14 @@ import android.os.Build
 import android.os.PersistableBundle
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.comst19.dambom.core.common.util.suspendRunCatching
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -103,33 +107,34 @@ internal class UserInitiatedDownloadCoordinator
     @Inject
     constructor() {
         private val stateMutex = Mutex()
-        private val activeLock = Any()
-        private var activeJob: ActiveUidtJob? = null
-        private var pendingRecoverySchedule = false
-        private var jobFinishedWithoutReschedule = false
+        private val ownership = UidtJobOwnership()
 
         fun onJobStarting(
             token: Any,
             wifiOnlyDownloads: Boolean,
         ) {
-            synchronized(activeLock) {
-                activeJob = ActiveUidtJob(token = token, wifiOnlyDownloads = wifiOnlyDownloads)
-                pendingRecoverySchedule = false
-                jobFinishedWithoutReschedule = false
-            }
+            ownership.start(token, wifiOnlyDownloads)
         }
 
         fun onJobStopped(token: Any) {
-            synchronized(activeLock) {
-                val current = activeJob
-                if (current?.token === token) {
-                    current.stopped = true
+            ownership.stop(token)
+        }
+
+        suspend fun onJobFailed(
+            token: Any,
+            onJobFinished: (needsReschedule: Boolean) -> Unit,
+        ) {
+            withContext(NonCancellable) {
+                stateMutex.withLock {
+                    val termination = ownership.finishFailed(token)
+                    if (termination.shouldNotify) {
+                        onJobFinished(termination.needsReschedule)
+                    }
                 }
-                jobFinishedWithoutReschedule = false
             }
         }
 
-        fun hasPendingRecoverySchedule(): Boolean = synchronized(activeLock) { pendingRecoverySchedule }
+        fun hasPendingRecoverySchedule(): Boolean = ownership.hasPendingRecovery
 
         suspend fun schedule(
             wifiOnlyDownloads: Boolean,
@@ -149,27 +154,14 @@ internal class UserInitiatedDownloadCoordinator
             backend: UidtJobBackend,
         ): Boolean =
             stateMutex.withLock {
-                val (handledByActive, allowPendingReuse) =
-                    synchronized(activeLock) {
-                        val current = activeJob
-                        if (current != null && !current.stopped && current.wifiOnlyDownloads == wifiOnlyDownloads) {
-                            current.recheckRequested = true
-                            pendingRecoverySchedule = false
-                            true to false
-                        } else {
-                            false to !jobFinishedWithoutReschedule
-                        }
-                    }
+                val (handledByActive, allowPendingReuse) = ownership.tryHandleByActive(wifiOnlyDownloads)
                 if (handledByActive) return@withLock true
                 if (allowPendingReuse && backend.hasPendingJob(wifiOnlyDownloads)) {
-                    synchronized(activeLock) { pendingRecoverySchedule = false }
+                    ownership.recordScheduleResult(scheduled = true)
                     return@withLock true
                 }
                 val scheduled = backend.schedule(wifiOnlyDownloads, estimatedDownloadBytes)
-                synchronized(activeLock) {
-                    pendingRecoverySchedule = !scheduled
-                    if (scheduled) jobFinishedWithoutReschedule = false
-                }
+                ownership.recordScheduleResult(scheduled)
                 scheduled
             }
 
@@ -179,16 +171,10 @@ internal class UserInitiatedDownloadCoordinator
             backend: UidtJobBackend,
         ): Boolean =
             stateMutex.withLock {
-                synchronized(activeLock) {
-                    activeJob?.stopped = true
-                    jobFinishedWithoutReschedule = false
-                }
+                ownership.stopActiveForReschedule()
                 backend.cancel()
                 val scheduled = backend.schedule(wifiOnlyDownloads, estimatedDownloadBytes)
-                synchronized(activeLock) {
-                    pendingRecoverySchedule = !scheduled
-                    if (scheduled) jobFinishedWithoutReschedule = false
-                }
+                ownership.recordScheduleResult(scheduled)
                 scheduled
             }
 
@@ -201,42 +187,38 @@ internal class UserInitiatedDownloadCoordinator
             onJobFinished: (needsReschedule: Boolean) -> Unit,
             onBeforeFinishCheck: (suspend () -> Unit)? = null,
         ) {
-            synchronized(activeLock) {
-                if (activeJob?.token !== token) {
-                    activeJob = ActiveUidtJob(token = token, wifiOnlyDownloads = wifiOnlyDownloads)
-                }
-                pendingRecoverySchedule = false
-                jobFinishedWithoutReschedule = false
-            }
+            currentCoroutineContext().ensureActive()
+            if (!ownership.claim(token, wifiOnlyDownloads)) return
+            var terminated = false
             try {
-                while (true) {
-                    val result = runQueue()
-                    if (result == DownloadQueueRunResult.RETRY) {
-                        stateMutex.withLock {
-                            val shouldFinish =
-                                synchronized(activeLock) {
-                                    val current = activeJob
-                                    if (current?.token === token) {
-                                        activeJob = null
-                                        jobFinishedWithoutReschedule = false
-                                        !current.stopped
-                                    } else {
-                                        false
-                                    }
+                suspendRunCatching {
+                    while (true) {
+                        currentCoroutineContext().ensureActive()
+                        if (!ownership.isActive(token)) return@suspendRunCatching
+                        val result = runQueue()
+                        if (result == DownloadQueueRunResult.RETRY) {
+                            stateMutex.withLock {
+                                if (ownership.finish(token, markFinishedWithoutReschedule = false)) {
+                                    onJobFinished(true)
                                 }
-                            if (shouldFinish) onJobFinished(true)
+                            }
+                            return@suspendRunCatching
                         }
-                        return
+                        onBeforeFinishCheck?.invoke()
+                        val shouldContinue = decideContinueOrFinish(token, hasPendingWork, onJobFinished)
+                        if (!shouldContinue) return@suspendRunCatching
                     }
-                    onBeforeFinishCheck?.invoke()
-                    val shouldContinue = decideContinueOrFinish(token, hasPendingWork, onJobFinished)
-                    if (!shouldContinue) return
+                }.onSuccess {
+                    terminated = true
+                }.onFailure { error ->
+                    onJobFailed(token, onJobFinished)
+                    terminated = true
+                    throw error
                 }
-            } catch (cancellation: CancellationException) {
-                synchronized(activeLock) {
-                    if (activeJob?.token === token) activeJob = null
+            } finally {
+                if (!terminated) {
+                    ownership.stop(token)
                 }
-                throw cancellation
             }
         }
 
@@ -247,52 +229,176 @@ internal class UserInitiatedDownloadCoordinator
             onJobFinished: (needsReschedule: Boolean) -> Unit,
         ): Boolean =
             stateMutex.withLock {
-                when (consumeRecheckState(token)) {
+                when (ownership.consumeRecheck(token)) {
                     RecheckState.STOPPED_OR_REPLACED -> return@withLock false
                     RecheckState.RECHECK_REQUESTED -> return@withLock true
                     RecheckState.IDLE -> Unit
                 }
                 if (hasPendingWork()) return@withLock true
-                when (consumeRecheckState(token)) {
+                when (ownership.consumeRecheck(token)) {
                     RecheckState.STOPPED_OR_REPLACED -> return@withLock false
                     RecheckState.RECHECK_REQUESTED -> return@withLock true
                     RecheckState.IDLE -> Unit
                 }
-                onJobFinished(false)
-                synchronized(activeLock) {
-                    if (activeJob?.token === token) {
-                        activeJob = null
-                        jobFinishedWithoutReschedule = true
-                    }
+                if (ownership.finish(token, markFinishedWithoutReschedule = true)) {
+                    onJobFinished(false)
                 }
                 false
             }
+    }
 
-        private fun consumeRecheckState(token: Any): RecheckState =
-            synchronized(activeLock) {
-                val current = activeJob
-                when {
-                    current?.token !== token || current.stopped -> {
-                        RecheckState.STOPPED_OR_REPLACED
-                    }
+private class UidtJobOwnership {
+    private val lock = Any()
+    private var activeJob: ActiveUidtJob? = null
+    private var pendingRecoverySchedule = false
+    private var jobFinishedWithoutReschedule = false
 
-                    current.recheckRequested -> {
-                        current.recheckRequested = false
-                        RecheckState.RECHECK_REQUESTED
-                    }
+    val hasPendingRecovery: Boolean
+        get() = synchronized(lock) { pendingRecoverySchedule }
 
-                    else -> {
-                        RecheckState.IDLE
-                    }
+    fun start(
+        token: Any,
+        wifiOnlyDownloads: Boolean,
+    ) {
+        synchronized(lock) {
+            activeJob?.let { previous ->
+                if (previous.token !== token) {
+                    previous.stopped = true
                 }
             }
+            activeJob = ActiveUidtJob(token = token, wifiOnlyDownloads = wifiOnlyDownloads)
+            pendingRecoverySchedule = false
+            jobFinishedWithoutReschedule = false
+        }
     }
+
+    fun stop(token: Any) {
+        synchronized(lock) {
+            val current = activeJob
+            if (current?.token === token) {
+                current.stopped = true
+                activeJob = null
+                jobFinishedWithoutReschedule = false
+            }
+        }
+    }
+
+    fun stopActiveForReschedule() {
+        synchronized(lock) {
+            activeJob?.stopped = true
+            activeJob = null
+            jobFinishedWithoutReschedule = false
+        }
+    }
+
+    fun claim(
+        token: Any,
+        wifiOnlyDownloads: Boolean,
+    ): Boolean =
+        synchronized(lock) {
+            val current = activeJob
+            val matchesRegistered =
+                current != null &&
+                    current.token === token &&
+                    current.wifiOnlyDownloads == wifiOnlyDownloads
+            if (matchesRegistered && !current.stopped && !current.claimed) {
+                current.claimed = true
+                pendingRecoverySchedule = false
+                jobFinishedWithoutReschedule = false
+                true
+            } else {
+                false
+            }
+        }
+
+    fun isActive(token: Any): Boolean =
+        synchronized(lock) {
+            val current = activeJob
+            current?.token === token && !current.stopped
+        }
+
+    fun finish(
+        token: Any,
+        markFinishedWithoutReschedule: Boolean,
+    ): Boolean =
+        synchronized(lock) {
+            val current = activeJob
+            if (current?.token === token) {
+                activeJob = null
+                jobFinishedWithoutReschedule = markFinishedWithoutReschedule
+                !current.stopped
+            } else {
+                false
+            }
+        }
+
+    fun finishFailed(token: Any): FailureTermination =
+        synchronized(lock) {
+            val current = activeJob
+            if (current?.token === token) {
+                activeJob = null
+                val needsReschedule = current.recheckRequested
+                jobFinishedWithoutReschedule = !needsReschedule
+                pendingRecoverySchedule = false
+                FailureTermination(
+                    shouldNotify = !current.stopped,
+                    needsReschedule = needsReschedule,
+                )
+            } else {
+                FailureTermination(shouldNotify = false, needsReschedule = false)
+            }
+        }
+
+    fun consumeRecheck(token: Any): RecheckState =
+        synchronized(lock) {
+            val current = activeJob
+            when {
+                current?.token !== token || current.stopped -> {
+                    RecheckState.STOPPED_OR_REPLACED
+                }
+
+                current.recheckRequested -> {
+                    current.recheckRequested = false
+                    RecheckState.RECHECK_REQUESTED
+                }
+
+                else -> {
+                    RecheckState.IDLE
+                }
+            }
+        }
+
+    fun tryHandleByActive(wifiOnlyDownloads: Boolean): Pair<Boolean, Boolean> =
+        synchronized(lock) {
+            val current = activeJob
+            if (current != null && !current.stopped && current.wifiOnlyDownloads == wifiOnlyDownloads) {
+                current.recheckRequested = true
+                pendingRecoverySchedule = false
+                true to false
+            } else {
+                false to !jobFinishedWithoutReschedule
+            }
+        }
+
+    fun recordScheduleResult(scheduled: Boolean) {
+        synchronized(lock) {
+            pendingRecoverySchedule = !scheduled
+            if (scheduled) jobFinishedWithoutReschedule = false
+        }
+    }
+}
 
 private data class ActiveUidtJob(
     val token: Any,
     val wifiOnlyDownloads: Boolean,
+    var claimed: Boolean = false,
     var recheckRequested: Boolean = false,
     var stopped: Boolean = false,
+)
+
+private data class FailureTermination(
+    val shouldNotify: Boolean,
+    val needsReschedule: Boolean,
 )
 
 private enum class RecheckState {

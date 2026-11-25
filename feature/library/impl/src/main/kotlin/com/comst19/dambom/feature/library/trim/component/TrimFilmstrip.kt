@@ -1,6 +1,5 @@
 package com.comst19.dambom.feature.library.trim.component
 
-import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.os.Build
 import androidx.compose.foundation.Canvas
@@ -28,6 +27,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.scale
 import com.comst19.dambom.core.common.util.suspendRunCatching
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
@@ -125,14 +125,9 @@ private suspend fun loadTrimFrames(
                             )?.let { original ->
                                 val scale = FRAME_SIZE.toFloat() / maxOf(original.width, original.height)
                                 val scaled =
-                                    Bitmap.createScaledBitmap(
-                                        original,
+                                    original.scale(
                                         (original.width * scale).toInt().coerceAtLeast(1),
-                                        (
-                                            original.height *
-                                                scale
-                                        ).toInt().coerceAtLeast(1),
-                                        true,
+                                        (original.height * scale).toInt().coerceAtLeast(1),
                                     )
                                 if (scaled !== original) original.recycle()
                                 scaled

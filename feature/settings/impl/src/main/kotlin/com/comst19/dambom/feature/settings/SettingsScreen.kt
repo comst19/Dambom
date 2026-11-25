@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -23,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -136,14 +136,11 @@ internal fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 internal fun SettingsScreen(
     state: SettingsContentState,
     actions: SettingsActions,
 ) {
-    var showThemeDialog by remember { mutableStateOf(false) }
-    var showLanguageDialog by remember { mutableStateOf(false) }
-    var showSaveMethodDialog by remember { mutableStateOf(false) }
+    var activeDialog by remember { mutableStateOf<SettingsDialog?>(null) }
 
     AppScreen(
         maxWidth = AppScreenDefaults.SinglePaneMaxWidth,
@@ -164,49 +161,75 @@ internal fun SettingsScreen(
         SettingsContent(
             state = state,
             actions = actions,
-            onSaveMethodClick = { showSaveMethodDialog = true },
-            onThemeClick = { showThemeDialog = true },
-            onLanguageClick = { showLanguageDialog = true },
+            onSaveMethodClick = { activeDialog = SettingsDialog.SAVE_METHOD },
+            onThemeClick = { activeDialog = SettingsDialog.THEME },
+            onLanguageClick = { activeDialog = SettingsDialog.LANGUAGE },
             modifier = Modifier.fillMaxSize().padding(innerPadding),
         )
     }
 
-    if (showSaveMethodDialog) {
-        SettingsChoiceDialog(
-            title = stringResource(R.string.settings_save_method),
-            entries = SAVE_LOCATION_MODE_ENTRIES,
-            selected = state.saveLocationMode,
-            label = { stringResource(it.labelRes) },
-            onDismiss = { showSaveMethodDialog = false },
-            onSelect = {
-                showSaveMethodDialog = false
-                actions.saveToDevice.onSaveLocationModeChange(it)
-            },
+    activeDialog?.let { dialog ->
+        SettingsDialogs(
+            activeDialog = dialog,
+            state = state,
+            actions = actions,
+            onDismiss = { activeDialog = null },
         )
     }
+}
 
-    if (showThemeDialog) {
-        SettingsChoiceDialog(
-            title = stringResource(R.string.settings_theme),
-            entries = THEME_MODE_ENTRIES,
-            selected = state.themeMode,
-            label = { stringResource(it.labelRes) },
-            onDismiss = { showThemeDialog = false },
-            onSelect = {
-                showThemeDialog = false
-                actions.general.onThemeModeChange(it)
-            },
-        )
-    }
-    if (showLanguageDialog) {
-        LanguageChoiceDialog(
-            selected = state.language,
-            onDismiss = { showLanguageDialog = false },
-            onSelect = {
-                showLanguageDialog = false
-                actions.general.onLanguageChange(it)
-            },
-        )
+private enum class SettingsDialog {
+    SAVE_METHOD,
+    THEME,
+    LANGUAGE,
+}
+
+@Composable
+private fun SettingsDialogs(
+    activeDialog: SettingsDialog,
+    state: SettingsContentState,
+    actions: SettingsActions,
+    onDismiss: () -> Unit,
+) {
+    when (activeDialog) {
+        SettingsDialog.SAVE_METHOD -> {
+            SettingsChoiceDialog(
+                title = stringResource(R.string.settings_save_method),
+                entries = SAVE_LOCATION_MODE_ENTRIES,
+                selected = state.saveLocationMode,
+                label = { stringResource(it.labelRes) },
+                onDismiss = onDismiss,
+                onSelect = {
+                    onDismiss()
+                    actions.saveToDevice.onSaveLocationModeChange(it)
+                },
+            )
+        }
+
+        SettingsDialog.THEME -> {
+            SettingsChoiceDialog(
+                title = stringResource(R.string.settings_theme),
+                entries = THEME_MODE_ENTRIES,
+                selected = state.themeMode,
+                label = { stringResource(it.labelRes) },
+                onDismiss = onDismiss,
+                onSelect = {
+                    onDismiss()
+                    actions.general.onThemeModeChange(it)
+                },
+            )
+        }
+
+        SettingsDialog.LANGUAGE -> {
+            LanguageChoiceDialog(
+                selected = state.language,
+                onDismiss = onDismiss,
+                onSelect = {
+                    onDismiss()
+                    actions.general.onLanguageChange(it)
+                },
+            )
+        }
     }
 }
 
@@ -266,7 +289,7 @@ internal fun downloadLocationLabel(
 ): String {
     if (treeUri == null) return defaultLabel
     val documentId =
-        runCatching { DocumentsContract.getTreeDocumentId(Uri.parse(treeUri)) }
+        runCatching { DocumentsContract.getTreeDocumentId(treeUri.toUri()) }
             .getOrNull()
             ?: return defaultLabel
     return Uri.decode(documentId.substringAfter(':', documentId)).ifBlank { defaultLabel }

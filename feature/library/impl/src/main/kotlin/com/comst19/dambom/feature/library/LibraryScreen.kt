@@ -314,7 +314,7 @@ private fun previewTask(title: String) =
         status = DownloadStatus.COMPLETED,
         failureReason = null,
         localFileName = "video.mp4",
-        localFilePath = "/data/user/0/example/files/videos/video.mp4",
+        localFilePath = "videos/video.mp4",
         createdAtMillis = 1L,
         updatedAtMillis = 1L,
     )

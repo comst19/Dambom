@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.media.ThumbnailUtils
 import android.os.Build
 import android.util.Size
+import androidx.core.graphics.createBitmap
 import coil3.ImageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
@@ -252,7 +253,7 @@ private suspend fun decodeVideoThumbnail(
             .diskCachePolicy(CachePolicy.DISABLED)
             .build()
     val image = (VideoThumbnailImageLoader.get(context).execute(request) as? SuccessResult)?.image ?: return null
-    return Bitmap.createBitmap(image.width, image.height, Bitmap.Config.ARGB_8888).also { bitmap ->
+    return createBitmap(image.width, image.height).also { bitmap ->
         image.draw(Canvas(bitmap))
     }
 }

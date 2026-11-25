@@ -5,12 +5,12 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import com.comst19.dambom.feature.library.VideoSourceKind
 import com.comst19.dambom.feature.library.videoSourcePresentation
 
 internal fun originalLinkIntents(sourcePageUrl: String): List<Intent> {
-    val genericIntent = Intent(Intent.ACTION_VIEW, Uri.parse(sourcePageUrl))
+    val genericIntent = Intent(Intent.ACTION_VIEW, sourcePageUrl.toUri())
     return if (videoSourcePresentation(sourcePageUrl).kind == VideoSourceKind.X) {
         listOf(Intent(genericIntent).setPackage(X_ANDROID_PACKAGE), genericIntent)
     } else {

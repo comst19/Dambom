@@ -81,7 +81,6 @@ internal object LocalVideoMetadataLoader {
     private var cacheVersion = 0L
     private val memoryCallbacks =
         object : ComponentCallbacks2 {
-            @Suppress("DEPRECATION")
             override fun onTrimMemory(level: Int) {
                 if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) clearCache()
             }

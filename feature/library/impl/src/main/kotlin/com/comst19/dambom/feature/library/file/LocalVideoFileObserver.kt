@@ -1,5 +1,6 @@
 package com.comst19.dambom.feature.library.file
 
+import android.os.Build
 import android.os.FileObserver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -20,20 +21,7 @@ internal fun observeLocalVideoChanges(
 }.conflate().flowOn(Dispatchers.IO)
 
 internal class LocalVideoFileObservers(
-    private val createObserver: (File, (String?) -> Unit) -> FileObserver = { directory, onChange ->
-        @Suppress("DEPRECATION")
-        object : FileObserver(
-            directory.path,
-            DELETE or MOVED_FROM or CREATE or MOVED_TO or CLOSE_WRITE or MODIFY or ATTRIB,
-        ) {
-            override fun onEvent(
-                event: Int,
-                path: String?,
-            ) {
-                onChange(path)
-            }
-        }
-    },
+    private val createObserver: (File, (String?) -> Unit) -> FileObserver = ::createDirectoryFileObserver,
 ) {
     private class Watch(
         val observer: FileObserver,
@@ -81,3 +69,37 @@ internal class LocalVideoFileObservers(
         }
     }
 }
+
+private const val VIDEO_FILE_OBSERVER_MASK =
+    FileObserver.DELETE or
+        FileObserver.MOVED_FROM or
+        FileObserver.CREATE or
+        FileObserver.MOVED_TO or
+        FileObserver.CLOSE_WRITE or
+        FileObserver.MODIFY or
+        FileObserver.ATTRIB
+
+internal fun createDirectoryFileObserver(
+    directory: File,
+    onChange: (String?) -> Unit,
+): FileObserver =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        object : FileObserver(directory, VIDEO_FILE_OBSERVER_MASK) {
+            override fun onEvent(
+                event: Int,
+                path: String?,
+            ) {
+                onChange(path)
+            }
+        }
+    } else {
+        @Suppress("DEPRECATION")
+        object : FileObserver(directory.path, VIDEO_FILE_OBSERVER_MASK) {
+            override fun onEvent(
+                event: Int,
+                path: String?,
+            ) {
+                onChange(path)
+            }
+        }
+    }

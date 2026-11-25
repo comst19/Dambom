@@ -80,11 +80,14 @@ internal fun createWebView(
         settings.allowContentAccess = false
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
         settings.mediaPlaybackRequiresUserGesture = true
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) settings.safeBrowsingEnabled = true
-        val mediaGuardInstalled = WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
-        if (mediaGuardInstalled) {
-            WebViewCompat.addDocumentStartJavaScript(this, WEB_MEDIA_GUARD_SCRIPT, setOf("*"))
-        }
+        settings.safeBrowsingEnabled = true
+        val mediaGuardInstalled =
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+                WebViewCompat.addDocumentStartJavaScript(this, WEB_MEDIA_GUARD_SCRIPT, setOf("*"))
+                true
+            } else {
+                false
+            }
         installWebMediaObserver(this, tab.id, pageGeneration) { tabId, generation, request ->
             if (!callbacks.isActive()) return@installWebMediaObserver
             val enriched =

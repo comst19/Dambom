@@ -3,7 +3,6 @@ package com.comst19.dambom.feature.library.compress
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.comst19.dambom.feature.library.R
@@ -61,7 +61,7 @@ internal fun VideoCompressionRoute(
         onCancel = { confirmCancel = true },
         onShare = {
             state.savedUri?.let { saved ->
-                val uri = Uri.parse(saved)
+                val uri = saved.toUri()
                 val intent =
                     Intent(Intent.ACTION_SEND).apply {
                         type = "video/mp4"

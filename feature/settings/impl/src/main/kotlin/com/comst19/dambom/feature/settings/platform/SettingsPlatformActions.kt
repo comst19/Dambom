@@ -2,7 +2,7 @@ package com.comst19.dambom.feature.settings.platform
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import androidx.core.net.toUri
 import com.comst19.dambom.core.common.ui.locale.AppLanguagePreferences
 import dagger.Binds
 import dagger.Module
@@ -46,7 +46,7 @@ internal class AndroidSettingsPlatformActions
         override fun takePersistedDownloadDirectory(treeUri: String): Boolean =
             try {
                 context.contentResolver.takePersistableUriPermission(
-                    Uri.parse(treeUri),
+                    treeUri.toUri(),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
                 )
                 true
@@ -57,7 +57,7 @@ internal class AndroidSettingsPlatformActions
         override fun releasePersistedDownloadDirectory(treeUri: String) {
             try {
                 context.contentResolver.releasePersistableUriPermission(
-                    Uri.parse(treeUri),
+                    treeUri.toUri(),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
                 )
             } catch (_: SecurityException) {

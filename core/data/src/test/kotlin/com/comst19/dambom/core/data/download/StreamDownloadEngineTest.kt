@@ -9,14 +9,21 @@ import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.HttpDataSource
 import androidx.media3.exoplayer.offline.DownloadHelper
 import com.comst19.dambom.core.domain.model.DownloadFailureReason
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.IOException
+import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -89,4 +96,57 @@ class StreamDownloadEngineTest {
         val failure = classifyStreamFailure(IOException(response)) as StreamDownloadException
         assertEquals(DownloadFailureReason.ACCESS_RESTRICTED, failure.reason)
     }
+
+    @Test
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun `storage monitor runs on injected dispatcher and cancels when export finishes`() =
+        runTest {
+            val monitorDispatcher = StandardTestDispatcher(testScheduler)
+            var checkCount = 0
+
+            val result =
+                runWithStorageMonitor(
+                    dispatcher = monitorDispatcher,
+                    interval = 500.milliseconds,
+                    checkSpace = { checkCount += 1 },
+                ) {
+                    delay(1_250.milliseconds)
+                    "done"
+                }
+
+            assertEquals("done", result)
+            assertEquals(2, checkCount)
+
+            testScheduler.advanceTimeBy(5_000L)
+            testScheduler.runCurrent()
+            assertEquals(2, checkCount)
+        }
+
+    @Test
+    fun `storage monitor failure cancels export block and propagates insufficient storage`() =
+        runTest {
+            val monitorDispatcher = StandardTestDispatcher(testScheduler)
+            var exportCancelled = false
+            var failure: StreamDownloadException? = null
+
+            try {
+                runWithStorageMonitor(
+                    dispatcher = monitorDispatcher,
+                    interval = 500.milliseconds,
+                    checkSpace = { throw StreamDownloadException(DownloadFailureReason.INSUFFICIENT_STORAGE) },
+                ) {
+                    try {
+                        delay(5_000.milliseconds)
+                    } catch (cancellation: CancellationException) {
+                        exportCancelled = true
+                        throw cancellation
+                    }
+                }
+            } catch (expected: StreamDownloadException) {
+                failure = expected
+            }
+
+            assertTrue(exportCancelled)
+            assertEquals(DownloadFailureReason.INSUFFICIENT_STORAGE, failure?.reason)
+        }
 }

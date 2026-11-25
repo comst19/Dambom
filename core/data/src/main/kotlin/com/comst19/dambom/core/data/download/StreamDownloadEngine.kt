@@ -46,6 +46,8 @@ import java.io.File
 import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 internal class StreamDownloadEngine(
     private val context: Context,
@@ -216,19 +218,12 @@ internal class StreamDownloadEngine(
         item: MediaItem,
         source: DataSource.Factory,
         output: File,
-    ) = coroutineScope {
-        val storageMonitor =
-            launch(Dispatchers.IO) {
-                while (true) {
-                    delay(STREAM_CHECKPOINT_INTERVAL_MILLIS)
-                    requireSpaceFor(STREAM_SPACE_CHECK_BYTES)
-                }
-            }
-        try {
-            exportOnMain(item, source, output)
-        } finally {
-            storageMonitor.cancel()
-        }
+    ) = runWithStorageMonitor(
+        dispatcher = ioDispatcher,
+        interval = STREAM_CHECKPOINT_INTERVAL,
+        checkSpace = { requireSpaceFor(STREAM_SPACE_CHECK_BYTES) },
+    ) {
+        exportOnMain(item, source, output)
     }
 
     private suspend fun exportOnMain(
@@ -348,11 +343,32 @@ internal class StreamDownloadException(
     cause: Throwable? = null,
 ) : IOException(cause)
 
+internal suspend fun <T> runWithStorageMonitor(
+    dispatcher: CoroutineDispatcher,
+    interval: Duration,
+    checkSpace: () -> Unit,
+    block: suspend () -> T,
+): T =
+    coroutineScope {
+        val storageMonitor =
+            launch(dispatcher) {
+                while (true) {
+                    delay(interval)
+                    checkSpace()
+                }
+            }
+        try {
+            block()
+        } finally {
+            storageMonitor.cancel()
+        }
+    }
+
 private val HLS_MIME_TYPES =
     setOf("application/vnd.apple.mpegurl", "application/x-mpegurl", "audio/mpegurl", "audio/x-mpegurl")
 private val ACCESS_RESTRICTED_HTTP_CODES = setOf(HTTP_UNAUTHORIZED, HTTP_FORBIDDEN)
 private const val STREAM_SPACE_CHECK_BYTES = 64L * 1024
-private const val STREAM_CHECKPOINT_INTERVAL_MILLIS = 500L
+private val STREAM_CHECKPOINT_INTERVAL = 500.milliseconds
 private const val MAX_CAUSE_DEPTH = 16
 
 private const val HTTP_UNAUTHORIZED = 401

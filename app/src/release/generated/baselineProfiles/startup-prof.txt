@@ -6673,7 +6673,7 @@ SPLandroidx/compose/runtime/CompositionImpl;->prepareCompose(Lkotlin/jvm/functio
 SPLandroidx/compose/runtime/CompositionImpl;->recompose()Z
 SPLandroidx/compose/runtime/CompositionImpl;->recomposeScopeReleased(Landroidx/compose/runtime/RecomposeScopeImpl;)V
 SPLandroidx/compose/runtime/CompositionImpl;->recordModificationsOf(Ljava/util/Set;)V
-HSPLandroidx/compose/runtime/CompositionImpl;->recordReadOf(Ljava/lang/Object;)V
+SPLandroidx/compose/runtime/CompositionImpl;->recordReadOf(Ljava/lang/Object;)V
 SPLandroidx/compose/runtime/CompositionImpl;->recordWriteOf(Ljava/lang/Object;)V
 SPLandroidx/compose/runtime/CompositionImpl;->removeDerivedStateObservation$runtime(Landroidx/compose/runtime/DerivedState;)V
 SPLandroidx/compose/runtime/CompositionImpl;->removeObservation$runtime(Ljava/lang/Object;Landroidx/compose/runtime/RecomposeScopeImpl;)V
@@ -7031,7 +7031,7 @@ SPLandroidx/compose/runtime/IntStack;->peek()I
 SPLandroidx/compose/runtime/IntStack;->peek2()I
 SPLandroidx/compose/runtime/IntStack;->peekOr(I)I
 SPLandroidx/compose/runtime/IntStack;->pop()I
-HSPLandroidx/compose/runtime/IntStack;->push(I)V
+SPLandroidx/compose/runtime/IntStack;->push(I)V
 SPLandroidx/compose/runtime/IntStack;->resize()[I
 Landroidx/compose/runtime/IntState;
 Landroidx/compose/runtime/InternalComposer;
@@ -7770,7 +7770,7 @@ SPLandroidx/compose/runtime/composer/gapbuffer/SlotReader;->reposition(I)V
 SPLandroidx/compose/runtime/composer/gapbuffer/SlotReader;->restoreParent(I)V
 SPLandroidx/compose/runtime/composer/gapbuffer/SlotReader;->skipGroup()I
 SPLandroidx/compose/runtime/composer/gapbuffer/SlotReader;->skipToGroupEnd()V
-HSPLandroidx/compose/runtime/composer/gapbuffer/SlotReader;->startGroup()V
+SPLandroidx/compose/runtime/composer/gapbuffer/SlotReader;->startGroup()V
 SPLandroidx/compose/runtime/composer/gapbuffer/SlotReader;->startNode()V
 Landroidx/compose/runtime/composer/gapbuffer/SlotTable;
 SPLandroidx/compose/runtime/composer/gapbuffer/SlotTable;-><clinit>()V
@@ -8797,7 +8797,7 @@ SPLandroidx/compose/runtime/snapshots/SnapshotKt;->takeNewSnapshot$lambda$0(Lkot
 SPLandroidx/compose/runtime/snapshots/SnapshotKt;->takeNewSnapshot(Lkotlin/jvm/functions/Function1;)Landroidx/compose/runtime/snapshots/Snapshot;
 SPLandroidx/compose/runtime/snapshots/SnapshotKt;->trackPinning(JLandroidx/compose/runtime/snapshots/SnapshotIdSet;)I
 SPLandroidx/compose/runtime/snapshots/SnapshotKt;->usedLocked(Landroidx/compose/runtime/snapshots/StateObject;)Landroidx/compose/runtime/snapshots/StateRecord;
-SPLandroidx/compose/runtime/snapshots/SnapshotKt;->valid(JJLandroidx/compose/runtime/snapshots/SnapshotIdSet;)Z
+HSPLandroidx/compose/runtime/snapshots/SnapshotKt;->valid(JJLandroidx/compose/runtime/snapshots/SnapshotIdSet;)Z
 SPLandroidx/compose/runtime/snapshots/SnapshotKt;->valid(Landroidx/compose/runtime/snapshots/StateRecord;JLandroidx/compose/runtime/snapshots/SnapshotIdSet;)Z
 SPLandroidx/compose/runtime/snapshots/SnapshotKt;->validateOpen(Landroidx/compose/runtime/snapshots/Snapshot;)V
 SPLandroidx/compose/runtime/snapshots/SnapshotKt;->writableRecord(Landroidx/compose/runtime/snapshots/StateRecord;Landroidx/compose/runtime/snapshots/StateObject;Landroidx/compose/runtime/snapshots/Snapshot;)Landroidx/compose/runtime/snapshots/StateRecord;
@@ -11972,7 +11972,7 @@ SPLandroidx/compose/ui/node/LayoutNode;->getGloballyPositionedObservers()I
 SPLandroidx/compose/ui/node/LayoutNode;->getHasFixedInnerContentConstraints$ui()Z
 SPLandroidx/compose/ui/node/LayoutNode;->getHasPositionalLayerTransformationsInOffsetFromRoot$ui()Z
 SPLandroidx/compose/ui/node/LayoutNode;->getHeight()I
-SPLandroidx/compose/ui/node/LayoutNode;->getInnerCoordinator$ui()Landroidx/compose/ui/node/NodeCoordinator;
+HSPLandroidx/compose/ui/node/LayoutNode;->getInnerCoordinator$ui()Landroidx/compose/ui/node/NodeCoordinator;
 SPLandroidx/compose/ui/node/LayoutNode;->getInnerLayerCoordinator$ui()Landroidx/compose/ui/node/NodeCoordinator;
 SPLandroidx/compose/ui/node/LayoutNode;->getIntrinsicsUsageByParent$ui()Landroidx/compose/ui/node/LayoutNode$UsageByParent;
 SPLandroidx/compose/ui/node/LayoutNode;->getLayoutDelegate$ui()Landroidx/compose/ui/node/LayoutNodeLayoutDelegate;
@@ -12309,7 +12309,7 @@ SPLandroidx/compose/ui/node/MeasurePassDelegate;->onIntrinsicsQueried()V
 SPLandroidx/compose/ui/node/MeasurePassDelegate;->onNodeDetached()V
 SPLandroidx/compose/ui/node/MeasurePassDelegate;->onNodePlaced$ui()V
 SPLandroidx/compose/ui/node/MeasurePassDelegate;->placeAt-f8xVGno(JFLkotlin/jvm/functions/Function1;)V
-HSPLandroidx/compose/ui/node/MeasurePassDelegate;->placeOuterCoordinator-MLgxB_4(JFLkotlin/jvm/functions/Function1;Landroidx/compose/ui/graphics/layer/GraphicsLayer;)V
+SPLandroidx/compose/ui/node/MeasurePassDelegate;->placeOuterCoordinator-MLgxB_4(JFLkotlin/jvm/functions/Function1;Landroidx/compose/ui/graphics/layer/GraphicsLayer;)V
 SPLandroidx/compose/ui/node/MeasurePassDelegate;->placeSelf-MLgxB_4(JFLkotlin/jvm/functions/Function1;Landroidx/compose/ui/graphics/layer/GraphicsLayer;)V
 HSPLandroidx/compose/ui/node/MeasurePassDelegate;->remeasure-BRTryo0(J)Z
 SPLandroidx/compose/ui/node/MeasurePassDelegate;->replace()V
@@ -13786,7 +13786,7 @@ SPLandroidx/compose/ui/semantics/SemanticsActions;-><clinit>()V
 SPLandroidx/compose/ui/semantics/SemanticsActions;-><init>()V
 SPLandroidx/compose/ui/semantics/SemanticsActions;->getClearTextSubstitution()Landroidx/compose/ui/semantics/SemanticsPropertyKey;
 HSPLandroidx/compose/ui/semantics/SemanticsActions;->getCollapse()Landroidx/compose/ui/semantics/SemanticsPropertyKey;
-HSPLandroidx/compose/ui/semantics/SemanticsActions;->getCopyText()Landroidx/compose/ui/semantics/SemanticsPropertyKey;
+SPLandroidx/compose/ui/semantics/SemanticsActions;->getCopyText()Landroidx/compose/ui/semantics/SemanticsPropertyKey;
 HSPLandroidx/compose/ui/semantics/SemanticsActions;->getCustomActions()Landroidx/compose/ui/semantics/SemanticsPropertyKey;
 HSPLandroidx/compose/ui/semantics/SemanticsActions;->getCutText()Landroidx/compose/ui/semantics/SemanticsPropertyKey;
 HSPLandroidx/compose/ui/semantics/SemanticsActions;->getDismiss()Landroidx/compose/ui/semantics/SemanticsPropertyKey;
@@ -13834,7 +13834,7 @@ HSPLandroidx/compose/ui/semantics/SemanticsConfigurationKt;->getOrNull(Landroidx
 Landroidx/compose/ui/semantics/SemanticsConfigurationKt$getOrNull$1;
 SPLandroidx/compose/ui/semantics/SemanticsConfigurationKt$getOrNull$1;-><clinit>()V
 SPLandroidx/compose/ui/semantics/SemanticsConfigurationKt$getOrNull$1;-><init>()V
-SPLandroidx/compose/ui/semantics/SemanticsConfigurationKt$getOrNull$1;->invoke()Ljava/lang/Object;
+HSPLandroidx/compose/ui/semantics/SemanticsConfigurationKt$getOrNull$1;->invoke()Ljava/lang/Object;
 Landroidx/compose/ui/semantics/SemanticsInfo;
 Landroidx/compose/ui/semantics/SemanticsListener;
 Landroidx/compose/ui/semantics/SemanticsModifier;
@@ -13851,6 +13851,7 @@ HSPLandroidx/compose/ui/semantics/SemanticsNode;->emitFakeNodes(Ljava/util/List;
 HSPLandroidx/compose/ui/semantics/SemanticsNode;->fakeSemanticsNode-ypyhhiA(Landroidx/compose/ui/semantics/Role;Lkotlin/jvm/functions/Function1;)Landroidx/compose/ui/semantics/SemanticsNode;
 HSPLandroidx/compose/ui/semantics/SemanticsNode;->fillOneLayerOfSemanticsWrappers(Landroidx/compose/ui/node/LayoutNode;Ljava/util/List;Z)V
 HSPLandroidx/compose/ui/semantics/SemanticsNode;->findCoordinatorToGetBounds$ui()Landroidx/compose/ui/node/NodeCoordinator;
+HSPLandroidx/compose/ui/semantics/SemanticsNode;->findSemanticsModifierNodeToGetBounds()Landroidx/compose/ui/node/SemanticsModifierNode;
 HSPLandroidx/compose/ui/semantics/SemanticsNode;->getBoundsInRoot()Landroidx/compose/ui/geometry/Rect;
 SPLandroidx/compose/ui/semantics/SemanticsNode;->getChildren$ui$default(Landroidx/compose/ui/semantics/SemanticsNode;ZZZILjava/lang/Object;)Ljava/util/List;
 HSPLandroidx/compose/ui/semantics/SemanticsNode;->getChildren$ui(ZZZ)Ljava/util/List;
@@ -22798,6 +22799,7 @@ SPLkotlinx/coroutines/DispatchedCoroutine;->tryResume()Z
 SPLkotlinx/coroutines/DispatchedCoroutine;->trySuspend()Z
 Lkotlinx/coroutines/DispatchedTask;
 SPLkotlinx/coroutines/DispatchedTask;-><init>(I)V
+SPLkotlinx/coroutines/DispatchedTask;->cancelCompletedResult$kotlinx_coroutines_core(Ljava/lang/Object;Ljava/lang/Throwable;)V
 SPLkotlinx/coroutines/DispatchedTask;->getExceptionalResult$kotlinx_coroutines_core(Ljava/lang/Object;)Ljava/lang/Throwable;
 SPLkotlinx/coroutines/DispatchedTask;->getSuccessfulResult$kotlinx_coroutines_core(Ljava/lang/Object;)Ljava/lang/Object;
 HSPLkotlinx/coroutines/DispatchedTask;->run()V
@@ -22991,6 +22993,7 @@ SPLkotlinx/coroutines/JobSupport$Finishing;->getRootCause()Ljava/lang/Throwable;
 SPLkotlinx/coroutines/JobSupport$Finishing;->get_exceptionsHolder$volatile$FU()Ljava/util/concurrent/atomic/AtomicReferenceFieldUpdater;
 SPLkotlinx/coroutines/JobSupport$Finishing;->get_isCompleting$volatile$FU()Ljava/util/concurrent/atomic/AtomicIntegerFieldUpdater;
 SPLkotlinx/coroutines/JobSupport$Finishing;->get_rootCause$volatile$FU()Ljava/util/concurrent/atomic/AtomicReferenceFieldUpdater;
+SPLkotlinx/coroutines/JobSupport$Finishing;->isActive()Z
 SPLkotlinx/coroutines/JobSupport$Finishing;->isCancelling()Z
 SPLkotlinx/coroutines/JobSupport$Finishing;->isCompleting()Z
 SPLkotlinx/coroutines/JobSupport$Finishing;->sealLocked(Ljava/lang/Throwable;)Ljava/util/List;
@@ -23029,6 +23032,7 @@ Lkotlinx/coroutines/StandaloneCoroutine;
 SPLkotlinx/coroutines/StandaloneCoroutine;-><init>(Lkotlin/coroutines/CoroutineContext;Z)V
 Lkotlinx/coroutines/SupervisorJobImpl;
 SPLkotlinx/coroutines/SupervisorJobImpl;-><init>(Lkotlinx/coroutines/Job;)V
+SPLkotlinx/coroutines/SupervisorJobImpl;->childCancelled(Ljava/lang/Throwable;)Z
 Lkotlinx/coroutines/SupervisorKt;
 SPLkotlinx/coroutines/SupervisorKt;->SupervisorJob$default(Lkotlinx/coroutines/Job;ILjava/lang/Object;)Lkotlinx/coroutines/CompletableJob;
 SPLkotlinx/coroutines/SupervisorKt;->SupervisorJob(Lkotlinx/coroutines/Job;)Lkotlinx/coroutines/CompletableJob;
@@ -24066,6 +24070,10 @@ Lkotlinx/coroutines/scheduling/WorkQueue;
 SPLkotlinx/coroutines/scheduling/WorkQueue;-><clinit>()V
 SPLkotlinx/coroutines/scheduling/WorkQueue;-><init>()V
 SPLkotlinx/coroutines/scheduling/WorkQueue;->add(Lkotlinx/coroutines/scheduling/Task;Z)Lkotlinx/coroutines/scheduling/Task;
+SPLkotlinx/coroutines/scheduling/WorkQueue;->addLast(Lkotlinx/coroutines/scheduling/Task;)Lkotlinx/coroutines/scheduling/Task;
+SPLkotlinx/coroutines/scheduling/WorkQueue;->decrementIfBlocking(Lkotlinx/coroutines/scheduling/Task;)V
+SPLkotlinx/coroutines/scheduling/WorkQueue;->getBlockingTasksInBuffer$volatile$FU()Ljava/util/concurrent/atomic/AtomicIntegerFieldUpdater;
+SPLkotlinx/coroutines/scheduling/WorkQueue;->getBufferSize()I
 SPLkotlinx/coroutines/scheduling/WorkQueue;->getConsumerIndex$volatile$FU()Ljava/util/concurrent/atomic/AtomicIntegerFieldUpdater;
 SPLkotlinx/coroutines/scheduling/WorkQueue;->getLastScheduledTask$volatile$FU()Ljava/util/concurrent/atomic/AtomicReferenceFieldUpdater;
 SPLkotlinx/coroutines/scheduling/WorkQueue;->getProducerIndex$volatile$FU()Ljava/util/concurrent/atomic/AtomicIntegerFieldUpdater;

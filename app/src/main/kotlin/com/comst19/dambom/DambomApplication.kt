@@ -25,5 +25,9 @@ class DambomApplication :
             Configuration
                 .Builder()
                 .setWorkerFactory(workerFactory)
+                .setJobSchedulerJobIdRange(WORK_MANAGER_MIN_JOB_ID, WORK_MANAGER_MAX_JOB_ID)
                 .build()
 }
+
+private const val WORK_MANAGER_MIN_JOB_ID = 0
+private const val WORK_MANAGER_MAX_JOB_ID = 40_000

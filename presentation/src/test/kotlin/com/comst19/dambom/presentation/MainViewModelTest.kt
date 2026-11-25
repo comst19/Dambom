@@ -121,6 +121,26 @@ class MainViewModelTest {
 
         assertEquals(null, feedback)
     }
+
+    @Test
+    fun `onAppResumed ensures pending downloads are scheduled`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val repository = TrackingDownloadRepository()
+            val viewModel =
+                MainViewModel(
+                    FakeSettingsRepository(),
+                    FakeNetworkMonitor,
+                    repository,
+                    SuccessfulStartupCoordinator,
+                    ErrorHandler(),
+                    AppEventBus(),
+                )
+
+            viewModel.onAppResumed()
+            advanceUntilIdle()
+
+            assertEquals(1, repository.ensureScheduledCalls)
+        }
 }
 
 private object SuccessfulStartupCoordinator : StartupCoordinator {
@@ -196,6 +216,14 @@ private object FakeDownloadRepository : DownloadRepository {
     override suspend fun recoverPendingDownloads() = Unit
 
     override suspend fun refreshNetworkPolicy() = Unit
+}
+
+private class TrackingDownloadRepository : DownloadRepository by FakeDownloadRepository {
+    var ensureScheduledCalls = 0
+
+    override suspend fun ensurePendingDownloadsScheduled() {
+        ensureScheduledCalls++
+    }
 }
 
 private fun downloadTask(status: DownloadStatus) =

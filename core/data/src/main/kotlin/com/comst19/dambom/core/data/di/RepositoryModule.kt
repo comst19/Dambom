@@ -1,7 +1,11 @@
 package com.comst19.dambom.core.data.di
 
+import com.comst19.dambom.core.data.download.AdaptiveDownloadWorkScheduler
+import com.comst19.dambom.core.data.download.ContextDownloadWorkManager
+import com.comst19.dambom.core.data.download.DownloadWorkManager
 import com.comst19.dambom.core.data.download.DownloadWorkScheduler
-import com.comst19.dambom.core.data.download.WorkManagerDownloadScheduler
+import com.comst19.dambom.core.data.download.JobSchedulerUidtBackend
+import com.comst19.dambom.core.data.download.UidtJobBackend
 import com.comst19.dambom.core.data.repository.ConnectivityNetworkMonitor
 import com.comst19.dambom.core.data.repository.DefaultDownloadRepository
 import com.comst19.dambom.core.data.repository.DefaultMediaDetectionRepository
@@ -49,5 +53,13 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    internal abstract fun bindDownloadWorkScheduler(implementation: WorkManagerDownloadScheduler): DownloadWorkScheduler
+    internal abstract fun bindDownloadWorkManager(implementation: ContextDownloadWorkManager): DownloadWorkManager
+
+    @Binds
+    @Singleton
+    internal abstract fun bindUidtJobBackend(implementation: JobSchedulerUidtBackend): UidtJobBackend
+
+    @Binds
+    @Singleton
+    internal abstract fun bindDownloadWorkScheduler(scheduler: AdaptiveDownloadWorkScheduler): DownloadWorkScheduler
 }

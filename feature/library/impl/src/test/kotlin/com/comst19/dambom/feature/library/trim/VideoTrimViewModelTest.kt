@@ -161,6 +161,59 @@ class VideoTrimViewModelTest {
             assertEquals(destination.toString(), saved.get<String>("trim-saved-uri"))
         }
 
+    @Test
+    fun `a second picker document is discarded without deleting the active destination`() =
+        runTest(main.dispatcher) {
+            val exporter = FakeClipExporter().apply { exportGate = CompletableDeferred() }
+            val model = model(exporter)
+            model.export("saved-video", destination)
+            runCurrent()
+            val duplicate = Uri.parse("content://test.documents/duplicate")
+            model.export("saved-video", duplicate)
+            model.export("saved-video", destination)
+            runCurrent()
+            assertEquals(listOf(duplicate.toString()), exporter.discarded)
+            assertEquals(1, exporter.exports)
+            assertTrue(model.state.value.exporting)
+            exporter.exportGate?.complete(Unit)
+            runCurrent()
+            assertEquals(destination.toString(), model.state.value.savedUri)
+            assertFalse(model.state.value.exporting)
+        }
+
+    @Test
+    fun `canceling export while discard is pending lets a new export keep its active destination`() =
+        runTest(main.dispatcher) {
+            val exporter =
+                FakeClipExporter().apply {
+                    durationGate = CompletableDeferred()
+                    discardGate = CompletableDeferred()
+                    exportGate = CompletableDeferred()
+                }
+            val model = model(exporter)
+            val second = Uri.parse("content://test.documents/second")
+            model.export("saved-video", destination)
+            runCurrent()
+            model.cancelExport()
+            runCurrent()
+            model.export("saved-video", second)
+            runCurrent()
+            exporter.discardGate?.complete(Unit)
+            runCurrent()
+            assertTrue(model.state.value.exporting)
+            model.export("saved-video", second)
+            runCurrent()
+            exporter.durationGate?.complete(20_000L)
+            runCurrent()
+            exporter.exportGate?.complete(Unit)
+            runCurrent()
+            assertEquals(listOf(destination.toString()), exporter.discarded)
+            assertEquals(1, exporter.exports)
+            assertEquals(second.toString(), model.state.value.savedUri)
+            assertFalse(model.state.value.exporting)
+            assertFalse(model.state.value.exportFailed)
+        }
+
     private fun model(
         exporter: FakeClipExporter,
         saved: SavedStateHandle = SavedStateHandle(),
@@ -204,6 +257,7 @@ class VideoTrimViewModelTest {
 private class FakeClipExporter : ClipExporter {
     var durationGate: CompletableDeferred<Long>? = null
     var exportGate: CompletableDeferred<Unit>? = null
+    var discardGate: CompletableDeferred<Unit>? = null
     var durationCalls = 0
     var exports = 0
     var failDuration = false
@@ -236,6 +290,7 @@ private class FakeClipExporter : ClipExporter {
     }
 
     override suspend fun discard(destination: String) {
+        discardGate?.await()
         discarded += destination
     }
 }

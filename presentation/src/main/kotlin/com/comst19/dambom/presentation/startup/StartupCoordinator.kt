@@ -3,6 +3,7 @@ package com.comst19.dambom.presentation.startup
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
+import com.comst19.dambom.core.common.ui.locale.AppLanguagePreferences
 import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.coroutine.ApplicationScope
 import com.comst19.dambom.core.domain.repository.DownloadRepository
@@ -15,7 +16,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 interface StartupCoordinator {
-    fun initialize(): TopLevelNavKey
+    suspend fun initialize(): TopLevelNavKey
 }
 
 @Singleton
@@ -23,10 +24,11 @@ class DefaultStartupCoordinator
     @Inject
     constructor(
         private val downloadRepository: DownloadRepository,
+        private val appLanguagePreferences: AppLanguagePreferences,
         private val appEventBus: AppEventBus,
         @ApplicationScope private val applicationScope: CoroutineScope,
     ) : StartupCoordinator {
-        override fun initialize(): TopLevelNavKey {
+        override suspend fun initialize(): TopLevelNavKey {
             applicationScope.launch {
                 suspendRunCatching { downloadRepository.recoverPendingDownloads() }
                     .onFailure {
@@ -35,6 +37,7 @@ class DefaultStartupCoordinator
                         )
                     }
             }
+            suspendRunCatching { appLanguagePreferences.syncSystemLanguage() }
             return HomeKey
         }
     }

@@ -6,6 +6,7 @@ import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.SnackbarDuration
 import com.comst19.dambom.core.common.ui.UiText
+import com.comst19.dambom.core.common.ui.locale.AppLanguagePreferences
 import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.domain.error.AppDecodingException
 import com.comst19.dambom.core.domain.error.AppErrorCode
@@ -36,11 +37,13 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel
     @Inject
+    @Suppress("LongParameterList")
     constructor(
         repository: SettingsRepository,
         networkMonitor: NetworkMonitor,
         private val downloadRepository: DownloadRepository,
         private val startupCoordinator: StartupCoordinator,
+        private val appLanguagePreferences: AppLanguagePreferences,
         private val errorHandler: ErrorHandler,
         private val appEventBus: AppEventBus,
     ) : ViewModel() {
@@ -71,19 +74,24 @@ class MainViewModel
 
         fun onAppResumed() {
             viewModelScope.launch {
+                suspendRunCatching { appLanguagePreferences.syncSystemLanguage() }
+            }
+            viewModelScope.launch {
                 suspendRunCatching { downloadRepository.ensurePendingDownloadsScheduled() }
             }
         }
 
         private fun initializeStartup() {
-            runCatching(startupCoordinator::initialize).fold(
-                onSuccess = { startKey ->
-                    _startupState.value = AppStartupState.Ready(startKey)
-                },
-                onFailure = {
-                    _startupState.value = AppStartupState.Failed(StartupFailure.InitializationFailed)
-                },
-            )
+            viewModelScope.launch {
+                suspendRunCatching { startupCoordinator.initialize() }.fold(
+                    onSuccess = { startKey ->
+                        _startupState.value = AppStartupState.Ready(startKey)
+                    },
+                    onFailure = {
+                        _startupState.value = AppStartupState.Failed(StartupFailure.InitializationFailed)
+                    },
+                )
+            }
         }
 
         private fun observeUnhandledErrors() {

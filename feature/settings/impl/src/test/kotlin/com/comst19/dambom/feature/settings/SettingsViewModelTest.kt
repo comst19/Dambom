@@ -42,41 +42,101 @@ class SettingsViewModelTest {
     @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
     @Test
-    fun `language state and platform locale stay in sync`() {
-        val platform = FakeSettingsPlatformActions(currentLanguageTags = "ko-KR")
-        val viewModel = createViewModel(platformActions = platform)
+    fun `language state and platform locale stay in sync`() =
+        runTest {
+            val platform = FakeSettingsPlatformActions(currentLanguageTags = "ko-KR")
+            val viewModel = createViewModel(platformActions = platform)
 
-        assertEquals(AppLanguage.KOREAN, viewModel.language.value)
+            advanceUntilIdle()
+            assertEquals(AppLanguage.KOREAN, viewModel.language.value)
 
-        viewModel.setLanguage(AppLanguage.ENGLISH)
+            viewModel.setLanguage(AppLanguage.ENGLISH)
+            advanceUntilIdle()
 
-        assertEquals(AppLanguage.ENGLISH, viewModel.language.value)
-        assertEquals("en", platform.appliedLanguageTag)
-    }
-
-    @Test
-    fun `resuming settings refreshes an externally changed language`() {
-        val platform = FakeSettingsPlatformActions(currentLanguageTags = "ko")
-        val viewModel = createViewModel(platformActions = platform)
-
-        platform.currentLanguageTags = "fr-FR"
-        viewModel.refreshLanguage()
-
-        assertEquals(AppLanguage.FRENCH, viewModel.language.value)
-        assertNull(platform.appliedLanguageTag)
-    }
+            assertEquals(AppLanguage.ENGLISH, viewModel.language.value)
+            assertEquals("en", platform.appliedLanguageTag)
+        }
 
     @Test
-    fun `resuming settings reflects a return to automatic selection`() {
-        val platform = FakeSettingsPlatformActions(currentLanguageTags = "fr")
-        val viewModel = createViewModel(platformActions = platform)
+    fun `resuming settings refreshes an externally changed language`() =
+        runTest {
+            val platform = FakeSettingsPlatformActions(currentLanguageTags = "ko")
+            val viewModel = createViewModel(platformActions = platform)
 
-        platform.currentLanguageTags = ""
-        viewModel.refreshLanguage()
+            advanceUntilIdle()
+            platform.currentLanguageTags = "fr-FR"
+            viewModel.refreshLanguage()
+            advanceUntilIdle()
 
-        assertEquals(AppLanguage.SYSTEM, viewModel.language.value)
-        assertNull(platform.appliedLanguageTag)
-    }
+            assertEquals(AppLanguage.FRENCH, viewModel.language.value)
+            assertNull(platform.appliedLanguageTag)
+        }
+
+    @Test
+    fun `resuming settings reflects a return to automatic selection`() =
+        runTest {
+            val platform = FakeSettingsPlatformActions(currentLanguageTags = "fr")
+            val viewModel = createViewModel(platformActions = platform)
+
+            advanceUntilIdle()
+            platform.currentLanguageTags = ""
+            viewModel.refreshLanguage()
+            advanceUntilIdle()
+
+            assertEquals(AppLanguage.SYSTEM, viewModel.language.value)
+            assertNull(platform.appliedLanguageTag)
+        }
+
+    @Test
+    fun `language persistence failure reports feedback and restores previous selection`() =
+        runTest {
+            val platform =
+                FakeSettingsPlatformActions(
+                    currentLanguageTags = "ko",
+                    applyLanguageFailure = IOException("language"),
+                )
+            val events = AppEventBus()
+            val viewModel = createViewModel(platformActions = platform, appEventBus = events)
+
+            advanceUntilIdle()
+            assertEquals(AppLanguage.KOREAN, viewModel.language.value)
+
+            viewModel.setLanguage(AppLanguage.ENGLISH)
+            advanceUntilIdle()
+
+            assertEquals(1, platform.applyLanguageCalls)
+            assertEquals(AppLanguage.KOREAN, viewModel.language.value)
+            assertEquals(
+                R.string.settings_update_failure,
+                ((events.events.first() as AppEvent.ShowSnackbar).message as UiText.Resource).id,
+            )
+        }
+
+    @Test
+    fun `stale initial refresh does not overwrite a subsequent language selection`() =
+        runTest {
+            val initialReadStarted = CompletableDeferred<Unit>()
+            val initialReadGate = CompletableDeferred<Unit>()
+            val platform =
+                FakeSettingsPlatformActions(
+                    currentLanguageTags = "ko",
+                    firstLanguageReadStarted = initialReadStarted,
+                    firstLanguageReadGate = initialReadGate,
+                )
+            val viewModel = createViewModel(platformActions = platform)
+
+            initialReadStarted.await()
+            viewModel.setLanguage(AppLanguage.GERMAN)
+            runCurrent()
+
+            assertNull(platform.appliedLanguageTag)
+
+            initialReadGate.complete(Unit)
+            advanceUntilIdle()
+
+            assertEquals("de", platform.appliedLanguageTag)
+            assertEquals(AppLanguage.GERMAN, viewModel.language.value)
+        }
 
     @Test
     fun `persisted directory is saved in settings`() =
@@ -465,15 +525,31 @@ class SettingsViewModelTest {
 }
 
 private class FakeSettingsPlatformActions(
-    override var currentLanguageTags: String = "",
+    var currentLanguageTags: String = "",
     override val versionName: String = "1.0.1",
     private val canPersistDirectory: Boolean = true,
+    private val applyLanguageFailure: Throwable? = null,
+    private val firstLanguageReadStarted: CompletableDeferred<Unit>? = null,
+    private val firstLanguageReadGate: CompletableDeferred<Unit>? = null,
 ) : SettingsPlatformActions {
     var appliedLanguageTag: String? = null
+    var applyLanguageCalls = 0
     val calls = mutableListOf<String>()
+    private var languageReadCalls = 0
 
-    override fun applyLanguage(languageTag: String) {
+    override suspend fun currentLanguageTags(): String {
+        if (languageReadCalls++ == 0) {
+            firstLanguageReadStarted?.complete(Unit)
+            firstLanguageReadGate?.await()
+        }
+        return currentLanguageTags
+    }
+
+    override suspend fun applyLanguage(languageTag: String) {
+        applyLanguageCalls++
+        applyLanguageFailure?.let { throw it }
         appliedLanguageTag = languageTag
+        currentLanguageTags = languageTag
     }
 
     override fun takePersistedDownloadDirectory(treeUri: String): Boolean {

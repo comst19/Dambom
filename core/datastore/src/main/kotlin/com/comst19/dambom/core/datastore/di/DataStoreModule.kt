@@ -1,5 +1,7 @@
 package com.comst19.dambom.core.datastore.di
 
+import com.comst19.dambom.core.datastore.AppLanguageDataSource
+import com.comst19.dambom.core.datastore.PreferencesAppLanguageDataSource
 import com.comst19.dambom.core.datastore.PreferencesSettingsDataSource
 import com.comst19.dambom.core.datastore.SettingsDataSource
 import dagger.Binds
@@ -12,4 +14,7 @@ import dagger.hilt.components.SingletonComponent
 abstract class DataStoreModule {
     @Binds
     abstract fun bindSettingsDataSource(implementation: PreferencesSettingsDataSource): SettingsDataSource
+
+    @Binds
+    abstract fun bindAppLanguageDataSource(implementation: PreferencesAppLanguageDataSource): AppLanguageDataSource
 }

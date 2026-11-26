@@ -9,6 +9,7 @@ android { namespace = "com.comst19.dambom.core.common.ui" }
 
 dependencies {
     implementation(projects.core.common)
+    implementation(projects.core.domain)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.compose.material.icons.extended)
@@ -18,4 +19,5 @@ dependencies {
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.video)
     implementation(libs.kotlinx.coroutines.android)
+    testImplementation(projects.core.datastore)
 }

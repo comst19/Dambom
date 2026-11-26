@@ -7,11 +7,13 @@ import com.comst19.dambom.core.data.download.DownloadWorkScheduler
 import com.comst19.dambom.core.data.download.JobSchedulerUidtBackend
 import com.comst19.dambom.core.data.download.UidtJobBackend
 import com.comst19.dambom.core.data.repository.ConnectivityNetworkMonitor
+import com.comst19.dambom.core.data.repository.DefaultAppLanguagePreferenceStore
 import com.comst19.dambom.core.data.repository.DefaultDownloadRepository
 import com.comst19.dambom.core.data.repository.DefaultMediaDetectionRepository
 import com.comst19.dambom.core.data.repository.DefaultPlaybackHistoryRepository
 import com.comst19.dambom.core.data.repository.DefaultSettingsRepository
 import com.comst19.dambom.core.data.repository.DefaultVideoTagRepository
+import com.comst19.dambom.core.domain.repository.AppLanguagePreferenceStore
 import com.comst19.dambom.core.domain.repository.DownloadRepository
 import com.comst19.dambom.core.domain.repository.MediaDetectionRepository
 import com.comst19.dambom.core.domain.repository.NetworkMonitor
@@ -46,6 +48,10 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSettingsRepository(implementation: DefaultSettingsRepository): SettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAppLanguagePreferenceStore(impl: DefaultAppLanguagePreferenceStore): AppLanguagePreferenceStore
 
     @Binds
     @Singleton

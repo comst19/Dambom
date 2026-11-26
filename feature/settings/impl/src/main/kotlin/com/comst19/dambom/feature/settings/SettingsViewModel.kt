@@ -47,7 +47,8 @@ internal class SettingsViewModel
         @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     ) : ViewModel() {
         private val downloadLocationMutex = Mutex()
-        private val mutableLanguage = MutableStateFlow(AppLanguage.from(platformActions.currentLanguageTags))
+        private val languageMutex = Mutex()
+        private val mutableLanguage = MutableStateFlow(AppLanguage.SYSTEM)
 
         val settings: StateFlow<AppSettings> =
             repository.settings.stateIn(
@@ -58,17 +59,36 @@ internal class SettingsViewModel
         val language: StateFlow<AppLanguage> = mutableLanguage.asStateFlow()
         val versionName: String = platformActions.versionName
 
+        init {
+            refreshLanguage()
+        }
+
         fun setThemeMode(mode: ThemeMode) {
             launchSettingUpdate { repository.setThemeMode(mode) }
         }
 
         fun refreshLanguage() {
-            mutableLanguage.value = AppLanguage.from(platformActions.currentLanguageTags)
+            viewModelScope.launch {
+                languageMutex.withLock {
+                    suspendRunCatching { platformActions.currentLanguageTags() }
+                        .onSuccess { tags -> mutableLanguage.value = AppLanguage.from(tags) }
+                }
+            }
         }
 
         fun setLanguage(language: AppLanguage) {
-            mutableLanguage.value = language
-            platformActions.applyLanguage(language.languageTag)
+            viewModelScope.launch {
+                languageMutex.withLock {
+                    val previous = mutableLanguage.value
+                    mutableLanguage.value = language
+                    val applied = updateSetting { platformActions.applyLanguage(language.languageTag) }
+                    if (!applied) {
+                        mutableLanguage.value =
+                            suspendRunCatching { AppLanguage.from(platformActions.currentLanguageTags()) }
+                                .getOrDefault(previous)
+                    }
+                }
+            }
         }
 
         fun setClipboardSuggestion(enabled: Boolean) {

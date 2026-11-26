@@ -1,56 +1,105 @@
 package com.comst19.dambom.core.common.ui.locale
 
+import android.app.LocaleManager
 import android.content.Context
 import android.icu.util.ULocale
+import android.os.Build
+import android.os.LocaleList
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.LocaleManagerCompat
 import androidx.core.os.LocaleListCompat
 import com.comst19.dambom.core.common.locale.AppLocalePolicy
+import com.comst19.dambom.core.domain.model.AppLanguagePreference
+import com.comst19.dambom.core.domain.repository.AppLanguagePreferenceStore
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.util.Locale
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object AppLanguagePreferences {
-    fun selectedLanguageTags(context: Context): String {
-        val currentTags = AppCompatDelegate.getApplicationLocales().toLanguageTags()
-        val preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-        val automatic =
-            preferences.getBoolean(FOLLOW_SYSTEM, false) &&
-                preferences.getString(AUTOMATIC_TAG, null) == currentTags
-        return if (automatic) "" else currentTags
-    }
+interface AppLanguagePreferences {
+    suspend fun selectedLanguageTags(): String
 
-    fun apply(
-        context: Context,
-        languageTag: String,
-    ) {
-        if (languageTag.isEmpty()) {
-            applySystemLanguage(context)
-            return
+    suspend fun apply(languageTag: String)
+
+    suspend fun syncSystemLanguage()
+}
+
+@Singleton
+class DefaultAppLanguagePreferences internal constructor(
+    private val context: Context,
+    private val store: AppLanguagePreferenceStore,
+    private val mainDispatcher: CoroutineDispatcher,
+) : AppLanguagePreferences {
+    @Inject
+    constructor(
+        @ApplicationContext context: Context,
+        store: AppLanguagePreferenceStore,
+    ) : this(
+        context = context,
+        store = store,
+        mainDispatcher = Dispatchers.Main.immediate,
+    )
+
+    private val mutex = Mutex()
+
+    override suspend fun selectedLanguageTags(): String =
+        mutex.withLock {
+            val stored = store.read()
+            val currentTags = readApplicationLanguageTags()
+            selectedLanguageTags(stored, currentTags)
         }
-        context
-            .getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putBoolean(FOLLOW_SYSTEM, false)
-            .remove(AUTOMATIC_TAG)
-            .apply()
-        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(languageTag))
-    }
 
-    fun syncSystemLanguage(context: Context) {
-        if (selectedLanguageTags(context).isEmpty()) {
-            applySystemLanguage(context)
-        } else {
-            val preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-            if (preferences.getBoolean(FOLLOW_SYSTEM, false)) {
-                preferences
-                    .edit()
-                    .putBoolean(FOLLOW_SYSTEM, false)
-                    .remove(AUTOMATIC_TAG)
-                    .apply()
+    override suspend fun apply(languageTag: String) {
+        mutex.withLock {
+            withContext(NonCancellable) {
+                if (languageTag.isEmpty()) {
+                    applySystemLanguageLocked(store.read())
+                } else {
+                    store.clearAutomatic()
+                    setApplicationLocales(LocaleListCompat.forLanguageTags(languageTag))
+                }
             }
         }
     }
 
-    private fun applySystemLanguage(context: Context) {
+    override suspend fun syncSystemLanguage() {
+        mutex.withLock {
+            val stored = store.read()
+            val currentTags = readApplicationLanguageTags()
+            if (selectedLanguageTags(stored, currentTags).isEmpty()) {
+                withContext(NonCancellable) {
+                    applySystemLanguageLocked(stored)
+                }
+            } else if (stored.followSystem) {
+                withContext(NonCancellable) {
+                    store.clearAutomatic()
+                }
+            }
+        }
+    }
+
+    private suspend fun applySystemLanguageLocked(stored: AppLanguagePreference) {
+        val languageTag = resolveSystemLanguageTag()
+        val automaticSelectionChanged =
+            !stored.followSystem || stored.automaticTag != languageTag
+        if (automaticSelectionChanged) {
+            store.setAutomatic(languageTag)
+        }
+        val locales = LocaleListCompat.forLanguageTags(languageTag)
+        withContext(mainDispatcher) {
+            if (readApplicationLocalesOnMain() != locales) {
+                writeApplicationLocalesOnMain(locales)
+            }
+        }
+    }
+
+    private fun resolveSystemLanguageTag(): String {
         val systemLocales = LocaleManagerCompat.getSystemLocales(context)
         val primaryLocale =
             systemLocales[0]?.let { locale ->
@@ -65,25 +114,46 @@ object AppLanguagePreferences {
                         .build()
                 }
             }
-        val languageTag = AppLocalePolicy.resolve(listOfNotNull(primaryLocale))
-        val preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-        val automaticSelectionChanged =
-            !preferences.getBoolean(FOLLOW_SYSTEM, false) ||
-                preferences.getString(AUTOMATIC_TAG, null) != languageTag
-        if (automaticSelectionChanged) {
-            preferences
-                .edit()
-                .putBoolean(FOLLOW_SYSTEM, true)
-                .putString(AUTOMATIC_TAG, languageTag)
-                .apply()
+        return AppLocalePolicy.resolve(listOfNotNull(primaryLocale))
+    }
+
+    private suspend fun readApplicationLanguageTags(): String =
+        withContext(mainDispatcher) {
+            readApplicationLocalesOnMain().toLanguageTags()
         }
-        val locales = LocaleListCompat.forLanguageTags(languageTag)
-        if (AppCompatDelegate.getApplicationLocales() != locales) {
-            AppCompatDelegate.setApplicationLocales(locales)
+
+    private suspend fun setApplicationLocales(locales: LocaleListCompat) {
+        withContext(mainDispatcher) {
+            writeApplicationLocalesOnMain(locales)
         }
     }
 
-    private const val PREFERENCES_NAME = "app_language"
-    private const val FOLLOW_SYSTEM = "follow_system"
-    private const val AUTOMATIC_TAG = "automatic_tag"
+    private fun readApplicationLocalesOnMain(): LocaleListCompat {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val localeManager = context.getSystemService(LocaleManager::class.java)
+            if (localeManager != null) {
+                return LocaleListCompat.wrap(localeManager.applicationLocales)
+            }
+        }
+        return AppCompatDelegate.getApplicationLocales()
+    }
+
+    private fun writeApplicationLocalesOnMain(locales: LocaleListCompat) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val localeManager = context.getSystemService(LocaleManager::class.java)
+            if (localeManager != null) {
+                localeManager.applicationLocales = LocaleList.forLanguageTags(locales.toLanguageTags())
+                return
+            }
+        }
+        AppCompatDelegate.setApplicationLocales(locales)
+    }
+
+    private fun selectedLanguageTags(
+        stored: AppLanguagePreference,
+        currentTags: String,
+    ): String {
+        val automatic = stored.followSystem && stored.automaticTag == currentTags
+        return if (automatic) "" else currentTags
+    }
 }

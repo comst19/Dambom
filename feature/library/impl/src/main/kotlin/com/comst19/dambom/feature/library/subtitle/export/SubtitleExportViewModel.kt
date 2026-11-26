@@ -15,6 +15,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -45,6 +47,7 @@ internal class SubtitleExportViewModel
         val state = mutableState.asStateFlow()
         private var loadJob: Job? = null
         private var exportJob: Job? = null
+        private var activeExportToken: Any? = null
         private var activeDestination: String? = null
 
         fun load(id: String) {
@@ -66,9 +69,17 @@ internal class SubtitleExportViewModel
         ) {
             val uri = destination.toString()
             if (exportJob?.isActive == true) {
-                if (activeDestination != uri) viewModelScope.launch { exporter.discard(uri) }
+                if (activeDestination != uri) {
+                    viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
+                        withContext(NonCancellable) {
+                            suspendRunCatching { exporter.discard(uri) }
+                        }
+                    }
+                }
                 return
             }
+            val exportToken = Any()
+            activeExportToken = exportToken
             activeDestination = uri
             exportJob =
                 viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
@@ -80,6 +91,7 @@ internal class SubtitleExportViewModel
                         val path = checkNotNull(task.localFilePath)
                         val cues = files.read(path)
                         check(cues.isNotEmpty())
+                        currentCoroutineContext().ensureActive()
                         owned = true
                         exporter.export(path, cues, uri) { value -> mutableState.update { it.copy(progress = value) } }
                         mutableState.update { it.copy(saved = true) }
@@ -88,9 +100,16 @@ internal class SubtitleExportViewModel
                     } catch (_: Exception) {
                         mutableState.update { it.copy(failed = true) }
                     } finally {
-                        if (!owned) withContext(NonCancellable) { exporter.discard(uri) }
-                        activeDestination = null
-                        mutableState.update { it.copy(exporting = false, progress = null) }
+                        if (!owned) {
+                            withContext(NonCancellable) {
+                                suspendRunCatching { exporter.discard(uri) }
+                            }
+                        }
+                        if (activeExportToken === exportToken) {
+                            activeExportToken = null
+                            activeDestination = null
+                            mutableState.update { it.copy(exporting = false, progress = null) }
+                        }
                     }
                 }
         }

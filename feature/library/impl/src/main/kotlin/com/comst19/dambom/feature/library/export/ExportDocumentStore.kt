@@ -18,6 +18,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -36,44 +37,53 @@ class ExportDocumentStore
             destination: Uri,
             transform: (suspend (File) -> Unit)? = null,
             source: (File) -> File,
-        ): Long =
-            withContext(io) {
-                val entry = Entry(UUID.randomUUID().toString(), destination, ownsGrant(destination))
-                var complete = false
-                try {
-                    synchronized(active) {
-                        entry.record()
-                        active.add(entry.id)
-                    }
-                    if (entry.releaseGrant) {
-                        // Tree grants already cover child documents. Some providers only grant temporary access.
-                        runCatching { resolver.takePersistableUriPermission(destination, WRITE_GRANT) }
-                    }
-                    val temporary = entry.temporary
-                    transform?.invoke(temporary)
-                    val file = source(temporary)
-                    val size = file.length()
-                    check(size > 0) { "Export source is empty or missing" }
-                    copyStreams(
-                        openInput = file::inputStream,
-                        openOutput = { checkNotNull(resolver.openOutputStream(destination, "wt")) },
-                    )
-                    currentCoroutineContext().ensureActive()
-                    entry.commit()
-                    complete = true
-                    size
-                } finally {
-                    withContext(NonCancellable) {
-                        try {
-                            val removed = complete || removeDocument(destination)
-                            entry.finish()
-                            if (!removed) showCleanupWarning()
-                        } finally {
-                            synchronized(active) { active.remove(entry.id) }
+        ): Long {
+            val handledByStore = AtomicBoolean(false)
+            try {
+                return withContext(io) {
+                    val entry = Entry(UUID.randomUUID().toString(), destination, ownsGrant(destination))
+                    var complete = false
+                    try {
+                        handledByStore.set(true)
+                        synchronized(active) {
+                            entry.record()
+                            active.add(entry.id)
+                        }
+                        if (entry.releaseGrant) {
+                            // Tree grants already cover child documents. Some providers only grant temporary access.
+                            runCatching { resolver.takePersistableUriPermission(destination, WRITE_GRANT) }
+                        }
+                        val temporary = entry.temporary
+                        transform?.invoke(temporary)
+                        val file = source(temporary)
+                        val size = file.length()
+                        check(size > 0) { "Export source is empty or missing" }
+                        copyStreams(
+                            openInput = file::inputStream,
+                            openOutput = { checkNotNull(resolver.openOutputStream(destination, "wt")) },
+                        )
+                        currentCoroutineContext().ensureActive()
+                        entry.commit()
+                        complete = true
+                        size
+                    } finally {
+                        withContext(NonCancellable) {
+                            try {
+                                val removed = complete || removeDocument(destination)
+                                entry.finish()
+                                if (!removed) showCleanupWarning()
+                            } finally {
+                                synchronized(active) { active.remove(entry.id) }
+                            }
                         }
                     }
                 }
+            } finally {
+                if (!handledByStore.get()) {
+                    discard(destination)
+                }
             }
+        }
 
         internal suspend fun discard(destination: Uri) {
             withContext(NonCancellable + io) {

@@ -17,6 +17,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -38,6 +40,8 @@ internal class VideoTrimViewModel
         val state = mutableState.asStateFlow()
         private var exportJob: Job? = null
         private var loadJob: Job? = null
+        private var activeExportToken: Any? = null
+        private var activeDestination: String? = null
 
         fun load(id: String) {
             if (state.value.task != null || loadJob?.isActive == true) return
@@ -74,7 +78,20 @@ internal class VideoTrimViewModel
             id: String,
             destination: Uri,
         ) {
-            if (exportJob?.isActive == true) return
+            val destinationUri = destination.toString()
+            if (exportJob?.isActive == true) {
+                if (activeDestination != destinationUri) {
+                    viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
+                        withContext(NonCancellable) {
+                            suspendRunCatching { exporter.discard(destinationUri) }
+                        }
+                    }
+                }
+                return
+            }
+            val exportToken = Any()
+            activeExportToken = exportToken
+            activeDestination = destinationUri
             exportJob =
                 viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
                     mutableState.update {
@@ -87,24 +104,31 @@ internal class VideoTrimViewModel
                         loadJob?.join()
                         val current = state.value
                         val path = checkNotNull(current.task?.localFilePath)
+                        currentCoroutineContext().ensureActive()
                         exporterOwnsDocument = true
                         exporter.export(
                             path = path,
                             selection = current.selection,
-                            destination = destination.toString(),
+                            destination = destinationUri,
                             onProgress = { progress -> mutableState.update { it.copy(progress = progress) } },
                         )
-                        savedState["trim-saved-uri"] = destination.toString()
-                        mutableState.update { it.copy(savedUri = destination.toString()) }
+                        savedState["trim-saved-uri"] = destinationUri
+                        mutableState.update { it.copy(savedUri = destinationUri) }
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (_: Exception) {
                         mutableState.update { it.copy(exportFailed = true) }
                     } finally {
                         if (!exporterOwnsDocument) {
-                            withContext(NonCancellable) { exporter.discard(destination.toString()) }
+                            withContext(NonCancellable) {
+                                suspendRunCatching { exporter.discard(destinationUri) }
+                            }
                         }
-                        mutableState.update { it.copy(exporting = false, progress = null) }
+                        if (activeExportToken === exportToken) {
+                            activeExportToken = null
+                            activeDestination = null
+                            mutableState.update { it.copy(exporting = false, progress = null) }
+                        }
                     }
                 }
         }

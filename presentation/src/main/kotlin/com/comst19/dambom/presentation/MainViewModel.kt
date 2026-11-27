@@ -8,12 +8,6 @@ import com.comst19.dambom.core.common.ui.SnackbarDuration
 import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.ui.locale.AppLanguagePreferences
 import com.comst19.dambom.core.common.util.suspendRunCatching
-import com.comst19.dambom.core.domain.error.AppDecodingException
-import com.comst19.dambom.core.domain.error.AppErrorCode
-import com.comst19.dambom.core.domain.error.AppNetworkException
-import com.comst19.dambom.core.domain.error.AppRequestException
-import com.comst19.dambom.core.domain.error.ErrorHandler
-import com.comst19.dambom.core.domain.error.NetworkFailureReason
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadStatus
 import com.comst19.dambom.core.domain.model.DownloadStatusSnapshot
@@ -44,7 +38,6 @@ class MainViewModel
         private val downloadRepository: DownloadRepository,
         private val startupCoordinator: StartupCoordinator,
         private val appLanguagePreferences: AppLanguagePreferences,
-        private val errorHandler: ErrorHandler,
         private val appEventBus: AppEventBus,
     ) : ViewModel() {
         private val _startupState = MutableStateFlow<AppStartupState>(AppStartupState.Initializing)
@@ -68,7 +61,6 @@ class MainViewModel
 
         init {
             initializeStartup()
-            observeUnhandledErrors()
             observeDownloadFeedback(downloadRepository)
         }
 
@@ -94,12 +86,6 @@ class MainViewModel
             }
         }
 
-        private fun observeUnhandledErrors() {
-            viewModelScope.launch {
-                errorHandler.errors.collect(::handleUnhandledError)
-            }
-        }
-
         private fun observeDownloadFeedback(repository: DownloadRepository) {
             viewModelScope.launch {
                 var previousStatuses: Map<String, DownloadStatus>? = null
@@ -117,34 +103,6 @@ class MainViewModel
                     previousStatuses = tasks.associate { it.id to it.status }
                 }
             }
-        }
-
-        private suspend fun handleUnhandledError(error: Throwable) {
-            val message =
-                when (error) {
-                    is AppNetworkException -> {
-                        when (error.reason) {
-                            NetworkFailureReason.TIMEOUT -> "Request timed out"
-                            NetworkFailureReason.CONNECTION -> "Check your internet connection"
-                            NetworkFailureReason.UNKNOWN -> "Network connection failed"
-                        }
-                    }
-
-                    is AppRequestException -> {
-                        when (error.errorCode) {
-                            AppErrorCode.UNKNOWN -> "Network request failed"
-                        }
-                    }
-
-                    is AppDecodingException -> {
-                        "Unable to read server response"
-                    }
-
-                    else -> {
-                        "Something went wrong"
-                    }
-                }
-            appEventBus.send(AppEvent.ShowSnackbar(UiText.Dynamic(message)))
         }
     }
 

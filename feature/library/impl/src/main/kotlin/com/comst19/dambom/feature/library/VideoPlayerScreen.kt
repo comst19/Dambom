@@ -16,9 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +64,7 @@ internal fun VideoPlayerRoute(
     onVideoRotate: () -> Unit,
     libraryViewModel: LibraryViewModel = hiltViewModel(),
     playerViewModel: VideoPlayerViewModel = hiltViewModel(),
+    rememberVideoAvailability: @Composable (DownloadTask?, Int) -> State<Boolean?> = ::rememberLocalVideoAvailable,
 ) {
     val detailState =
         remember(libraryViewModel, id) {
@@ -74,7 +75,7 @@ internal fun VideoPlayerRoute(
         PrivateVideoWindowProtection()
     }
     var fileCheckRevision by remember { mutableIntStateOf(0) }
-    val fileAvailability by rememberLocalVideoAvailable(task, fileCheckRevision)
+    val fileAvailability = rememberVideoAvailability(task, fileCheckRevision).value
     val isLocalVideoAvailable = fileAvailability == true
 
     fun refreshLocalVideoAvailability() {
@@ -90,10 +91,6 @@ internal fun VideoPlayerRoute(
                 libraryViewModel.delete(video, closeDetail = true)
             },
         )
-
-    DisposableEffect(Unit) {
-        onDispose { onVideoFullscreenChange(false) }
-    }
 
     LifecycleEventEffect(Lifecycle.Event.ON_START) {
         refreshLocalVideoAvailability()
@@ -126,14 +123,14 @@ internal fun VideoPlayerRoute(
     if (task != null && !task.isPrivate) VideoPlayerMediaSessionEffect(playerViewModel.player)
     LaunchedEffect(detailState, isVideoFullscreen, task, fileAvailability) {
         if (detailState == VideoDetailState.Loading) return@LaunchedEffect
-        if (fileAvailability == null) return@LaunchedEffect
-        if (isLocalVideoAvailable) {
+        val available = fileAvailability ?: return@LaunchedEffect
+        if (available) {
             task?.let(playerViewModel::prepare)
         } else {
             playerViewModel.stopUnavailableVideo()
         }
         refreshLocalVideoAvailability()
-        if (shouldClearVideoFullscreen(isVideoFullscreen, isLocalVideoAvailable)) {
+        if (shouldClearVideoFullscreen(isVideoFullscreen, available)) {
             onVideoFullscreenChange(false)
         }
     }

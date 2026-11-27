@@ -215,6 +215,70 @@ class AppNavigationRestorationTest {
         composeRule.onNodeWithText("screen:detail:open-video-1:false:fullscreen=false").assertIsDisplayed()
     }
 
+    @Test
+    fun `restored video detail fullscreen synchronizes new host callback`() {
+        val harness = mountDambomAppHarness(config)
+        harness.seedNonDefaultPanelsAndFullscreen(navigateToLibraryFirst = true)
+        val saved = harness.save()
+        assertTrue(harness.fullscreenCallbacks.contains(true))
+
+        harness.fullscreenCallbacks.clear()
+        harness.restore(saved)
+
+        val restoredCtx = harness.context()
+        assertEquals(VideoDetailKey("seed-video", isPrivate = true), restoredCtx.state.currentKey)
+        assertTrue(restoredCtx.isVideoFullscreen())
+        assertEquals(listOf(true), harness.fullscreenCallbacks)
+    }
+
+    @Test
+    fun `mutating fullscreen after save does not corrupt saved in memory snapshot`() {
+        val harness = mountDambomAppHarness(config)
+        harness.seedNonDefaultPanelsAndFullscreen(navigateToLibraryFirst = true)
+        val saved = harness.save()
+
+        composeRule.runOnIdle {
+            harness.context().onVideoFullscreenChange(false)
+        }
+        composeRule.waitForIdle()
+        assertFalse(harness.context().isVideoFullscreen())
+
+        harness.fullscreenCallbacks.clear()
+        harness.restore(saved)
+
+        assertTrue(harness.context().isVideoFullscreen())
+        assertEquals(listOf(true), harness.fullscreenCallbacks)
+    }
+
+    @Test
+    fun `leaving video detail resets fullscreen state and notifies host`() {
+        val harness = mountDambomAppHarness(config)
+        harness.seedNonDefaultPanelsAndFullscreen(navigateToLibraryFirst = true)
+        harness.fullscreenCallbacks.clear()
+
+        harness.dispatch(NavigationEvent.Back)
+        assertEquals(LibraryKey, harness.context().state.currentKey)
+        assertFalse(harness.context().isVideoFullscreen())
+        assertEquals(listOf(false), harness.fullscreenCallbacks)
+
+        harness.fullscreenCallbacks.clear()
+        harness.dispatch(NavigationEvent.Navigate(VideoDetailKey("seed-video", isPrivate = true)))
+        assertFalse(harness.context().isVideoFullscreen())
+        assertTrue(harness.fullscreenCallbacks.isEmpty())
+    }
+
+    @Test
+    fun `switching to another video detail resets fullscreen state and notifies host`() {
+        val harness = mountDambomAppHarness(config)
+        harness.seedNonDefaultPanelsAndFullscreen(navigateToLibraryFirst = true)
+        harness.fullscreenCallbacks.clear()
+
+        harness.dispatch(NavigationEvent.Navigate(VideoDetailKey("other-video", isPrivate = false)))
+        assertEquals(VideoDetailKey("other-video", isPrivate = false), harness.context().state.currentKey)
+        assertFalse(harness.context().isVideoFullscreen())
+        assertEquals(listOf(false), harness.fullscreenCallbacks)
+    }
+
     private fun mountDambomAppHarness(navigationConfig: NavigationConfig): DambomAppHarness {
         val harness = DambomAppHarness()
         composeRule.setContent {

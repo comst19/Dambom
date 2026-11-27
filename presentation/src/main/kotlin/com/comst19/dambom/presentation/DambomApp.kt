@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.autoSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -56,18 +57,7 @@ internal fun DambomApp(
     val currentNetworkAccess = rememberUpdatedState(networkAccess)
     var isLibraryDetailPaneVisible by rememberSaveable { mutableStateOf(true) }
     var isHomeResultPaneVisible by rememberSaveable { mutableStateOf(true) }
-    var isVideoFullscreen by rememberSaveable { mutableStateOf(false) }
-    val activeVideoFullscreen = isVideoFullscreen && state.currentKey is VideoDetailKey
-    val updateVideoFullscreen: (Boolean) -> Unit = { fullscreen ->
-        isVideoFullscreen = fullscreen
-        onVideoFullscreenChange(fullscreen)
-    }
-
-    LaunchedEffect(state.currentKey, isVideoFullscreen) {
-        if (isVideoFullscreen && state.currentKey !is VideoDetailKey) {
-            updateVideoFullscreen(false)
-        }
-    }
+    val fullscreenState = rememberVideoFullscreenState(state, onVideoFullscreenChange)
 
     // 모든 feature가 발행한 명령은 이 단일 collector에서 순서대로 NavigationState에 반영합니다.
     LaunchedEffect(dispatcher, navigator) {
@@ -86,8 +76,8 @@ internal fun DambomApp(
                     isLibraryDetailPaneVisible = { isLibraryDetailPaneVisible },
                     onLibraryDetailPaneVisibilityChange = { isLibraryDetailPaneVisible = it },
                 ),
-            isVideoFullscreen = { isVideoFullscreen && state.currentKey is VideoDetailKey },
-            onVideoFullscreenChange = updateVideoFullscreen,
+            isVideoFullscreen = fullscreenState.isActive,
+            onVideoFullscreenChange = fullscreenState.onChange,
             onVideoRotate = onVideoRotate,
         )
     val entryProviderFactory = LocalDambomEntryProviderFactory.current ?: ::defaultDambomEntryProvider
@@ -102,7 +92,45 @@ internal fun DambomApp(
         networkAccess = networkAccess,
         isLibraryDetailPaneVisible = isLibraryDetailPaneVisible,
         isHomeResultPaneVisible = isHomeResultPaneVisible,
-        isVideoFullscreen = activeVideoFullscreen,
+        isVideoFullscreen = fullscreenState.active,
+    )
+}
+
+private class VideoFullscreenState(
+    val active: Boolean,
+    val isActive: () -> Boolean,
+    val onChange: (Boolean) -> Unit,
+)
+
+@Composable
+private fun rememberVideoFullscreenState(
+    state: NavigationState,
+    onVideoFullscreenChange: (Boolean) -> Unit,
+): VideoFullscreenState {
+    var fullscreenVideoId by rememberSaveable(stateSaver = autoSaver()) { mutableStateOf<String?>(null) }
+    val currentVideoDetailKey = state.currentKey as? VideoDetailKey
+    val activeVideoFullscreen = currentVideoDetailKey != null && fullscreenVideoId == currentVideoDetailKey.id
+    val currentOnVideoFullscreenChange by rememberUpdatedState(onVideoFullscreenChange)
+
+    LaunchedEffect(currentVideoDetailKey, fullscreenVideoId) {
+        if (fullscreenVideoId != null && fullscreenVideoId != currentVideoDetailKey?.id) {
+            fullscreenVideoId = null
+        }
+    }
+
+    LaunchedEffect(activeVideoFullscreen) {
+        currentOnVideoFullscreenChange(activeVideoFullscreen)
+    }
+
+    return VideoFullscreenState(
+        active = activeVideoFullscreen,
+        isActive = {
+            val detailKey = state.currentKey as? VideoDetailKey
+            detailKey != null && fullscreenVideoId == detailKey.id
+        },
+        onChange = { fullscreen ->
+            fullscreenVideoId = if (fullscreen) (state.currentKey as? VideoDetailKey)?.id else null
+        },
     )
 }
 

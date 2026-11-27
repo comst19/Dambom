@@ -2,6 +2,7 @@ package com.comst19.dambom.presentation
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,6 +47,7 @@ internal fun MainActivityContent(
             }
 
             is AppStartupState.Failed -> {
+                LaunchedEffect(Unit) { onVideoFullscreenChange(false) }
                 MessageContent(message = stringResource(R.string.startup_initialization_failed))
             }
         }

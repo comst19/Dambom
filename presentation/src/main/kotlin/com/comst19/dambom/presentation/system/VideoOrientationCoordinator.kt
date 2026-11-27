@@ -4,14 +4,29 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.os.Bundle
 
 internal class VideoOrientationCoordinator(
     private val activity: Activity,
 ) {
     private var state = VideoFullscreenOrientationState()
 
-    fun applyInitialPolicy() {
+    fun applyInitialPolicy(savedInstanceState: Bundle? = null) {
+        state = restoreState(savedInstanceState)
+        if (activity.isInPictureInPictureMode) {
+            state = state.withPictureInPictureEntered()
+        }
         applyPolicy(activity.resources.configuration.smallestScreenWidthDp)
+    }
+
+    fun saveState(outState: Bundle) {
+        outState.putBoolean(KEY_IS_FULLSCREEN, state.isFullscreen)
+        val manualOrientation = state.manualOrientation
+        if (!state.isInPictureInPicture && manualOrientation != null) {
+            outState.putInt(KEY_MANUAL_ORIENTATION, manualOrientation)
+        } else {
+            outState.remove(KEY_MANUAL_ORIENTATION)
+        }
     }
 
     fun onConfigurationChanged(configuration: Configuration) {
@@ -47,6 +62,21 @@ internal class VideoOrientationCoordinator(
         val orientation = requestedOrientationFor(smallestScreenWidthDp, state)
         if (activity.requestedOrientation != orientation) activity.requestedOrientation = orientation
     }
+
+    private fun restoreState(savedInstanceState: Bundle?): VideoFullscreenOrientationState {
+        if (savedInstanceState == null) return VideoFullscreenOrientationState()
+        val isFullscreen = savedInstanceState.getBoolean(KEY_IS_FULLSCREEN, false)
+        val manualOrientation =
+            if (isFullscreen && savedInstanceState.containsKey(KEY_MANUAL_ORIENTATION)) {
+                savedInstanceState.getInt(KEY_MANUAL_ORIENTATION)
+            } else {
+                null
+            }
+        return VideoFullscreenOrientationState(
+            isFullscreen = isFullscreen,
+            manualOrientation = manualOrientation,
+        )
+    }
 }
 
 internal fun requestedOrientationFor(
@@ -60,6 +90,7 @@ internal fun requestedOrientationFor(
 ): Int =
     when {
         smallestScreenWidthDp >= ROTATION_MIN_SMALLEST_WIDTH_DP -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        state.isInPictureInPicture -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         state.manualOrientation != null -> state.manualOrientation
         state.isFullscreen -> ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
         else -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -68,12 +99,25 @@ internal fun requestedOrientationFor(
 internal data class VideoFullscreenOrientationState(
     val isFullscreen: Boolean = false,
     val manualOrientation: Int? = null,
+    val isInPictureInPicture: Boolean = false,
 ) {
     fun withFullscreen(isFullscreen: Boolean): VideoFullscreenOrientationState =
-        if (isFullscreen) copy(isFullscreen = true) else VideoFullscreenOrientationState()
+        if (isFullscreen) {
+            copy(isFullscreen = true)
+        } else {
+            copy(
+                isFullscreen = false,
+                manualOrientation =
+                    if (isInPictureInPicture) {
+                        ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                    } else {
+                        null
+                    },
+            )
+        }
 
     fun rotate(currentOrientation: Int): VideoFullscreenOrientationState {
-        if (!isFullscreen) return this
+        if (!isFullscreen || isInPictureInPicture) return this
         return copy(
             manualOrientation =
                 if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -85,9 +129,18 @@ internal data class VideoFullscreenOrientationState(
     }
 
     fun withPictureInPictureEntered(): VideoFullscreenOrientationState =
-        copy(manualOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+        copy(
+            manualOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED,
+            isInPictureInPicture = true,
+        )
 
-    fun withPictureInPictureExited(): VideoFullscreenOrientationState = if (isFullscreen) copy(manualOrientation = null) else this
+    fun withPictureInPictureExited(): VideoFullscreenOrientationState =
+        copy(
+            manualOrientation = null,
+            isInPictureInPicture = false,
+        )
 }
 
+private const val KEY_IS_FULLSCREEN = "dambom.video_orientation.is_fullscreen"
+private const val KEY_MANUAL_ORIENTATION = "dambom.video_orientation.manual_orientation"
 private const val ROTATION_MIN_SMALLEST_WIDTH_DP = 600

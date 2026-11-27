@@ -1,8 +1,10 @@
 package com.comst19.dambom.presentation
 
+import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
+import com.comst19.dambom.core.common.ui.SnackbarDuration
+import com.comst19.dambom.core.common.ui.UiText
 import com.comst19.dambom.core.common.ui.locale.AppLanguagePreferences
-import com.comst19.dambom.core.domain.error.ErrorHandler
 import com.comst19.dambom.core.domain.model.AppSettings
 import com.comst19.dambom.core.domain.model.DownloadRequest
 import com.comst19.dambom.core.domain.model.DownloadStatus
@@ -23,7 +25,10 @@ import com.comst19.dambom.presentation.startup.StartupCoordinator
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -53,7 +58,6 @@ class MainViewModelTest {
                     FakeDownloadRepository,
                     coordinator,
                     TrackingAppLanguagePreferences(),
-                    ErrorHandler(),
                     AppEventBus(),
                 )
 
@@ -76,7 +80,6 @@ class MainViewModelTest {
                     FakeDownloadRepository,
                     FailingStartupCoordinator,
                     TrackingAppLanguagePreferences(),
-                    ErrorHandler(),
                     AppEventBus(),
                 )
 
@@ -151,7 +154,6 @@ class MainViewModelTest {
                     repository,
                     SuccessfulStartupCoordinator,
                     languagePreferences,
-                    ErrorHandler(),
                     AppEventBus(),
                 )
 
@@ -160,6 +162,38 @@ class MainViewModelTest {
 
             assertEquals(1, languagePreferences.syncCalls)
             assertEquals(1, repository.ensureScheduledCalls)
+        }
+
+    @Test
+    fun `download failure transition emits snackbar event through app event bus`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val statuses = MutableStateFlow(listOf(downloadTask(DownloadStatus.DOWNLOADING)))
+            val repository = StatusEmittingDownloadRepository(statuses)
+            val eventBus = AppEventBus()
+            var receivedEvent: AppEvent? = null
+            val collector = launch { receivedEvent = eventBus.events.first() }
+
+            MainViewModel(
+                FakeSettingsRepository(),
+                FakeNetworkMonitor,
+                repository,
+                SuccessfulStartupCoordinator,
+                TrackingAppLanguagePreferences(),
+                eventBus,
+            )
+            runCurrent()
+
+            statuses.value = listOf(downloadTask(DownloadStatus.FAILED))
+            advanceUntilIdle()
+            collector.join()
+
+            assertEquals(
+                AppEvent.ShowSnackbar(
+                    message = UiText.Resource(R.string.download_feedback_failed, listOf("여행 영상")),
+                    duration = SnackbarDuration.Long,
+                ),
+                receivedEvent,
+            )
         }
 }
 
@@ -257,6 +291,10 @@ private class TrackingDownloadRepository : DownloadRepository by FakeDownloadRep
         ensureScheduledCalls++
     }
 }
+
+private class StatusEmittingDownloadRepository(
+    override val statuses: Flow<List<DownloadStatusSnapshot>>,
+) : DownloadRepository by FakeDownloadRepository
 
 private fun downloadTask(status: DownloadStatus) =
     DownloadStatusSnapshot(

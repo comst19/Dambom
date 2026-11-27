@@ -14,7 +14,9 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.domain.model.DownloadFailureReason
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.runBlocking
@@ -39,8 +41,10 @@ import java.io.InterruptedIOException
 import java.time.Duration
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.CoroutineContext
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -191,6 +195,65 @@ class StreamSegmentDownloadTest {
             }
         }
 
+    @Test
+    fun `injected ioDispatcher runs segment transfer and executor shutdown on completion`() =
+        runBlocking {
+            val executor = Executors.newCachedThreadPool()
+            val recordedIo = RecordingIoDispatcher(executor.asCoroutineDispatcher())
+            val transfer =
+                async {
+                    downloadStreamSegments(
+                        request("playlist.m3u8", MimeTypes.APPLICATION_M3U8),
+                        source,
+                        {},
+                        ioDispatcher = recordedIo,
+                    ) { _, _ -> }
+                }
+            try {
+                assertTrue(withContext(Dispatchers.IO) { started.await(10, TimeUnit.SECONDS) })
+                assertEquals(1, recordedIo.dispatches.get())
+                release.countDown()
+                withTimeout(10_000) { transfer.await() }
+                assertEquals(2, recordedIo.dispatches.get())
+                assertEquals(12, requests.get())
+                assertEquals(0, active.get())
+            } finally {
+                release.countDown()
+                transfer.cancelAndJoin()
+                executor.shutdownNow()
+            }
+        }
+
+    @Test
+    fun `injected ioDispatcher runs transfer and executor shutdown when canceled`() =
+        runBlocking {
+            val executor = Executors.newCachedThreadPool()
+            val recordedIo = RecordingIoDispatcher(executor.asCoroutineDispatcher())
+            val transfer =
+                async {
+                    downloadStreamSegments(
+                        request("playlist.m3u8", MimeTypes.APPLICATION_M3U8),
+                        source,
+                        {},
+                        ioDispatcher = recordedIo,
+                    ) { _, _ -> }
+                }
+            try {
+                assertTrue(withContext(Dispatchers.IO) { started.await(10, TimeUnit.SECONDS) })
+                assertEquals(1, recordedIo.dispatches.get())
+                withTimeout(10_000) { transfer.cancelAndJoin() }
+                assertEquals(2, recordedIo.dispatches.get())
+                assertEquals(0, openSources.get())
+                assertEquals(3, requests.get())
+                cache.release()
+                assertFalse(SimpleCache.isCacheFolderLocked(store.streamDirectory(id)))
+            } finally {
+                release.countDown()
+                transfer.cancelAndJoin()
+                executor.shutdownNow()
+            }
+        }
+
     private fun verifyParallelDownload(
         path: String,
         mimeType: String,
@@ -251,4 +314,18 @@ class StreamSegmentDownloadTest {
           </Period>
         </MPD>
         """.trimIndent()
+
+    private class RecordingIoDispatcher(
+        private val delegate: CoroutineDispatcher,
+    ) : CoroutineDispatcher() {
+        val dispatches = AtomicInteger()
+
+        override fun dispatch(
+            context: CoroutineContext,
+            block: Runnable,
+        ) {
+            dispatches.incrementAndGet()
+            delegate.dispatch(context, block)
+        }
+    }
 }

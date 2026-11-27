@@ -6,6 +6,7 @@ import android.os.SystemClock
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.offline.DefaultDownloaderFactory
 import androidx.media3.exoplayer.offline.DownloadRequest
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -19,11 +20,13 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+@Suppress("LongParameterList")
 internal suspend fun downloadStreamSegments(
     request: DownloadRequest,
     source: CacheDataSource.Factory,
     checkSpace: () -> Unit,
     parallelism: Int = SEGMENT_PARALLELISM,
+    ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     onProgress: suspend (Long, Long?) -> Unit,
 ) {
     val executor = Executors.newFixedThreadPool(parallelism)
@@ -41,7 +44,7 @@ internal suspend fun downloadStreamSegments(
                     }
                 }
             val transfer =
-                async(Dispatchers.IO) {
+                async(ioDispatcher) {
                     runInterruptible {
                         val progressLock = Any()
                         var lastUpdate = -PROGRESS_INTERVAL_MILLIS
@@ -69,7 +72,7 @@ internal suspend fun downloadStreamSegments(
         }
     } finally {
         // The scope has joined the downloader and its canceled segment tasks before cache release.
-        withContext(NonCancellable + Dispatchers.IO) {
+        withContext(NonCancellable + ioDispatcher) {
             executor.shutdownNow()
             while (!executor.awaitTermination(1, TimeUnit.SECONDS)) {
                 // Wait for every executor thread before the caller can release its cache.

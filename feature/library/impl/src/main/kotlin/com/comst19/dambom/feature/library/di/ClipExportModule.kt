@@ -1,8 +1,12 @@
 package com.comst19.dambom.feature.library.di
 
 import androidx.media3.common.util.UnstableApi
+import com.comst19.dambom.feature.library.api.InterruptedExportRecovery
 import com.comst19.dambom.feature.library.compress.Media3VideoCompressor
 import com.comst19.dambom.feature.library.compress.VideoCompressor
+import com.comst19.dambom.feature.library.export.ExportCleanupNotifier
+import com.comst19.dambom.feature.library.export.ExportDocumentStore
+import com.comst19.dambom.feature.library.export.ToastExportCleanupNotifier
 import com.comst19.dambom.feature.library.subtitle.export.Media3SubtitleVideoExporter
 import com.comst19.dambom.feature.library.subtitle.export.SubtitleVideoExporter
 import com.comst19.dambom.feature.library.trim.export.ClipExporter
@@ -24,4 +28,10 @@ internal interface ClipExportModule {
 
     @Binds
     fun bindClipExporter(implementation: VideoClipExporter): ClipExporter
+
+    @Binds
+    fun bindInterruptedExportRecovery(implementation: ExportDocumentStore): InterruptedExportRecovery
+
+    @Binds
+    fun bindExportCleanupNotifier(implementation: ToastExportCleanupNotifier): ExportCleanupNotifier
 }

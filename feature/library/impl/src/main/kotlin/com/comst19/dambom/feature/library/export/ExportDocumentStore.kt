@@ -4,13 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.DocumentsContract
-import android.widget.Toast
 import com.comst19.dambom.core.coroutine.IoDispatcher
-import com.comst19.dambom.feature.library.R
+import com.comst19.dambom.feature.library.api.InterruptedExportRecovery
 import com.comst19.dambom.feature.library.file.copyStreams
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -23,12 +21,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ExportDocumentStore
+internal class ExportDocumentStore
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
         @IoDispatcher private val io: CoroutineDispatcher,
-    ) {
+        private val cleanupNotifier: ExportCleanupNotifier,
+    ) : InterruptedExportRecovery {
+        internal constructor(
+            context: Context,
+            io: CoroutineDispatcher,
+        ) : this(context, io, ExportCleanupNotifier {})
+
         private val journal get() = context.noBackupFilesDir.resolve("pending-exports")
         private val resolver get() = context.contentResolver
         private val active = mutableSetOf<String>()
@@ -71,7 +75,7 @@ class ExportDocumentStore
                             try {
                                 val removed = complete || removeDocument(destination)
                                 entry.finish()
-                                if (!removed) showCleanupWarning()
+                                if (!removed) cleanupNotifier.notifyIncompleteCleanup()
                             } finally {
                                 synchronized(active) { active.remove(entry.id) }
                             }
@@ -87,11 +91,11 @@ class ExportDocumentStore
 
         internal suspend fun discard(destination: Uri) {
             withContext(NonCancellable + io) {
-                if (!removeDocument(destination)) showCleanupWarning()
+                if (!removeDocument(destination)) cleanupNotifier.notifyIncompleteCleanup()
             }
         }
 
-        suspend fun recoverInterruptedExports() {
+        override suspend fun recoverInterruptedExports() {
             val entries =
                 withContext(io) {
                     synchronized(active) {
@@ -108,7 +112,7 @@ class ExportDocumentStore
                 for (marker in entries) {
                     if (!recover(marker)) needsWarning = true
                 }
-                if (needsWarning) showCleanupWarning()
+                if (needsWarning) cleanupNotifier.notifyIncompleteCleanup()
             }
         }
 
@@ -155,12 +159,6 @@ class ExportDocumentStore
                 runCatching { checkNotNull(resolver.openFileDescriptor(uri, "rwt")).close() }
             }
             return removed
-        }
-
-        private suspend fun showCleanupWarning() {
-            withContext(Dispatchers.Main) {
-                Toast.makeText(context, R.string.library_export_cleanup_incomplete, Toast.LENGTH_LONG).show()
-            }
         }
 
         private inner class Entry(

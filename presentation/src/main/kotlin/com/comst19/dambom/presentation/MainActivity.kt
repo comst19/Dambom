@@ -12,7 +12,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.navigation.NavigationDispatcher
-import com.comst19.dambom.feature.library.export.ExportDocumentStore
+import com.comst19.dambom.feature.library.api.InterruptedExportRecovery
 import com.comst19.dambom.presentation.contract.AppStartupState
 import com.comst19.dambom.presentation.entry.SharedTextEntryHandler
 import com.comst19.dambom.presentation.system.VideoOrientationCoordinator
@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     @Inject internal lateinit var sharedTextEntryHandler: SharedTextEntryHandler
 
-    @Inject lateinit var exportDocumentStore: ExportDocumentStore
+    @Inject lateinit var interruptedExportRecovery: InterruptedExportRecovery
 
     private val mainViewModel: MainViewModel by viewModels()
     private val videoOrientationCoordinator by lazy { VideoOrientationCoordinator(this) }
@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
             window.isNavigationBarContrastEnforced = false
         }
         if (savedInstanceState == null) handleSharedTextIntent(intent)
-        lifecycleScope.launch { exportDocumentStore.recoverInterruptedExports() }
+        lifecycleScope.launch { interruptedExportRecovery.recoverInterruptedExports() }
         setContent {
             MainActivityContent(
                 viewModel = viewModel,

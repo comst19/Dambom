@@ -349,6 +349,7 @@ internal class DownloadQueueRunner
                         context = appContext,
                         client = client,
                         fileStore = fileStore,
+                        ioDispatcher = ioDispatcher,
                         networkSession = networkSession,
                     ).download(
                         id = task.id,

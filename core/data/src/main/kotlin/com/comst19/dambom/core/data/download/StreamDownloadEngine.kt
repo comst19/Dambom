@@ -89,6 +89,7 @@ internal class StreamDownloadEngine(
                 request,
                 downloadSource,
                 { requireSpaceFor(STREAM_SPACE_CHECK_BYTES) },
+                ioDispatcher = ioDispatcher,
                 onProgress = onProgress,
             )
             requireSpaceFor(cache.cacheSpace)

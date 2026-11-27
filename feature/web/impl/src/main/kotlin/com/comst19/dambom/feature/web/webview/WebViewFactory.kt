@@ -66,14 +66,14 @@ internal fun createWebView(
     tab: WebTab,
     savedState: Bundle?,
     callbacks: WebViewCallbacks,
-): WebView =
-    WebView(context).apply {
+): WebView {
+    val navigationTracker = WebNavigationErrorTracker()
+    return TrackedWebView(context, navigationTracker, callbacks).apply {
         val pageGeneration = AtomicLong()
         val defaultUserAgent = settings.userAgentString
         val mediaUserAgent = AtomicReference(defaultUserAgent)
         var currentPageUrl = tab.url
         var pageStarted = false
-        var failureBeforePageStart = false
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
         settings.allowFileAccess = false
@@ -104,7 +104,14 @@ internal fun createWebView(
                     request: WebResourceRequest?,
                 ): Boolean {
                     val isForMainFrame = request?.isForMainFrame != false
-                    return !shouldAllowWebNavigationUrl(request?.url?.toString(), isForMainFrame)
+                    val requestUrl = request?.url?.toString()
+                    val allowed = shouldAllowWebNavigationUrl(requestUrl, isForMainFrame)
+                    if (allowed && isForMainFrame && callbacks.isActive()) {
+                        if (navigationTracker.onLoadRequested(requestUrl)) {
+                            callbacks.onNavigationFailure(null)
+                        }
+                    }
+                    return !allowed
                 }
 
                 override fun onPageStarted(
@@ -113,14 +120,14 @@ internal fun createWebView(
                     favicon: Bitmap?,
                 ) {
                     if (!callbacks.isActive()) return
+                    val resolution = navigationTracker.onPageStarted(url)
+                    if (resolution == PageStartResolution.IGNORED) return
                     val desiredUserAgent = siteMediaUserAgent(url.orEmpty(), defaultUserAgent)
                     mediaUserAgent.set(desiredUserAgent)
                     if (view != null && url != null && view.settings.userAgentString != desiredUserAgent) {
                         view.settings.userAgentString = desiredUserAgent
                     }
-                    if (failureBeforePageStart) {
-                        failureBeforePageStart = false
-                    } else {
+                    if (resolution == PageStartResolution.ACCEPTED_CLEAR_FAILURE) {
                         callbacks.onNavigationFailure(null)
                     }
                     pageStarted = true
@@ -136,6 +143,7 @@ internal fun createWebView(
                     url: String?,
                 ) {
                     if (!callbacks.isActive()) return
+                    if (!navigationTracker.onPageFinished(url)) return
                     pageStarted = false
                     if (url != null) currentPageUrl = url
                     callbacks.onPageFinished(tab.id, url, view?.title, pageGeneration.get())
@@ -153,6 +161,7 @@ internal fun createWebView(
                         (url ?: view?.url)?.takeIf {
                             it.startsWith("http://") || it.startsWith("https://")
                         }
+                    navigationTracker.onVisitedHistoryUpdated(visitedUrl)
                     if (!pageStarted && visitedUrl != null && visitedUrl != currentPageUrl) {
                         currentPageUrl = visitedUrl
                         val generation = nextWebPageGeneration.incrementAndGet()
@@ -166,6 +175,9 @@ internal fun createWebView(
                     request: WebResourceRequest?,
                 ): WebResourceResponse? {
                     val url = request?.url?.toString()?.takeIf { callbacks.isActive() } ?: return null
+                    if (request.isForMainFrame) {
+                        navigationTracker.onMainFrameRequestIntercepted(url)
+                    }
                     if (request.method.equals("GET", true)) {
                         val mediaRequest =
                             MediaResourceRequest(url, request.requestHeaders, request.method)
@@ -185,8 +197,9 @@ internal fun createWebView(
                         isForMainFrame = request?.isForMainFrame == true,
                         errorCode = error?.errorCode,
                     )?.let { failure ->
-                        if (!pageStarted) failureBeforePageStart = true
-                        callbacks.onNavigationFailure(failure)
+                        navigationTracker
+                            .resolveMainFrameFailure(request?.url?.toString(), failure)
+                            ?.let(callbacks.onNavigationFailure)
                     }
                 }
 
@@ -200,8 +213,9 @@ internal fun createWebView(
                         isForMainFrame = request?.isForMainFrame == true,
                         statusCode = errorResponse?.statusCode,
                     )?.let { failure ->
-                        if (!pageStarted) failureBeforePageStart = true
-                        callbacks.onNavigationFailure(failure)
+                        navigationTracker
+                            .resolveMainFrameFailure(request?.url?.toString(), failure)
+                            ?.let(callbacks.onNavigationFailure)
                     }
                 }
 
@@ -212,8 +226,9 @@ internal fun createWebView(
                 ) {
                     handler?.cancel()
                     if (!callbacks.isActive()) return
-                    if (!pageStarted) failureBeforePageStart = true
-                    callbacks.onNavigationFailure(WebNavigationFailure.SECURITY)
+                    navigationTracker
+                        .resolveSslFailure(error?.url)
+                        ?.let(callbacks.onNavigationFailure)
                 }
 
                 override fun onSafeBrowsingHit(
@@ -227,8 +242,9 @@ internal fun createWebView(
                     }
                     if (!callbacks.isActive()) return
                     if (request?.isForMainFrame == true) {
-                        if (!pageStarted) failureBeforePageStart = true
-                        callbacks.onNavigationFailure(WebNavigationFailure.SECURITY)
+                        navigationTracker
+                            .resolveMainFrameFailure(request.url?.toString(), WebNavigationFailure.SECURITY)
+                            ?.let(callbacks.onNavigationFailure)
                     }
                 }
 
@@ -266,7 +282,10 @@ internal fun createWebView(
         val restored = savedState != null && restoreState(savedState) != null
         val initialUrl =
             if (restored) {
-                url?.let { currentPageUrl = it }
+                url?.let {
+                    currentPageUrl = it
+                    navigationTracker.onRestoreState(it)
+                }
                 callbacks.pendingNavigationUrl
             } else {
                 callbacks.pendingNavigationUrl ?: tab.url
@@ -278,5 +297,69 @@ internal fun createWebView(
             loadUrl(urlToLoad)
         }
     }
+}
+
+private class TrackedWebView(
+    context: Context,
+    private val navigationTracker: WebNavigationErrorTracker,
+    private val callbacks: WebViewCallbacks,
+) : WebView(context) {
+    override fun loadUrl(url: String) {
+        if (navigationTracker.onLoadRequested(url) && callbacks.isActive()) {
+            callbacks.onNavigationFailure(null)
+        }
+        super.loadUrl(url)
+    }
+
+    override fun loadUrl(
+        url: String,
+        additionalHttpHeaders: MutableMap<String, String>,
+    ) {
+        if (navigationTracker.onLoadRequested(url) && callbacks.isActive()) {
+            callbacks.onNavigationFailure(null)
+        }
+        super.loadUrl(url, additionalHttpHeaders)
+    }
+
+    override fun reload() {
+        if (navigationTracker.onReloadRequested(url) && callbacks.isActive()) {
+            callbacks.onNavigationFailure(null)
+        }
+        super.reload()
+    }
+
+    override fun goBack() {
+        if (canGoBack()) {
+            notifyHistoryNavigation(steps = -1)
+        }
+        super.goBack()
+    }
+
+    override fun goForward() {
+        if (canGoForward()) {
+            notifyHistoryNavigation(steps = 1)
+        }
+        super.goForward()
+    }
+
+    override fun goBackOrForward(steps: Int) {
+        if (steps != 0 && canGoBackOrForward(steps)) {
+            notifyHistoryNavigation(steps = steps)
+        }
+        super.goBackOrForward(steps)
+    }
+
+    private fun notifyHistoryNavigation(steps: Int) {
+        val targetUrl =
+            runCatching {
+                val list = copyBackForwardList()
+                val targetIndex = list.currentIndex + steps
+                if (targetIndex in 0 until list.size) list.getItemAtIndex(targetIndex)?.url else null
+            }.getOrNull()
+        if (navigationTracker.onLoadRequested(targetUrl, allowBlankTarget = true) && callbacks.isActive()) {
+            callbacks.onNavigationFailure(null)
+        }
+    }
+}
 
 private val nextWebPageGeneration = AtomicLong()

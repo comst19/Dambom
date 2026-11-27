@@ -3,6 +3,7 @@ package com.comst19.dambom.feature.library
 import android.content.Context
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.lifecycle.Lifecycle
@@ -132,6 +133,200 @@ class VideoPlayerLifecycleTest {
             assertTrue(repository.updates.tryEmit(null))
         }
         composeRule.waitForIdle()
+        composeRule.runOnIdle {
+            assertEquals(0, playerViewModel.player.mediaItemCount)
+            assertFalse(fullscreen.value)
+            owner.lifecycle.currentState = Lifecycle.State.DESTROYED
+        }
+    }
+
+    @Test
+    fun `disposing VideoPlayerRoute preserves fullscreen state for activity recreation`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val repository = LifecycleDownloadRepository()
+        val libraryViewModel =
+            LibraryViewModel(
+                repository,
+                LifecycleSettings,
+                SpyNavigationDispatcher(),
+                SavedStateHandle(),
+                LibraryFileManager(context, Dispatchers.IO, ExportDocumentStore(context, Dispatchers.IO)),
+                AppEventBus(),
+                LibraryTestPlaybackHistory(),
+                privateVideoSession = PrivateVideoSession(),
+                defaultDispatcher = Dispatchers.Unconfined,
+            )
+        playerViewModel = testVideoPlayerViewModel(context)
+        val mounted = mutableStateOf(true)
+        val fullscreen = mutableStateOf(true)
+        val video = savedVideo("video").copy(localFilePath = videoFile.path)
+
+        composeRule.setContent {
+            MaterialTheme {
+                if (mounted.value) {
+                    VideoPlayerRoute(
+                        id = video.id,
+                        isVideoFullscreen = fullscreen.value,
+                        onVideoFullscreenChange = { fullscreen.value = it },
+                        onVideoRotate = {},
+                        libraryViewModel = libraryViewModel,
+                        playerViewModel = playerViewModel,
+                    )
+                }
+            }
+        }
+        composeRule.waitUntil { repository.updates.subscriptionCount.value == 1 }
+        composeRule.runOnIdle { assertTrue(repository.updates.tryEmit(video)) }
+        composeRule.waitUntil {
+            composeRule.runOnIdle { playerViewModel.player.currentMediaItem?.mediaId == video.id }
+        }
+        composeRule.waitForIdle()
+        assertTrue(fullscreen.value)
+
+        composeRule.runOnIdle { mounted.value = false }
+        composeRule.waitForIdle()
+
+        assertTrue(fullscreen.value)
+    }
+
+    @Test
+    @Suppress("LongMethod")
+    fun `availability turning true before playback effect runs preserves playback and fullscreen`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val repository = LifecycleDownloadRepository()
+        val libraryViewModel =
+            LibraryViewModel(
+                repository,
+                LifecycleSettings,
+                SpyNavigationDispatcher(),
+                SavedStateHandle(),
+                LibraryFileManager(context, Dispatchers.IO, ExportDocumentStore(context, Dispatchers.IO)),
+                AppEventBus(),
+                LibraryTestPlaybackHistory(),
+                privateVideoSession = PrivateVideoSession(),
+                defaultDispatcher = Dispatchers.Unconfined,
+            )
+        playerViewModel = testVideoPlayerViewModel(context)
+        val mounted = mutableStateOf(true)
+        val fullscreen = mutableStateOf(true)
+        val video = savedVideo("video").copy(localFilePath = videoFile.path)
+
+        val availability = mutableStateOf<Boolean?>(true)
+        var flipAvailabilityOnNextCompose = false
+        val fullscreenChanges = mutableListOf<Boolean>()
+        composeRule.setContent {
+            MaterialTheme {
+                if (mounted.value) {
+                    VideoPlayerRoute(
+                        id = video.id,
+                        isVideoFullscreen = fullscreen.value,
+                        onVideoFullscreenChange = {
+                            fullscreenChanges += it
+                            fullscreen.value = it
+                        },
+                        onVideoRotate = {},
+                        libraryViewModel = libraryViewModel,
+                        playerViewModel = playerViewModel,
+                        rememberVideoAvailability = { task, _ ->
+                            if (task != null && flipAvailabilityOnNextCompose) {
+                                SideEffect {
+                                    flipAvailabilityOnNextCompose = false
+                                    availability.value = true
+                                }
+                            }
+                            availability
+                        },
+                    )
+                }
+            }
+        }
+        composeRule.waitUntil { repository.updates.subscriptionCount.value == 1 }
+        composeRule.runOnIdle { assertTrue(repository.updates.tryEmit(video)) }
+        composeRule.waitUntil {
+            composeRule.runOnIdle { playerViewModel.player.currentMediaItem?.mediaId == video.id }
+        }
+        composeRule.runOnIdle {
+            playerViewModel.player.pause()
+            playerViewModel.player.seekTo(15_000L)
+            mounted.value = false
+        }
+        composeRule.waitUntil { repository.updates.subscriptionCount.value == 0 }
+        composeRule.waitForIdle()
+
+        composeRule.runOnIdle {
+            fullscreenChanges.clear()
+            availability.value = null
+            flipAvailabilityOnNextCompose = true
+            mounted.value = true
+        }
+        composeRule.waitForIdle()
+        assertEquals(1, repository.updates.subscriptionCount.value)
+        composeRule.runOnIdle { assertTrue(repository.updates.tryEmit(video)) }
+        composeRule.waitForIdle()
+
+        composeRule.runOnIdle {
+            assertEquals(video.id, playerViewModel.player.currentMediaItem?.mediaId)
+            assertEquals(15_000L, playerViewModel.player.currentPosition)
+            assertTrue(fullscreen.value)
+            assertTrue(fullscreenChanges.isEmpty())
+        }
+    }
+
+    @Test
+    fun `deleting local video file stops playback and clears fullscreen`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val repository = LifecycleDownloadRepository()
+        val libraryViewModel =
+            LibraryViewModel(
+                repository,
+                LifecycleSettings,
+                SpyNavigationDispatcher(),
+                SavedStateHandle(),
+                LibraryFileManager(context, Dispatchers.IO, ExportDocumentStore(context, Dispatchers.IO)),
+                AppEventBus(),
+                LibraryTestPlaybackHistory(),
+                privateVideoSession = PrivateVideoSession(),
+                defaultDispatcher = Dispatchers.Unconfined,
+            )
+        playerViewModel = testVideoPlayerViewModel(context)
+        val owner =
+            object : LifecycleOwner {
+                override val lifecycle = LifecycleRegistry(this)
+            }
+        owner.lifecycle.currentState = Lifecycle.State.RESUMED
+        val fullscreen = mutableStateOf(true)
+        val video = savedVideo("video").copy(localFilePath = videoFile.path)
+
+        composeRule.setContent {
+            CompositionLocalProvider(LocalLifecycleOwner provides owner) {
+                MaterialTheme {
+                    VideoPlayerRoute(
+                        id = video.id,
+                        isVideoFullscreen = fullscreen.value,
+                        onVideoFullscreenChange = { fullscreen.value = it },
+                        onVideoRotate = {},
+                        libraryViewModel = libraryViewModel,
+                        playerViewModel = playerViewModel,
+                    )
+                }
+            }
+        }
+        composeRule.waitUntil { repository.updates.subscriptionCount.value == 1 }
+        composeRule.runOnIdle { assertTrue(repository.updates.tryEmit(video)) }
+        composeRule.waitUntil {
+            composeRule.runOnIdle { playerViewModel.player.currentMediaItem?.mediaId == video.id }
+        }
+        composeRule.waitForIdle()
+        assertTrue(fullscreen.value)
+
+        assertTrue(videoFile.delete())
+        composeRule.runOnIdle {
+            owner.lifecycle.currentState = Lifecycle.State.STARTED
+            owner.lifecycle.currentState = Lifecycle.State.RESUMED
+        }
+        composeRule.waitUntil(5_000) {
+            composeRule.runOnIdle { !fullscreen.value && playerViewModel.player.mediaItemCount == 0 }
+        }
         composeRule.runOnIdle {
             assertEquals(0, playerViewModel.player.mediaItemCount)
             assertFalse(fullscreen.value)

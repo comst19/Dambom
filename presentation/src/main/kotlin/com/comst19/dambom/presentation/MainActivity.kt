@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         val viewModel = mainViewModel
-        videoOrientationCoordinator.applyInitialPolicy()
+        videoOrientationCoordinator.applyInitialPolicy(savedInstanceState)
         splashScreen.setKeepOnScreenCondition {
             viewModel.startupState.value is AppStartupState.Initializing
         }
@@ -56,6 +56,11 @@ class MainActivity : AppCompatActivity() {
                 onVideoRotate = videoOrientationCoordinator::onRotateRequested,
             )
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        videoOrientationCoordinator.saveState(outState)
     }
 
     override fun onResume() {

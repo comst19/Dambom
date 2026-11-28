@@ -190,25 +190,74 @@ class LibraryFileManagerTest {
     }
 
     @Test
-    fun `missing local file returns no share intent instead of throwing`() =
+    fun `missing local file returns no share payload instead of throwing`() =
         kotlinx.coroutines.runBlocking {
             val context = ApplicationProvider.getApplicationContext<Context>()
+            registerTestFileProvider(context)
             val manager = LibraryFileManager(context, Dispatchers.IO, ExportDocumentStore(context, Dispatchers.IO))
 
-            assertNull(manager.createShareIntent(missingFileTask()))
+            assertNull(manager.prepareShare(missingFileTask()))
         }
 
     @Test
-    fun `file outside configured provider path returns no share intent`() =
+    fun `allowed provider path returns share payload while file outside provider path is rejected`() =
         kotlinx.coroutines.runBlocking {
             val context = ApplicationProvider.getApplicationContext<Context>()
+            registerTestFileProvider(context)
             val manager = LibraryFileManager(context, Dispatchers.IO, ExportDocumentStore(context, Dispatchers.IO))
+            val allowedFile =
+                context.filesDir
+                    .resolve("videos")
+                    .apply { mkdirs() }
+                    .resolve("allowed-provider.mp4")
+                    .apply { writeBytes(byteArrayOf(1)) }
             val unsupportedFile = context.cacheDir.resolve("outside-provider.mp4").apply { writeBytes(byteArrayOf(1)) }
 
             try {
-                assertNull(manager.createShareIntent(taskWithPath(unsupportedFile.path)))
+                val allowed = manager.prepareShare(taskWithPath(allowedFile.path).copy(title = "Allowed"))
+                assertEquals(
+                    ShareableVideo(
+                        contentUri = "content://${context.packageName}.fileprovider/saved_videos/allowed-provider.mp4",
+                        mimeType = "video/mp4",
+                        title = "Allowed",
+                    ),
+                    allowed,
+                )
+                assertNull(manager.prepareShare(taskWithPath(unsupportedFile.path)))
             } finally {
+                allowedFile.delete()
                 unsupportedFile.delete()
+            }
+        }
+
+    @Test
+    fun `share preparation defaults missing mime type to wildcard video`() =
+        kotlinx.coroutines.runBlocking {
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            registerTestFileProvider(context)
+            val file =
+                context.filesDir
+                    .resolve("videos")
+                    .apply { mkdirs() }
+                    .resolve("share-default-mime.mp4")
+                    .apply { writeBytes(byteArrayOf(1)) }
+            val manager = LibraryFileManager(context, Dispatchers.IO, ExportDocumentStore(context, Dispatchers.IO))
+
+            try {
+                val shareable = manager.prepareShare(taskWithPath(file.path).copy(mimeType = null, title = "Clip"))
+
+                val expectedUri =
+                    "content://${context.packageName}.fileprovider/saved_videos/share-default-mime.mp4"
+                assertEquals(
+                    ShareableVideo(
+                        contentUri = expectedUri,
+                        mimeType = "video/*",
+                        title = "Clip",
+                    ),
+                    shareable,
+                )
+            } finally {
+                file.delete()
             }
         }
 

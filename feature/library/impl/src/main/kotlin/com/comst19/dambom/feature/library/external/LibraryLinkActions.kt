@@ -52,7 +52,7 @@ internal fun originalLinkShareIntent(
         chooserTitle,
     )
 
-private fun Context.startActivitySafely(intent: Intent): Boolean =
+internal fun Context.startActivitySafely(intent: Intent): Boolean =
     try {
         startActivity(intent)
         true

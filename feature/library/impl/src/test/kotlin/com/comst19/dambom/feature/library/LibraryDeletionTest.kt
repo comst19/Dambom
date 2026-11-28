@@ -150,7 +150,7 @@ class LibraryDeletionTest {
 
             assertTrue(navigation.dispatched.isEmpty())
             assertEquals(0, repository.renameCount)
-            assertNull(viewModel.createShareIntent(pending))
+            assertNull(viewModel.prepareShare(pending))
 
             repository.gate.complete(Unit)
             viewModel.delete(pending)

@@ -156,7 +156,7 @@ class PrivateVideoVaultTest {
             val session = PrivateVideoSession()
             assertFalse(session.isUnlocked.value)
             val model = model(LibraryTestDownloads(listOf(privateVideo)), session)
-            assertNull(model.createShareIntent(privateVideo))
+            assertNull(model.prepareShare(privateVideo))
             assertNull(model.findExportTask("private"))
         }
 

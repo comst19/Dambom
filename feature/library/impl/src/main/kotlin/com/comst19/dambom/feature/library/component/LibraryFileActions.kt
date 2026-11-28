@@ -1,7 +1,6 @@
 package com.comst19.dambom.feature.library.component
 
 import android.Manifest
-import android.content.ActivityNotFoundException
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -28,6 +27,7 @@ import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.external.copyOriginalLink
 import com.comst19.dambom.feature.library.external.openOriginalLink
 import com.comst19.dambom.feature.library.external.shareOriginalLink
+import com.comst19.dambom.feature.library.external.shareVideo
 import com.comst19.dambom.feature.library.file.suggestedFileName
 import kotlinx.coroutines.launch
 
@@ -55,6 +55,7 @@ internal fun rememberLibraryFileActions(
 ): LibraryFileActions {
     val context = LocalContext.current
     val shareLinkChooserTitle = stringResource(R.string.library_share_link_chooser)
+    val shareVideoChooserTitle = stringResource(R.string.library_share_chooser)
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val currentSettings = rememberUpdatedState(settings)
     val scope = rememberCoroutineScope()
@@ -82,7 +83,14 @@ internal fun rememberLibraryFileActions(
         }
     val currentOnDelete = rememberUpdatedState(onDelete)
     val originalActions =
-        remember(viewModel, context, shareLinkChooserTitle, exportLauncher, legacyStoragePermissionLauncher) {
+        remember(
+            viewModel,
+            context,
+            shareLinkChooserTitle,
+            shareVideoChooserTitle,
+            exportLauncher,
+            legacyStoragePermissionLauncher,
+        ) {
             LibraryFileActions(
                 onRename = viewModel::rename,
                 onToggleFavorite = viewModel::toggleFavorite,
@@ -121,16 +129,8 @@ internal fun rememberLibraryFileActions(
                 },
                 onShareVideo = { task ->
                     scope.launch {
-                        val intent = viewModel.createShareIntent(task)
-                        if (intent == null) {
-                            viewModel.notifyShareFailure()
-                            return@launch
-                        }
-                        try {
-                            context.startActivity(intent)
-                        } catch (_: ActivityNotFoundException) {
-                            viewModel.notifyShareFailure()
-                        } catch (_: IllegalArgumentException) {
+                        val video = viewModel.prepareShare(task)
+                        if (video == null || !shareVideo(context, video, shareVideoChooserTitle)) {
                             viewModel.notifyShareFailure()
                         }
                     }

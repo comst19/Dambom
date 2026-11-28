@@ -1,9 +1,7 @@
 package com.comst19.dambom.feature.library.file
 
-import android.content.ClipData
 import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
@@ -16,7 +14,6 @@ import androidx.core.net.toUri
 import com.comst19.dambom.core.common.io.videoSubtitleFile
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.domain.model.DownloadTask
-import com.comst19.dambom.feature.library.R
 import com.comst19.dambom.feature.library.export.ExportDocumentStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -83,32 +80,15 @@ internal class LibraryFileManager
                 )
             }
 
-        suspend fun createShareIntent(task: DownloadTask): Intent? =
+        suspend fun prepareShare(task: DownloadTask): ShareableVideo? =
             withContext(ioDispatcher) {
-                task.localFileOrNull()?.shareUriOrNull()?.let { uri ->
-                    val sendIntent =
-                        Intent(Intent.ACTION_SEND)
-                            .setType(task.mimeType ?: "video/*")
-                            .putExtra(Intent.EXTRA_STREAM, uri)
-                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                            .apply {
-                                clipData = ClipData.newUri(context.contentResolver, task.title, uri)
-                            }
-                    Intent
-                        .createChooser(sendIntent, context.getString(R.string.library_share_chooser))
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                task.localFileOrNull()?.fileProviderUriOrNull(context)?.let { uri ->
+                    ShareableVideo(
+                        contentUri = uri.toString(),
+                        mimeType = task.mimeType ?: "video/*",
+                        title = task.title,
+                    )
                 }
-            }
-
-        private fun File.shareUriOrNull(): Uri? =
-            try {
-                FileProvider.getUriForFile(
-                    context,
-                    "${context.packageName}.fileprovider",
-                    this,
-                )
-            } catch (_: IllegalArgumentException) {
-                null
             }
 
         private suspend fun File.copyToTree(
@@ -273,6 +253,17 @@ internal fun hasPersistedTreePermission(
     treeUri: Uri,
     persistedPermissions: Iterable<PersistedTreePermission>,
 ): Boolean = persistedPermissions.any { it.uri == treeUri && it.canRead && it.canWrite }
+
+private fun File.fileProviderUriOrNull(context: Context): Uri? =
+    try {
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            this,
+        )
+    } catch (_: IllegalArgumentException) {
+        null
+    }
 
 private val INVALID_FILE_NAME_CHARACTERS = Regex("[\\\\/:*?\"<>|\\p{Cntrl}]")
 private const val MAX_FILE_NAME_LENGTH = 80

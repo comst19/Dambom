@@ -1,6 +1,13 @@
 package com.comst19.dambom.feature.library.subtitle
 
+import android.content.ContentProvider
+import android.content.ContentValues
 import android.content.Context
+import android.content.pm.ProviderInfo
+import android.database.Cursor
+import android.net.Uri
+import android.os.Bundle
+import android.provider.DocumentsContract
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import androidx.test.core.app.ApplicationProvider
@@ -34,6 +41,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -45,7 +54,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowContentResolver
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.lang.reflect.Proxy
 
@@ -78,6 +90,7 @@ class SubtitleViewModelTest {
         source.videoSubtitleFile().delete()
         source.videoSubtitleTemporaryFile().delete()
         source.delete()
+        context.noBackupFilesDir.resolve("pending-exports").deleteRecursively()
     }
 
     @Test fun `opening checks support without downloading or running inference`() =
@@ -344,9 +357,48 @@ class SubtitleViewModelTest {
             assertEquals(SubtitleModelStatus.AVAILABLE, restored.state.value.model)
         }
 
+    @Test fun `duplicate export preserves active destination and discards only a different document`() =
+        runTest(main.dispatcher) {
+            val expectedSrt = listOf(SubtitleCue(0, 800, "안녕하세요")).toSrt()
+            source.videoSubtitleFile().writeText(expectedSrt)
+            val provider =
+                FakeSubtitleDocumentsProvider().apply {
+                    attachInfo(
+                        context,
+                        ProviderInfo().apply {
+                            authority = SUBTITLE_DOCUMENTS_AUTHORITY
+                            exported = true
+                        },
+                    )
+                }
+            ShadowContentResolver.registerProviderInternal(SUBTITLE_DOCUMENTS_AUTHORITY, provider)
+            val first = DocumentsContract.buildDocumentUri(SUBTITLE_DOCUMENTS_AUTHORITY, "first.srt")
+            val second = DocumentsContract.buildDocumentUri(SUBTITLE_DOCUMENTS_AUTHORITY, "second.srt")
+            val firstOutput = ByteArrayOutputStream()
+            shadowOf(context.contentResolver).registerOutputStream(first, firstOutput)
+            val exportIo = StandardTestDispatcher(testScheduler)
+            val subtitleFiles = SubtitleFiles(ExportDocumentStore(context, exportIo), exportIo)
+            val model = model(files = subtitleFiles)
+            model.load("video")
+            advanceUntilIdle()
+
+            model.export(first.toString())
+            assertEquals(SubtitleOperation.EXPORTING, model.state.value.operation)
+            model.export(first.toString())
+            model.export(second.toString())
+            advanceUntilIdle()
+
+            assertEquals(listOf(second), provider.deletedUris)
+            assertTrue(model.state.value.exported)
+            assertFalse(model.state.value.failed)
+            assertEquals(SubtitleOperation.IDLE, model.state.value.operation)
+            assertEquals(expectedSrt, firstOutput.toString(Charsets.UTF_8.name()))
+        }
+
     private fun model(
         key: String = "model",
         saved: SavedStateHandle = SavedStateHandle(),
+        files: SubtitleFiles = SubtitleFiles(ExportDocumentStore(context, main.dispatcher), main.dispatcher),
     ): SubtitleViewModel {
         val task =
             DownloadTask(
@@ -376,12 +428,62 @@ class SubtitleViewModelTest {
         return SubtitleViewModel(
             repository,
             engine,
-            SubtitleFiles(ExportDocumentStore(context, main.dispatcher), main.dispatcher),
+            files,
             SpyNavigationDispatcher(),
             saved,
             jobs,
         ).also { store.put(key, it) }
     }
+}
+
+private const val SUBTITLE_DOCUMENTS_AUTHORITY = "com.comst19.dambom.test.subtitle.documents"
+private const val METHOD_DELETE_DOCUMENT = "android:deleteDocument"
+private const val EXTRA_URI = "uri"
+
+private class FakeSubtitleDocumentsProvider : ContentProvider() {
+    val deletedUris = mutableListOf<Uri>()
+
+    override fun onCreate(): Boolean = true
+
+    override fun call(
+        method: String,
+        arg: String?,
+        extras: Bundle?,
+    ): Bundle? =
+        if (method == METHOD_DELETE_DOCUMENT) {
+            extras?.getParcelable(EXTRA_URI, Uri::class.java)?.let(deletedUris::add)
+            Bundle.EMPTY
+        } else {
+            super.call(method, arg, extras)
+        }
+
+    override fun query(
+        uri: Uri,
+        projection: Array<out String>?,
+        selection: String?,
+        selectionArgs: Array<out String>?,
+        sortOrder: String?,
+    ): Cursor? = null
+
+    override fun getType(uri: Uri): String = "application/x-subrip"
+
+    override fun insert(
+        uri: Uri,
+        values: ContentValues?,
+    ): Uri? = null
+
+    override fun delete(
+        uri: Uri,
+        selection: String?,
+        selectionArgs: Array<out String>?,
+    ): Int = 0
+
+    override fun update(
+        uri: Uri,
+        values: ContentValues?,
+        selection: String?,
+        selectionArgs: Array<out String>?,
+    ): Int = 0
 }
 
 private class FakeSubtitleEngine : SubtitleEngine {

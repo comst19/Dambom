@@ -1,6 +1,5 @@
 package com.comst19.dambom.feature.library.compress
 
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -72,17 +71,17 @@ internal class VideoCompressionViewModel
 
         fun export(
             id: String,
-            destination: Uri,
+            destinationUri: String,
         ) {
             if (exportJob?.isActive == true) {
-                if (activeDestination != destination.toString()) {
+                if (activeDestination != destinationUri) {
                     viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
-                        withContext(NonCancellable) { compressor.discard(destination.toString()) }
+                        withContext(NonCancellable) { compressor.discard(destinationUri) }
                     }
                 }
                 return
             }
-            activeDestination = destination.toString()
+            activeDestination = destinationUri
             exportJob =
                 viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
                     mutableState.update {
@@ -98,12 +97,12 @@ internal class VideoCompressionViewModel
                         val path = checkNotNull(current.task?.localFilePath)
                         compressorOwnsDocument = true
                         val bytes =
-                            compressor.compress(path, current.profile, destination.toString()) { progress ->
+                            compressor.compress(path, current.profile, destinationUri) { progress ->
                                 mutableState.update { it.copy(progress = progress) }
                             }
-                        savedState["compression-saved-uri"] = destination.toString()
+                        savedState["compression-saved-uri"] = destinationUri
                         savedState["compression-saved-bytes"] = bytes
-                        mutableState.update { it.copy(savedUri = destination.toString(), savedBytes = bytes) }
+                        mutableState.update { it.copy(savedUri = destinationUri, savedBytes = bytes) }
                     } catch (cancelled: CancellationException) {
                         throw cancelled
                     } catch (_: CompressionNotSmallerException) {
@@ -112,7 +111,7 @@ internal class VideoCompressionViewModel
                         mutableState.update { it.copy(failure = CompressionFailure.FAILED) }
                     } finally {
                         if (!compressorOwnsDocument) {
-                            withContext(NonCancellable) { compressor.discard(destination.toString()) }
+                            withContext(NonCancellable) { compressor.discard(destinationUri) }
                         }
                         activeDestination = null
                         mutableState.update { it.copy(exporting = false, progress = null) }

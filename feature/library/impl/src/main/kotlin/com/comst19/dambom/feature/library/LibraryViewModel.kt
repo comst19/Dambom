@@ -1,7 +1,6 @@
 package com.comst19.dambom.feature.library
 
 import android.content.Intent
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -350,25 +349,25 @@ internal class LibraryViewModel
 
         fun exportRestored(
             id: String?,
-            destination: Uri,
+            destinationUri: String,
         ) {
             viewModelScope.launch {
                 val task = findExportTask(id)
                 if (task == null) {
-                    fileManager.discardExport(destination)
+                    fileManager.discardExport(destinationUri)
                 } else {
-                    export(task, destination)
+                    export(task, destinationUri)
                 }
             }
         }
 
         fun export(
             task: DownloadTask,
-            destination: Uri,
+            destinationUri: String,
         ) {
             if (task.isPrivate || task.deletePending || task.localFilePath == null) return
             viewModelScope.launch {
-                suspendRunCatching { fileManager.export(task, destination) }
+                suspendRunCatching { fileManager.export(task, destinationUri) }
                     .notifyResult(R.string.library_export_success, R.string.library_export_failure)
             }
         }
@@ -385,11 +384,7 @@ internal class LibraryViewModel
         fun exportToConfiguredLocation(task: DownloadTask) {
             if (task.isPrivate || task.deletePending || task.localFilePath == null) return
             viewModelScope.launch {
-                val treeUri =
-                    settingsRepository.settings
-                        .first()
-                        .downloadTreeUri
-                        ?.let(Uri::parse)
+                val treeUri = settingsRepository.settings.first().downloadTreeUri
                 if (treeUri != null && !fileManager.hasPersistedTreePermission(treeUri)) {
                     clearInvalidDownloadLocation()
                     return@launch
@@ -409,7 +404,7 @@ internal class LibraryViewModel
         }
 
         suspend fun hasValidConfiguredDownloadLocation(treeUri: String?): Boolean =
-            treeUri?.let(Uri::parse)?.let { fileManager.hasPersistedTreePermission(it) } ?: true
+            treeUri?.let { fileManager.hasPersistedTreePermission(it) } ?: true
 
         fun clearInvalidDownloadLocation() {
             viewModelScope.launch {

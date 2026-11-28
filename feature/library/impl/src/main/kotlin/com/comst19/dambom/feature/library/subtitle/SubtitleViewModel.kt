@@ -1,6 +1,5 @@
 package com.comst19.dambom.feature.library.subtitle
 
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -55,7 +54,7 @@ internal class SubtitleViewModel
             )
         val state = mutableState.asStateFlow()
         private var job: Job? = null
-        private var activeDestination: Uri? = null
+        private var activeDestination: String? = null
         private var observation: Job? = null
         private var modelObservation: Job? = null
 
@@ -260,20 +259,20 @@ internal class SubtitleViewModel
             viewModelScope.launch { navigation.dispatch(NavigationEvent.Navigate(VideoSubtitleTranscriptKey(task.id))) }
         }
 
-        fun export(destination: Uri) {
+        fun export(destinationUri: String) {
             val path = state.value.task?.localFilePath
             if (state.value.operation != SubtitleOperation.IDLE || path == null || state.value.cues.isEmpty()) {
-                if (activeDestination != destination) viewModelScope.launch { files.discard(destination) }
+                if (activeDestination != destinationUri) viewModelScope.launch { files.discard(destinationUri) }
                 return
             }
-            activeDestination = destination
+            activeDestination = destinationUri
             job =
                 viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
                     mutableState.update {
                         it.copy(localOperation = SubtitleOperation.EXPORTING, failed = false, exported = false)
                     }
                     try {
-                        files.export(path, destination)
+                        files.export(path, destinationUri)
                         mutableState.update { it.copy(exported = true) }
                     } catch (cancelled: CancellationException) {
                         throw cancelled

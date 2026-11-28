@@ -42,7 +42,7 @@ internal fun VideoTrimRoute(
     val launchExport =
         rememberTrimExportLauncher(
             exporting = state.exporting,
-            onDestinationSelected = { uri -> viewModel.export(id, uri) },
+            onDestinationSelected = { uri -> viewModel.export(id, uri.toString()) },
         )
     LaunchedEffect(id) { viewModel.load(id) }
     LaunchedEffect(state.exporting) { if (!state.exporting) confirmCancel = false }

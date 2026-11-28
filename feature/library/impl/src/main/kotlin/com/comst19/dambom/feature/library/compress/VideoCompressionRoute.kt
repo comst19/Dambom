@@ -38,7 +38,7 @@ internal fun VideoCompressionRoute(
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("video/mp4")) { uri ->
             pickingDestination = false
-            if (uri != null) viewModel.export(id, uri)
+            if (uri != null) viewModel.export(id, uri.toString())
         }
     LaunchedEffect(id) { viewModel.load(id) }
     LaunchedEffect(state.exporting) { if (!state.exporting) confirmCancel = false }

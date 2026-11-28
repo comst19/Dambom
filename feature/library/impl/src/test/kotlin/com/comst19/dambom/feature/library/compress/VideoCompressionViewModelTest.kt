@@ -1,6 +1,5 @@
 package com.comst19.dambom.feature.library.compress
 
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import com.comst19.dambom.core.domain.model.DownloadStatus
@@ -33,7 +32,7 @@ import java.lang.reflect.Proxy
 class VideoCompressionViewModelTest {
     @get:Rule val main = MainDispatcherRule()
     private val store = ViewModelStore()
-    private val destination = Uri.parse("content://test.documents/compressed")
+    private val destination = "content://test.documents/compressed"
 
     @After fun tearDown() {
         store.clear()
@@ -53,7 +52,7 @@ class VideoCompressionViewModelTest {
             compressor.inspection?.complete(source)
             runCurrent()
             assertEquals(1, compressor.exports)
-            assertEquals(destination.toString(), model.state.value.savedUri)
+            assertEquals(destination, model.state.value.savedUri)
             assertEquals(100L, model.state.value.savedBytes)
         }
 
@@ -64,7 +63,7 @@ class VideoCompressionViewModelTest {
             model.export("saved-video", destination)
             runCurrent()
             assertEquals(0, compressor.exports)
-            assertEquals(listOf(destination.toString()), compressor.discarded)
+            assertEquals(listOf(destination), compressor.discarded)
             assertEquals(CompressionFailure.FAILED, model.state.value.failure)
             assertFalse(model.state.value.exporting)
         }
@@ -118,7 +117,7 @@ class VideoCompressionViewModelTest {
             assertEquals(CompressionProfile.SMALL, model.state.value.profile)
             model.export("saved-video", destination)
             runCurrent()
-            assertEquals(destination.toString(), saved.get<String>("compression-saved-uri"))
+            assertEquals(destination, saved.get<String>("compression-saved-uri"))
             model.select(CompressionProfile.QUALITY)
             assertEquals("QUALITY", saved.get<String>("compression-profile"))
             assertNull(saved.get<String>("compression-saved-uri"))
@@ -132,16 +131,16 @@ class VideoCompressionViewModelTest {
             val model = model(compressor)
             model.export("saved-video", destination)
             runCurrent()
-            val duplicate = Uri.parse("content://test.documents/duplicate")
+            val duplicate = "content://test.documents/duplicate"
             model.export("saved-video", duplicate)
             model.export("saved-video", destination)
             runCurrent()
-            assertEquals(listOf(duplicate.toString()), compressor.discarded)
+            assertEquals(listOf(duplicate), compressor.discarded)
             assertEquals(1, compressor.exports)
             assertTrue(model.state.value.exporting)
             compressor.exportGate?.complete(Unit)
             runCurrent()
-            assertEquals(destination.toString(), model.state.value.savedUri)
+            assertEquals(destination, model.state.value.savedUri)
         }
 
     private fun model(

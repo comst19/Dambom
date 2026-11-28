@@ -159,7 +159,7 @@ class ExportDocumentRecoveryTest {
     private suspend fun saveSrt(
         id: String,
         source: File,
-    ) = SubtitleFiles(store, Dispatchers.IO).export(source.path, uri(id))
+    ) = SubtitleFiles(store, Dispatchers.IO).export(source.path, uri(id).toString())
 
     private fun captionSource(id: String) = captionSourceFile(id).apply { writePayload(videoSubtitleFile()) }
 

@@ -63,7 +63,7 @@ internal fun rememberLibraryFileActions(
         rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("video/*")) { destination ->
             val task = pendingExport
             pendingExport = null
-            if (destination != null) viewModel.exportRestored(task, destination)
+            if (destination != null) viewModel.exportRestored(task, destination.toString())
         }
     var pendingDefaultExport by rememberSaveable { mutableStateOf<String?>(null) }
     val legacyStoragePermissionLauncher =

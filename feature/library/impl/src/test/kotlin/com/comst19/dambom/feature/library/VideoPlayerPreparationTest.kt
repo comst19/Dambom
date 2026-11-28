@@ -3,6 +3,7 @@ package com.comst19.dambom.feature.library
 import android.content.Context
 import android.net.Uri
 import android.os.Looper
+import androidx.media3.common.MediaItem
 import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.domain.model.PlaybackHistory
 import com.comst19.dambom.core.domain.model.PrivateVideoSession
@@ -27,81 +28,81 @@ class VideoPlayerPreparationTest {
     @Test
     fun `locking private playback clears media and prevents playback from restarting`() {
         val session = PrivateVideoSession()
-        val viewModel =
-            testVideoPlayerViewModel(
+        val harness =
+            testVideoPlayerHarness(
                 ApplicationProvider.getApplicationContext<Context>(),
                 session = session,
             )
         val task = savedVideo("private").copy(localFilePath = "/files/private.mp4", isPrivate = true)
         try {
-            viewModel.prepare(task)
-            assertNull(viewModel.player.currentMediaItem)
+            harness.viewModel.prepare(task)
+            assertNull(harness.player.currentMediaItem)
             session.unlock()
-            viewModel.prepare(task)
-            assertEquals("private", viewModel.player.currentMediaItem?.mediaId)
+            harness.viewModel.prepare(task)
+            assertEquals("private", harness.player.currentMediaItem?.mediaId)
             session.lock()
             Shadows.shadowOf(Looper.getMainLooper()).idle()
-            assertNull(viewModel.player.currentMediaItem)
-            viewModel.onUiStarted()
-            viewModel.requestPlayPause()
-            viewModel.prepare(task)
-            assertNull(viewModel.player.currentMediaItem)
-            assertFalse(viewModel.player.playWhenReady)
+            assertNull(harness.player.currentMediaItem)
+            harness.viewModel.onUiStarted()
+            harness.viewModel.requestPlayPause()
+            harness.viewModel.prepare(task)
+            assertNull(harness.player.currentMediaItem)
+            assertFalse(harness.player.playWhenReady)
         } finally {
-            viewModel.closeForTest()
+            harness.close()
         }
     }
 
     @Test
     fun `stop ignores another video and clears the matching video`() {
-        val viewModel = testVideoPlayerViewModel(ApplicationProvider.getApplicationContext<Context>())
+        val harness = testVideoPlayerHarness(ApplicationProvider.getApplicationContext<Context>())
         try {
-            viewModel.prepare(savedVideo("video").copy(localFilePath = "/files/video.mp4"))
-            viewModel.player.seekTo(5_000L)
+            harness.viewModel.prepare(savedVideo("video").copy(localFilePath = "/files/video.mp4"))
+            harness.player.seekTo(5_000L)
 
-            viewModel.stop("other")
+            harness.viewModel.stop("other")
 
-            assertEquals("video", viewModel.player.currentMediaItem?.mediaId)
-            assertEquals(5_000L, viewModel.player.currentPosition)
+            assertEquals("video", harness.player.currentMediaItem?.mediaId)
+            assertEquals(5_000L, harness.player.currentPosition)
 
-            viewModel.stop("video")
-            viewModel.onUiStarted()
+            harness.viewModel.stop("video")
+            harness.viewModel.onUiStarted()
 
-            assertNull(viewModel.player.currentMediaItem)
-            assertNull(viewModel.resumePromptPosition.value)
-            assertFalse(viewModel.player.playWhenReady)
+            assertNull(harness.player.currentMediaItem)
+            assertNull(harness.viewModel.resumePromptPosition.value)
+            assertFalse(harness.player.playWhenReady)
         } finally {
-            viewModel.closeForTest()
+            harness.close()
         }
     }
 
     @Test
     fun `new detail waits for play and switching videos clears pending resume`() {
-        val viewModel = testVideoPlayerViewModel(ApplicationProvider.getApplicationContext<Context>())
+        val harness = testVideoPlayerHarness(ApplicationProvider.getApplicationContext<Context>())
         val first = savedVideo("first").copy(localFilePath = "/files/first.mp4")
         val second = savedVideo("second").copy(localFilePath = "/files/second.mp4")
         try {
-            viewModel.prepare(first)
-            assertEquals("first", viewModel.player.currentMediaItem?.mediaId)
-            assertFalse(viewModel.player.playWhenReady)
-            viewModel.player.play()
-            assertTrue(viewModel.player.playWhenReady)
-            viewModel.player.seekTo(5_000L)
-            viewModel.prepare(first.copy(isFavorite = true))
-            assertTrue(viewModel.player.playWhenReady)
-            assertEquals(5_000L, viewModel.player.currentPosition)
-            viewModel.onUiStopped()
-            viewModel.prepare(second)
-            viewModel.onUiStarted()
-            assertEquals("second", viewModel.player.currentMediaItem?.mediaId)
-            assertFalse(viewModel.player.playWhenReady)
+            harness.viewModel.prepare(first)
+            assertEquals("first", harness.player.currentMediaItem?.mediaId)
+            assertFalse(harness.player.playWhenReady)
+            harness.player.play()
+            assertTrue(harness.player.playWhenReady)
+            harness.player.seekTo(5_000L)
+            harness.viewModel.prepare(first.copy(isFavorite = true))
+            assertTrue(harness.player.playWhenReady)
+            assertEquals(5_000L, harness.player.currentPosition)
+            harness.viewModel.onUiStopped()
+            harness.viewModel.prepare(second)
+            harness.viewModel.onUiStarted()
+            assertEquals("second", harness.player.currentMediaItem?.mediaId)
+            assertFalse(harness.player.playWhenReady)
         } finally {
-            viewModel.closeForTest()
+            harness.close()
         }
     }
 
     @Test
-    fun `prepare cancels pending load when uri changes for same id while deduplicating same uri`() {
+    fun `prepare cancels pending load when path changes for same id while deduplicating same path`() {
         val historyGate = CompletableDeferred<Unit>()
         var historyCalls = 0
         val suspendingHistory =
@@ -122,8 +123,8 @@ class VideoPlayerPreparationTest {
                 ) = Unit
             }
         val session = PrivateVideoSession().apply { unlock() }
-        val viewModel =
-            testVideoPlayerViewModel(
+        val harness =
+            testVideoPlayerHarness(
                 ApplicationProvider.getApplicationContext<Context>(),
                 history = suspendingHistory,
                 session = session,
@@ -132,25 +133,74 @@ class VideoPlayerPreparationTest {
         val newPath = "/files/private_videos/one.mp4"
         val task = savedVideo("one").copy(localFilePath = oldPath, isPrivate = true)
         try {
-            viewModel.prepare(task)
-            viewModel.prepare(task.copy(isFavorite = true))
+            harness.viewModel.prepare(task)
+            harness.viewModel.prepare(task.copy(isFavorite = true))
             assertEquals(1, historyCalls)
 
-            viewModel.prepare(task.copy(localFilePath = newPath))
+            harness.viewModel.prepare(task.copy(localFilePath = newPath))
             assertEquals(2, historyCalls)
 
             historyGate.complete(Unit)
             Shadows.shadowOf(Looper.getMainLooper()).idle()
 
-            assertEquals("one", viewModel.player.currentMediaItem?.mediaId)
+            assertEquals("one", harness.player.currentMediaItem?.mediaId)
             val currentUri =
-                viewModel.player.currentMediaItem
+                harness.player.currentMediaItem
                     ?.localConfiguration
                     ?.uri
             assertEquals(Uri.fromFile(File(newPath)), currentUri)
         } finally {
             historyGate.complete(Unit)
-            viewModel.closeForTest()
+            harness.close()
+        }
+    }
+
+    @Test
+    fun `prepare reloads when shared player replaces media item uri for same id`() {
+        val harness = testVideoPlayerHarness(ApplicationProvider.getApplicationContext<Context>())
+        val originalPath = "/files/videos/original.mp4"
+        val replacedPath = "/files/videos/replaced.mp4"
+        val task = savedVideo("same-id").copy(localFilePath = originalPath)
+        try {
+            harness.viewModel.prepare(task)
+            assertEquals(
+                Uri.fromFile(File(originalPath)),
+                harness.player.currentMediaItem
+                    ?.localConfiguration
+                    ?.uri,
+            )
+
+            harness.player.setMediaItem(
+                MediaItem
+                    .Builder()
+                    .setMediaId("same-id")
+                    .setUri(Uri.fromFile(File(replacedPath)))
+                    .build(),
+            )
+            harness.viewModel.prepare(task)
+            assertEquals(
+                Uri.fromFile(File(originalPath)),
+                harness.player.currentMediaItem
+                    ?.localConfiguration
+                    ?.uri,
+            )
+
+            harness.player.setMediaItem(
+                MediaItem
+                    .Builder()
+                    .setMediaId("same-id")
+                    .setUri(Uri.parse("content://example.provider$originalPath"))
+                    .build(),
+            )
+            harness.viewModel.prepare(task)
+            assertEquals(
+                Uri.fromFile(File(originalPath)),
+                harness.player.currentMediaItem
+                    ?.localConfiguration
+                    ?.uri,
+            )
+        } finally {
+            harness.close()
         }
     }
 }

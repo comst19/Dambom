@@ -19,65 +19,65 @@ import org.robolectric.annotation.Config
 class PlaybackResumePromptTest {
     @Test
     fun `resume asks on play and continues only after confirmation`() {
-        withSavedVideo { viewModel ->
-            assertNull(viewModel.resumePromptPosition.value)
-            assertFalse(viewModel.player.playWhenReady)
-            viewModel.requestPlayPause()
+        withSavedVideo { harness ->
+            assertNull(harness.viewModel.resumePromptPosition.value)
+            assertFalse(harness.player.playWhenReady)
+            harness.viewModel.requestPlayPause()
             shadowOf(Looper.getMainLooper()).idle()
-            assertEquals(5_000L, viewModel.resumePromptPosition.value)
-            assertFalse(viewModel.player.playWhenReady)
-            viewModel.answerResume(true)
-            assertNull(viewModel.resumePromptPosition.value)
-            assertEquals(5_000L, viewModel.player.currentPosition)
-            assertTrue(viewModel.player.playWhenReady)
+            assertEquals(5_000L, harness.viewModel.resumePromptPosition.value)
+            assertFalse(harness.player.playWhenReady)
+            harness.viewModel.answerResume(true)
+            assertNull(harness.viewModel.resumePromptPosition.value)
+            assertEquals(5_000L, harness.player.currentPosition)
+            assertTrue(harness.player.playWhenReady)
         }
     }
 
     @Test
     fun `start over starts at zero and dismiss waits to ask on next play`() {
-        withSavedVideo { viewModel ->
-            viewModel.player.play()
+        withSavedVideo { harness ->
+            harness.player.play()
             shadowOf(Looper.getMainLooper()).idle()
-            viewModel.dismissResumePrompt()
-            assertNull(viewModel.resumePromptPosition.value)
-            assertFalse(viewModel.player.playWhenReady)
-            viewModel.player.play()
+            harness.viewModel.dismissResumePrompt()
+            assertNull(harness.viewModel.resumePromptPosition.value)
+            assertFalse(harness.player.playWhenReady)
+            harness.player.play()
             shadowOf(Looper.getMainLooper()).idle()
-            assertEquals(5_000L, viewModel.resumePromptPosition.value)
-            viewModel.answerResume(false)
-            assertEquals(0L, viewModel.player.currentPosition)
-            assertTrue(viewModel.player.playWhenReady)
+            assertEquals(5_000L, harness.viewModel.resumePromptPosition.value)
+            harness.viewModel.answerResume(false)
+            assertEquals(0L, harness.player.currentPosition)
+            assertTrue(harness.player.playWhenReady)
         }
     }
 
     @Test
     fun `switching videos clears old prompt and repeat mode`() {
-        withSavedVideo { viewModel ->
-            viewModel.player.repeatMode = androidx.media3.common.Player.REPEAT_MODE_ONE
-            viewModel.player.play()
+        withSavedVideo { harness ->
+            harness.player.repeatMode = androidx.media3.common.Player.REPEAT_MODE_ONE
+            harness.player.play()
             shadowOf(Looper.getMainLooper()).idle()
-            viewModel.prepare(savedVideo("other").copy(localFilePath = "/files/other.mp4"))
+            harness.viewModel.prepare(savedVideo("other").copy(localFilePath = "/files/other.mp4"))
             shadowOf(Looper.getMainLooper()).idle()
-            viewModel.answerResume(true)
-            assertNull(viewModel.resumePromptPosition.value)
-            assertFalse(viewModel.player.playWhenReady)
-            assertEquals("other", viewModel.player.currentMediaItem?.mediaId)
-            assertEquals(androidx.media3.common.Player.REPEAT_MODE_OFF, viewModel.player.repeatMode)
+            harness.viewModel.answerResume(true)
+            assertNull(harness.viewModel.resumePromptPosition.value)
+            assertFalse(harness.player.playWhenReady)
+            assertEquals("other", harness.player.currentMediaItem?.mediaId)
+            assertEquals(androidx.media3.common.Player.REPEAT_MODE_OFF, harness.player.repeatMode)
         }
     }
 
-    private fun withSavedVideo(block: (VideoPlayerViewModel) -> Unit) {
+    private fun withSavedVideo(block: (TestVideoPlayerViewModel) -> Unit) {
         val history =
             LibraryTestPlaybackHistory().apply {
                 this.history.value = mapOf("video" to PlaybackHistory("video", 5_000L, 20_000L, 1L))
             }
-        val viewModel = testVideoPlayerViewModel(ApplicationProvider.getApplicationContext<Context>(), history)
+        val harness = testVideoPlayerHarness(ApplicationProvider.getApplicationContext<Context>(), history)
         try {
-            viewModel.prepare(savedVideo("video").copy(localFilePath = "/files/video.mp4"))
+            harness.viewModel.prepare(savedVideo("video").copy(localFilePath = "/files/video.mp4"))
             shadowOf(Looper.getMainLooper()).idle()
-            block(viewModel)
+            block(harness)
         } finally {
-            viewModel.closeForTest()
+            harness.close()
         }
     }
 }

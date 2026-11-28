@@ -2,9 +2,7 @@ package com.comst19.dambom.feature.library
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.domain.model.PlaybackHistory
-import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.repository.PlaybackHistoryRepository
 import com.comst19.dambom.core.testing.MainDispatcherRule
 import kotlinx.coroutines.CompletableDeferred
@@ -35,29 +33,26 @@ class PlaybackPreparationRaceTest {
                     object : PlaybackHistoryRepository by LibraryTestPlaybackHistory() {
                         override suspend fun getHistory(downloadId: String) = loaded.await()
                     }
-                val model =
-                    VideoPlayerViewModel(
-                        ApplicationProvider.getApplicationContext<Context>(),
-                        repository,
-                        LibraryTestSettings,
-                        backgroundScope,
-                        AppEventBus(),
-                        privateVideoSession = PrivateVideoSession(),
+                val harness =
+                    testVideoPlayerHarness(
+                        context = ApplicationProvider.getApplicationContext<Context>(),
+                        history = repository,
+                        applicationScope = backgroundScope,
                     )
                 try {
-                    model.prepare(savedVideo("video").copy(localFilePath = "/files/video.mp4"))
+                    harness.viewModel.prepare(savedVideo("video").copy(localFilePath = "/files/video.mp4"))
                     runCurrent()
-                    model.requestPlayPause()
-                    if (unavailable) model.stopUnavailableVideo() else model.stop("video")
+                    harness.viewModel.requestPlayPause()
+                    if (unavailable) harness.viewModel.stopUnavailableVideo() else harness.viewModel.stop("video")
                     loaded.complete(PlaybackHistory("video", 5_000L, 20_000L, 1L))
                     runCurrent()
-                    model.onUiStarted()
+                    harness.viewModel.onUiStarted()
 
-                    assertNull(model.player.currentMediaItem)
-                    assertNull(model.resumePromptPosition.value)
-                    assertFalse(model.player.playWhenReady)
+                    assertNull(harness.player.currentMediaItem)
+                    assertNull(harness.viewModel.resumePromptPosition.value)
+                    assertFalse(harness.player.playWhenReady)
                 } finally {
-                    model.closeForTest()
+                    harness.close()
                 }
             }
         }
@@ -70,29 +65,26 @@ class PlaybackPreparationRaceTest {
                 object : PlaybackHistoryRepository by LibraryTestPlaybackHistory() {
                     override suspend fun getHistory(downloadId: String) = loaded.await()
                 }
-            val model =
-                VideoPlayerViewModel(
-                    ApplicationProvider.getApplicationContext<Context>(),
-                    repository,
-                    LibraryTestSettings,
-                    backgroundScope,
-                    AppEventBus(),
-                    privateVideoSession = PrivateVideoSession(),
+            val harness =
+                testVideoPlayerHarness(
+                    context = ApplicationProvider.getApplicationContext<Context>(),
+                    history = repository,
+                    applicationScope = backgroundScope,
                 )
             try {
-                model.prepare(savedVideo("video").copy(localFilePath = "/files/video.mp4"))
+                harness.viewModel.prepare(savedVideo("video").copy(localFilePath = "/files/video.mp4"))
                 runCurrent()
-                model.requestPlayPause()
-                assertFalse(model.player.playWhenReady)
-                model.player.play()
-                assertFalse(model.player.playWhenReady)
+                harness.viewModel.requestPlayPause()
+                assertFalse(harness.player.playWhenReady)
+                harness.player.play()
+                assertFalse(harness.player.playWhenReady)
                 loaded.complete(PlaybackHistory("video", 5_000L, 20_000L, 1L))
                 runCurrent()
-                assertEquals(5_000L, model.resumePromptPosition.value)
-                assertFalse(model.player.playWhenReady)
-                assertEquals(0L, model.player.currentPosition)
+                assertEquals(5_000L, harness.viewModel.resumePromptPosition.value)
+                assertFalse(harness.player.playWhenReady)
+                assertEquals(0L, harness.player.currentPosition)
             } finally {
-                model.closeForTest()
+                harness.close()
             }
         }
 }

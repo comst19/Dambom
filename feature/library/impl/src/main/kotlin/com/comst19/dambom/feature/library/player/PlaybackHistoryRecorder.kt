@@ -1,6 +1,5 @@
 package com.comst19.dambom.feature.library.player
 
-import androidx.media3.common.Player
 import com.comst19.dambom.core.common.util.suspendRunCatching
 import com.comst19.dambom.core.domain.model.PlaybackHistory
 import com.comst19.dambom.core.domain.repository.PlaybackHistoryRepository
@@ -20,10 +19,10 @@ internal class PlaybackHistoryRecorder(
     private var lastPlayedAt = 0L
     private var lastSaved: PlaybackHistory? = null
 
-    fun onPlaying(player: Player) {
-        playedId = player.currentMediaItem?.mediaId
+    fun onPlaying(progress: PlaybackProgressSnapshot?) {
+        playedId = progress?.mediaId
         lastPlayedAt = System.currentTimeMillis()
-        save(player)
+        save(progress)
     }
 
     suspend fun awaitPendingWrites() = writes.withLock {}
@@ -32,14 +31,14 @@ internal class PlaybackHistoryRecorder(
         playedId = null
     }
 
-    fun save(player: Player) {
-        val id = player.currentMediaItem?.mediaId ?: return
-        if (playedId != id || player.duration <= 0L) return
+    fun save(progress: PlaybackProgressSnapshot?) {
+        val snapshot = progress ?: return
+        if (playedId != snapshot.mediaId || snapshot.durationMillis <= 0L) return
         val history =
             PlaybackHistory(
-                id,
-                player.currentPosition.coerceIn(0L, player.duration),
-                player.duration,
+                snapshot.mediaId,
+                snapshot.positionMillis.coerceIn(0L, snapshot.durationMillis),
+                snapshot.durationMillis,
                 lastPlayedAt,
             )
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
@@ -47,7 +46,7 @@ internal class PlaybackHistoryRecorder(
                 if (history == lastSaved) return@withLock
                 suspendRunCatching {
                     repository.saveProgress(
-                        id,
+                        snapshot.mediaId,
                         history.positionMillis,
                         history.durationMillis,
                         history.lastPlayedAtMillis,

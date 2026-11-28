@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.compose.gradle.plugin)
     implementation(libs.ksp.gradle.plugin)
     implementation(libs.hilt.gradle.plugin)
+    testImplementation(libs.junit)
 }
 
 gradlePlugin {
@@ -54,6 +55,10 @@ gradlePlugin {
         register("kotlinSerialization") {
             id = "dambom.kotlin.serialization"
             implementationClass = "com.comst19.dambom.buildlogic.KotlinSerializationConventionPlugin"
+        }
+        register("moduleBoundaries") {
+            id = "dambom.module.boundaries"
+            implementationClass = "com.comst19.dambom.buildlogic.ModuleBoundariesConventionPlugin"
         }
     }
 }

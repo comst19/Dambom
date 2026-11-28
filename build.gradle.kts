@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.dependency.analysis)
     alias(libs.plugins.versions)
+    id("dambom.module.boundaries")
 }
 
 subprojects {

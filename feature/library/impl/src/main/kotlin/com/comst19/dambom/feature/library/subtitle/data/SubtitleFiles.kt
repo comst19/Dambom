@@ -1,6 +1,6 @@
 package com.comst19.dambom.feature.library.subtitle.data
 
-import android.net.Uri
+import androidx.core.net.toUri
 import com.comst19.dambom.core.common.io.videoSubtitleFile
 import com.comst19.dambom.core.common.io.videoSubtitleTemporaryFile
 import com.comst19.dambom.core.coroutine.IoDispatcher
@@ -49,10 +49,10 @@ internal class SubtitleFiles
 
         suspend fun export(
             path: String,
-            destination: Uri,
+            destinationUri: String,
         ) {
-            documents.save(destination) { File(path).videoSubtitleFile() }
+            documents.save(destinationUri.toUri()) { File(path).videoSubtitleFile() }
         }
 
-        suspend fun discard(destination: Uri) = documents.discard(destination)
+        suspend fun discard(destinationUri: String) = documents.discard(destinationUri.toUri())
     }

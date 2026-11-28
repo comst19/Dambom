@@ -1,7 +1,6 @@
 package com.comst19.dambom.feature.library.subtitle
 
 import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.ViewModelStore
 import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.common.io.videoSubtitleFile
@@ -53,7 +52,7 @@ class SubtitleExportViewModelTest {
             val cues = listOf(SubtitleCue(1_000, 2_000, "안녕하세요"))
             source.videoSubtitleFile().writeText(cues.toSrt())
             val model = model()
-            model.export(task.id, Uri.parse("content://test/video"))
+            model.export(task.id, "content://test/video")
             runCurrent()
             assertEquals(source.path, fake.path)
             assertEquals(cues, fake.cues)
@@ -65,7 +64,7 @@ class SubtitleExportViewModelTest {
     @Test fun `missing subtitles discards destination instead of exporting a silent fallback`() =
         runTest(main.dispatcher) {
             val model = model()
-            model.export(task.id, Uri.parse("content://test/empty"))
+            model.export(task.id, "content://test/empty")
             runCurrent()
             assertEquals(listOf("content://test/empty"), fake.discarded)
             assertEquals(null, fake.path)
@@ -78,15 +77,15 @@ class SubtitleExportViewModelTest {
             source.videoSubtitleFile().writeText(listOf(SubtitleCue(0, 100, "text")).toSrt())
             fake.gate = CompletableDeferred()
             val model = model()
-            val first = Uri.parse("content://test/first")
-            val second = Uri.parse("content://test/second")
-            val third = Uri.parse("content://test/third")
+            val first = "content://test/first"
+            val second = "content://test/second"
+            val third = "content://test/third"
             model.export(task.id, first)
             runCurrent()
             model.export(task.id, second)
             model.export(task.id, first)
             runCurrent()
-            assertEquals(listOf(second.toString()), fake.discarded)
+            assertEquals(listOf(second), fake.discarded)
             assertTrue(model.state.value.exporting)
             model.cancel()
             runCurrent()
@@ -96,7 +95,7 @@ class SubtitleExportViewModelTest {
             fake.gate = null
             model.export(task.id, third)
             runCurrent()
-            assertEquals(listOf(second.toString()), fake.discarded)
+            assertEquals(listOf(second), fake.discarded)
             assertFalse(model.state.value.exporting)
             assertTrue(model.state.value.saved)
             assertFalse(model.state.value.failed)

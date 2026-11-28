@@ -1,6 +1,5 @@
 package com.comst19.dambom.feature.library.trim
 
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -76,9 +75,8 @@ internal class VideoTrimViewModel
 
         fun export(
             id: String,
-            destination: Uri,
+            destinationUri: String,
         ) {
-            val destinationUri = destination.toString()
             if (exportJob?.isActive == true) {
                 if (activeDestination != destinationUri) {
                     viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {

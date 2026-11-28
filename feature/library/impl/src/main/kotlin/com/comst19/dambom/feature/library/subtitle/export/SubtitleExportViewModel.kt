@@ -1,6 +1,5 @@
 package com.comst19.dambom.feature.library.subtitle.export
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.comst19.dambom.core.common.util.suspendRunCatching
@@ -65,14 +64,13 @@ internal class SubtitleExportViewModel
 
         fun export(
             id: String,
-            destination: Uri,
+            destinationUri: String,
         ) {
-            val uri = destination.toString()
             if (exportJob?.isActive == true) {
-                if (activeDestination != uri) {
+                if (activeDestination != destinationUri) {
                     viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
                         withContext(NonCancellable) {
-                            suspendRunCatching { exporter.discard(uri) }
+                            suspendRunCatching { exporter.discard(destinationUri) }
                         }
                     }
                 }
@@ -80,7 +78,7 @@ internal class SubtitleExportViewModel
             }
             val exportToken = Any()
             activeExportToken = exportToken
-            activeDestination = uri
+            activeDestination = destinationUri
             exportJob =
                 viewModelScope.launch(start = CoroutineStart.UNDISPATCHED) {
                     mutableState.update { it.copy(exporting = true, failed = false, saved = false, progress = null) }
@@ -93,7 +91,9 @@ internal class SubtitleExportViewModel
                         check(cues.isNotEmpty())
                         currentCoroutineContext().ensureActive()
                         owned = true
-                        exporter.export(path, cues, uri) { value -> mutableState.update { it.copy(progress = value) } }
+                        exporter.export(path, cues, destinationUri) { value ->
+                            mutableState.update { it.copy(progress = value) }
+                        }
                         mutableState.update { it.copy(saved = true) }
                     } catch (cancelled: CancellationException) {
                         throw cancelled
@@ -102,7 +102,7 @@ internal class SubtitleExportViewModel
                     } finally {
                         if (!owned) {
                             withContext(NonCancellable) {
-                                suspendRunCatching { exporter.discard(uri) }
+                                suspendRunCatching { exporter.discard(destinationUri) }
                             }
                         }
                         if (activeExportToken === exportToken) {

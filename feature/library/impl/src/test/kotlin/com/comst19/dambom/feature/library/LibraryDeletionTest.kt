@@ -1,7 +1,6 @@
 package com.comst19.dambom.feature.library
 
 import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.comst19.dambom.core.common.ui.AppEvent
@@ -145,7 +144,7 @@ class LibraryDeletionTest {
             )
             viewModel.openVideo(pending.id)
             viewModel.rename(pending, "renamed")
-            viewModel.export(pending, Uri.EMPTY)
+            viewModel.export(pending, "")
             viewModel.exportToConfiguredLocation(pending)
             runCurrent()
 

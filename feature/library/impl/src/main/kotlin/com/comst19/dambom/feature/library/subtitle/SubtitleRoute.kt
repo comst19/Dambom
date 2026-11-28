@@ -54,7 +54,7 @@ internal fun SubtitleRoute(
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/x-subrip")) { uri ->
             picking = false
-            if (uri != null) viewModel.export(uri)
+            if (uri != null) viewModel.export(uri.toString())
         }
     var permissionForDownload by rememberSaveable { mutableStateOf(false) }
     val notificationPermission =

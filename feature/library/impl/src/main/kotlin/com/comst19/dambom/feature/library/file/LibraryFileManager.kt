@@ -12,6 +12,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import com.comst19.dambom.core.common.io.videoSubtitleFile
 import com.comst19.dambom.core.coroutine.IoDispatcher
 import com.comst19.dambom.core.domain.model.DownloadTask
@@ -42,27 +43,32 @@ internal class LibraryFileManager
 
         suspend fun export(
             task: DownloadTask,
-            destination: Uri,
+            destinationUri: String,
         ) {
-            documents.save(destination) { task.requireLocalFile() }
+            documents.save(destinationUri.toUri()) { task.requireLocalFile() }
         }
 
-        suspend fun discardExport(destination: Uri) = documents.discard(destination)
+        suspend fun discardExport(destinationUri: String) = documents.discard(destinationUri.toUri())
 
         suspend fun exportToConfiguredLocation(
             task: DownloadTask,
-            treeUri: Uri?,
+            treeUri: String?,
         ) = withContext(ioDispatcher) {
             val source = task.requireLocalFile()
-            if (treeUri == null) {
+            val parsedTreeUri = treeUri?.toUri()
+            if (parsedTreeUri == null) {
                 source.copyToDefaultDownloads(task)
             } else {
-                check(hasPersistedTreePermission(treeUri)) { "Configured download folder permission is unavailable" }
-                source.copyToTree(task, treeUri)
+                check(hasPersistedTreePermission(parsedTreeUri)) {
+                    "Configured download folder permission is unavailable"
+                }
+                source.copyToTree(task, parsedTreeUri)
             }
         }
 
-        suspend fun hasPersistedTreePermission(treeUri: Uri): Boolean =
+        suspend fun hasPersistedTreePermission(treeUri: String): Boolean = hasPersistedTreePermission(treeUri.toUri())
+
+        private suspend fun hasPersistedTreePermission(treeUri: Uri): Boolean =
             withContext(ioDispatcher) {
                 hasPersistedTreePermission(
                     treeUri = treeUri,

@@ -1,6 +1,5 @@
 package com.comst19.dambom.feature.library.trim
 
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelStore
 import com.comst19.dambom.core.domain.model.DownloadStatus
@@ -91,7 +90,7 @@ class VideoTrimViewModelTest {
             runCurrent()
             assertEquals(1, reads)
             assertEquals(1, exporter.exports)
-            assertEquals(destination.toString(), model.state.value.savedUri)
+            assertEquals(destination, model.state.value.savedUri)
         }
 
     @Test
@@ -102,7 +101,7 @@ class VideoTrimViewModelTest {
             model.export("saved-video", destination)
             runCurrent()
             assertEquals(0, exporter.exports)
-            assertEquals(listOf(destination.toString()), exporter.discarded)
+            assertEquals(listOf(destination), exporter.discarded)
             assertTrue(model.state.value.exportFailed)
             assertFalse(model.state.value.exporting)
         }
@@ -117,7 +116,7 @@ class VideoTrimViewModelTest {
             runCurrent()
             exporter.durationGate?.complete(20_000L)
             runCurrent()
-            assertEquals(listOf(destination.toString()), exporter.discarded)
+            assertEquals(listOf(destination), exporter.discarded)
             assertFalse(model.state.value.exporting)
             assertFalse(model.state.value.exportFailed)
         }
@@ -158,7 +157,7 @@ class VideoTrimViewModelTest {
             model.export("saved-video", destination)
             runCurrent()
             assertFalse(model.state.value.exportFailed)
-            assertEquals(destination.toString(), saved.get<String>("trim-saved-uri"))
+            assertEquals(destination, saved.get<String>("trim-saved-uri"))
         }
 
     @Test
@@ -168,16 +167,16 @@ class VideoTrimViewModelTest {
             val model = model(exporter)
             model.export("saved-video", destination)
             runCurrent()
-            val duplicate = Uri.parse("content://test.documents/duplicate")
+            val duplicate = "content://test.documents/duplicate"
             model.export("saved-video", duplicate)
             model.export("saved-video", destination)
             runCurrent()
-            assertEquals(listOf(duplicate.toString()), exporter.discarded)
+            assertEquals(listOf(duplicate), exporter.discarded)
             assertEquals(1, exporter.exports)
             assertTrue(model.state.value.exporting)
             exporter.exportGate?.complete(Unit)
             runCurrent()
-            assertEquals(destination.toString(), model.state.value.savedUri)
+            assertEquals(destination, model.state.value.savedUri)
             assertFalse(model.state.value.exporting)
         }
 
@@ -191,7 +190,7 @@ class VideoTrimViewModelTest {
                     exportGate = CompletableDeferred()
                 }
             val model = model(exporter)
-            val second = Uri.parse("content://test.documents/second")
+            val second = "content://test.documents/second"
             model.export("saved-video", destination)
             runCurrent()
             model.cancelExport()
@@ -207,9 +206,9 @@ class VideoTrimViewModelTest {
             runCurrent()
             exporter.exportGate?.complete(Unit)
             runCurrent()
-            assertEquals(listOf(destination.toString()), exporter.discarded)
+            assertEquals(listOf(destination), exporter.discarded)
             assertEquals(1, exporter.exports)
-            assertEquals(second.toString(), model.state.value.savedUri)
+            assertEquals(second, model.state.value.savedUri)
             assertFalse(model.state.value.exporting)
             assertFalse(model.state.value.exportFailed)
         }
@@ -251,7 +250,7 @@ class VideoTrimViewModelTest {
         ).also { store.put("trim", it) }
     }
 
-    private val destination = Uri.parse("content://test.documents/clip")
+    private val destination = "content://test.documents/clip"
 }
 
 private class FakeClipExporter : ClipExporter {

@@ -2,6 +2,8 @@ package com.comst19.dambom.feature.detection
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.comst19.dambom.core.common.net.DefaultMediaHeaderPolicy
+import com.comst19.dambom.core.common.net.MediaHeaderPolicy
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
@@ -33,6 +35,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@Suppress("LongParameterList")
 internal class DetectionViewModel
     @Inject
     constructor(
@@ -42,6 +45,7 @@ internal class DetectionViewModel
         private val navigation: NavigationDispatcher,
         private val appEventBus: AppEventBus,
         private val snapshots: MediaDetectionSnapshots = MediaDetectionSnapshots(),
+        private val headerPolicy: MediaHeaderPolicy = DefaultMediaHeaderPolicy,
     ) : ViewModel() {
         private val mutableUiState = MutableStateFlow<DetectionUiState>(DetectionUiState.Loading)
         val uiState: StateFlow<DetectionUiState> = mutableUiState.asStateFlow()
@@ -184,7 +188,8 @@ internal class DetectionViewModel
             mutableUiState.value = state.copy(isSubmitting = true)
             viewModelScope.launch {
                 suspendRunCatching {
-                    val requests = repository.selectedDownloadRequests(state, sourcePageUrl, fallbackTitle)
+                    val requests =
+                        repository.selectedDownloadRequests(state, sourcePageUrl, fallbackTitle, headerPolicy)
                     downloadRepository.enqueue(requests)
                 }.onSuccess { result ->
                     appEventBus.send(AppEvent.ShowSnackbar(result.feedbackMessage))

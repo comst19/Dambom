@@ -32,139 +32,186 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.comst19.dambom.core.common.net.DefaultMediaHeaderPolicy
+import com.comst19.dambom.core.common.net.MediaHeaderPolicy
+import com.comst19.dambom.core.common.ui.player.MediaPreviewDataSourceFactory
 import com.comst19.dambom.core.designsystem.DambomButton
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.model.NetworkRestriction
-import com.comst19.dambom.core.network.header.mediaHeadersForUrl
 import com.comst19.dambom.feature.detection.R
 import com.comst19.dambom.feature.detection.contract.DetectionUiState
 
 @Composable
+@Suppress("LongParameterList")
 internal fun DetectionCandidateContent(
     state: DetectionUiState.Content,
     networkAccess: NetworkAccessState,
     onToggleCandidate: (String) -> Unit,
     onSelectVariant: (String, String) -> Unit,
     onDownload: () -> Unit,
+    previewDataSourceFactory: MediaPreviewDataSourceFactory? = null,
+    headerPolicy: MediaHeaderPolicy = DefaultMediaHeaderPolicy,
 ) {
     var previewCandidate by remember { mutableStateOf<MediaCandidate?>(null) }
     var pendingDownloadQualityIds by remember { mutableStateOf(emptyList<String>()) }
-    val gridState = rememberLazyGridState()
     Column(Modifier.fillMaxSize()) {
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(MIN_CANDIDATE_WIDTH),
+        DetectionCandidateGrid(
+            state = state,
             modifier = Modifier.weight(1f),
-            state = gridState,
-            contentPadding = PaddingValues(start = SCREEN_HORIZONTAL_PADDING, end = SCREEN_HORIZONTAL_PADDING, bottom = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Column(
-                    modifier = Modifier.padding(bottom = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(
-                        text = state.pageTitle,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        stringResource(R.string.detection_found_count, state.candidates.size),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    if (state.hasProtectedMedia) ProtectedMediaNotice()
-                    if (state.candidates.size > 1) {
-                        Text(
-                            stringResource(R.string.detection_choose_videos),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        DetectionSelectAll(state, onToggleCandidate)
-                    }
-                }
-            }
-            itemsIndexed(
-                items = state.candidates,
-                key = { _, candidate -> candidate.id },
-                contentType = { _, _ -> CANDIDATE_CONTENT_TYPE },
-            ) { index, candidate ->
-                val selectedVariant =
-                    candidate.downloadVariants.firstOrNull {
-                        it.selectionId == state.selectedVariantUrls[candidate.id]
-                    } ?: candidate.downloadVariants.first()
-                val previewTitle = candidate.displayTitle(index + 1)
-                DetectionCandidateItem(
-                    candidate = candidate,
-                    selectedVariant = selectedVariant,
-                    index = index + 1,
-                    selected = candidate.id in state.selectedIds,
-                    onClick = { onToggleCandidate(candidate.id) },
-                    onSelectVariant = { onSelectVariant(candidate.id, it) },
-                    onPreview = {
-                        val hasOwnHeaders = selectedVariant.requestHeaders.isNotEmpty()
-                        val headerSource = if (hasOwnHeaders) selectedVariant.url else candidate.url
-                        previewCandidate =
-                            candidate.copy(
-                                url = selectedVariant.url,
-                                title = previewTitle,
-                                mimeType = selectedVariant.mimeType,
-                                videoHeight = selectedVariant.videoHeight,
-                                requestHeaders =
-                                    mediaHeadersForUrl(
-                                        selectedVariant.requestHeaders.ifEmpty { candidate.requestHeaders },
-                                        headerSource,
-                                        selectedVariant.url,
-                                    ),
-                            )
-                    },
-                )
-            }
-        }
+            onToggleCandidate = onToggleCandidate,
+            onSelectVariant = onSelectVariant,
+            headerPolicy = headerPolicy,
+            onPreview = { previewCandidate = it },
+        )
         DetectionActions(
             state = state,
             networkAccess = networkAccess,
             onDownload = {
-                pendingDownloadQualityIds =
-                    state.candidates
-                        .filter { candidate ->
-                            !state.automaticQuality &&
-                                candidate.id in state.selectedIds &&
-                                candidate.downloadVariants.size > 1
-                        }.map(MediaCandidate::id)
-                if (pendingDownloadQualityIds.isEmpty()) {
-                    onDownload()
-                }
-            },
-        )
-    }
-    previewCandidate?.let { candidate ->
-        CandidatePreviewDialog(candidate = candidate, onDismiss = { previewCandidate = null })
-    }
-    val pendingDownloadQuality =
-        pendingDownloadQualityIds.firstOrNull()?.let { id -> state.candidates.firstOrNull { it.id == id } }
-    pendingDownloadQuality?.let { candidate ->
-        val selectedVariant =
-            candidate.downloadVariants.firstOrNull {
-                it.selectionId == state.selectedVariantUrls[candidate.id]
-            } ?: candidate.downloadVariants.first()
-        DetectionQualitySheet(
-            candidate = candidate,
-            selectedVariant = selectedVariant,
-            title = candidate.displayTitle(state.candidates.indexOf(candidate) + 1),
-            onDismiss = { pendingDownloadQualityIds = emptyList() },
-            onSelect = { variant ->
-                onSelectVariant(candidate.id, variant.selectionId)
-                pendingDownloadQualityIds = pendingDownloadQualityIds.drop(1)
+                pendingDownloadQualityIds = state.pendingDownloadQualityIds()
                 if (pendingDownloadQualityIds.isEmpty()) onDownload()
             },
         )
     }
+    previewCandidate?.let { candidate ->
+        CandidatePreviewDialog(
+            candidate = candidate,
+            onDismiss = { previewCandidate = null },
+            previewDataSourceFactory = previewDataSourceFactory,
+        )
+    }
+    DetectionPendingQualitySheet(
+        state = state,
+        pendingIds = pendingDownloadQualityIds,
+        onDismiss = { pendingDownloadQualityIds = emptyList() },
+        onSelect = { candidateId, selectionId ->
+            onSelectVariant(candidateId, selectionId)
+            pendingDownloadQualityIds = pendingDownloadQualityIds.drop(1)
+            if (pendingDownloadQualityIds.isEmpty()) onDownload()
+        },
+    )
 }
+
+@Composable
+@Suppress("LongParameterList")
+private fun DetectionCandidateGrid(
+    state: DetectionUiState.Content,
+    modifier: Modifier,
+    onToggleCandidate: (String) -> Unit,
+    onSelectVariant: (String, String) -> Unit,
+    headerPolicy: MediaHeaderPolicy,
+    onPreview: (MediaCandidate) -> Unit,
+) {
+    val gridState = rememberLazyGridState()
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(MIN_CANDIDATE_WIDTH),
+        modifier = modifier,
+        state = gridState,
+        contentPadding = PaddingValues(start = SCREEN_HORIZONTAL_PADDING, end = SCREEN_HORIZONTAL_PADDING, bottom = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            DetectionCandidateHeader(state, onToggleCandidate)
+        }
+        itemsIndexed(
+            items = state.candidates,
+            key = { _, candidate -> candidate.id },
+            contentType = { _, _ -> CANDIDATE_CONTENT_TYPE },
+        ) { index, candidate ->
+            val selectedVariant = state.selectedVariantFor(candidate)
+            val previewTitle = candidate.displayTitle(index + 1)
+            DetectionCandidateItem(
+                candidate = candidate,
+                selectedVariant = selectedVariant,
+                index = index + 1,
+                selected = candidate.id in state.selectedIds,
+                onClick = { onToggleCandidate(candidate.id) },
+                onSelectVariant = { onSelectVariant(candidate.id, it) },
+                onPreview = {
+                    onPreview(
+                        candidate.copy(
+                            url = selectedVariant.url,
+                            title = previewTitle,
+                            mimeType = selectedVariant.mimeType,
+                            videoHeight = selectedVariant.videoHeight,
+                            requestHeaders =
+                                headerPolicy.resolveVariantHeaders(
+                                    candidateUrl = candidate.url,
+                                    candidateHeaders = candidate.requestHeaders,
+                                    variantUrl = selectedVariant.url,
+                                    variantHeaders = selectedVariant.requestHeaders,
+                                ),
+                        ),
+                    )
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun DetectionCandidateHeader(
+    state: DetectionUiState.Content,
+    onToggleCandidate: (String) -> Unit,
+) {
+    Column(
+        modifier = Modifier.padding(bottom = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(
+            text = state.pageTitle,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            stringResource(R.string.detection_found_count, state.candidates.size),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        if (state.hasProtectedMedia) ProtectedMediaNotice()
+        if (state.candidates.size > 1) {
+            Text(
+                stringResource(R.string.detection_choose_videos),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            DetectionSelectAll(state, onToggleCandidate)
+        }
+    }
+}
+
+@Composable
+private fun DetectionPendingQualitySheet(
+    state: DetectionUiState.Content,
+    pendingIds: List<String>,
+    onDismiss: () -> Unit,
+    onSelect: (String, String) -> Unit,
+) {
+    val candidate = pendingIds.firstOrNull()?.let { id -> state.candidates.firstOrNull { it.id == id } } ?: return
+    DetectionQualitySheet(
+        candidate = candidate,
+        selectedVariant = state.selectedVariantFor(candidate),
+        title = candidate.displayTitle(state.candidates.indexOf(candidate) + 1),
+        onDismiss = onDismiss,
+        onSelect = { variant -> onSelect(candidate.id, variant.selectionId) },
+    )
+}
+
+private fun DetectionUiState.Content.selectedVariantFor(candidate: MediaCandidate) =
+    candidate.downloadVariants.firstOrNull {
+        it.selectionId == selectedVariantUrls[candidate.id]
+    } ?: candidate.downloadVariants.first()
+
+private fun DetectionUiState.Content.pendingDownloadQualityIds(): List<String> =
+    candidates
+        .filter { candidate ->
+            !automaticQuality &&
+                candidate.id in selectedIds &&
+                candidate.downloadVariants.size > 1
+        }.map(MediaCandidate::id)
 
 @Composable
 private fun DetectionSelectAll(

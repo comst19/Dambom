@@ -1,5 +1,7 @@
 package com.comst19.dambom.feature.detection
 
+import com.comst19.dambom.core.common.net.DefaultMediaHeaderPolicy
+import com.comst19.dambom.core.common.net.MediaHeaderPolicy
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
@@ -514,6 +516,195 @@ class DetectionViewModelTest {
 
             assertEquals(listOf(SOURCE_URL, SOURCE_URL), repository.requestedUrls)
         }
+
+    @Test
+    fun `download requests prefer variant own headers and filter fallback candidate headers by origin`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val crossOriginVariant = MediaVariant("https://cdn.other.example/low.mp4", "video/mp4", 512L, "Low")
+            val candidates = headerResolutionCandidates(crossOriginVariant)
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String) = MediaDetectionResult.Success("Page", candidates)
+                }
+            val downloads = RecordingDownloadRepository()
+            val viewModel = testDetectionViewModel(repository, downloads, SpyNavigationDispatcher(), AppEventBus())
+            viewModel.detect(SOURCE_URL)
+            advanceUntilIdle()
+            viewModel.selectVariant("fallback", crossOriginVariant.selectionId)
+            viewModel.toggleCandidate("fallback")
+            viewModel.toggleCandidate("own")
+            viewModel.downloadSelected("Video")
+            advanceUntilIdle()
+            assertEquals(
+                listOf(
+                    mapOf("user-agent" to "DownloadAgent", "referer" to "https://origin.example/page"),
+                    mapOf("cookie" to "variant=1", "authorization" to "Bearer variant"),
+                ),
+                downloads.enqueued.single().map { it.requestHeaders },
+            )
+        }
+
+    private fun headerResolutionCandidates(crossOriginVariant: MediaVariant): List<MediaCandidate> {
+        val ownHeaderVariant =
+            MediaVariant(
+                url = "https://cdn.other.example/high.mp4",
+                mimeType = "video/mp4",
+                contentLength = 1024L,
+                quality = "High",
+                requestHeaders = mapOf("Cookie" to "variant=1", "Authorization" to "Bearer variant"),
+            )
+        return listOf(
+            MediaCandidate(
+                id = "fallback",
+                url = "https://origin.example/master.mp4",
+                title = "Fallback",
+                mimeType = "video/mp4",
+                contentLength = 1024L,
+                requestHeaders =
+                    mapOf(
+                        "Cookie" to "session=secret",
+                        "Authorization" to "Bearer secret",
+                        "User-Agent" to "DownloadAgent",
+                        "Referer" to "https://origin.example/page",
+                    ),
+                variants =
+                    listOf(
+                        MediaVariant("https://origin.example/master.mp4", "video/mp4", 1024L, "High"),
+                        crossOriginVariant,
+                    ),
+            ),
+            MediaCandidate(
+                id = "own",
+                url = "https://origin.example/own-master.mp4",
+                title = "Own",
+                mimeType = "video/mp4",
+                contentLength = 1024L,
+                requestHeaders = mapOf("Cookie" to "candidate=1", "User-Agent" to "CandidateAgent"),
+                variants = listOf(ownHeaderVariant),
+            ),
+        )
+    }
+
+    @Test
+    fun `extensionless download variant filters resolved headers across origins`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val candidate =
+                MediaCandidate(
+                    id = "dynamic",
+                    url = "https://origin.example/watch/123",
+                    title = "Dynamic",
+                    mimeType = null,
+                    contentLength = null,
+                    quality = "720p",
+                    requestHeaders =
+                        mapOf(
+                            "Cookie" to "session=secret",
+                            "Authorization" to "Bearer secret",
+                            "User-Agent" to "ResolveAgent",
+                        ),
+                )
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String) = MediaDetectionResult.Success("Page", listOf(candidate))
+
+                    override suspend fun detectRequest(
+                        url: String,
+                        headers: Map<String, String>,
+                    ): MediaDetectionResult =
+                        MediaDetectionResult.Success(
+                            "Resolved",
+                            listOf(
+                                MediaCandidate(
+                                    id = "resolved",
+                                    url = "https://cdn.other.example/stream.mp4",
+                                    title = "Resolved",
+                                    mimeType = "video/mp4",
+                                    contentLength = 2048L,
+                                ),
+                            ),
+                        )
+                }
+            val downloads = RecordingDownloadRepository()
+            val viewModel = testDetectionViewModel(repository, downloads, SpyNavigationDispatcher(), AppEventBus())
+
+            viewModel.detect(SOURCE_URL)
+            advanceUntilIdle()
+            viewModel.downloadSelected("Video")
+            advanceUntilIdle()
+
+            val request = downloads.enqueued.single().single()
+            assertEquals("https://cdn.other.example/stream.mp4", request.url)
+            assertEquals(mapOf("user-agent" to "ResolveAgent"), request.requestHeaders)
+        }
+
+    @Test
+    fun `download preserves credentials on canonicalized same origin and uses injected header policy`() =
+        runTest(mainDispatcherRule.dispatcher) {
+            val punycodeVariant = MediaVariant("https://xn--bcher-kva.example/720.mp4", "video/mp4", 1024L, "720p")
+            val candidate =
+                MediaCandidate(
+                    id = "idn-video",
+                    url = "https://bücher.example/master.m3u8",
+                    title = "IDN Video",
+                    mimeType = "video/mp4",
+                    contentLength = 2048L,
+                    requestHeaders =
+                        mapOf(
+                            "Cookie" to "session=secret",
+                            "Authorization" to "Bearer secret",
+                            "User-Agent" to "DownloadAgent",
+                        ),
+                    variants =
+                        listOf(
+                            MediaVariant("https://bücher.example/master.m3u8", "video/mp4", 2048L, "High"),
+                            punycodeVariant,
+                        ),
+                )
+            val repository =
+                object : MediaDetectionRepository {
+                    override suspend fun detect(url: String) = MediaDetectionResult.Success("Page", listOf(candidate))
+                }
+            val downloads = RecordingDownloadRepository()
+            var policyCalls = 0
+            val policy =
+                object : MediaHeaderPolicy {
+                    override fun mediaHeadersForUrl(
+                        headers: Map<String, String>,
+                        sourceUrl: String,
+                        targetUrl: String,
+                    ): Map<String, String> {
+                        policyCalls++
+                        return DefaultMediaHeaderPolicy.mediaHeadersForUrl(headers, sourceUrl, targetUrl)
+                    }
+                }
+            val viewModel =
+                testDetectionViewModel(
+                    repository = repository,
+                    downloadRepository = downloads,
+                    navigation = SpyNavigationDispatcher(),
+                    appEventBus = AppEventBus(),
+                    headerPolicy = policy,
+                )
+
+            viewModel.detect(SOURCE_URL)
+            advanceUntilIdle()
+            viewModel.selectVariant("idn-video", punycodeVariant.selectionId)
+            viewModel.downloadSelected("Video")
+            advanceUntilIdle()
+
+            assertEquals(1, policyCalls)
+            assertEquals(
+                mapOf(
+                    "cookie" to "session=secret",
+                    "authorization" to "Bearer secret",
+                    "user-agent" to "DownloadAgent",
+                ),
+                downloads.enqueued
+                    .single()
+                    .single()
+                    .requestHeaders,
+            )
+        }
 }
 
 private class ControllableDetectionRepository : MediaDetectionRepository {
@@ -635,8 +826,8 @@ private fun testDetectionViewModel(
     navigation: NavigationDispatcher,
     appEventBus: AppEventBus,
     snapshots: MediaDetectionSnapshots = MediaDetectionSnapshots(),
-    settings: AppSettings =
-        AppSettings(),
+    settings: AppSettings = AppSettings(),
+    headerPolicy: MediaHeaderPolicy = DefaultMediaHeaderPolicy,
 ): DetectionViewModel =
     DetectionViewModel(
         repository = repository,
@@ -645,6 +836,7 @@ private fun testDetectionViewModel(
         navigation = navigation,
         appEventBus = appEventBus,
         snapshots = snapshots,
+        headerPolicy = headerPolicy,
     )
 
 private class DetectionSettingsRepository(

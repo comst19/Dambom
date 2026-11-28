@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.material3.adaptive)
     implementation(libs.androidx.media3.common)
+    api(libs.androidx.media3.datasource)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.video)

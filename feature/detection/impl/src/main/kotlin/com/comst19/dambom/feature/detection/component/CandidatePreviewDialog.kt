@@ -56,6 +56,7 @@ import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.media3.ui.compose.state.rememberProgressStateWithTickInterval
 import com.comst19.dambom.core.common.ui.player.DambomPlayerControls
 import com.comst19.dambom.core.common.ui.player.KeepScreenOnWhilePlaying
+import com.comst19.dambom.core.common.ui.player.MediaPreviewDataSourceFactory
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.feature.detection.R
 import kotlinx.coroutines.delay
@@ -65,12 +66,16 @@ import kotlinx.coroutines.delay
 internal fun CandidatePreviewDialog(
     candidate: MediaCandidate,
     onDismiss: () -> Unit,
+    previewDataSourceFactory: MediaPreviewDataSourceFactory? = null,
     playerFactory: ((Context) -> Player)? = null,
 ) {
     val context = LocalContext.current
     val player =
-        remember(candidate.url, candidate.requestHeaders, candidate.videoHeight) {
-            (playerFactory?.invoke(context) ?: createCandidatePreviewPlayer(context, candidate)).apply {
+        remember(candidate.url, candidate.requestHeaders, candidate.videoHeight, previewDataSourceFactory) {
+            val created =
+                playerFactory?.invoke(context)
+                    ?: createCandidatePreviewPlayer(context, candidate, previewDataSourceFactory)
+            created.apply {
                 repeatMode = Player.REPEAT_MODE_ONE
                 setMediaItem(
                     MediaItem

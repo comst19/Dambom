@@ -14,6 +14,12 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DataSpec
+import androidx.media3.datasource.TransferListener
+import com.comst19.dambom.core.common.net.DefaultMediaHeaderPolicy
+import com.comst19.dambom.core.common.net.MediaHeaderPolicy
+import com.comst19.dambom.core.common.ui.player.MediaPreviewDataSourceFactory
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.MediaVariant
@@ -269,6 +275,181 @@ class DetectionCandidateContentTest {
         )
         assertEquals(1, downloadCount)
     }
+
+    @Test
+    fun `preview passes origin filtered candidate headers to injected factory`() {
+        val crossOriginVariant = MediaVariant("https://cdn.other.example/low.mp4", "video/mp4", 1_024L, "Low")
+        val item =
+            previewHeaderCandidate(
+                candidateHeaders =
+                    mapOf(
+                        "Cookie" to "session=secret",
+                        "Authorization" to "Bearer secret",
+                        "User-Agent" to "PreviewAgent",
+                        "Referer" to "https://origin.example/watch",
+                    ),
+                selectedVariant = crossOriginVariant,
+            )
+
+        val recorded = recordPreviewFactoryCalls(item, crossOriginVariant.selectionId)
+
+        assertEquals(
+            listOf(
+                "https://cdn.other.example/low.mp4" to
+                    mapOf(
+                        "user-agent" to "PreviewAgent",
+                        "referer" to "https://origin.example/watch",
+                    ),
+            ),
+            recorded,
+        )
+    }
+
+    @Test
+    fun `preview prefers selected variant own headers over candidate headers`() {
+        val ownHeaderVariant =
+            MediaVariant(
+                url = "https://cdn.other.example/low.mp4",
+                mimeType = "video/mp4",
+                contentLength = 1_024L,
+                quality = "Low",
+                requestHeaders = mapOf("Cookie" to "variant=1", "Authorization" to "Bearer variant"),
+            )
+        val item =
+            previewHeaderCandidate(
+                candidateHeaders = mapOf("Cookie" to "candidate=1", "User-Agent" to "CandidateAgent"),
+                selectedVariant = ownHeaderVariant,
+            )
+
+        val recorded = recordPreviewFactoryCalls(item, ownHeaderVariant.selectionId)
+
+        assertEquals(
+            listOf(
+                "https://cdn.other.example/low.mp4" to
+                    mapOf(
+                        "cookie" to "variant=1",
+                        "authorization" to "Bearer variant",
+                    ),
+            ),
+            recorded,
+        )
+    }
+
+    @Test
+    fun `preview preserves credentials on canonicalized same origin and uses injected policy`() {
+        val variant = MediaVariant("https://[::1]/low.mp4", "video/mp4", 1_024L, "Low")
+        val item =
+            MediaCandidate(
+                id = "video-1",
+                url = "https://[0:0:0:0:0:0:0:1]/high.mp4",
+                title = "Preview video",
+                mimeType = "video/mp4",
+                contentLength = 2_048L,
+                quality = "High",
+                requestHeaders = mapOf("Cookie" to "session=secret", "Authorization" to "Bearer secret"),
+                variants =
+                    listOf(
+                        MediaVariant("https://[0:0:0:0:0:0:0:1]/high.mp4", "video/mp4", 2_048L, "High"),
+                        variant,
+                    ),
+            )
+        var policyCalls = 0
+        val policy =
+            object : MediaHeaderPolicy {
+                override fun mediaHeadersForUrl(
+                    headers: Map<String, String>,
+                    sourceUrl: String,
+                    targetUrl: String,
+                ): Map<String, String> {
+                    policyCalls++
+                    return DefaultMediaHeaderPolicy.mediaHeadersForUrl(headers, sourceUrl, targetUrl)
+                }
+            }
+
+        val recorded = recordPreviewFactoryCalls(item, variant.selectionId, policy)
+
+        assertEquals(1, policyCalls)
+        assertEquals(
+            listOf(
+                "https://[::1]/low.mp4" to
+                    mapOf(
+                        "cookie" to "session=secret",
+                        "authorization" to "Bearer secret",
+                    ),
+            ),
+            recorded,
+        )
+    }
+
+    private fun recordPreviewFactoryCalls(
+        item: MediaCandidate,
+        selectedVariantId: String,
+        headerPolicy: MediaHeaderPolicy = DefaultMediaHeaderPolicy,
+    ): List<Pair<String, Map<String, String>>> {
+        val recorded = mutableListOf<Pair<String, Map<String, String>>>()
+        val factory =
+            MediaPreviewDataSourceFactory { url, headers ->
+                recorded += url to headers
+                DataSource.Factory { NoOpDataSource }
+            }
+        composeRule.setContent {
+            DambomTheme {
+                DetectionCandidateContent(
+                    state =
+                        DetectionUiState.Content(
+                            pageTitle = "Videos",
+                            candidates = persistentListOf(item),
+                            selectedIds = persistentSetOf(item.id),
+                            selectedVariantUrls = persistentMapOf(item.id to selectedVariantId),
+                        ),
+                    networkAccess = NetworkAccessState(NetworkConnection.UNMETERED),
+                    onToggleCandidate = {},
+                    onSelectVariant = { _, _ -> },
+                    onDownload = {},
+                    previewDataSourceFactory = factory,
+                    headerPolicy = headerPolicy,
+                )
+            }
+        }
+        composeRule.onNodeWithText("Play").performClick()
+        composeRule.waitForIdle()
+        return recorded
+    }
+}
+
+private fun previewHeaderCandidate(
+    candidateHeaders: Map<String, String>,
+    selectedVariant: MediaVariant,
+): MediaCandidate =
+    MediaCandidate(
+        id = "video-1",
+        url = "https://origin.example/high.mp4",
+        title = "Preview video",
+        mimeType = "video/mp4",
+        contentLength = 2_048L,
+        quality = "High",
+        requestHeaders = candidateHeaders,
+        variants =
+            listOf(
+                MediaVariant("https://origin.example/high.mp4", "video/mp4", 2_048L, "High"),
+                selectedVariant,
+            ),
+    )
+
+private object NoOpDataSource : DataSource {
+    override fun addTransferListener(transferListener: TransferListener) = Unit
+
+    override fun open(dataSpec: DataSpec): Long = 0L
+
+    override fun read(
+        buffer: ByteArray,
+        offset: Int,
+        length: Int,
+    ): Int = -1
+
+    override fun getUri() = null
+
+    override fun close() = Unit
 }
 
 private const val SELECTION_CHECKBOX_TAG = "detection-selection-checkbox"

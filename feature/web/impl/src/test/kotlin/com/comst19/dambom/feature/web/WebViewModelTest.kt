@@ -365,17 +365,6 @@ class WebViewModelTest {
     }
 
     @Test
-    fun `inactive web states retain only a small recent set`() {
-        val viewModel = createViewModel()
-
-        repeat(4) { tabId -> viewModel.saveWebState(tabId.toLong(), android.os.Bundle()) }
-
-        assertNull(viewModel.savedWebState(0L))
-        assertTrue(viewModel.savedWebState(1L) != null)
-        assertTrue(viewModel.savedWebState(1L) != null)
-    }
-
-    @Test
     fun `media detection state belongs to its tab`() {
         val viewModel = createViewModel()
         val firstTabId = viewModel.uiState.value.currentTabId

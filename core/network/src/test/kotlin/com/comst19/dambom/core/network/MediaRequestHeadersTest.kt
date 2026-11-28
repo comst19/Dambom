@@ -1,5 +1,7 @@
 package com.comst19.dambom.core.network
 
+import com.comst19.dambom.core.common.net.DefaultMediaHeaderPolicy
+import com.comst19.dambom.core.network.header.OkHttpMediaHeaderPolicy
 import com.comst19.dambom.core.network.header.decodeMediaHeaders
 import com.comst19.dambom.core.network.header.encodeMediaHeaders
 import com.comst19.dambom.core.network.header.inheritPlaylistQuery
@@ -121,6 +123,50 @@ class MediaRequestHeadersTest {
                 assertNull(redirected.getHeader("Authorization"))
                 assertEquals("TestAgent", redirected.getHeader("User-Agent"))
             }
+        }
+    }
+
+    @Test
+    fun `header policies match OkHttp origin canonicalization for ipv6 idn underscore and ports`() {
+        val headers =
+            mapOf(
+                "Cookie" to "session=secret",
+                "Authorization" to "Bearer secret",
+                "User-Agent" to "DambomAgent",
+            )
+        val sameOriginExpected =
+            mapOf(
+                "cookie" to "session=secret",
+                "authorization" to "Bearer secret",
+                "user-agent" to "DambomAgent",
+            )
+        val crossOriginExpected = mapOf("user-agent" to "DambomAgent")
+        val okHttpPolicy = OkHttpMediaHeaderPolicy()
+        val cases =
+            listOf(
+                Triple("https://origin.example/a", "https://origin.example:443/b", sameOriginExpected),
+                Triple("https://[0:0:0:0:0:0:0:1]/a", "https://[::1]/b", sameOriginExpected),
+                Triple("https://bücher.example/a", "https://xn--bcher-kva.example/b", sameOriginExpected),
+                Triple("https://video_edge.example/a", "https://video_edge.example/b", sameOriginExpected),
+                Triple("https://origin.example/a", "https://origin.example:8443/b", crossOriginExpected),
+            )
+
+        cases.forEach { (source, target, expected) ->
+            assertEquals(
+                "OkHttp helper mismatch for $source -> $target",
+                expected,
+                mediaHeadersForUrl(headers, source, target),
+            )
+            assertEquals(
+                "OkHttp policy mismatch for $source -> $target",
+                expected,
+                okHttpPolicy.mediaHeadersForUrl(headers, source, target),
+            )
+            assertEquals(
+                "Default policy mismatch for $source -> $target",
+                expected,
+                DefaultMediaHeaderPolicy.mediaHeadersForUrl(headers, source, target),
+            )
         }
     }
 }

@@ -1,8 +1,10 @@
 package com.comst19.dambom.core.network.di
 
+import com.comst19.dambom.core.common.net.MediaHeaderPolicy
 import com.comst19.dambom.core.network.NetworkConfig
 import com.comst19.dambom.core.network.header.DefaultNetworkHeaderProvider
 import com.comst19.dambom.core.network.header.NetworkHeaderProvider
+import com.comst19.dambom.core.network.header.OkHttpMediaHeaderPolicy
 import com.comst19.dambom.core.network.interceptor.HeaderInterceptor
 import com.comst19.dambom.core.network.interceptor.RequestIdInterceptor
 import dagger.Module
@@ -21,6 +23,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideNetworkHeaderProvider(provider: DefaultNetworkHeaderProvider): NetworkHeaderProvider = provider
+
+    @Provides
+    @Singleton
+    fun provideMediaHeaderPolicy(policy: OkHttpMediaHeaderPolicy): MediaHeaderPolicy = policy
 
     @Provides
     @Singleton
@@ -51,6 +57,11 @@ object NetworkModule {
             ).connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .build()
+
+    @Provides
+    @Singleton
+    @MediaPreviewHttpClient
+    fun provideMediaPreviewOkHttpClient(): OkHttpClient = OkHttpClient()
 
     private const val CONNECT_TIMEOUT_SECONDS = 10L
     private const val READ_TIMEOUT_SECONDS = 20L

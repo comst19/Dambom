@@ -150,6 +150,7 @@ dependencies {
     implementation(projects.presentation)
     implementation(projects.core.navigation)
     implementation(projects.core.common)
+    implementation(projects.core.commonUi)
     implementation(projects.core.data)
     implementation(projects.core.network)
     implementation(projects.core.analytics)

@@ -1,18 +1,16 @@
 package com.comst19.dambom.core.network.header
 
+import com.comst19.dambom.core.common.net.isSharedMediaHeader
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
+import com.comst19.dambom.core.common.net.sanitizeMediaHeaders as filterMediaHeaders
 
-fun sanitizeMediaHeaders(headers: Map<String, String>): Map<String, String> =
-    headers.entries
-        .filter { (name, value) ->
-            HEADER_NAME.matches(name) && name.lowercase() !in TRANSPORT_HEADERS &&
-                value.none { it == '\r' || it == '\n' }
-        }.associate { (name, value) -> name.lowercase() to value }
+fun sanitizeMediaHeaders(headers: Map<String, String>): Map<String, String> = filterMediaHeaders(headers)
 
 fun encodeMediaHeaders(headers: Map<String, String>): String {
     val sanitized = sanitizeMediaHeaders(headers)
@@ -29,10 +27,10 @@ fun mediaHeadersForUrl(
     sourceUrl: String,
     targetUrl: String,
 ): Map<String, String> {
-    val source = sourceUrl.toHttpUrl()
-    val target = targetUrl.toHttpUrl()
-    val sameOrigin = source.scheme == target.scheme && source.host == target.host && source.port == target.port
-    return sanitizeMediaHeaders(headers).filterKeys { sameOrigin || it in SHARED_HEADERS }
+    val source = sourceUrl.toHttpUrlOrNull()
+    val target = targetUrl.toHttpUrlOrNull()
+    val sameOrigin = source != null && target != null && hasSameOrigin(source, target)
+    return sanitizeMediaHeaders(headers).filterKeys { sameOrigin || isSharedMediaHeader(it) }
 }
 
 fun mediaRequestClient(
@@ -50,7 +48,7 @@ fun mediaRequestClient(
         .newBuilder()
         .addNetworkInterceptor { chain ->
             val target = chain.request().url
-            val sameOrigin = target.scheme == origin.scheme && target.host == origin.host && target.port == origin.port
+            val sameOrigin = hasSameOrigin(origin, target)
             val request =
                 chain
                     .request()
@@ -59,7 +57,7 @@ fun mediaRequestClient(
                     .apply {
                         sanitized.forEach { (name, value) ->
                             removeHeader(name)
-                            if (sameOrigin || name in SHARED_HEADERS) header(name, value)
+                            if (sameOrigin || isSharedMediaHeader(name)) header(name, value)
                         }
                     }.build()
             chain.proceed(request)
@@ -73,7 +71,7 @@ internal fun inheritPlaylistQuery(
     val knownHost =
         source.host.endsWith(".pstatic.net") || source.host.endsWith(".daum.net") ||
             source.host.endsWith("-naver-vod.akamaized.net")
-    val sameOrigin = source.scheme == target.scheme && source.host == target.host && source.port == target.port
+    val sameOrigin = hasSameOrigin(source, target)
     val needsQuery =
         source.encodedQuery != null && target.encodedQuery == null &&
             target.encodedPath.endsWith(".m3u8", ignoreCase = true)
@@ -84,20 +82,9 @@ internal fun inheritPlaylistQuery(
     }
 }
 
-private val SHARED_HEADERS = setOf("user-agent", "referer", "origin", "accept", "accept-language")
-private val TRANSPORT_HEADERS =
-    setOf(
-        "host",
-        "connection",
-        "content-length",
-        "transfer-encoding",
-        "accept-encoding",
-        "range",
-        "if-range",
-        "proxy-authorization",
-        "te",
-        "trailer",
-        "upgrade",
-    )
-private val HEADER_NAME = Regex("[!#$%&'*+.^_`|~0-9a-zA-Z-]+")
+private fun hasSameOrigin(
+    source: HttpUrl,
+    target: HttpUrl,
+): Boolean = source.scheme == target.scheme && source.host == target.host && source.port == target.port
+
 private val HEADER_SERIALIZER = MapSerializer(String.serializer(), String.serializer())

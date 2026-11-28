@@ -31,7 +31,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.comst19.dambom.core.common.net.DefaultMediaHeaderPolicy
+import com.comst19.dambom.core.common.net.MediaHeaderPolicy
 import com.comst19.dambom.core.common.ui.AppScreen
+import com.comst19.dambom.core.common.ui.player.MediaPreviewDataSourceFactory
 import com.comst19.dambom.core.designsystem.DambomTheme
 import com.comst19.dambom.core.designsystem.FormFactorPreviews
 import com.comst19.dambom.core.designsystem.previewNoOp
@@ -39,6 +42,7 @@ import com.comst19.dambom.core.domain.model.MediaCandidate
 import com.comst19.dambom.core.domain.model.NetworkAccessState
 import com.comst19.dambom.core.domain.model.NetworkConnection
 import com.comst19.dambom.feature.detection.component.DetectionCandidateContent
+import com.comst19.dambom.feature.detection.component.DetectionPreviewHost
 import com.comst19.dambom.feature.detection.component.LoadingDetectionContent
 import com.comst19.dambom.feature.detection.component.NetworkUnavailableDetectionContent
 import com.comst19.dambom.feature.detection.component.UnsupportedDetectionContent
@@ -52,6 +56,7 @@ internal fun DetectionRoute(
     url: String,
     networkAccess: NetworkAccessState,
     viewModel: DetectionViewModel = hiltViewModel(),
+    previewHost: DetectionPreviewHost = hiltViewModel(),
     snapshotId: String? = null,
     sharedLink: Boolean = false,
     isSupportingPane: Boolean = false,
@@ -96,6 +101,8 @@ internal fun DetectionRoute(
         onToggleCandidate = viewModel::toggleCandidate,
         onSelectVariant = viewModel::selectVariant,
         onDownload = download,
+        previewDataSourceFactory = previewHost.previewDataSourceFactory,
+        headerPolicy = previewHost.headerPolicy,
         isSupportingPane = isSupportingPane,
         sourceUrl = url,
     )
@@ -113,6 +120,8 @@ internal fun DetectionScreen(
     onToggleCandidate: (String) -> Unit,
     onSelectVariant: (String, String) -> Unit,
     onDownload: () -> Unit,
+    previewDataSourceFactory: MediaPreviewDataSourceFactory? = null,
+    headerPolicy: MediaHeaderPolicy = DefaultMediaHeaderPolicy,
     isSupportingPane: Boolean = false,
     sourceUrl: String = "",
 ) {
@@ -147,6 +156,8 @@ internal fun DetectionScreen(
                         onToggleCandidate = onToggleCandidate,
                         onSelectVariant = onSelectVariant,
                         onDownload = onDownload,
+                        previewDataSourceFactory = previewDataSourceFactory,
+                        headerPolicy = headerPolicy,
                     )
                 }
 

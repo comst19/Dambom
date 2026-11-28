@@ -30,6 +30,7 @@ import com.comst19.dambom.core.navigation.NavigationEvent
 import com.comst19.dambom.feature.web.contract.WebDetectionState
 import com.comst19.dambom.feature.web.contract.WebTab
 import com.comst19.dambom.feature.web.contract.WebUiState
+import com.comst19.dambom.feature.web.webview.WebViewStateHost
 import kotlinx.collections.immutable.mutate
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
@@ -239,9 +240,83 @@ class WebBackNavigationRuntimeTest {
         assertEquals(1, server.requestCount("/c"))
     }
 
+    @Test
+    fun tabSwitchWithRealViewModelAndStateHostPreservesBackAndForwardHistory() {
+        val urlA = server.url("/a")
+        val urlB = server.url("/b")
+        val urlC = server.url("/c")
+        val urlD = server.url("/d")
+        val viewModel =
+            WebViewModel(
+                mediaDetectionRepository = NoOpRuntimeMediaDetectionRepository,
+                navigation = NoOpRuntimeNavigationDispatcher,
+                savedStateHandle = SavedStateHandle(),
+                snapshots = MediaDetectionSnapshots(),
+            )
+        val stateHost = WebViewStateHost()
+        val tab1Id = viewModel.uiState.value.currentTabId
+        viewModel.navigateCurrentTab(urlA)
+        val finishedUrls = CopyOnWriteArrayList<String>()
+        setViewModelWebScreenContent(viewModel, finishedUrls, stateHost)
+
+        composeRule.waitUntil(timeoutMillis = WAIT_TIMEOUT_MS) {
+            finishedUrls.contains(urlA) && currentWebViewUrl() == urlA
+        }
+
+        composeRule.runOnUiThread { viewModel.navigateCurrentTab(urlB) }
+        composeRule.waitUntil(timeoutMillis = WAIT_TIMEOUT_MS) {
+            finishedUrls.contains(urlB) && currentWebViewUrl() == urlB
+        }
+
+        composeRule.runOnUiThread { viewModel.navigateCurrentTab(urlC) }
+        composeRule.waitUntil(timeoutMillis = WAIT_TIMEOUT_MS) {
+            finishedUrls.contains(urlC) && currentWebViewUrl() == urlC
+        }
+
+        composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
+        composeRule.waitUntil(timeoutMillis = WAIT_TIMEOUT_MS) { currentWebViewUrl() == urlB }
+        composeRule.waitForIdle()
+        backButton().assertIsEnabled()
+        forwardButton().assertIsEnabled()
+
+        val tab1BeforeSwitch = requireWebView()
+        composeRule.runOnUiThread { viewModel.createTab(urlD) }
+        composeRule.waitUntil(timeoutMillis = WAIT_TIMEOUT_MS) {
+            finishedUrls.contains(urlD) && currentWebViewUrl() == urlD
+        }
+        composeRule.waitForIdle()
+        val tab2WebView = requireWebView()
+        assertNotSame(tab1BeforeSwitch, tab2WebView)
+        assertTrue(stateHost.savedWebState(tab1Id) != null)
+
+        composeRule.runOnUiThread { viewModel.selectTab(tab1Id) }
+        composeRule.waitUntil(timeoutMillis = WAIT_TIMEOUT_MS) {
+            val view = findWebViewOnUiThread()
+            view != null && view !== tab2WebView && currentWebViewUrl() == urlB && currentWebViewCanGoBack()
+        }
+        composeRule.waitForIdle()
+        backButton().assertIsEnabled()
+        forwardButton().assertIsEnabled()
+
+        composeRule.runOnUiThread { requireWebView().goBack() }
+        composeRule.waitUntil(timeoutMillis = WAIT_TIMEOUT_MS) { currentWebViewUrl() == urlA }
+        composeRule.waitForIdle()
+        backButton().assertIsNotEnabled()
+        forwardButton().assertIsEnabled()
+
+        composeRule.runOnUiThread { requireWebView().goForward() }
+        composeRule.waitUntil(timeoutMillis = WAIT_TIMEOUT_MS) { currentWebViewUrl() == urlB }
+        composeRule.runOnUiThread { requireWebView().goForward() }
+        composeRule.waitUntil(timeoutMillis = WAIT_TIMEOUT_MS) { currentWebViewUrl() == urlC }
+        composeRule.waitForIdle()
+        backButton().assertIsEnabled()
+        forwardButton().assertIsNotEnabled()
+    }
+
     private fun setViewModelWebScreenContent(
         viewModel: WebViewModel,
         finishedUrls: MutableList<String>,
+        stateHost: WebViewStateHost = WebViewStateHost(),
     ) {
         composeRule.setContent {
             DambomTheme {
@@ -263,9 +338,17 @@ class WebBackNavigationRuntimeTest {
                             onOpenDetectedMedia = viewModel::openDetectedMedia,
                             onCreateTab = viewModel::createTab,
                             onSelectTab = viewModel::selectTab,
-                            onCloseTab = viewModel::closeTab,
-                            savedWebState = viewModel::savedWebState,
-                            onSaveWebState = viewModel::saveWebState,
+                            onCloseTab = { tabId ->
+                                stateHost.removeWebState(tabId)
+                                viewModel.closeTab(tabId)
+                            },
+                            savedWebState = stateHost::savedWebState,
+                            onSaveWebState = { tabId, state ->
+                                val openTabs = viewModel.uiState.value.tabs
+                                if (openTabs.any { it.id == tabId }) {
+                                    stateHost.saveWebState(tabId, state)
+                                }
+                            },
                             consumedNavigationRequestId = viewModel::consumedNavigationRequestId,
                             onNavigationRequestConsumed = viewModel::markNavigationRequestConsumed,
                         ),

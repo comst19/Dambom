@@ -1,6 +1,5 @@
 package com.comst19.dambom.feature.web
 
-import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -45,7 +44,6 @@ internal class WebViewModel
     ) : ViewModel() {
         private val mutableUiState = MutableStateFlow(savedStateHandle.restoreWebUiState())
         val uiState: StateFlow<WebUiState> = mutableUiState.asStateFlow()
-        private val savedWebStates = LinkedHashMap<Long, Bundle>()
         private val consumedNavigationRequestIds = mutableMapOf<Long, Long>()
         private val mediaByTab = mutableMapOf<Long, WebMediaCandidates>()
         private val blockedTabs = mutableMapOf<Long, UnsupportedReason>()
@@ -96,7 +94,6 @@ internal class WebViewModel
 
         fun closeTab(id: Long) {
             clearSharedOrigin(id)
-            savedWebStates.remove(id)
             consumedNavigationRequestIds.remove(id)
             invalidatePage(id)
             updateState { state ->
@@ -335,19 +332,6 @@ internal class WebViewModel
             updateCurrentTabIf(tabId) { it.copy(detectionState = media.detectionState()) }
         }
 
-        fun saveWebState(
-            tabId: Long,
-            state: Bundle,
-        ) {
-            savedWebStates.remove(tabId)
-            savedWebStates[tabId] = state
-            while (savedWebStates.size > MAX_RETAINED_WEB_STATES) {
-                savedWebStates.remove(savedWebStates.keys.first())
-            }
-        }
-
-        fun savedWebState(tabId: Long): Bundle? = savedWebStates[tabId]
-
         fun consumedNavigationRequestId(tabId: Long): Long = consumedNavigationRequestIds[tabId] ?: 0L
 
         fun markNavigationRequestConsumed(
@@ -433,7 +417,6 @@ internal class WebViewModel
     }
 
 private const val MAX_RECENT_PAGES = 8
-private const val MAX_RETAINED_WEB_STATES = 3
 private const val NEXT_TAB_ID_KEY = "web-next-tab-id"
 private const val INITIAL_URL_APPLIED_KEY = "web-initial-url-applied"
 

@@ -41,6 +41,7 @@ import com.comst19.dambom.feature.web.contract.WebUiState
 import com.comst19.dambom.feature.web.webview.WebContent
 import com.comst19.dambom.feature.web.webview.WebContentCallbacks
 import com.comst19.dambom.feature.web.webview.WebNavigationFailure
+import com.comst19.dambom.feature.web.webview.WebViewStateHost
 import com.comst19.dambom.feature.web.webview.createWebView
 import kotlinx.collections.immutable.mutate
 import kotlinx.collections.immutable.persistentListOf
@@ -476,7 +477,10 @@ class WebBackNavigationTest {
         composeRule.waitForIdle()
     }
 
-    private fun webViewModelCallbacks(viewModel: WebViewModel): WebScreenCallbacks =
+    private fun webViewModelCallbacks(
+        viewModel: WebViewModel,
+        stateHost: WebViewStateHost = WebViewStateHost(),
+    ): WebScreenCallbacks =
         WebScreenCallbacks(
             onBack = viewModel::goBack,
             onNavigate = viewModel::navigateCurrentTab,
@@ -488,9 +492,17 @@ class WebBackNavigationTest {
             onOpenDetectedMedia = viewModel::openDetectedMedia,
             onCreateTab = viewModel::createTab,
             onSelectTab = viewModel::selectTab,
-            onCloseTab = viewModel::closeTab,
-            savedWebState = viewModel::savedWebState,
-            onSaveWebState = viewModel::saveWebState,
+            onCloseTab = { tabId ->
+                stateHost.removeWebState(tabId)
+                viewModel.closeTab(tabId)
+            },
+            savedWebState = stateHost::savedWebState,
+            onSaveWebState = { tabId, state ->
+                val openTabs = viewModel.uiState.value.tabs
+                if (openTabs.any { it.id == tabId }) {
+                    stateHost.saveWebState(tabId, state)
+                }
+            },
             consumedNavigationRequestId = viewModel::consumedNavigationRequestId,
             onNavigationRequestConsumed = viewModel::markNavigationRequestConsumed,
         )

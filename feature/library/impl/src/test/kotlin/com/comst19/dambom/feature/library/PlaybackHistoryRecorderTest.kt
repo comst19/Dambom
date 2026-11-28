@@ -1,22 +1,14 @@
 package com.comst19.dambom.feature.library
 
-import androidx.media3.common.C
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 import com.comst19.dambom.feature.library.player.PlaybackHistoryRecorder
+import com.comst19.dambom.feature.library.player.PlaybackProgressSnapshot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
-import java.lang.reflect.Proxy
 
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35])
 @OptIn(ExperimentalCoroutinesApi::class)
 class PlaybackHistoryRecorderTest {
     @Test
@@ -24,11 +16,9 @@ class PlaybackHistoryRecorderTest {
         runTest {
             val repository = LibraryTestPlaybackHistory()
             val recorder = PlaybackHistoryRecorder(repository, backgroundScope) {}
-            val state = RecorderPlayer()
 
-            recorder.save(state.player)
-            state.position = 5_000L
-            recorder.save(state.player)
+            recorder.save(PlaybackProgressSnapshot("video", 100L, 10_000L))
+            recorder.save(PlaybackProgressSnapshot("video", 5_000L, 10_000L))
             runCurrent()
 
             assertTrue(repository.history.value.isEmpty())
@@ -39,12 +29,10 @@ class PlaybackHistoryRecorderTest {
         runTest {
             val repository = LibraryTestPlaybackHistory()
             val recorder = PlaybackHistoryRecorder(repository, backgroundScope) {}
-            val state = RecorderPlayer()
-            recorder.onPlaying(state.player)
+            recorder.onPlaying(PlaybackProgressSnapshot("video", 100L, 10_000L))
             runCurrent()
             val started = repository.history.value.getValue("video")
-            state.position = 5_000L
-            recorder.save(state.player)
+            recorder.save(PlaybackProgressSnapshot("video", 5_000L, 10_000L))
             runCurrent()
 
             assertEquals(
@@ -60,8 +48,7 @@ class PlaybackHistoryRecorderTest {
                     .lastPlayedAtMillis,
             )
             recorder.reset()
-            state.id = "other"
-            recorder.save(state.player)
+            recorder.save(PlaybackProgressSnapshot("other", 5_000L, 10_000L))
             runCurrent()
             assertEquals(setOf("video"), repository.history.value.keys)
         }
@@ -71,13 +58,11 @@ class PlaybackHistoryRecorderTest {
         runTest {
             val repository = LibraryTestPlaybackHistory()
             val recorder = PlaybackHistoryRecorder(repository, backgroundScope) {}
-            val state = RecorderPlayer().apply { duration = C.TIME_UNSET }
-            recorder.onPlaying(state.player)
+            recorder.onPlaying(PlaybackProgressSnapshot("video", 100L, Long.MIN_VALUE + 1L))
             runCurrent()
             assertTrue(repository.history.value.isEmpty())
 
-            state.duration = 10_000L
-            recorder.save(state.player)
+            recorder.save(PlaybackProgressSnapshot("video", 100L, 10_000L))
             runCurrent()
             assertEquals(
                 10_000L,
@@ -86,22 +71,4 @@ class PlaybackHistoryRecorderTest {
                     .durationMillis,
             )
         }
-}
-
-private class RecorderPlayer {
-    var id = "video"
-    var duration = 10_000L
-    var position = 100L
-    val player =
-        Proxy.newProxyInstance(Player::class.java.classLoader, arrayOf(Player::class.java)) { proxy, method, args ->
-            when (method.name) {
-                "hashCode" -> System.identityHashCode(proxy)
-                "equals" -> proxy === args?.firstOrNull()
-                "toString" -> "RecorderPlayer"
-                "getCurrentMediaItem" -> MediaItem.Builder().setMediaId(id).build()
-                "getDuration" -> duration
-                "getCurrentPosition" -> position
-                else -> error("Unexpected Player call: ${method.name}")
-            }
-        } as Player
 }

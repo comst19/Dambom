@@ -1,16 +1,7 @@
 package com.comst19.dambom.feature.library
 
-import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.AudioAttributes
-import androidx.media3.common.C
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
-import androidx.media3.common.PlaybackParameters
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
 import com.comst19.dambom.core.common.ui.AppEvent
 import com.comst19.dambom.core.common.ui.AppEventBus
 import com.comst19.dambom.core.common.ui.UiText
@@ -21,9 +12,13 @@ import com.comst19.dambom.core.domain.model.PrivateVideoSession
 import com.comst19.dambom.core.domain.repository.PlaybackHistoryRepository
 import com.comst19.dambom.core.domain.repository.SettingsRepository
 import com.comst19.dambom.feature.library.player.PlaybackHistoryRecorder
+import com.comst19.dambom.feature.library.player.VideoPlaybackController
+import com.comst19.dambom.feature.library.player.VideoPlaybackListener
 import com.comst19.dambom.feature.library.player.resumePosition
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -35,24 +30,27 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.File
-import javax.inject.Inject
 
-@HiltViewModel
+@HiltViewModel(assistedFactory = VideoPlayerViewModel.Factory::class)
 internal class VideoPlayerViewModel
-    @Inject
+    @AssistedInject
     constructor(
-        @ApplicationContext context: Context,
+        @Assisted private val playback: VideoPlaybackController,
         private val historyRepository: PlaybackHistoryRepository,
         private val settingsRepository: SettingsRepository,
         @ApplicationScope private val applicationScope: CoroutineScope,
         private val appEventBus: AppEventBus,
         private val privateVideoSession: PrivateVideoSession,
     ) : ViewModel() {
+        @AssistedFactory
+        interface Factory {
+            fun create(playback: VideoPlaybackController): VideoPlayerViewModel
+        }
+
         private val visibilityState = PlaybackVisibilityState()
         private var preparation: Job? = null
         private var requestedId: String? = null
-        private var requestedUri: String? = null
+        private var requestedPath: String? = null
         private var privatePlayback = false
         private var playRequestedWhilePreparing = false
         private var progressJob: Job? = null
@@ -67,74 +65,53 @@ internal class VideoPlayerViewModel
                 appEventBus.send(AppEvent.ShowSnackbar(UiText.Resource(R.string.player_history_failure)))
             }
 
-        val player: ExoPlayer =
-            ExoPlayer
-                .Builder(context)
-                .setSeekBackIncrementMs(SEEK_INCREMENT_MILLIS)
-                .setSeekForwardIncrementMs(SEEK_INCREMENT_MILLIS)
-                .build()
-                .apply {
-                    setAudioAttributes(
-                        AudioAttributes
-                            .Builder()
-                            .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
-                            .setUsage(C.USAGE_MEDIA)
-                            .build(),
-                        true,
-                    )
-                    setHandleAudioBecomingNoisy(true)
-                }
-
         init {
             viewModelScope.launch {
                 privateVideoSession.isUnlocked.collect { unlocked ->
                     if (!unlocked && privatePlayback) stopUnavailableVideo()
                 }
             }
-            player.addListener(
-                object : Player.Listener {
-                    override fun onPlayWhenReadyChanged(
-                        playWhenReady: Boolean,
-                        reason: Int,
-                    ) {
-                        if (playWhenReady && preparation?.isActive == true && player.currentMediaItem == null) {
+            playback.setListener(
+                object : VideoPlaybackListener {
+                    override fun onPlayWhenReadyChanged(playWhenReady: Boolean) {
+                        if (playWhenReady && preparation?.isActive == true && playback.currentMediaId == null) {
                             playRequestedWhilePreparing = true
-                            player.pause()
+                            playback.pause()
                             return
                         }
                         val candidate = resumeCandidate
                         if (playWhenReady && candidate != null) {
-                            player.pause()
+                            playback.pause()
                             _resumePromptPosition.value = candidate
                         }
                     }
 
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         progressJob?.cancel()
-                        if (isPlaying && player.isPlaying && resumeCandidate == null) {
-                            history.onPlaying(player)
+                        if (isPlaying && playback.isPlaying && resumeCandidate == null) {
+                            history.onPlaying(playback.currentProgress)
                             progressJob =
                                 viewModelScope.launch {
                                     while (true) {
                                         delay(HISTORY_SAVE_INTERVAL_MILLIS)
-                                        history.save(player)
+                                        history.save(playback.currentProgress)
                                     }
                                 }
                         } else {
-                            history.save(player)
+                            history.save(playback.currentProgress)
                         }
                     }
 
-                    override fun onPlaybackStateChanged(playbackState: Int) {
-                        if (playbackState == Player.STATE_ENDED) history.save(player)
+                    override fun onPlaybackEnded() {
+                        history.save(playback.currentProgress)
                     }
 
-                    override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
+                    override fun onPlaybackSpeedChanged(speed: Float) {
                         if (applyingSavedSpeed) return
                         speedSelected = true
                         applicationScope.launch(start = CoroutineStart.UNDISPATCHED) {
                             speedWrites.withLock {
-                                suspendRunCatching { settingsRepository.setPlaybackSpeed(playbackParameters.speed) }
+                                suspendRunCatching { settingsRepository.setPlaybackSpeed(speed) }
                                     .onFailure {
                                         val message = UiText.Resource(R.string.player_settings_failure)
                                         appEventBus.send(AppEvent.ShowSnackbar(message))
@@ -148,7 +125,7 @@ internal class VideoPlayerViewModel
                 settingsRepository.settings.map { it.playbackSpeed }.distinctUntilChanged().collect { speed ->
                     if (!speedSelected) {
                         applyingSavedSpeed = true
-                        player.setPlaybackSpeed(speed)
+                        playback.setPlaybackSpeed(speed)
                         applyingSavedSpeed = false
                     }
                 }
@@ -163,22 +140,20 @@ internal class VideoPlayerViewModel
             }
             privatePlayback = task.isPrivate
             val path = task.localFilePath ?: return
-            val uri = Uri.fromFile(File(path))
-            val uriString = uri.toString()
-            if (isAlreadyPreparedOrPending(task.id, uriString)) {
+            if (isAlreadyPreparedOrPending(task.id, path)) {
                 return
             }
             preparation?.cancel()
             requestedId = task.id
-            requestedUri = uriString
+            requestedPath = path
             playRequestedWhilePreparing = false
             resumeCandidate = null
             _resumePromptPosition.value = null
-            history.save(player)
+            history.save(playback.currentProgress)
             history.reset()
             visibilityState.onPlaybackStopped()
-            player.pause()
-            player.clearMediaItems()
+            playback.pause()
+            playback.clearMediaItems()
             preparation =
                 viewModelScope.launch {
                     val saved =
@@ -188,19 +163,9 @@ internal class VideoPlayerViewModel
                         }.onFailure {
                             appEventBus.send(AppEvent.ShowSnackbar(UiText.Resource(R.string.player_history_failure)))
                         }.getOrNull()
-                    player.pause()
+                    playback.pause()
                     resumeCandidate = resumePosition(saved).takeIf { it > 0L }
-                    player.repeatMode = Player.REPEAT_MODE_OFF
-                    player.setMediaItem(
-                        MediaItem
-                            .Builder()
-                            .setMediaId(task.id)
-                            .setUri(uri)
-                            .setMediaMetadata(MediaMetadata.Builder().setTitle(task.title).build())
-                            .build(),
-                        0L,
-                    )
-                    player.prepare()
+                    playback.prepare(mediaId = task.id, localFilePath = path, title = task.title)
                     if (playRequestedWhilePreparing) {
                         playRequestedWhilePreparing = false
                         requestPlayPause()
@@ -213,19 +178,19 @@ internal class VideoPlayerViewModel
                 stopUnavailableVideo()
                 return
             }
-            if (preparation?.isActive == true && player.currentMediaItem == null) {
+            if (preparation?.isActive == true && playback.currentMediaId == null) {
                 playRequestedWhilePreparing = true
                 return
             }
-            if (player.playWhenReady) {
-                player.pause()
+            if (playback.playWhenReady) {
+                playback.pause()
             } else {
                 val candidate = resumeCandidate
                 if (candidate != null) {
                     _resumePromptPosition.value = candidate
                 } else {
-                    if (player.playbackState == Player.STATE_ENDED) player.seekToDefaultPosition()
-                    player.play()
+                    if (playback.isEnded) playback.seekToDefaultPosition()
+                    playback.play()
                 }
             }
         }
@@ -234,8 +199,8 @@ internal class VideoPlayerViewModel
             val position = _resumePromptPosition.value ?: return
             resumeCandidate = null
             _resumePromptPosition.value = null
-            player.seekTo(if (continueFromPosition) position else 0L)
-            player.play()
+            playback.seekTo(if (continueFromPosition) position else 0L)
+            playback.play()
         }
 
         fun dismissResumePrompt() {
@@ -250,8 +215,8 @@ internal class VideoPlayerViewModel
 
         fun onUiStopped() {
             playRequestedWhilePreparing = false
-            history.save(player)
-            applyPlaybackCommand(visibilityState.onStopped(player.playWhenReady))
+            history.save(playback.currentProgress)
+            applyPlaybackCommand(visibilityState.onStopped(playback.playWhenReady))
         }
 
         fun onPictureInPictureEntered() = applyPlaybackCommand(visibilityState.onPictureInPictureEntered())
@@ -259,68 +224,60 @@ internal class VideoPlayerViewModel
         fun onPictureInPictureExited() = applyPlaybackCommand(visibilityState.onPictureInPictureExited())
 
         fun stop(id: String) {
-            if (player.currentMediaItem?.mediaId != id && requestedId != id) return
+            if (playback.currentMediaId != id && requestedId != id) return
             stopUnavailableVideo()
         }
 
         fun stopUnavailableVideo() {
             preparation?.cancel()
             requestedId = null
-            requestedUri = null
+            requestedPath = null
             playRequestedWhilePreparing = false
             _resumePromptPosition.value = null
             resumeCandidate = null
-            history.save(player)
+            history.save(playback.currentProgress)
             history.reset()
             visibilityState.onPlaybackStopped()
-            player.stop()
-            player.clearMediaItems()
+            playback.stopAndClear()
         }
 
         override fun onCleared() {
             preparation?.cancel()
             requestedId = null
-            requestedUri = null
+            requestedPath = null
             playRequestedWhilePreparing = false
             _resumePromptPosition.value = null
             resumeCandidate = null
-            history.save(player)
+            history.save(playback.currentProgress)
             history.reset()
             applyPlaybackCommand(visibilityState.onDisposed())
-            player.release()
+            playback.release()
         }
 
         private fun isAlreadyPreparedOrPending(
             taskId: String,
-            uriString: String,
+            localFilePath: String,
         ): Boolean {
-            val currentUri =
-                player.currentMediaItem
-                    ?.localConfiguration
-                    ?.uri
-                    ?.toString()
             val samePendingRequest =
                 requestedId == taskId &&
-                    requestedUri == uriString &&
+                    requestedPath == localFilePath &&
                     preparation?.isActive == true
             return !shouldReplaceMediaItem(
-                player.currentMediaItem?.mediaId,
-                currentUri,
+                playback.currentMediaId,
+                playback.currentSourcePath,
                 taskId,
-                uriString,
+                localFilePath,
             ) || samePendingRequest
         }
 
         private fun applyPlaybackCommand(command: PlaybackCommand) {
             when (command) {
-                PlaybackCommand.Pause -> player.pause()
-                PlaybackCommand.Resume -> player.play()
+                PlaybackCommand.Pause -> playback.pause()
+                PlaybackCommand.Resume -> playback.play()
                 PlaybackCommand.None -> Unit
             }
         }
     }
-
-private const val SEEK_INCREMENT_MILLIS = 10_000L
 
 internal enum class PlaybackCommand {
     Pause,
@@ -330,10 +287,10 @@ internal enum class PlaybackCommand {
 
 internal fun shouldReplaceMediaItem(
     currentMediaId: String?,
-    currentUri: String?,
+    currentSourcePath: String?,
     targetMediaId: String,
-    targetUri: String,
-): Boolean = currentMediaId != targetMediaId || currentUri != targetUri
+    targetSourcePath: String,
+): Boolean = currentMediaId != targetMediaId || currentSourcePath != targetSourcePath
 
 internal class PlaybackVisibilityState {
     private var resumeRequested = false

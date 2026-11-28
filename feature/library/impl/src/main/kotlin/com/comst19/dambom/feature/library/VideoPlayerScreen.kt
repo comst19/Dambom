@@ -49,6 +49,7 @@ import com.comst19.dambom.feature.library.component.rememberLibraryFileActions
 import com.comst19.dambom.feature.library.file.rememberLocalVideoAvailable
 import com.comst19.dambom.feature.library.pip.PipPlatformEffect
 import com.comst19.dambom.feature.library.player.PlayerInteractionState
+import com.comst19.dambom.feature.library.player.VideoPlayerHost
 import com.comst19.dambom.feature.library.subtitle.playback.SubtitleCueSource
 import com.comst19.dambom.feature.library.subtitle.playback.rememberSubtitleCues
 import com.comst19.dambom.feature.library.vault.PrivateVideoWindowProtection
@@ -63,7 +64,11 @@ internal fun VideoPlayerRoute(
     onVideoFullscreenChange: (Boolean) -> Unit,
     onVideoRotate: () -> Unit,
     libraryViewModel: LibraryViewModel = hiltViewModel(),
-    playerViewModel: VideoPlayerViewModel = hiltViewModel(),
+    playerHost: VideoPlayerHost = hiltViewModel(),
+    playerViewModel: VideoPlayerViewModel =
+        hiltViewModel<VideoPlayerViewModel, VideoPlayerViewModel.Factory> { factory ->
+            factory.create(playerHost.attachController())
+        },
     rememberVideoAvailability: @Composable (DownloadTask?, Int) -> State<Boolean?> = ::rememberLocalVideoAvailable,
 ) {
     val detailState =
@@ -120,7 +125,7 @@ internal fun VideoPlayerRoute(
             },
         )
     }
-    if (task != null && !task.isPrivate) VideoPlayerMediaSessionEffect(playerViewModel.player)
+    if (task != null && !task.isPrivate) VideoPlayerMediaSessionEffect(playerHost.player)
     LaunchedEffect(detailState, isVideoFullscreen, task, fileAvailability) {
         if (detailState == VideoDetailState.Loading) return@LaunchedEffect
         val available = fileAvailability ?: return@LaunchedEffect
@@ -138,7 +143,7 @@ internal fun VideoPlayerRoute(
     val playableTask = task?.takeIf { isLocalVideoAvailable }
 
     PipPlatformEffect(
-        player = playerViewModel.player,
+        player = playerHost.player,
         task = playableTask?.takeUnless(DownloadTask::isPrivate),
         isFullscreen = isVideoFullscreen,
         onPictureInPictureModeChanged = { inPictureInPictureMode ->
@@ -151,7 +156,7 @@ internal fun VideoPlayerRoute(
     ) { pipContentOnly, onVideoBoundsChanged ->
         VideoPlayerScreen(
             task = playableTask,
-            player = playerViewModel.player,
+            player = playerHost.player,
             detailState = if (task != null && fileAvailability == null) VideoDetailState.Loading else detailState,
             fileActions = fileActions,
             onBack = libraryViewModel::goBack,

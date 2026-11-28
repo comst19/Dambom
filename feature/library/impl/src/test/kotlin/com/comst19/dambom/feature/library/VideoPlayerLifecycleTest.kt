@@ -44,11 +44,11 @@ class VideoPlayerLifecycleTest {
     @get:Rule val composeRule = createComposeRule()
 
     private val videoFile = File.createTempFile("lifecycle-video", ".mp4")
-    private lateinit var playerViewModel: VideoPlayerViewModel
+    private lateinit var playerHarness: TestVideoPlayerViewModel
 
     @After
     fun tearDown() {
-        if (::playerViewModel.isInitialized) playerViewModel.closeForTest()
+        if (::playerHarness.isInitialized) playerHarness.close()
         File("${videoFile.path}.thumbnail.unavailable").delete()
         videoFile.delete()
     }
@@ -70,7 +70,7 @@ class VideoPlayerLifecycleTest {
                 privateVideoSession = PrivateVideoSession(),
                 defaultDispatcher = Dispatchers.Unconfined,
             )
-        playerViewModel = testVideoPlayerViewModel(context)
+        playerHarness = testVideoPlayerHarness(context)
         val owner =
             object : LifecycleOwner {
                 override val lifecycle = LifecycleRegistry(this)
@@ -87,7 +87,8 @@ class VideoPlayerLifecycleTest {
                         onVideoFullscreenChange = { fullscreen.value = it },
                         onVideoRotate = {},
                         libraryViewModel = libraryViewModel,
-                        playerViewModel = playerViewModel,
+                        playerHost = playerHarness.host,
+                        playerViewModel = playerHarness.viewModel,
                     )
                 }
             }
@@ -95,13 +96,13 @@ class VideoPlayerLifecycleTest {
         composeRule.waitUntil { repository.updates.subscriptionCount.value == 1 }
         composeRule.runOnIdle { assertTrue(repository.updates.tryEmit(video)) }
         composeRule.waitUntil {
-            composeRule.runOnIdle { playerViewModel.player.currentMediaItem?.mediaId == video.id }
+            composeRule.runOnIdle { playerHarness.player.currentMediaItem?.mediaId == video.id }
         }
         composeRule.runOnIdle {
-            assertEquals("video", playerViewModel.player.currentMediaItem?.mediaId)
-            assertFalse(playerViewModel.player.playWhenReady)
-            playerViewModel.player.pause()
-            playerViewModel.player.seekTo(15_000L)
+            assertEquals("video", playerHarness.player.currentMediaItem?.mediaId)
+            assertFalse(playerHarness.player.playWhenReady)
+            playerHarness.player.pause()
+            playerHarness.player.seekTo(15_000L)
             fullscreen.value = true
         }
         composeRule.waitForIdle()
@@ -112,29 +113,29 @@ class VideoPlayerLifecycleTest {
         composeRule.waitForIdle()
         composeRule.runOnIdle {
             assertTrue(videoFile.isFile)
-            assertEquals("video", playerViewModel.player.currentMediaItem?.mediaId)
-            assertEquals(15_000L, playerViewModel.player.currentPosition)
-            assertFalse(playerViewModel.player.playWhenReady)
+            assertEquals("video", playerHarness.player.currentMediaItem?.mediaId)
+            assertEquals(15_000L, playerHarness.player.currentPosition)
+            assertFalse(playerHarness.player.playWhenReady)
             assertTrue(fullscreen.value)
             assertTrue(repository.updates.tryEmit(video))
         }
         composeRule.waitForIdle()
         composeRule.runOnIdle {
-            assertEquals(15_000L, playerViewModel.player.currentPosition)
-            assertFalse(playerViewModel.player.playWhenReady)
+            assertEquals(15_000L, playerHarness.player.currentPosition)
+            assertFalse(playerHarness.player.playWhenReady)
             assertTrue(fullscreen.value)
             assertTrue(repository.updates.tryEmit(video.copy(isFavorite = true)))
         }
         composeRule.waitForIdle()
         composeRule.runOnIdle {
-            assertEquals(15_000L, playerViewModel.player.currentPosition)
-            assertFalse(playerViewModel.player.playWhenReady)
+            assertEquals(15_000L, playerHarness.player.currentPosition)
+            assertFalse(playerHarness.player.playWhenReady)
             assertTrue(fullscreen.value)
             assertTrue(repository.updates.tryEmit(null))
         }
         composeRule.waitForIdle()
         composeRule.runOnIdle {
-            assertEquals(0, playerViewModel.player.mediaItemCount)
+            assertEquals(0, playerHarness.player.mediaItemCount)
             assertFalse(fullscreen.value)
             owner.lifecycle.currentState = Lifecycle.State.DESTROYED
         }
@@ -156,7 +157,7 @@ class VideoPlayerLifecycleTest {
                 privateVideoSession = PrivateVideoSession(),
                 defaultDispatcher = Dispatchers.Unconfined,
             )
-        playerViewModel = testVideoPlayerViewModel(context)
+        playerHarness = testVideoPlayerHarness(context)
         val mounted = mutableStateOf(true)
         val fullscreen = mutableStateOf(true)
         val video = savedVideo("video").copy(localFilePath = videoFile.path)
@@ -170,7 +171,8 @@ class VideoPlayerLifecycleTest {
                         onVideoFullscreenChange = { fullscreen.value = it },
                         onVideoRotate = {},
                         libraryViewModel = libraryViewModel,
-                        playerViewModel = playerViewModel,
+                        playerHost = playerHarness.host,
+                        playerViewModel = playerHarness.viewModel,
                     )
                 }
             }
@@ -178,7 +180,7 @@ class VideoPlayerLifecycleTest {
         composeRule.waitUntil { repository.updates.subscriptionCount.value == 1 }
         composeRule.runOnIdle { assertTrue(repository.updates.tryEmit(video)) }
         composeRule.waitUntil {
-            composeRule.runOnIdle { playerViewModel.player.currentMediaItem?.mediaId == video.id }
+            composeRule.runOnIdle { playerHarness.player.currentMediaItem?.mediaId == video.id }
         }
         composeRule.waitForIdle()
         assertTrue(fullscreen.value)
@@ -206,7 +208,7 @@ class VideoPlayerLifecycleTest {
                 privateVideoSession = PrivateVideoSession(),
                 defaultDispatcher = Dispatchers.Unconfined,
             )
-        playerViewModel = testVideoPlayerViewModel(context)
+        playerHarness = testVideoPlayerHarness(context)
         val mounted = mutableStateOf(true)
         val fullscreen = mutableStateOf(true)
         val video = savedVideo("video").copy(localFilePath = videoFile.path)
@@ -226,7 +228,8 @@ class VideoPlayerLifecycleTest {
                         },
                         onVideoRotate = {},
                         libraryViewModel = libraryViewModel,
-                        playerViewModel = playerViewModel,
+                        playerHost = playerHarness.host,
+                        playerViewModel = playerHarness.viewModel,
                         rememberVideoAvailability = { task, _ ->
                             if (task != null && flipAvailabilityOnNextCompose) {
                                 SideEffect {
@@ -243,11 +246,11 @@ class VideoPlayerLifecycleTest {
         composeRule.waitUntil { repository.updates.subscriptionCount.value == 1 }
         composeRule.runOnIdle { assertTrue(repository.updates.tryEmit(video)) }
         composeRule.waitUntil {
-            composeRule.runOnIdle { playerViewModel.player.currentMediaItem?.mediaId == video.id }
+            composeRule.runOnIdle { playerHarness.player.currentMediaItem?.mediaId == video.id }
         }
         composeRule.runOnIdle {
-            playerViewModel.player.pause()
-            playerViewModel.player.seekTo(15_000L)
+            playerHarness.player.pause()
+            playerHarness.player.seekTo(15_000L)
             mounted.value = false
         }
         composeRule.waitUntil { repository.updates.subscriptionCount.value == 0 }
@@ -265,8 +268,8 @@ class VideoPlayerLifecycleTest {
         composeRule.waitForIdle()
 
         composeRule.runOnIdle {
-            assertEquals(video.id, playerViewModel.player.currentMediaItem?.mediaId)
-            assertEquals(15_000L, playerViewModel.player.currentPosition)
+            assertEquals(video.id, playerHarness.player.currentMediaItem?.mediaId)
+            assertEquals(15_000L, playerHarness.player.currentPosition)
             assertTrue(fullscreen.value)
             assertTrue(fullscreenChanges.isEmpty())
         }
@@ -288,7 +291,7 @@ class VideoPlayerLifecycleTest {
                 privateVideoSession = PrivateVideoSession(),
                 defaultDispatcher = Dispatchers.Unconfined,
             )
-        playerViewModel = testVideoPlayerViewModel(context)
+        playerHarness = testVideoPlayerHarness(context)
         val owner =
             object : LifecycleOwner {
                 override val lifecycle = LifecycleRegistry(this)
@@ -306,7 +309,8 @@ class VideoPlayerLifecycleTest {
                         onVideoFullscreenChange = { fullscreen.value = it },
                         onVideoRotate = {},
                         libraryViewModel = libraryViewModel,
-                        playerViewModel = playerViewModel,
+                        playerHost = playerHarness.host,
+                        playerViewModel = playerHarness.viewModel,
                     )
                 }
             }
@@ -314,7 +318,7 @@ class VideoPlayerLifecycleTest {
         composeRule.waitUntil { repository.updates.subscriptionCount.value == 1 }
         composeRule.runOnIdle { assertTrue(repository.updates.tryEmit(video)) }
         composeRule.waitUntil {
-            composeRule.runOnIdle { playerViewModel.player.currentMediaItem?.mediaId == video.id }
+            composeRule.runOnIdle { playerHarness.player.currentMediaItem?.mediaId == video.id }
         }
         composeRule.waitForIdle()
         assertTrue(fullscreen.value)
@@ -325,10 +329,10 @@ class VideoPlayerLifecycleTest {
             owner.lifecycle.currentState = Lifecycle.State.RESUMED
         }
         composeRule.waitUntil(5_000) {
-            composeRule.runOnIdle { !fullscreen.value && playerViewModel.player.mediaItemCount == 0 }
+            composeRule.runOnIdle { !fullscreen.value && playerHarness.player.mediaItemCount == 0 }
         }
         composeRule.runOnIdle {
-            assertEquals(0, playerViewModel.player.mediaItemCount)
+            assertEquals(0, playerHarness.player.mediaItemCount)
             assertFalse(fullscreen.value)
             owner.lifecycle.currentState = Lifecycle.State.DESTROYED
         }

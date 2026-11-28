@@ -47,7 +47,7 @@ class MainSafeFileOperationsTest {
             val violations = CopyOnWriteArrayList<Throwable>()
             try {
                 isLocalVideoAvailable(task)
-                manager.createShareIntent(task)
+                manager.prepareShare(task)
                 observeLocalVideoChanges(file.path).first()
 
                 withContext(Dispatchers.Main) {
@@ -64,7 +64,7 @@ class MainSafeFileOperationsTest {
                         assertTrue(isLocalVideoAvailable(task))
                         assertFalse(isLocalVideoAvailable(task.copy(localFilePath = "${file.path}.missing")))
                         observeLocalVideoChanges(file.path).first()
-                        assertNull(manager.createShareIntent(task))
+                        assertNull(manager.prepareShare(task))
                     } finally {
                         StrictMode.setThreadPolicy(previous)
                     }

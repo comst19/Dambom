@@ -1,6 +1,5 @@
 package com.comst19.dambom.feature.library
 
-import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,6 +22,7 @@ import com.comst19.dambom.feature.library.contract.LibrarySourceFilter
 import com.comst19.dambom.feature.library.contract.LibraryUiState
 import com.comst19.dambom.feature.library.contract.LibraryViewMode
 import com.comst19.dambom.feature.library.file.LibraryFileManager
+import com.comst19.dambom.feature.library.file.ShareableVideo
 import com.comst19.dambom.feature.library.navigation.PrivateLibraryKey
 import com.comst19.dambom.feature.library.navigation.VideoCompressionKey
 import com.comst19.dambom.feature.library.navigation.VideoSubtitleExportKey
@@ -413,10 +413,10 @@ internal class LibraryViewModel
             }
         }
 
-        suspend fun createShareIntent(task: DownloadTask): Intent? =
+        suspend fun prepareShare(task: DownloadTask): ShareableVideo? =
             task
                 .takeIf { !it.isPrivate && !it.deletePending && it.localFilePath != null }
-                ?.let { fileManager.createShareIntent(it) }
+                ?.let { fileManager.prepareShare(it) }
 
         fun notifyShareFailure() {
             viewModelScope.launch { showMessage(R.string.library_share_failure) }

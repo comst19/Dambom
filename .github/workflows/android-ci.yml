@@ -98,7 +98,7 @@ jobs:
         include:
           - id: static-analysis
             name: Static analysis
-            tasks: ktlintCheck detekt
+            tasks: checkModuleBoundaries :build-logic:test ktlintCheck detekt
           - id: unit-tests
             name: Unit tests
             tasks: testDebugUnitTest

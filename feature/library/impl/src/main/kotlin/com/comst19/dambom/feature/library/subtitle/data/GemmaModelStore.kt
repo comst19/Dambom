@@ -103,11 +103,7 @@ internal class GemmaModelStore
             onBytes: (ModelDownloadProgress) -> Unit,
             validate: suspend (File) -> Unit,
         ) = access.withLock {
-            val catalog =
-                withResponse(client, Request.Builder().url(GEMMA_CATALOG).build()) { response ->
-                    checkModelResponse(response)
-                    parseGemmaCatalog(response.body)
-                }
+            val catalog = fetchGemmaCatalog(client, io = io)
             if (installed() && withContext(io) { receipt.readLines().first() == catalog.sha256 }) return@withLock
             withContext(io) {
                 check(directory.isDirectory || directory.mkdirs())
@@ -116,7 +112,7 @@ internal class GemmaModelStore
             val candidate = File(directory, "candidate.litertlm")
             try {
                 val started = SystemClock.elapsedRealtime()
-                downloadVerifiedModel(client, catalog, candidate) { bytes ->
+                downloadVerifiedModel(client, catalog, candidate, io) { bytes ->
                     onBytes(modelDownloadProgress(bytes, catalog.bytes, SystemClock.elapsedRealtime() - started))
                 }
                 onBytes(ModelDownloadProgress(catalog.bytes, catalog.bytes, stage = ModelDownloadStage.VERIFYING))
@@ -127,7 +123,7 @@ internal class GemmaModelStore
                     receipt.writeText("${catalog.sha256}\n${catalog.bytes}\n")
                 }
             } finally {
-                withContext(NonCancellable + io) { candidate.delete() }
+                withContext(NonCancellable) { withContext(io) { candidate.delete() } }
             }
         }
 
@@ -145,15 +141,26 @@ internal class GemmaModelStore
             }
     }
 
+internal suspend fun fetchGemmaCatalog(
+    client: OkHttpClient,
+    url: String = GEMMA_CATALOG,
+    io: CoroutineDispatcher = Dispatchers.IO,
+): GemmaModelDescriptor =
+    withResponse(client, Request.Builder().url(url).build(), io) { response ->
+        checkModelResponse(response)
+        parseGemmaCatalog(response.body)
+    }
+
 internal suspend fun downloadVerifiedModel(
     client: OkHttpClient,
     descriptor: GemmaModelDescriptor,
     destination: File,
+    io: CoroutineDispatcher = Dispatchers.IO,
     onBytes: (Long) -> Unit,
 ) {
     val temporary = File(destination.path + ".part")
     try {
-        withResponse(client, Request.Builder().url(descriptor.url).build()) { response ->
+        withResponse(client, Request.Builder().url(descriptor.url).build(), io) { response ->
             checkModelResponse(response)
             check(response.code == HttpURLConnection.HTTP_OK)
             val digest = MessageDigest.getInstance("SHA-256")
@@ -188,13 +195,14 @@ internal suspend fun downloadVerifiedModel(
             check(temporary.renameTo(destination))
         }
     } finally {
-        withContext(NonCancellable + Dispatchers.IO) { temporary.delete() }
+        withContext(NonCancellable) { withContext(io) { temporary.delete() } }
     }
 }
 
 private suspend fun <T> withResponse(
     client: OkHttpClient,
     request: Request,
+    io: CoroutineDispatcher,
     block: suspend (Response) -> T,
 ): T =
     coroutineScope {
@@ -208,7 +216,7 @@ private suspend fun <T> withResponse(
                 }
             }
         try {
-            withContext(Dispatchers.IO) { modelNetworkRead { call.execute() }.use { block(it) } }
+            withContext(io) { modelNetworkRead { call.execute() }.use { block(it) } }
         } catch (failure: IOException) {
             currentCoroutineContext().ensureActive()
             throw failure
